@@ -1,0 +1,153 @@
+/* General styles for the configurator */
+.form-field-configurator {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    font-size: 0.9em;
+    padding: 8px 10px;
+    border-radius: 16px;
+    max-width: 600px;
+    margin: 20px auto;
+  }
+  
+  h2 {
+    font-size: 0.8rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  label {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: black;
+  }
+  
+text textarea{
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #333;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+  label select {
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: black;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+  
+  label input:hover,
+  label select:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+  }
+  
+  label input:focus,
+  label select:focus {
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    outline: none;
+    transform: scale(1.02);
+  }
+  
+  label input:disabled,
+  label select:disabled {
+    background-color: #f1f1f1;
+    border-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+  }
+  
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  button:active {
+    background-color: #004080;
+    transform: scale(0.98);
+  }
+  
+  /* Collapsible section styles */
+  .collapsible-section {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .section-toggle {
+    width: 100%;
+    background-color: #f1f1f1;
+    color: #333;
+    border: none;
+    padding: 14px;
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .section-toggle:hover {
+    background-color: #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .section-toggle:focus {
+    outline: none;
+  }
+  
+  .section-content {
+    padding: 8px;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    color: #333;
+  }
+  
+  .section-content label {
+    margin-bottom: 12px;
+  }
+  
+
+  .mytext {
+    border-radius: 20px;
+  }
+
+  .mytext {
+    border-radius: 20px;
+  }
+  
+  .mytext[type="color"] {
+    height: 30px;
+    width: 50px; /* Ensure the field fills the width of its container */
+
+    border-radius: 20px; /* Apply your desired border-radius */
+    background: none; /* Clear any default background */
+  }
+  

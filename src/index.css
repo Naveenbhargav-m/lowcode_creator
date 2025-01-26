@@ -1,0 +1,484 @@
+@import "bulma/css/bulma.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    overflow: auto;
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+
+input::-webkit-scrollbar {
+    display: none; /* Hides scrollbar */
+}
+
+
+.scrollable-div {
+    overflow-y: scroll;
+    overflow-x: scroll;
+    /*-ms-overflow-style: none; /* Hide scrollbar in Internet Explorer and Edge */
+    /*scrollbar-width: none; /* Hide scrollbar in Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari, and Opera */
+/* .scrollable-div::-webkit-scrollbar {
+    display: none;
+} */
+/* Custom styles for react-calendar */
+.custom-calendar {
+    border: none !important; /* Remove border */
+}
+
+.custom-calendar .react-calendar__tile {
+    border-radius: 0.5rem; /* Rounded corners */
+    /* You can add more styling here if needed */
+}
+
+.custom-calendar .react-calendar__tile:hover {
+    background-color: #3c3d37 !important; /* Example hover color */
+    border-radius: 0.5rem; /* Ensure border-radius is maintained */
+}
+
+.custom-calendar .react-calendar__tile--active {
+    background-color: #000000 !important; /* Example active color */
+    color: #ffffff; /* Text color when active */
+    border-radius: 0.5rem; /* Ensure border-radius is maintained */
+}
+
+.custom-calendar .react-calendar__month-view__weekdays__weekday {
+    color: #d2e0fb; /* Weekend text color */
+}
+
+.custom-calendar .react-calendar__month-view__days__day--weekend {
+    color: #6a9c89 !important; /* Weekend background color */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge, and Firefox */
+.hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+/* below will be dynamic form styles*/
+.navbar {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: white;
+    background-color: #3498db;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    display: block;
+}
+
+.custom-form {
+    max-width: auto;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    font-family: "Arial", sans-serif;
+}
+
+.custom-field {
+    outline: none;
+    border-radius: 8px;
+    transition: all 0.4s ease;
+    margin-bottom: 20px;
+}
+.custom-field input,
+.custom-field textarea,
+.custom-field select {
+    background-color: inherit; /* Inherit background color */
+}
+.custom-field::placeholder {
+    color: #a0aec0;
+}
+
+.custom-field:focus,
+input:hover,
+input:focus {
+    border: 2px solid #3498db;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+}
+
+.custom-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: black; /* No quotes needed */
+    font-size: 14px;
+}
+
+.custom-input,
+.custom-select,
+.custom-textarea,
+.custom-slider {
+    width: auto;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.custom-input:focus,
+.custom-select:focus,
+.custom-textarea:focus,
+.custom-slider:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
+}
+
+.custom-checkbox,
+.custom-radio {
+    transform: scale(1);
+}
+
+.custom-button-group {
+    border: 1px solid #18181a;
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 15px;
+    padding: 18px 18px 17px;
+    text-decoration: none;
+    cursor: pointer;
+    background: inherit;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    margin-right: 5px;
+}
+
+.custom-button-group:hover {
+    background-color: black;
+    color: #fff;
+}
+.custom-button-group-selected {
+    border: 1px solid #18181a;
+    color: white;
+    display: inline-block;
+    font-size: 15px;
+    line-height: 15px;
+    padding: 18px 18px 17px;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: black;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    margin-right: 5px;
+}
+
+.custom-switch {
+    position: relative;
+    display: inline-block;
+    width: 55px;
+    height: 30px;
+    margin-bottom: 20px;
+}
+
+.custom-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.custom-slider {
+    cursor: pointer;
+    background-color: #ddd;
+    transition: 0.4s;
+    border-radius: 30px;
+}
+
+.custom-slider:before {
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 5px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.custom-switch input:checked + .custom-slider {
+    background-color: #3498db;
+}
+
+.custom-switch input:checked + .custom-slider:before {
+    transform: translateX(26px);
+}
+
+.custom-submit {
+    display: inline-block;
+    width: auto;
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    background-color: #3498db;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+.custom-submit:hover {
+    background-color: #2980b9;
+}
+
+.custom-file,
+.custom-image-picker {
+    display: block;
+    font-size: 16px;
+    margin-top: 10px;
+    color: #333;
+}
+
+.display-inline {
+    display: inline-block;
+    cursor: pointer;
+    border: 2px solid #000;
+    border-radius: 5px;
+    color: #000;
+    background: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 28px;
+    padding: 12px 18px;
+    text-align: center;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.display-inline:hover {
+    color: #fff;
+    background-color: #f1c40f;
+}
+
+
+/* style.css */
+/* App layout */
+.app-container {
+    display: flex;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+  }
+  
+  .sidebar {
+    width: 200px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+  }
+  
+  .sidebar h2 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar-item {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: grab;
+    text-align: center;
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .main-content h2 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+  }
+  
+  .drop-area {
+    width: 80%;
+    min-height: 300px;
+    background-color: #e0e0e0;
+    border: 2px dashed #bbb;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .draggable-item {
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 80px;
+    text-align: center;
+    cursor: grab;
+  }
+  
+
+.hover-modal {
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  .popup-modal {
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+  }
+  
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background-color: white;
+    border-left: 1px solid #ccc;
+    box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.3);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 20;
+  }
+  
+  .drawer-active .drawer {
+    transform: translateX(0); /* Slide in the drawer */
+  }
+  
+
+.container {
+    position: relative;
+  }
+  
+  .container-child {
+    position: relative;
+    overflow: hidden;
+  }
+
+
+
+
+
+
+/* Flexy css*/
+:root {--m: 15px}
+
+* {box-sizing: border-box;}
+
+.main{display: flex; flex-flow: row wrap;  width: 80%; margin: 0 auto}
+
+.dp10,.dp12,.dp17,.dp20,.dp25,.dp33,.dp40,.dp50,.dp60,.dp67,.dp75,.dp80,.dp83,.dp100,.fluid{margin:0 0 0 var(--m)}
+
+.dp10{width:calc(10% - var(--m))}
+.dp12{width:calc(12.5% - var(--m))}
+.dp17{width:calc(16.6667% - var(--m))}
+.dp20{width:calc(20% - var(--m))}
+.dp25{width:calc(25% - var(--m))}
+.dp33{width:calc(33.3334% - var(--m))}
+.dp40{width:calc(40% - var(--m))}
+.dp50{width:calc(50% - var(--m))}
+.dp60{width:calc(60% - var(--m))}
+.dp67{width:calc(66.6667% - var(--m))}
+.dp75{width:calc(75% - var(--m))}
+.dp80{width:calc(80% - var(--m))}
+.dp83{width:calc(83.3334% - var(--m))}
+.dp100{width:calc(100% - var(--m))}
+
+.fluid{flex:2}
+.clear{width: 100%}
+.nomargin{display: flex; flex-flow: row wrap; padding:0 !important; margin:0 !important}
+
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  .row {
+    display: flex;
+    margin-left: calc(-1 * var(--gutter) / 2);
+    margin-right: calc(-1 * var(--gutter) / 2);
+    flex-direction: row;
+  }
+  
+  .column {
+    padding-left: calc(var(--gutter) / 2);
+    padding-right: calc(var(--gutter) / 2);
+  }
+  
+
+@media (max-width: 600px) {
+  .dp10,.dp12,.dp17,.dp20,.dp25,.dp33,.dp40,.dp50,.dp60,.dp67,.dp75,.dp80,.dp83,.dp100,.fluid {width:100%; margin:0}}
+
+
+
+
+
+
+  * { box-sizing: border-box; }
+
+  .container {
+    display: flex;
+  }
+  
+  .builder {
+    flex: 1;
+  }
+  
+  .canvas {
+    display: flex;
+    flex-flow: row wrap;
+    width: 80%;
+    margin: 0 auto;
+    border: 2px dashed #ccc;
+    padding: 20px;
+    min-height: 300px;
+  }
+  
+  .block {
+    padding: 20px;
+    margin: 10px;
+    background-color: #b3d9ff;
+    border-radius: 5px;
+    cursor: move;
+  }
+  
+  .config-panel {
+    width: 200px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-left: 20px;
+  }
+  
+  .add-blocks {
+    margin-top: 20px;
+  }
+  
+  select {
+    width: 100%;
+  }
+  

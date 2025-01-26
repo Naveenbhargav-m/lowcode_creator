@@ -1,0 +1,58 @@
+import { render } from "preact";
+import { LocationProvider, Router, Route } from "preact-iso";
+import "/node_modules/react-grid-layout/css/styles.css";
+import "/node_modules/react-resizable/css/styles.css";
+import "./index.css";
+import "bulma/css/bulma.css";
+import "./styles/theme.css";
+
+import { ThemeProvider } from "./components/theme_provider";
+
+import SideBar from "./components/sidebar.jsx";
+import FormsPage from "./form_builder/forms_page";
+import TablesPage from "./table_builder/tables_page";
+import ScreenPage from "./screen_builder/screen_page";
+import { WorkFlowPage } from "./workflows/workflow_page";
+import { UsersPage } from "./users/users_page";
+import { SettingsPage } from "./settings/settings_page";
+import { PreviewArea } from "./preview/preview";
+import { sideBarEnable } from "./states/global_state";
+import AppCreatorPage from "./app_creator/app_creator";
+import ExamplePage from "./pages/drag_resize_test";
+import { FormTestpage } from "./pages/form_test";
+import { FormsPageNew } from "./pages/flex_page_test";
+import { FormBuilderTest } from "./form_builder2/form_edit_area";
+
+export function App() {
+  return (
+    <ThemeProvider>
+    <LocationProvider>
+   <div className="flex bg-white">
+    {
+      sideBarEnable.value ?   <SideBar /> : <span></span>
+    }
+  <main className="flex-grow bg-white">
+    <Router>
+      <Route path="/home" component={TablesPage} />
+      <Route path="/forms" component={FormsPage} />
+      <Route path="/screens" component={ScreenPage}/>
+      <Route path="/containers" component={TablesPage} />
+      <Route path="/workflows" component={WorkFlowPage} />
+      <Route path="/users" component={UsersPage}/>
+      <Route path="/settings" component={SettingsPage} />
+      <Route path="/" component={AppCreatorPage} />
+      <Route path="/preview" component={PreviewArea} />
+      <Route path="/form_example" component={FormTestpage} />
+      <Route path="/flex_page" component={FormsPageNew} />
+      <Route path="/form_builder" component={FormBuilderTest} />
+      <Route default component={() => <div>Not Found</div>} />
+    </Router>
+  </main>
+</div>
+
+    </LocationProvider>
+    </ThemeProvider>
+  );
+}
+
+render(<App />, document.getElementById("app"));

@@ -1,0 +1,111 @@
+{
+    "element-0": {
+        "i": "element-0",
+        "type": "container",
+        "template": "element",
+        "title": "Column",
+        "position": {
+            "x": 0,
+            "y": 0
+        },
+        "parent": null,
+        "size": {
+            "width": 146,
+            "height": 166
+        },
+        "configs": {
+            "styleCode": "return undefined;",
+            "onClick": "return {};",
+            "onDoubleClick": "return {};",
+            "onHover": "return {};",
+            "i": "element-0"
+        },
+        "value": "",
+        "valueCode": "return {};",
+        "childrenCode": "if(activeButton ==1) {\n return {\n \"children\":[\"element-1\"]};\n} \n\nreturn {\"children\":[\"element-2\"]};",
+        "children": [
+            "element-1",
+            "element-2"
+        ],
+        "actions": {
+            "onClick": "if(activeButton == 1) {\n return {\"activeButton\":2};\n}\n\nreturn {\"activeButton\":1};",
+            "onDoubleClick": "return {};",
+            "onHoverEnter": "return {};",
+            "onHoverLeave": "return {};"
+        }
+    },
+    "element-1": {
+        "i": "element-1",
+        "type": "primitive",
+        "template": "element",
+        "title": "Avatar",
+        "position": {
+            "x": 14,
+            "y": 15
+        },
+        "parent": "element-0",
+        "size": {
+            "width": 433,
+            "height": 55
+        },
+        "configs": {
+            "styleCode": "return {\"size\":\"50px\"};",
+            "style": {
+                "size": "50px"
+            },
+            "onClick": "return {};",
+            "onDoubleClick": "return {};",
+            "onHover": "return {};"
+        },
+        "value": "",
+        "valueCode": "return {};",
+        "childrenCode": "return {};",
+        "children": [],
+        "actions": {
+            "onClick": "return {};",
+            "onDoubleClick": "return {};",
+            "onHoverEnter": "return {};",
+            "onHoverLeave": "return {};"
+        }
+    },
+    "element-2": {
+        "i": "element-2",
+        "type": "primitive",
+        "template": "element",
+        "title": "Badge",
+        "position": {
+            "x": 69.00003051757812,
+            "y": 24.00000762939453
+        },
+        "parent": "element-0",
+        "size": {
+            "width": "auto",
+            "height": "auto"
+        },
+        "configs": {
+            "styleCode": "return{\"color\":\"white\",\"backgroundColor\":\"black\",\"padding\":\"1px 3px\",\"fontSize\":\"14px\"};",
+            "style": {
+                "class": {
+                    "primary": "red",
+                    "textColor": "white",
+                    "padding": "5px"
+                }
+            },
+            "onClick": "return {};",
+            "onDoubleClick": "return {};",
+            "onHover": "return {};"
+        },
+        "value": "",
+        "valueCode": "return {};",
+        "childrenCode": "return {};",
+        "children": [],
+        "actions": {
+            "onClick": "return {};",
+            "onDoubleClick": "return {};",
+            "onHoverEnter": "return {};",
+            "onHoverLeave": "return {};"
+        }
+    }
+}
+
+
