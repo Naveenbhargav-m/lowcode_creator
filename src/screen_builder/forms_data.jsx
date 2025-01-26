@@ -1,0 +1,16 @@
+let container_form = [
+    { type: 'text', fieldName: 'Name', 
+        label: 'Name',
+        inputStyle:{"border-radius":"15px", "color":"black", width:"100%"},  
+        wrapperStyle:{"background-color":"white", "marginBottom":"0px", padding:"40px"},
+        labelStyle:{"color":"black"},
+       labelPosition: "top" , 
+      },
+      { type: 'textarea', fieldName: 'containerStyle', 
+        label: 'Container Style',
+        inputStyle:{"border-radius":"15px", "color":"black", width:"100%"},  
+        wrapperStyle:{"background-color":"white", "marginBottom":"0px", padding:"40px"},
+        labelStyle:{"color":"black"},
+       labelPosition: "top" , 
+      },
+];

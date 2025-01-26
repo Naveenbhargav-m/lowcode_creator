@@ -1,0 +1,64 @@
+{
+    "tables": {
+        "ewn3Ho4Qus": {
+            "id": "ewn3Ho4Qus",
+            "label": "Table ewn3Ho4Qus",
+            "position": {
+                "x": 56.50117212563266,
+                "y": 196.9971702014999
+            },
+            "fields": {
+                "ewn3Ho4Qus": {
+                    "operation": "add",
+                    "name": "id",
+                    "type": "primary",
+                    "sql_type": "SERIAL PRIMARY",
+                    "uid": "ewn3Ho4Qus",
+                    "id": "ewn3Ho4Qus",
+                    "table": "ewn3Ho4Qus",
+                    "order": 0,
+                    "required": false,
+                    "default": null,
+                    "relation": null
+                },
+                "NZ59WbhNf8": {
+                    "operation": "add",
+                    "uid": "NZ59WbhNf8",
+                    "name": "Name",
+                    "type": "Text",
+                    "sql_type": "TEXT",
+                    "table": "ewn3Ho4Qus",
+                    "order": 2,
+                    "required": true,
+                    "default": null,
+                    "relation": null
+                },
+                "qyXWTCzG3j": {
+                    "operation": "add",
+                    "uid": "qyXWTCzG3j",
+                    "name": "Salary",
+                    "type": "Integer",
+                    "sql_type": "INTEGER",
+                    "table": "ewn3Ho4Qus",
+                    "order": 3,
+                    "required": false,
+                    "default": null,
+                    "relation": null
+                },
+                "TCoYbVv80S": {
+                    "operation": "add",
+                    "uid": "TCoYbVv80S",
+                    "name": "active",
+                    "type": "Boolean",
+                    "sql_type": "BOOLEAN",
+                    "table": "ewn3Ho4Qus",
+                    "order": 4,
+                    "required": false,
+                    "default": "true",
+                    "relation": null
+                }
+            }
+        }
+    },
+    "edges": {}
+}
