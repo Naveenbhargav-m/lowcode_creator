@@ -1,7 +1,7 @@
 import { signal } from "@preact/signals"; // Assuming you have this import in your file
 import { containerConfigmaps } from "../components/configs/container_config_provider";
 import { FormRendererStatic } from "../components/custom/formComponents";
-import { activeElement, screenElements } from "./screen_state";
+import { activeConfigTab, activeElement, screenElements } from "./screen_state";
 import { elementConfigmaps } from "../components/configs/primitive_config_provider";
 import AdvnacedForm from "../form_builder2/advanced_form";
 import { FlexConfigTab } from "../form_builder2/form_edit_area";
@@ -39,11 +39,9 @@ function ScreenRightPanel() {
     return (
         <div>
             <FlexConfigTab />
-            {activeTab.value === "Basic" ? 
-          <FlexConfigurator onChange={handleChange} onSubmit={handleSubmit} existingConfig={configs} />
-       :
-        <AdvnacedForm configsInp={advancedConfig} onSubmit={onAdvancedSubmit} />
-            }
+            {activeConfigTab.value === "Basic" ? 
+            <FlexConfigurator onChange={updateDataback} onSubmit={updateDataback} existingConfig={myconfig.value} />
+            : <AdvnacedForm configsInp={myconfig.value} onSubmit={updateDataback} />}
         </div>
     );
 }

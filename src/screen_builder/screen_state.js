@@ -44,13 +44,12 @@ const tabDataSignal = signal({
     {icon:"columns-2", title:"SideDrawer", type:"modal"},
     {icon:"picture-in-picture-2", title:"Modal", type:"modal"},
     {icon:"picture-in-picture-2", title:"HovarCard", type:"modal"}
-
-
   ],
 });
 
 const containerBounds = {"height":0, "width":0};
 const activeTab = signal('Screen');
+const activeConfigTab = signal("Basic");
 const isHoveredSignal = signal(false);
 const activeElement = signal("");
 
@@ -75,8 +74,6 @@ let activeDragID = signal("none");
 
 
 const handleDrop = (data, parentId = null) => {
-
-  
   // Determine the parent container dimensions
   const parentElement = parentId 
     ? document.querySelector(`[data-id="${parentId}"]`) 
@@ -136,48 +133,9 @@ const handleDrop = (data, parentId = null) => {
 };
 
 
-const updateElementPosition = (i, position) => {
-  console.log("bounds:",containerBounds);
-  let activeItem = screenElements[i];
-  activeItem.value.position = position;
-  activeItem.value["parent_container"] = {...containerBounds};
-  activeItem.value = {...activeItem.value};
-  localStorage.setItem("screen_config", JSON.stringify(screenElements));
-  let screenData = {
-    "configs":JSON.stringify(screenElements)
-  };
-  SetScreenToAPI(screenData,1);
-
-};
-
-const updateElementSize = (i, size) => {
-  console.log("bounds:",containerBounds);
-
-  let activeItem = screenElements[i];
-  activeItem.value.size = size;
-  activeItem.value["parent_container"] = {...containerBounds};
-  activeItem.value = {...activeItem.value};
-  localStorage.setItem("screen_config", JSON.stringify(screenElements));
-  let screenData = {
-    "configs":JSON.stringify(screenElements)
-  };
-  SetScreenToAPI(screenData,1);
-};
-
-
-function setContainerBounds(inp) {
-  console.log("height and width:",inp);
-  containerBounds.height = inp["height"];
-  containerBounds.width = inp["width"];
-  console.log("containe Bounds:",containerBounds);
-}
 
 function CallbackExecutor(key , input) {
   actionsmap[key](input);
 }
 
-export {
-        tabDataSignal , tabSignal, isHoveredSignal,screenElements ,activeTab,
-        handleDrop, updateElementPosition, updateElementSize,activeDrag,activeDragID,
-        activeElement,CallbackExecutor, screenElementAdded, setContainerBounds
-      };
+export {tabDataSignal , tabSignal, isHoveredSignal,screenElements ,activeTab,activeConfigTab,handleDrop,activeDrag,activeDragID,activeElement,CallbackExecutor, screenElementAdded};
