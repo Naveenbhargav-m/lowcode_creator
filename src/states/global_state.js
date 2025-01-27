@@ -52,17 +52,3 @@ export {
 };
 
 
-// let style =  {"color":"white","backgroundColor":"black","display":"flex"};
-// if(activeButton == 1) {
-//   style["backgroundColor"] = "grey";
-//   style["color"]="brown";
-// }
-
-// return style;
-
-//
-// if(activeButton == 1) {
-//   return {"activeButton":0};
-// }
-// return {"activeButton":1};
-

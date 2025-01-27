@@ -37,7 +37,7 @@ export const DynamicWrapper = ({ children, config, value }) => {
 
   const handleAction = (actionType) => (e) => {
     e.stopPropagation();
-    ActionExecutor(dynamicConfig.value.i, actionType);
+    ActionExecutor(dynamicConfig.value.id, actionType);
     if (actionType === "onClick" && dynamicConfig.value.actions?.onClick) {
       const clickAction = FunctionExecutor({}, dynamicConfig.value.actions.onClick);
       if (clickAction?.show_form !== undefined) {
@@ -145,7 +145,7 @@ export const Dropdown = ({ value, config, options }) => {
       onChange={(e) => {
         e.stopPropagation();
         value.value = e.target["value"];
-        ActionExecutor(config.value.i, "onChange");
+        ActionExecutor(config.value.id, "onChange");
       }}
     >
       {config.value.map((option) => (

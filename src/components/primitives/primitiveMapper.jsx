@@ -23,7 +23,7 @@ export const renderPrimitiveElement = (data) => {
   }
 
   switch (data.title) {
-    case "Text":
+    case "text":
       return (
         <Text
           value={"Sample Text " + data.i}
@@ -31,7 +31,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
       
-    case "Number":
+    case "number":
       return (
         <Number
           value={42}
@@ -39,7 +39,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Text Area":
+    case "text_area":
       return (
         <TextArea
           value="Sample Text Area"
@@ -48,7 +48,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Progress Bar":
+    case "progress_bar":
       return (
         <ProgressBar
           progress={50}
@@ -57,7 +57,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Avatar":
+    case "avatar":
       return (
         <Avatar
           src={url}
@@ -66,7 +66,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Avatar Group":
+    case "avatar_group":
       return (
         <AvatarGroup
           avatars={[
@@ -77,7 +77,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Dropdown":
+    case "drop_down":
       return (
         <Dropdown
           value=""
@@ -89,7 +89,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Button":
+    case "button":
       return (
         <Button
           value="Click Me"
@@ -98,7 +98,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Image":
+    case "image":
       return (
         <Image
           src={url}
@@ -107,7 +107,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Badge":
+    case "badge":
       return (
         <Badge
           value="Badge"
@@ -116,7 +116,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Icon":
+    case "icon":
       return (
         <Icon
           name="menu"
@@ -125,7 +125,7 @@ export const renderPrimitiveElement = (data) => {
         />
       );
 
-    case "Icon Button":
+    case "icon_button":
       return (
         <IconButton
           icon="mouse-pointer"

@@ -1,19 +1,17 @@
 import { renderPrimitiveElement } from "../primitives/primitiveMapper";
 import { Card, GridView, Row, Column, Container, ListView, ScrollArea, Carousel } from "./container_components";
-import { activeDrag, activeDragID, screenElements, setContainerBounds, updateElementPosition, updateElementSize } from "../../screen_builder/screen_state";
+import { activeDrag, activeDragID, screenElements } from "../../screen_builder/screen_state";
 import { Drop } from "../custom/Drop";
 import { handleDrop } from "../../screen_builder/screen_state";
-import { Rnd } from "react-rnd";
 import { Drawer, HoverModal, PopupModal } from "../model_containers/model_components";
 import { variableKeys, variableMap } from '../../states/global_state';
 import { ActionExecutor, FunctionExecutor } from '../../states/common_actions';
 import { effect, signal } from '@preact/signals';
-import { useEffect } from "preact/hooks";
 import { renderTemplate } from "../templates/template_mapper";
 
 
 export function renderContainer(layoutItem) {
-  layoutItem.configs["i"] = layoutItem.i;
+  layoutItem.configs["id"] = layoutItem.id;
   const { title, children } = layoutItem;
   let childrenSignal = signal(children);
   effect(() => {
@@ -36,9 +34,9 @@ export function renderContainer(layoutItem) {
   const renderChildren = (children) =>
     children.map((child, ind) => (
      
-        <div style={{ display: "contents"}} onClick={() => { activeDragID.value = child.i }}>
+        <div style={{ display: "contents"}} onClick={() => { activeDragID.value = child.id }}>
           {(child.type === "container" || child.type === "modal") ? (
-            <Drop onDrop={(data) => handleDrop(data, child.i)} dropElementData={{ element: child.i }}>
+            <Drop onDrop={(data) => handleDrop(data, child.i)} dropElementData={{ element: child.id }}>
               {renderContainer(child)}
             </Drop>
           ) : child.type === "template"  ? (renderTemplate(child)) : (renderPrimitiveElement(child))}
@@ -73,54 +71,3 @@ export function renderContainer(layoutItem) {
       return <div>Unknown Container</div>;
   }
 }
-
-
-/*
-
- children.map((child, ind) => (
-      <Rnd
-        key={child.i}
-        // @ts-ignore
-        default={{
-          x: child.position.x,
-          y: child.position.y,
-          width: child.size.width,
-          height: child.size.height,
-        }}
-        scale={1}
-        onDragStart={(e) => {
-          e.stopPropagation();
-          activeDrag.value = true;
-          activeDragID.value = child.i;
-        }}
-        onDragStop={(e, data) => {
-          e.stopPropagation();
-          activeDrag.value = false;
-          activeDragID.value = "";
-          updateElementPosition(child.i, { x: data.x, y: data.y });
-        }}
-        onResize={(e, direction, ref, delta, position) => {
-          const newWidth = ref.offsetWidth;
-          const newHeight = ref.offsetHeight;
-          const newPosition = { x: position.x, y: position.y };
-          updateElementSize(child.i, { width: newWidth, height: newHeight });
-          updateElementPosition(child.i, newPosition);
-        }}
-        bounds="parent"
-        enableResizing={{
-          top: true, right: true, bottom: true, left: true,
-          topRight: true, bottomRight: true, bottomLeft: true, topLeft: true,
-        }}
-      >
-        <div style={{ display: "flex", height: "100%", width: "100%" }} onClick={() => { activeDragID.value = child.i }}>
-          {(child.type === "container" || child.type === "modal") ? (
-            <Drop onDrop={(data) => handleDrop(data, child.i)} dropElementData={{ element: child.i }}>
-              {renderContainer(child)}
-            </Drop>
-          ) : child.type === "template"  ? (renderTemplate(child)) : (renderPrimitiveElement(child))}
-        </div>
-      </Rnd>
-    ));
-
-
-*/
