@@ -17,12 +17,16 @@ function FunctionExecutor(signals, functionStr) {
 
 
 function ActionExecutor( i , action) {
-    const element = screenElements[i].peek();
+    let scrElement = screenElements[i];
+    if(scrElement === undefined) {
+        return;
+    }
+    const element = scrElement.peek();
     if (action === "onClick") {
         activeElement.value = i;
     }
-    
-    const actionStr = element["actions"][action];
+    return;
+    const actionStr = element["configs"][action];
     let myfunc;
     const keys = Object.keys(variableMap); // Get parameter names from variableMap
     const values = Object.values(variableMap); // Get corresponding values

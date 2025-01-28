@@ -9,13 +9,13 @@ import { renderTemplate } from "../components/templates/template_mapper";
 function renderElement(item) {
   if (item.type === "container" || item.type === "modal") {
     return (
-      <Drop onDrop={(data) => handleDrop(data, item.i)} dropElementData={{ element: item.i }}>
+      <Drop onDrop={(data) => handleDrop(data, item.i)} dropElementData={{ element: item.id }}>
         {renderContainer(item)}
       </Drop>
     );
   } else if (item.type === "template") {
     return (
-      <Drop onDrop={(data) => handleDrop(data, item.i)} dropElementData={{ element: item.i }}>
+      <Drop onDrop={(data) => handleDrop(data, item.i)} dropElementData={{ element: item.id }}>
         {renderTemplate(item)}
       </Drop>
     );

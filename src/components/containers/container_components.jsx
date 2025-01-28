@@ -41,10 +41,10 @@ const ContainerTemplate = ({ config, value, action, children }) => {
   return (
     <div
       style={containerConfig.value.style}
-      onClick={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.i, "onClick"); }}
-      onDblClick={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.i, "onDoubleClick"); }}
-      onMouseEnter={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.i, "onHoverEnter"); }}
-      onMouseLeave={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.i, "onHoverLeave"); }}
+      onClick={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onClick"); }}
+      onDblClick={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onDoubleClick"); }}
+      onMouseEnter={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onHoverEnter"); }}
+      onMouseLeave={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onHoverLeave"); }}
     >
       {children || value}
     </div>

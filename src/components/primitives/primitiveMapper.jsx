@@ -1,11 +1,21 @@
 
 
 import { Text, Number, TextArea, ProgressBar, Avatar, AvatarGroup, Dropdown, Button, Image, Badge, Icon, IconButton } from "./primitivies";
-import { CallbackExecutor } from "../../screen_builder/screen_state";
+import { activeElement, CallbackExecutor } from "../../screen_builder/screen_state";
 
 let url = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
 // Function to map drop data to the correct primitive component
 
+
+function ActiveWrapper({children, data}) {
+  return (
+        <div style={{display:"contents"}} onClick={(e) => {
+          activeElement.value = data["id"];
+          console.log("active element in primitive:",activeElement.value);
+        }}>
+          {children}
+        </div>);
+}
 export const renderPrimitiveElement = (data) => {
   let configs = { ...data.configs };
   let configObj = {};
@@ -23,51 +33,62 @@ export const renderPrimitiveElement = (data) => {
   }
 
   switch (data.title) {
-    case "Text":
+    case "text":
       return (
+        <ActiveWrapper data={data}>
         <Text
-          value={"Sample Text " + data.i}
+          value={"Sample Text " + data.id}
           config={{...configObj}}
         />
+        </ActiveWrapper>
       );
       
-    case "Number":
+    case "number":
       return (
+        <ActiveWrapper data={data}>
         <Number
           value={42}
           config={{...configObj}}
         />
+        </ActiveWrapper>
       );
 
-    case "Text Area":
+    case "text_area":
       return (
+        <ActiveWrapper data={data}>
         <TextArea
           value="Sample Text Area"
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
-    case "Progress Bar":
+    case "progress_bar":
       return (
+        <ActiveWrapper data={data}>
         <ProgressBar
           progress={50}
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
-    case "Avatar":
+    case "avatar":
       return (
+        <ActiveWrapper data={data}>
         <Avatar
           src={url}
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
-    case "Avatar Group":
+    case "avatar_group":
       return (
+        <ActiveWrapper data={data}>
         <AvatarGroup
           avatars={[
             { src: url, alt: "User1" },
@@ -75,10 +96,12 @@ export const renderPrimitiveElement = (data) => {
           ]}
           config={{...configObj}}
         />
+        </ActiveWrapper>
       );
 
-    case "Dropdown":
+    case "drop_down":
       return (
+        <ActiveWrapper data={data}>
         <Dropdown
           value=""
           options={[
@@ -87,51 +110,62 @@ export const renderPrimitiveElement = (data) => {
           ]}
           config={{...configObj}}
         />
+        </ActiveWrapper>
       );
 
-    case "Button":
+    case "button":
       return (
+        <ActiveWrapper data={data}>
         <Button
           value="Click Me"
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
-    case "Image":
+    case "image":
       return (
+        <ActiveWrapper data={data}>
         <Image
           src={url}
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
-    case "Badge":
+    case "badge":
       return (
+        <ActiveWrapper data={data}>
         <Badge
           value="Badge"
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
-    case "Icon":
+    case "icon":
       return (
+        <ActiveWrapper data={data}>
         <Icon
           name="menu"
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
-    case "Icon Button":
+    case "icon_button":
       return (
+        <ActiveWrapper data={data}>
         <IconButton
           icon="mouse-pointer"
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
     default:
