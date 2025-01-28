@@ -7,40 +7,52 @@ import AdvnacedForm from "../form_builder2/advanced_form";
 import { FlexConfigTab } from "../form_builder2/form_edit_area";
 import FlexConfigurator from "../form_builder2/flex_config";
 const myconfig = signal({});
+const basicConfig = signal({});
 
 function ScreenRightPanel() {
     let myelement = screenElements[activeElement.value];
+    console.log("active element in screen config panel:",activeElement.value, activeConfigTab.value);
     const updateConfig = () => {
 
         if (myelement) {
             let temp = myelement.peek();
-            let codestr = temp.configs.styleCode;
+            let configs = temp.configs;
             myconfig.value = {
-                "Style":codestr,
-                "OnClick":temp.actions.onClick,
-                "OnDoubleClick":temp.actions.onDoubleClick,
-                "Value":temp.valueCode,
-                "ShowHide":temp.childrenCode,
+                "Style":configs["style"],
+                "OnClick":configs["onClick"],
+                "OnDoubleClick":configs["onDoubleClick"],
+                "Value":configs["value"],
+                "ShowHide":configs["childrenCode"]
             };
+
+            basicConfig.value = {...configs["style"]};
+            console.log("basic config value:",basicConfig.value, configs);
     }};
     updateConfig();
     const updateDataback = (data) => {
         if (myelement) {
         let temp = myelement.peek();
-        temp.configs.styleCode = data["Style"];
-        temp.actions.onClick = data["OnClick"];
-        temp.actions.onDoubleClick = data["OnDoubleClick"];
-        temp.valueCode = data["Value"];
-        temp.childrenCode = data["ShowHide"];
+        temp.configs.style = data["Style"];
+        temp.configs.onClick = data["OnClick"];
+        temp.configs.onDoubleClick = data["OnDoubleClick"];
+        temp.configs.valueCode = data["Value"];
+        temp.configs.childrenCode = data["ShowHide"];
         screenElements[activeElement.peek()].value = {...temp}; 
         }
     }
 
+    const updateStyleback = (data) => {
+        if(myelement) {
+            let temp = myelement.peek();
+            temp.configs.style = {...temp.configs.style, ...data};
+            screenElements[activeElement.peek()].value = {...temp}; 
+        }
+    }
     return (
         <div>
-            <FlexConfigTab />
+            <FlexConfigTab tablSignal={activeConfigTab} />
             {activeConfigTab.value === "Basic" ? 
-            <FlexConfigurator onChange={updateDataback} onSubmit={updateDataback} existingConfig={myconfig.value} />
+            <FlexConfigurator onChange={updateStyleback} onSubmit={updateStyleback} existingConfig={basicConfig.value} />
             : <AdvnacedForm configsInp={myconfig.value} onSubmit={updateDataback} />}
         </div>
     );

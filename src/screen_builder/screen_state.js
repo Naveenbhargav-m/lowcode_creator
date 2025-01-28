@@ -1,9 +1,10 @@
 // Signals for state management
 import { signal } from "@preact/signals";
-import { styles_mapper } from "../components/configs/primitive_styles_provider";
 import { actionsmap } from "./helper_methods";
 import { SetScreenToAPI } from "../api/api";
 import { generateUID } from "../utils/helpers";
+import { PrimitivesStylesMap } from "../components/primitives/primitives_base_styles";
+import { ContainersStylesMap } from "../components/containers/containers_bse_styles";
 
 const tabSignal = signal("primitives");
 const tabDataSignal = signal({
@@ -70,11 +71,10 @@ if (screenConfigsMap === null || screenConfigsMap === undefined) {
 
 const screenElements = { ...screenConfigsMap };
 const screenElementAdded = signal(false);
-let activeDrag = signal(false);
-let activeDragID = signal("none");
 
 
 const handleDrop = (data, parentId = null) => {
+  console.log("called on drop:",data, parentId);
   // Determine the parent container dimensions
   const parentElement = parentId ? document.querySelector(`[data-id="${parentId}"]`) 
   : document.querySelector("#screen-container");
@@ -84,19 +84,28 @@ const handleDrop = (data, parentId = null) => {
   // @ts-ignore
   const parentHeight = parentElement ? parentElement.offsetHeight : window.innerHeight;
   let i = generateUID();
-  let StyleCode = JSON.stringify(styles_mapper[data.data.title]);
+  let styleObj = {};
+  let type = data.data.type;
+  let title = data.data.value;
+  if(type === "primitive") {
+    styleObj = PrimitivesStylesMap[title];
+  } else if(type === "container") {
+    styleObj = ContainersStylesMap[title];
+  }
+  let StyleCode = JSON.stringify(styleObj);
+
+
   const newItem = {
     id: i,
-    type: data.data.type,
+    type: type,
     template: "element",
-    title: data.data.value,
+    title: title,
     "parent_container":{...containerBounds},
     parent: parentId,
-    style: styles_mapper[data.data.vlaue],
     children: [],
     value:"",
     configs: {
-      styleCode: `return ${StyleCode};`,
+      style: styleObj,
       onClick: "return {};",
       onDoubleClick: "return {};",
       onHover:"return {};",
@@ -123,7 +132,7 @@ const handleDrop = (data, parentId = null) => {
   let screenData = {
     "configs":JSON.stringify(screenElements)
   };
-  SetScreenToAPI(screenData,1);
+  // SetScreenToAPI(screenData,1);
 };
 
 
@@ -132,4 +141,4 @@ function CallbackExecutor(key , input) {
   actionsmap[key](input);
 }
 
-export {tabDataSignal , tabSignal, isHoveredSignal,screenElements ,activeTab,activeConfigTab,handleDrop,activeDrag,activeDragID,activeElement,CallbackExecutor, screenElementAdded};
+export {tabDataSignal , tabSignal, isHoveredSignal,screenElements ,activeTab,activeConfigTab,handleDrop,activeElement,CallbackExecutor, screenElementAdded};

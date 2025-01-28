@@ -277,7 +277,7 @@ function EditArea() {
 
       }
       return (<div>
-      <FlexConfigTab />
+      <FlexConfigTab tablSignal={activeTab} />
       {activeTab.value === "Basic" ? (
         type === "column" || type === "row" ? (
           <FlexConfigurator onChange={handleChange} onSubmit={handleSubmit} existingConfig={configs} />
@@ -291,9 +291,9 @@ function EditArea() {
   }
   
   
-  export function FlexConfigTab() {
+  export function FlexConfigTab({tablSignal}) {
     const switchTab = (tab) => {
-      activeTab.value = tab;
+      tablSignal.value = tab;
     };
   
     let tabs = ["Basic","Advanced"];
@@ -304,7 +304,7 @@ function EditArea() {
           {tabs.map((value)=>{
             return (
               <button
-            class={`tab-button ${activeTab.value === value ? 'active' : ''}`}
+            class={`tab-button ${tablSignal.value === value ? 'active' : ''}`}
             onClick={() => switchTab(value)}
           >
             {value}

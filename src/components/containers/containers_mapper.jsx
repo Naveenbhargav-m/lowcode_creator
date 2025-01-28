@@ -1,6 +1,6 @@
 import { renderPrimitiveElement } from "../primitives/primitiveMapper";
 import { Card, GridView, Row, Column, Container, ListView, ScrollArea, Carousel } from "./container_components";
-import { activeDrag, activeDragID, screenElements } from "../../screen_builder/screen_state";
+import { activeElement, screenElements } from "../../screen_builder/screen_state";
 import { Drop } from "../custom/Drop";
 import { handleDrop } from "../../screen_builder/screen_state";
 import { Drawer, HoverModal, PopupModal } from "../model_containers/model_components";
@@ -34,7 +34,7 @@ export function renderContainer(layoutItem) {
   const renderChildren = (children) =>
     children.map((child, ind) => (
      
-        <div style={{ display: "contents"}} onClick={() => { activeDragID.value = child.id }}>
+        <div style={{ display: "contents"}} onClick={() => { activeElement.value = child.id  }}>
           {(child.type === "container" || child.type === "modal") ? (
             <Drop onDrop={(data) => handleDrop(data, child.i)} dropElementData={{ element: child.id }}>
               {renderContainer(child)}

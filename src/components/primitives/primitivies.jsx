@@ -119,14 +119,16 @@ export const Image = ({ src, config }) => (
 );
 
 // Refactored Avatar Component
-export const Avatar = ({ src, config }) => (
-  <DynamicWrapper config={config} value={src}>
+export const Avatar = ({ src, config }) => {
+    console.log("avatar configs:",config);
+    return (
+      <DynamicWrapper config={config} value={src}>
     {(dynamicValue) => (
       <img src={dynamicValue} alt="" style={{ ...config.style, borderRadius: "50%" }} />
     )}
   </DynamicWrapper>
-);
-
+    );
+}
 // Refactored Badge Component
 export const Badge = ({ value, config }) => (
   <DynamicWrapper config={config} value={value}>
