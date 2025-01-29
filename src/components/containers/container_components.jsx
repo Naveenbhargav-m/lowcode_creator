@@ -8,21 +8,6 @@ const ContainerTemplate = ({ config, value, action, children }) => {
     return <></>;
   }
   const containerConfig = signal(config);
-
-  // containerConfig.value.style = {
-  //   display: 'flex',
-  //   flexDirection: containerConfig.value.direction || 'column',
-  //   justifyContent: containerConfig.value.justify || 'flex-start',
-  //   alignItems: containerConfig.value.align || 'stretch',
-  //   padding: containerConfig.value.padding || '0px',
-  //   border: containerConfig.value.border || '1px solid #ccc',
-  //   borderRadius: containerConfig.value.borderRadius || '5px',
-  //   backgroundColor: containerConfig.value.backgroundColor || 'white',
-  //   height: "100%",
-  //   width: "100%",
-  //   ...containerConfig.value.customStyles
-  // };
-
   effect(() => {
     const keys = variableKeys.peek();
     let datamap = {};
@@ -37,7 +22,7 @@ const ContainerTemplate = ({ config, value, action, children }) => {
     const newStyles = FunctionExecutor(datamap, containerConfig.value.styleCode);
     containerConfig.value.style = { ...containerConfig.value.style, ...newStyles };
   });
-
+  console.log("container config:",containerConfig.value.style);
   return (
     <div
       style={containerConfig.value.style}
@@ -97,11 +82,14 @@ export const Row = ({ configs, value, action, children }) => (
 );
 
 // Column Container
-export const Column = ({ configs, value, action, children }) => (
-  <ContainerTemplate config={{ "direction":"column",...configs}} value={value} action={action}>
-    {children}
-  </ContainerTemplate>
-);
+export const Column = ({ configs, value, action, children }) => {
+  console.log("column configs:",configs);
+ return (
+  <ContainerTemplate config={{...configs}} value={value} action={action}>
+  {children}
+</ContainerTemplate>
+ );
+};
 
 // Scroll Area Container
 export const ScrollArea = ({ config, value, action, children }) => {

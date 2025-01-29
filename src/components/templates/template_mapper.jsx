@@ -44,7 +44,7 @@ export function renderTemplate(layoutItem) {
       ));
   
     switch (title) {
-      case "Table":
+      case "table":
         return <DataTable />;
     default:
         return <div>Unknown Container</div>;

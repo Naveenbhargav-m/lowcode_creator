@@ -73,7 +73,7 @@ export function GridView({ config, actions }) {
   let gap = config["gap"] || 0;
   let style = config["style"] || {};
   let path = config["path"];
-
+  style["borderRadius"] = "20px";
   const gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
   const gapStyle = `${gap}px`;
 
@@ -100,6 +100,9 @@ export function GridView({ config, actions }) {
                 borderStyle: "solid",
                 borderWidth: "1px",
                 color: "black",
+                "borderRadius":"20px",
+                fontSize:"8px",
+                "margin":"4px"
               },
             }}
             value={value}
@@ -137,9 +140,9 @@ function IconBox({ config, value, actions }) {
         }}
       >
         <div className="px-2">
-          <DynamicIcon name={value.icon} size={30} />
+          <DynamicIcon name={value.icon} size={24} />
         </div>
-        <p className="text-sm">{value.title}</p>
+        <p className="text-sm" style={{fontSize:"2em"}}>{value.title}</p>
       </div>
     </Draggable>
   );

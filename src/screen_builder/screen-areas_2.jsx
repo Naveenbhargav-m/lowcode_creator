@@ -2,20 +2,20 @@ import { Drop } from "../components/custom/Drop";
 import { Rnd } from "react-rnd";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop  } from "./screen_state";
+import { screenElements, handleDrop, screenElementAdded  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 
 function renderElement(item) {
   if (item.type === "container" || item.type === "modal") {
     return (
-      <Drop onDrop={(data) => handleDrop(data, item.i)} dropElementData={{ element: item.id }}>
+      <Drop onDrop={(data) => handleDrop(data, item.id)} dropElementData={{ element: item.id }}>
         {renderContainer(item)}
       </Drop>
     );
   } else if (item.type === "template") {
     return (
-      <Drop onDrop={(data) => handleDrop(data, item.i)} dropElementData={{ element: item.id }}>
+      <Drop onDrop={(data) => handleDrop(data, item.id)} dropElementData={{ element: item.id }}>
         {renderTemplate(item)}
       </Drop>
     );
@@ -47,7 +47,7 @@ function ScreenBuilderArea() {
       dropElementData={{ element: "screen" }}
       wrapParent={true}
     >
-      {Object.values(screenElements).map((item, ind) => {
+      {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
             if (!item.value.parent) {
               return renderElement(item.peek());
             }
