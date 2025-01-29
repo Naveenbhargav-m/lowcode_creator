@@ -38,6 +38,7 @@ function ScreenRightPanel() {
         temp.configs.valueCode = data["Value"];
         temp.configs.childrenCode = data["ShowHide"];
         screenElements[activeElement.peek()].value = {...temp}; 
+        localStorage.setItem("screen_config", JSON.stringify(screenElements));
         }
     }
 
@@ -46,6 +47,7 @@ function ScreenRightPanel() {
             let temp = myelement.peek();
             temp.configs.style = {...temp.configs.style, ...data};
             screenElements[activeElement.peek()].value = {...temp}; 
+            localStorage.setItem("screen_config", JSON.stringify(screenElements));
         }
     }
     return (

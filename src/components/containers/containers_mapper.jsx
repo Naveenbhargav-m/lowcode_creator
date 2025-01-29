@@ -36,36 +36,36 @@ export function renderContainer(layoutItem) {
      
         <div style={{ display: "contents"}} onClick={() => { activeElement.value = child.id  }}>
           {(child.type === "container" || child.type === "modal") ? (
-            <Drop onDrop={(data) => handleDrop(data, child.i)} dropElementData={{ element: child.id }}>
+            <Drop onDrop={(data) => handleDrop(data, child.id)} dropElementData={{ element: child.id }}>
               {renderContainer(child)}
             </Drop>
           ) : child.type === "template"  ? (renderTemplate(child)) : (renderPrimitiveElement(child))}
         </div>
     ));
-
+  console.log("title:", title);
   switch (title) {
-    case "Card":
+    case "card":
       return <Card {...layoutItem}>{renderChildren(childElements)}</Card>;
-    case "Grid View":
+    case "grid_view":
       return <GridView {...layoutItem}>{renderChildren(childElements)}</GridView>;
-    case "Container":
+    case "container":
       return <Container {...layoutItem}>{renderChildren(childElements)}</Container>;
-    case "List View":
+    case "list_view":
       return <ListView {...layoutItem}>{renderChildren(childElements)}</ListView>;
-    case "Row":
+    case "row":
       return <Row {...layoutItem}>{renderChildren(childElements)}</Row>;
-    case "Column":
+    case "column":
       return <Column {...layoutItem}>{renderChildren(childElements)}</Column>;
-    case "Scroll Area":
+    case "scroll_view":
       return <ScrollArea {...layoutItem}>{renderChildren(childElements)}</ScrollArea>;
-    case "Carousel":
+    case "carousel":
       return <Carousel {...layoutItem}>{renderChildren(childElements)}</Carousel>;
-    case "Modal":
+    case "model":
       console.log("layout item in modal",layoutItem);
       return <PopupModal {...layoutItem}>{renderChildren(childElements)}</PopupModal>;
-    case "HovarCard":
+    case "hover_card":
       return <HoverModal {...layoutItem}>{renderChildren(childElements)}</HoverModal>;
-    case "SideDrawer":
+    case "side_drawer":
       return <Drawer {...layoutItem}>{renderChildren(childElements)}</Drawer>
     default:
       return <div>Unknown Container</div>;

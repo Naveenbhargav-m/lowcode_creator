@@ -71,7 +71,7 @@ if (screenConfigsMap === null || screenConfigsMap === undefined) {
 
 const screenElements = { ...screenConfigsMap };
 const screenElementAdded = signal(false);
-
+screenElementAdded.value = true;
 
 const handleDrop = (data, parentId = null) => {
   console.log("called on drop:",data, parentId);

@@ -74,7 +74,7 @@ export const Button = ({ value, config }) => (
 export const Text = ({ value, config }) => (
   <DynamicWrapper config={config} value={value}>
     {(dynamicValue) => (
-      <p>{dynamicValue}</p>
+      <p style={config.style}>{dynamicValue}</p>
     )}
   </DynamicWrapper>
 );

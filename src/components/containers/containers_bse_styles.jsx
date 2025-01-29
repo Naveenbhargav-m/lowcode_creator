@@ -25,6 +25,9 @@ const row_base_style = {
 
 const column_base_style = {
     flex: "1",
+    height:"100%",
+    width:"100%",
+    backgroundColor:"green",
     padding: "8px", // Match row margin for gutters
 };
 
