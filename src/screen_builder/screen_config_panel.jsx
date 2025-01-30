@@ -3,9 +3,9 @@ import { containerConfigmaps } from "../components/configs/container_config_prov
 import { FormRendererStatic } from "../components/custom/formComponents";
 import { activeConfigTab, activeElement, screenElements } from "./screen_state";
 import { elementConfigmaps } from "../components/configs/primitive_config_provider";
-import AdvnacedForm from "../form_builder2/advanced_form";
-import { FlexConfigTab } from "../form_builder2/form_edit_area";
-import FlexConfigurator from "../form_builder2/flex_config";
+import AdvnacedForm from "../form_builder/advanced_form";
+import { FlexConfigTab } from "../form_builder/form_edit_area";
+import FlexConfigurator from "../form_builder/flex_config";
 const myconfig = signal({});
 const basicConfig = signal({});
 

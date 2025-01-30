@@ -40,7 +40,7 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit }) {
   
     const handleSubmit = () => {
       if (formName.trim() ) {
-        onSubmit({ formName});
+        onSubmit({ "name":formName});
         setFormName("");
         onClose();
       } else {
