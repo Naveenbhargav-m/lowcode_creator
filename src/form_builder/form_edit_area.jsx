@@ -209,7 +209,6 @@ function EditArea() {
   
     {/* Main content area */}
     <div className="w-4/6 h-screen bg-background scrollable-div">
-        <DatesTest />
         <EditArea />
     </div>
   

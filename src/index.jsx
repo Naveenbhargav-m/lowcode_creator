@@ -9,7 +9,6 @@ import "./styles/theme.css";
 import { ThemeProvider } from "./components/theme_provider";
 
 import SideBar from "./components/sidebar.jsx";
-import FormsPage from "./form_builder/forms_page";
 import TablesPage from "./table_builder/tables_page";
 import ScreenPage from "./screen_builder/screen_page";
 import { WorkFlowPage } from "./workflows/workflow_page";
@@ -18,10 +17,7 @@ import { SettingsPage } from "./settings/settings_page";
 import { PreviewArea } from "./preview/preview";
 import { sideBarEnable } from "./states/global_state";
 import AppCreatorPage from "./app_creator/app_creator";
-import ExamplePage from "./pages/drag_resize_test";
-import { FormTestpage } from "./pages/form_test";
-import { FormsPageNew } from "./pages/flex_page_test";
-import { FormBuilderTest } from "./form_builder2/form_edit_area";
+import { FormBuilderTest } from "./form_builder/form_edit_area";
 
 export function App() {
   return (
@@ -34,7 +30,7 @@ export function App() {
   <main className="flex-grow bg-white">
     <Router>
       <Route path="/home" component={TablesPage} />
-      <Route path="/forms" component={FormsPage} />
+      <Route path="/forms" component={FormBuilderTest} />
       <Route path="/screens" component={ScreenPage}/>
       <Route path="/containers" component={TablesPage} />
       <Route path="/workflows" component={WorkFlowPage} />
@@ -42,9 +38,6 @@ export function App() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
       <Route path="/preview" component={PreviewArea} />
-      <Route path="/form_example" component={FormTestpage} />
-      <Route path="/flex_page" component={FormsPageNew} />
-      <Route path="/form_builder" component={FormBuilderTest} />
       <Route default component={() => <div>Not Found</div>} />
     </Router>
   </main>

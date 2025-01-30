@@ -92,7 +92,7 @@ export const MyCodeEditor = ({ config, value, onChange }) => {
         language={language}
         prefixCls='wrap'
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target["value"])}
         data-color-mode="dark"
         padding={15}
         style={{
@@ -684,8 +684,6 @@ const TimePicker = ({ config, value, onChange }) => {
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css'; // Custom styling for calendar
 // @ts-ignore
-import { checkCollision, form_elements_data, handleFormElementDrop, user_form_layouts, user_forms_data } from '../../form_builder/form_state';
-
 // @ts-ignore
 const CalendarComponent = ({ config, styles, value, onChange }) => {
   const { label } = config;
@@ -817,7 +815,7 @@ const FormRenderer = ({ formConfig, formData, styles, onFormChange, onSubmit }) 
   return (
     <div className="min-h-screen bg-white">
       <form onSubmit={handleSubmit}>
-        <Drop onDrop={(data) => handleFormElementDrop(data)} dropElementData={{ element: "screen" }}>
+        {/* <Drop onDrop={(data) => handleFormElementDrop(data)} dropElementData={{ element: "screen" }}>
           {user_forms_data.value.length === 0 ? (
             <div className="min-h-screen"></div>
           ) : (
@@ -846,12 +844,12 @@ const FormRenderer = ({ formConfig, formData, styles, onFormChange, onSubmit }) 
                   }}
                   className="border-2 border-gray-300"
                 >
-                  {renderField(field.configs)}
-                </Rnd>
+                  {renderField(field.configs)} */}
+                {/* </Rnd>
               );
             })
           )}
-        </Drop>
+        </Drop> */}
       </form>
     </div>
   );

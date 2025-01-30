@@ -19,9 +19,9 @@ export function ScreenLeftPanel({ config, value, actions }) {
         <GridView
           config={{
             path: tabSignal.value,
-            columns: "1",
+            columns: "2",
             gap: 0,
-            style: { paddingTop: "20px" },
+            style: { paddingTop: "20px", minHeight: "120px" },
           }}
           actions={{ onChange: () => console.log("dragged") }}
         />
@@ -84,13 +84,12 @@ export function GridView({ config, actions }) {
         gridTemplateColumns: gridTemplateColumns,
         gap: gapStyle,
         ...style,
-        height: "100%", // Ensures it uses the parent's height.
         overflowY: "auto", // Enables scrolling for overflow.
       }}
       className="scrollable-div"
     >
       {tabDataSignal.value[path].map((value, index) => (
-        <div key={index}>
+        <div key={index} style={{display:"contents"}}>
           <IconBox
             config={{
               ...value,
@@ -102,7 +101,8 @@ export function GridView({ config, actions }) {
                 color: "black",
                 "borderRadius":"20px",
                 fontSize:"8px",
-                "margin":"4px"
+                "margin":"4px 4px",
+                height: "100px", // Ensures all boxes have at least this height
               },
             }}
             value={value}
@@ -128,7 +128,7 @@ function IconBox({ config, value, actions }) {
   return (
     <Draggable data={value} onDragStart={(data) => actions?.onDrag?.(data)}>
       <div
-        className="flex flex-col items-center p-2"
+        className="flex flex-col items-center justify-center p-2"
         style={mystyle}
         onMouseEnter={() => {
           isHoveredSignal.value = config["index"];

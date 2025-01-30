@@ -10,7 +10,7 @@ const Draggable = ({ data, onDragStart, children }) => {
   };
 
   return (
-    <div draggable onDragStart={handleDragStart} style={{ display: "block" }}>
+    <div draggable onDragStart={handleDragStart} style={{ display: "contents" }}>
       {children}
     </div>
   );
