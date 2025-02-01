@@ -54,6 +54,8 @@ const activeTab = signal('Screen');
 const activeConfigTab = signal("Basic");
 const isHoveredSignal = signal(false);
 const activeElement = signal("");
+const activeScreen = signal("");
+const screenView = signal("");
 
 let screenConfigjson = localStorage.getItem("screen_config");
 let screenConfigsMap = JSON.parse(screenConfigjson);
@@ -141,4 +143,9 @@ function CallbackExecutor(key , input) {
   actionsmap[key](input);
 }
 
-export {tabDataSignal , tabSignal, isHoveredSignal,screenElements ,activeTab,activeConfigTab,handleDrop,activeElement,CallbackExecutor, screenElementAdded};
+export {tabDataSignal , tabSignal, 
+  isHoveredSignal,screenElements ,activeTab,
+  activeConfigTab,handleDrop,activeElement,
+  CallbackExecutor, screenElementAdded,
+  activeScreen, screenView,
+};

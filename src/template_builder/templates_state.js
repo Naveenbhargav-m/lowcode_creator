@@ -3,7 +3,9 @@ import { generateUID } from "../utils/helpers";
 
 const templates = {};
 let templateNamesList = signal([]);
-
+let templatesPagesSignal = signal("components");
+let activeTamplate = signal("");
+let templateDesignView = signal("");
 function LoadTemplates( ) {
     let templatesStr = localStorage.getItem("templates");
     let templatesmap = JSON.parse(templatesStr);
@@ -36,4 +38,4 @@ function CreateTemplate(formdata) {
 }
 
 LoadTemplates();
-export {templates, CreateTemplate, templateNamesList};
+export {templates, CreateTemplate, templateNamesList, templatesPagesSignal, activeTamplate, templateDesignView};

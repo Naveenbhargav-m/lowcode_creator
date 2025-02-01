@@ -2,9 +2,11 @@ import { Drop } from "../components/custom/Drop";
 import { Rnd } from "react-rnd";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop, screenElementAdded  } from "./screen_state";
+import { screenElements, handleDrop, screenElementAdded, screenView  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
+import { IconGroup } from "../components/primitives/general_components";
+import { CreateFormButton } from "../template_builder/template_builder_view";
 
 function renderElement(item) {
   if (item.type === "container" || item.type === "modal") {
@@ -27,6 +29,16 @@ function renderElement(item) {
 
 function ScreenBuilderArea() {
   return (
+  <div>
+    <CreateAndbuttonbar 
+    iconNames={["smartphone", "app-window-mac"]} 
+    onIconChange={(name) => {screenView.value = name}}
+    formLabel={"Create New Screen"}
+    placeHolder={"Screen Name:"}
+    buttonLabel={"Create Screen"}
+    buttonCallBack={(data) => {}}
+     />
+  <div style={{height:"94vh"}}>
   <DesktopMockup>
   <div
     style={{
@@ -55,9 +67,46 @@ function ScreenBuilderArea() {
     </Drop>
     </div>
     </DesktopMockup>
+    </div>
+    </div>
     );
 }
 
+
+
+
+
+
+
+
+
+
+
+
+function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHolder , buttonLabel, buttonCallBack }) {
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between", // Ensures spacing
+      width: "100%",
+      padding: "10px"
+    }}>
+      {/* Centered IconGroup */}
+      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+        <IconGroup names={iconNames} onChange={onIconChange} />
+      </div>
+  
+      {/* Right-Aligned Button Component */}
+      <div style={{ marginLeft: "auto" }}>
+      <CreateFormButton 
+        formLabel={formLabel} 
+        placeHolder={placeHolder} 
+        buttonLabel={buttonLabel} 
+        callback={buttonCallBack}/>
+      </div>
+    </div>
+  );
+}
+
 export default ScreenBuilderArea;
-
-

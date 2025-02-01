@@ -75,6 +75,8 @@ import {
   Columns3,
   Rows3,
   Clock2,
+  AppWindowMac,
+  Smartphone,
 } from "lucide-react";
 
 export default function DynamicIcon({ name, size }) {
@@ -155,9 +157,9 @@ export default function DynamicIcon({ name, size }) {
     "letter-text": <LetterText size={size}/>,
     "columns-3": <Columns3 size={size}/>,
     "rows-3": <Rows3 size={size}/>,
-    "clock-2": <Clock2 size={size}/>
-
-
+    "clock-2": <Clock2 size={size}/>,
+    "app-window-mac": <AppWindowMac size={size}/>,
+    "smartphone":<Smartphone size={size}/>
   };
 
   return icon_map[name] || null;
