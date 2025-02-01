@@ -1,12 +1,13 @@
 import { useState } from "preact/hooks";
-import { CreateTemplate } from "./templates_state";
+import { CreateTemplate, templateDesignView } from "./templates_state";
 import MobileMockup from "../components/custom/mobile_mockup";
+import { IconGroup } from "../components/primitives/general_components";
 
 
 export function TemplateView() {
     return (
         <div>
-          <CreateFormButton />
+          <TemplateCreatorButtons />
           <div className="p-4 flex justify-center">
             <MobileMockup>
             <div
@@ -35,7 +36,7 @@ export function TemplateView() {
 
 
 
-export function CreateFormPopup({ isOpen, onClose, onSubmit }) {
+export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHolder }) {
     const [formName, setFormName] = useState("");
   
     const handleSubmit = () => {
@@ -66,7 +67,7 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit }) {
             zIndex: 1000,
           }}
         >
-          <h2 style={{ marginBottom: "10px" }}>Create New Template</h2>
+          <h2 style={{ marginBottom: "10px" }}>{FormLabel}</h2>
   
           {/* Form Name Input */}
           <input
@@ -74,7 +75,7 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit }) {
             value={formName}
             // @ts-ignore
             onChange={(e) => setFormName(e.target.value)}
-            placeholder="Template Name:"
+            placeholder={placeHolder}
             style={{
               width: "100%",
               padding: "8px",
@@ -133,12 +134,12 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit }) {
     );
   }
   
-  export function CreateFormButton() {
+  export function CreateFormButton({buttonLabel , formLabel, placeHolder , callback}) {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
   
     const handleCreateForm = (data) => {
       console.log("handle create form data:",data);
-     CreateTemplate(data);
+     callback(data);
     };
   
     return (
@@ -163,7 +164,7 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit }) {
               cursor: "pointer",
             }}
           >
-            Create Template
+          {buttonLabel}
           </button>
         </div>
   
@@ -171,8 +172,36 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit }) {
           isOpen={isPopupOpen}
           onClose={() => setIsPopupOpen(false)}
           onSubmit={handleCreateForm}
+          FormLabel={formLabel}
+          placeHolder={placeHolder}
         />
       </div>
     );
   }
   
+
+  function TemplateCreatorButtons() {
+    return (
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",  // Ensures spacing
+        width: "100%", 
+        padding: "10px"
+    }}>
+        {/* Centered IconGroup */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+            <IconGroup names={["smartphone", "app-window-mac"]} onChange={(data) => { templateDesignView.value = data; console.log("template view:",templateDesignView.value); }} />
+        </div>
+    
+        {/* Right-Aligned CreateFormButton */}
+        <div style={{ marginLeft: "auto" }}>
+            <CreateFormButton
+             formLabel={"Create a Template"} 
+             placeHolder={"Template Name:"} 
+             buttonLabel={"CreateTemplate"} 
+             callback={(data) => { CreateTemplate(data)}}/>
+        </div>
+    </div>
+    );
+  }

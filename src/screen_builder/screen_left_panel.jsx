@@ -147,3 +147,47 @@ function IconBox({ config, value, actions }) {
     </Draggable>
   );
 }
+
+
+
+export function TabElement({ config, actions }) {
+  const mytabs = config["tabs"];
+  const initTab = config["init"]
+  const [activeTab, setActiveTab] = useState(mytabs[initTab]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup effect (if necessary) can be placed here
+    };
+  }, []);
+
+  const handleTabClick = (tab, index) => {
+    setActiveTab(tab);
+    if (actions && actions.onChange) {
+      actions.onChange(tab, index);
+    }
+  };
+
+  let wrapperStyle = config["wrapperStyle"] || {};
+  let tabs = config["tabsStyle"] || {};
+  let element = config["elementStyle"] || {};
+  
+  return (
+    <div className="w-full border-b border-grey-700" style={wrapperStyle}>
+      <ul className="flex" style={tabs}>
+        {mytabs.map((tab, index) => (
+          <li
+            key={index}
+            className={`cursor-pointer py-2 px-4 border-b-2 ${
+              activeTab === tab ? "border-highlight text-black" : "border-transparent text-gray-600"
+            }`}
+            onClick={() => handleTabClick(tab, index)}
+            style={element}
+          >
+            {tab}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

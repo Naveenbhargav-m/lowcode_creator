@@ -1,5 +1,5 @@
 // Signals for state management
-import { signal } from "@preact/signals";
+import { effect, signal } from "@preact/signals";
 import { actionsmap } from "./helper_methods";
 import { SetScreenToAPI } from "../api/api";
 import { generateUID } from "../utils/helpers";
@@ -54,6 +54,10 @@ const activeTab = signal('Screen');
 const activeConfigTab = signal("Basic");
 const isHoveredSignal = signal(false);
 const activeElement = signal("");
+const activeScreen = signal("");
+const screenView = signal("");
+let screenLeftnamesAndIds = signal([]);
+const screenLeftTabSignal = signal("");
 
 let screenConfigjson = localStorage.getItem("screen_config");
 let screenConfigsMap = JSON.parse(screenConfigjson);
@@ -62,17 +66,47 @@ if (screenConfigsMap === null || screenConfigsMap === undefined) {
   screenConfigsMap = {};
 } else {
   // Convert each object in screenConfigsMap to a signal
+  var tempnames = [];
   for (const key in screenConfigsMap) {
     if (screenConfigsMap.hasOwnProperty(key)) {
-      screenConfigsMap[key] = signal(screenConfigsMap[key]);
+      let currentScreen = screenConfigsMap[key];
+      if(currentScreen === undefined) {
+        continue
+      }
+
+      let elements = currentScreen["elements"];
+      let newElements = {};
+      for (const elekey in elements) {
+        newElements[elekey] = signal(elements[elekey]);
+      }
+      tempnames.push({"name": currentScreen["name"], "id":currentScreen["id"]});
+      let newScreen = {
+        "id": currentScreen["id"],
+        "name": currentScreen["name"],
+        "order": currentScreen["order"],
+        "elements": currentScreen["elements"]
+      };
+
+      screenConfigsMap[key] = newScreen;
     }
   }
+  screenLeftnamesAndIds.value = [...tempnames];
 }
-
-const screenElements = { ...screenConfigsMap };
+const screens = screenConfigsMap;
+let screenElements = { };
 const screenElementAdded = signal(false);
 screenElementAdded.value = true;
 
+
+function SetCurrentScreen(id) {
+  if (screens[id] === undefined) {
+    return;
+  }
+  let elements = screens[id]["elements"];
+  screenElements = {...elements};
+  screenElementAdded.value = false;
+  screenElementAdded.value = true;
+}
 const handleDrop = (data, parentId = null) => {
   console.log("called on drop:",data, parentId);
   // Determine the parent container dimensions
@@ -135,10 +169,34 @@ const handleDrop = (data, parentId = null) => {
   // SetScreenToAPI(screenData,1);
 };
 
+effect(()=> {
+  SetCurrentScreen(activeScreen.value);
+});
+
+function CreatenewScreen(data) {
+  let name = data["name"];
+  let length = Object.keys(screens).length;
+  let id = generateUID();
+  let newScreenData = {"id": id, "name": name, "elements": {}, "order":length};
+  screens[id] = newScreenData;
+  screenElements = {};
+  let existingnames = screenLeftnamesAndIds.peek();
+  existingnames.push({"name": name, "id":id});
+  screenLeftnamesAndIds.value = [...existingnames];
+  localStorage.setItem("screen_config",JSON.stringify(screens));
+  screenElementAdded.value = false;
+  screenElementAdded.value = true;
+}
+
 
 
 function CallbackExecutor(key , input) {
   actionsmap[key](input);
 }
 
-export {tabDataSignal , tabSignal, isHoveredSignal,screenElements ,activeTab,activeConfigTab,handleDrop,activeElement,CallbackExecutor, screenElementAdded};
+export {tabDataSignal , tabSignal, 
+  isHoveredSignal,screenElements ,activeTab,
+  activeConfigTab,handleDrop,activeElement,
+  CallbackExecutor, screenElementAdded,
+  activeScreen, screenView,screenLeftTabSignal,screenLeftnamesAndIds, SetCurrentScreen, CreatenewScreen
+};
