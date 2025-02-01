@@ -1,9 +1,9 @@
 import { activeTamplate, templateNamesList } from "./templates_state";
 
-function TemplatesListPanel() {
+function TemplatesListPanel({elementsList}) {
     return (
     <div class="scrollable-div pt-4">
-        {templateNamesList.value.map((item) => {
+        {elementsList.map((item) => {
             console.log("item:",item);
             return (
                 <TemplateTile name={item["name"]} id={item["id"]}/>

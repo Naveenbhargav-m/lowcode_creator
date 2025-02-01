@@ -2,7 +2,7 @@ import { Drop } from "../components/custom/Drop";
 import { Rnd } from "react-rnd";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop, screenElementAdded, screenView  } from "./screen_state";
+import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 import { IconGroup } from "../components/primitives/general_components";
@@ -36,7 +36,7 @@ function ScreenBuilderArea() {
     formLabel={"Create New Screen"}
     placeHolder={"Screen Name:"}
     buttonLabel={"Create Screen"}
-    buttonCallBack={(data) => {}}
+    buttonCallBack={(data) => {CreatenewScreen(data);}}
      />
   <div style={{height:"94vh"}}>
   <DesktopMockup>

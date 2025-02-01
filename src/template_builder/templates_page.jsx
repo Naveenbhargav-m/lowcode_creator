@@ -17,11 +17,11 @@ function TemplatePage() {
             <div className="min-h-screen h-screen w-full bg-white flex">
             <div className="w-2/12 bg-white p-4 h-screen">
             <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
-            <TemplateOptionTabs />
+            <TemplateOptionTabs tabs={["templates", "components"]} onChange={(tab) => { templatesPagesSignal.value = tab; console.log("templates list value:",templatesPagesSignal.value); } }/>
             </div>
             {
                 templatesPagesSignal.value === "templates" ?
-                <TemplatesListPanel /> :
+                <TemplatesListPanel elementsList={templateNamesList.value}/> :
                 <ScreenLeftPanel config={{ tabs_path: config["paths"], views_path: config["views_path"] }}
                 value={{}}
                 actions={{}}/>
@@ -42,13 +42,13 @@ function TemplatePage() {
 }
 
 
-function TemplateOptionTabs() {
+function TemplateOptionTabs( {tabs ,onChange}) {
     return (
         <TabElement
-        config={{ tabs: ["templates", "components"] , init:1, elementStyle: { "font-size": "16px" } }}
-        actions={{ onChange: (tab) => { templatesPagesSignal.value = tab; console.log("templates list value:",templatesPagesSignal.value); } }}
+        config={{ "tabs": tabs, init:1, elementStyle: { "font-size": "16px" } }}
+        actions={{"onChange": onChange}}
         />
     );
 }
 
-export {TemplatePage};
+export {TemplatePage, TemplateOptionTabs};
