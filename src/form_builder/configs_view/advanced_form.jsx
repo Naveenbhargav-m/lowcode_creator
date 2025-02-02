@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { effect, useSignal } from '@preact/signals';
 import { useState } from 'preact/hooks';
-import './AdvancedFormStyle.css';
+import '../styles/AdvancedFormStyle.css';
 
 // Popup component
 const Popup = ({ isOpen, onClose, onSubmit, value, label }) => {

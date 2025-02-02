@@ -145,4 +145,4 @@ function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHol
   );
 }
 
-export default ScreenBuilderArea;
+export  {ScreenBuilderArea, CreateAndbuttonbar};

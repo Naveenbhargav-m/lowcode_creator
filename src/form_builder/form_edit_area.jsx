@@ -1,67 +1,17 @@
 import { signal } from "@preact/signals";
 import { Drop } from "../components/custom/Drop";
 import { DesktopMockup } from "../screen_builder/screen_components";
-import AdvnacedForm from "./advanced_form";
-import FlexConfigurator from "./flex_config";
+import AdvnacedForm from "./configs_view/advanced_form";
+import FlexConfigurator from "./configs_view/flex_config";
 import { FormBuilderLeftPanel } from "./form_builder_left";
-import { generateUID } from "../utils/helpers";
 import { Column, DatesTest, Field, PanelField, Row } from "./fields";
-import FormFieldConfigurator from "./formFieldConfigurator";
-import { defaultStyle, fieldStyle, labelStyle } from "./constantConfigs";
+import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
+import { activeTab, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList } from "./form_builder_state";
+import MobileMockup from "../components/custom/mobile_mockup";
+import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
+import { TemplateOptionTabs } from "../template_builder/templates_page";
+import { ScreensList } from "../screen_builder/screen_page";
 
-
-
-
-// Signals for managing form data
-const activeTab = signal('Basic');
-let activeElementID = signal("");
-let elements = signal({});
-
-
-function AddtoElements(data) {
-  console.log("add to element called:",data);
-  let fieldData = data["data"];
-  let formName = data["dropElementData"]["id"];
-  let newid = generateUID();
-  let elementData = {
-    "type":fieldData[1],
-    "id": newid,
-    "parent": formName,
-    "children": [],
-    "size_class": "",
-    "grow":"",
-    "srink":"",
-    "height": 50,
-    "width":50,
-    "config": {},
-    "class":"dp25",
-    "style": defaultStyle,
-    "panelStyle": defaultStyle,
-    "fieldStyle": fieldStyle,
-    "labelStyle":labelStyle,
-    "onClick": "",
-    "onChange": "",
-    "onHover": "",
-    "onDoubleTap": "",
-    "onDrop": "",
-    "onDrag": "",
-    "onMount": "",
-    "onDestroy": "",
-    "value": "",
-    "valueData": "",
-  };
-  let existing = elements.peek();
-  if(formName != "screen") {
-    elementData["parent"] = formName;
-    let parent = existing[formName];
-    parent["children"].push(newid);
-    existing[formName] = parent;
-  }
-  existing[newid] = elementData;
-  elements.value = {...existing};
-  console.log("elements after adding new field:",elements.value);
-
-}
 
 function GetAdvancedConfigs(element, isField) {
   if(element === undefined) {
@@ -103,7 +53,7 @@ function RenderRoworColumnChildren(children) {
   let childElements = {};
   for(var i=0;i<children.length;i++) {
     let childID = children[i];
-    let temp = elements.value[childID];
+    let temp = currentFormElements.value[childID];
     childElements[childID] = temp;
   }
   return RenderElements(childElements, true);
@@ -116,8 +66,8 @@ function SelectAble({children , id}) {
     style={{ display: "contents" }}
     onClick={(e) => {
       e.stopPropagation();
-      activeElementID.value = id;
-      console.log("active element ID:", activeElementID.value);
+      formActiveElement.value = id;
+      console.log("active element ID:", formActiveElement.value);
     }}
   >
     {children}
@@ -176,7 +126,27 @@ function RenderElements(elementsValue , areChildren) {
 
 
 function EditArea() {
-    return (<DesktopMockup>
+    return (
+    <div>
+      <CreateAndbuttonbar 
+         iconNames={["smartphone", "app-window-mac"]} 
+         onIconChange={(name) => {formBuilderView.value = name}}
+         formLabel={"Create New Form"}
+         placeHolder={"Form Name:"}
+         buttonLabel={"Create Form"}
+         buttonCallBack={(data) => {CreateNewForm (data);}}
+      />
+      <div style={{height:"94vh", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center"}}>
+      {formBuilderView.value == "smartphone" ? <FormEditMobileView /> : <FormEditDesktopView />}
+      </div>
+      </div>
+  );
+  }
+
+
+  function FormEditMobileView() {
+    return (
+      <MobileMockup>
     <div
        style={{
          width: "100%",
@@ -192,23 +162,57 @@ function EditArea() {
          onDrop={(data) => {AddtoElements(data)}}
          dropElementData={{ "id":"screen" }}
        >
-          {RenderElements(elements.value, false)}
+          {RenderElements(currentFormElements.value, false)}
       </Drop>
       </div>
-      </DesktopMockup>)
+      </MobileMockup>
+    );
   }
   
   
+  function FormEditDesktopView() {
+    return (
+      <DesktopMockup>
+    <div
+       style={{
+         width: "100%",
+         height: "100%",
+         backgroundColor: "#f9f9f9",
+         border: "1px solid #e0e0e0",
+         scrollbarWidth: "none",
+         msOverflowStyle: "none",
+       }}
+       className="scrollable-div"
+     >
+      <Drop 
+         onDrop={(data) => {AddtoElements(data)}}
+         dropElementData={{ "id":"screen" }}
+       >
+          {RenderElements(currentFormElements.value, false)}
+      </Drop>
+      </div>
+      </DesktopMockup>
+    );
+  }
   
   export function FormBuilderTest() {
     return (
     <div className="min-h-screen h-screen w-full flex">
     <div className="w-1/6 bg-white p-4 min-h-screen scrollable-div">
-      <FormBuilderLeftPanel />
+    <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
+            <TemplateOptionTabs tabs={["forms", "components"]} onChange={(tab) => { 
+              formActiveLeftTab.value = tab;
+               console.log("templates list value:",formBuilderView.value); } }/>
+            </div>
+            {
+                formActiveLeftTab.value === "forms" ?
+                <ScreensList elementsList={formLeftNamesList.value} signal={currentForm}/> :
+                <FormBuilderLeftPanel />
+            }
     </div>
   
     {/* Main content area */}
-    <div className="w-4/6 h-screen bg-background scrollable-div">
+    <div className="bg-background scrollable-div" style={{height:"100vh", width:"90%", padding:"20px"}}>
         <EditArea />
     </div>
   
@@ -220,26 +224,26 @@ function EditArea() {
   
   
   function FlexRightPanel() {
-    let eleID = activeElementID.value;
-    console.log("element ID renderering:",eleID, elements);
-    let activeElement = elements.peek()[eleID];  ;
+    let eleID = formActiveElement.value;
+    console.log("element ID renderering:",eleID, currentFormElements);
+    let activeElement = currentFormElements.peek()[eleID];  ;
     const handleChange = (config) => {
       console.log("existing element:",activeElement);
       if(activeElement !== undefined) {
         console.log("config:",config);
         activeElement["style"] = {...activeElement["style"],...config};
-        let allElement = elements.peek();
+        let allElement = currentFormElements.peek();
         allElement[eleID] = {...activeElement};
-        elements.value = {...allElement};
+        currentFormElements.value = {...allElement};
       }
     };
   
     const handleSubmit = (config) => {
       if(activeElement !== undefined) {
         activeElement["style"] = {...activeElement["style"],...config};
-        let allElement = elements.peek();
+        let allElement = currentFormElements.peek();
         allElement[eleID] = {...activeElement};
-        elements.value = {...allElement};
+        currentFormElements.value = {...allElement};
       }
     };
     const onAdvancedSubmit = (data) => {
@@ -252,9 +256,9 @@ function EditArea() {
             }
         }
         activeElement = {...activeElement,...data};
-        let allElement = elements.peek();
+        let allElement = currentFormElements.peek();
         allElement[eleID] = {...activeElement};
-        elements.value = {...allElement};
+        currentFormElements.value = {...allElement};
       }
     }
   
