@@ -1,14 +1,15 @@
 import { Drop } from "../components/custom/Drop";
 import { DesktopMockup } from "../screen_builder/screen_components";
 import { FormBuilderLeftPanel } from "./form_builder_left";
-import { Column, DatesTest, Field, PanelField, Row } from "./fields";
-import { activeTab, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal } from "./form_builder_state";
+import { Column, Field, PanelField, Row } from "./fields";
+import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal } from "./form_builder_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
 import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
+import { SetCurrentScreen } from "../screen_builder/screen_state";
 
 
 function RenderRoworColumnChildren(children) {
@@ -80,7 +81,13 @@ function RenderElements(elementsValue , areChildren) {
         let config = value["config"];
         return (
         <SelectAble id={id}>
-        <PanelField label={"test label"} labelPosition={"top"} labelStyle={labelStyle} panelStyle={style} showError={false} errorMessage={{}}>
+        <PanelField 
+        label={"test label"} 
+        labelPosition={"top"} 
+        labelStyle={labelStyle} 
+        panelStyle={style} 
+        showError={false} 
+        errorMessage={{}}>
           <Field type={type} options={[{"key":"key", "value":"value"}]} fieldStyle={fieldStyle} value={"test"} onChange={()=> console.log("field changes:",id)} />
         </PanelField>
         </SelectAble>
@@ -95,7 +102,7 @@ function EditArea() {
     <div>
       <CreateAndbuttonbar 
          iconNames={["smartphone", "app-window-mac"]} 
-         onIconChange={(name) => {formBuilderView.value = name}}
+         onIconChange={(name) => {formBuilderView.value = name; SwapChildrenBasedonView(formBuilderView.value);}}
          formLabel={"Create New Form"}
          placeHolder={"Form Name:"}
          buttonLabel={"Create Form"}
@@ -178,7 +185,7 @@ function EditArea() {
             </div>
             {
                 formActiveLeftTab.value === "forms" ?
-                <ScreensList elementsList={formLeftNamesList.value} signal={currentForm}/> :
+                <ScreensList elementsList={formLeftNamesList.value} signal={currentForm} callBack={(id) => SetCurrentScreen(id)}/> :
                 <FormBuilderLeftPanel />
             }
     </div>

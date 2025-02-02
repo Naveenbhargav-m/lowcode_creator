@@ -101,13 +101,7 @@ function LoadForms() {
     forms = formsObj;
 }
 
-effect(() => {
-    setCurrentForm(currentForm.value);
-});
 
-effect(() => {
-    SwapChildrenBasedonView(formBuilderView.value);
-});
 function SwapChildrenBasedonView(formView) {
     let curForm = forms[currentForm.peek()];
     console.log("currentform:",curForm, formView);
@@ -185,4 +179,4 @@ LoadForms();
 export {formBuilderView, forms, 
     currentForm, currentFormElements, formActiveElement ,
     activeTab,formActiveLeftTab,formLeftNamesList, formRenderSignal, CreateNewForm,
-    AddtoElements};
+    AddtoElements, SwapChildrenBasedonView};
