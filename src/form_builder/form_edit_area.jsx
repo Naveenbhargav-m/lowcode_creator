@@ -1,17 +1,14 @@
-import { signal } from "@preact/signals";
 import { Drop } from "../components/custom/Drop";
 import { DesktopMockup } from "../screen_builder/screen_components";
-import AdvnacedForm from "./configs_view/advanced_form";
-import FlexConfigurator from "./configs_view/flex_config";
 import { FormBuilderLeftPanel } from "./form_builder_left";
 import { Column, DatesTest, Field, PanelField, Row } from "./fields";
-import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
-import { activeTab, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList } from "./form_builder_state";
+import { activeTab, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal } from "./form_builder_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
 import { FlexRightPanel } from "./form_right_elements";
+import { useEffect } from "preact/hooks";
 
 
 function RenderRoworColumnChildren(children) {
@@ -113,6 +110,10 @@ function EditArea() {
 
 
   function FormEditMobileView() {
+    useEffect(() => {
+      console.log("Re-render triggered");
+    },[]);
+    let values = currentFormElements.value;
     return (
       <MobileMockup>
     <div
@@ -127,10 +128,11 @@ function EditArea() {
        className="scrollable-div"
      >
       <Drop 
-         onDrop={(data) => {AddtoElements(data)}}
-         dropElementData={{ "id":"screen" }}
+          wrapParent={true}
+          onDrop={(data) => {AddtoElements(data)}}
+          dropElementData={{ "id":"screen" }}
        >
-          {RenderElements(currentFormElements.value, false)}
+          {formRenderSignal.value && RenderElements(values, false)}
       </Drop>
       </div>
       </MobileMockup>
@@ -139,6 +141,7 @@ function EditArea() {
   
   
   function FormEditDesktopView() {
+    let values = currentFormElements.value;
     return (
       <DesktopMockup>
     <div
@@ -152,11 +155,12 @@ function EditArea() {
        }}
        className="scrollable-div"
      >
-      <Drop 
+      <Drop
+        wrapParent={true} 
          onDrop={(data) => {AddtoElements(data)}}
          dropElementData={{ "id":"screen" }}
        >
-          {currentFormElements.value && RenderElements(currentFormElements.value, false)}
+          {formRenderSignal.value && RenderElements(values, false)}
       </Drop>
       </div>
       </DesktopMockup>
