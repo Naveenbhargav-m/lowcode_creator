@@ -55,7 +55,7 @@ const activeConfigTab = signal("Basic");
 const isHoveredSignal = signal(false);
 const activeElement = signal("");
 const activeScreen = signal("");
-const screenView = signal("");
+const screenView = signal("smartphone");
 let screenLeftnamesAndIds = signal([]);
 const screenLeftTabSignal = signal("");
 

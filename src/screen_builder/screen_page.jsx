@@ -1,11 +1,10 @@
 import { useEffect } from "preact/hooks";
 import { TemplateView } from "../template_builder/template_builder_view";
-import ScreenContainerArea2 from "./screen-areas_2";
 import {TabComponent , VariableCreator} from "./screen_components";
 import { ScreenRightPanel } from "./screen_config_panel";
 import { ScreenLeftPanel } from "./screen_left_panel";
 import { activeScreen, activeTab, screenLeftnamesAndIds, screenLeftTabSignal } from "./screen_state";
-import ScreenBuilderArea from "./screen-areas_2";
+import {ScreenBuilderArea} from "./screen-areas_2";
 import { TemplateOptionTabs, TemplatePage } from "../template_builder/templates_page";
 
 let config = {

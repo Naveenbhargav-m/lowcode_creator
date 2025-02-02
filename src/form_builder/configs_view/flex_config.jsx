@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import { signal, useSignal } from '@preact/signals';
-import './FlexConfigurator.css';
+import '../styles/FlexConfigurator.css';
 
 // Configuration Object
 const flexConfigSchema = {
