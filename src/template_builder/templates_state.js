@@ -5,7 +5,7 @@ const templates = {};
 let templateNamesList = signal([]);
 let templatesPagesSignal = signal("components");
 let activeTamplate = signal("");
-let templateDesignView = signal("");
+let templateDesignView = signal("smartphone");
 function LoadTemplates( ) {
     let templatesStr = localStorage.getItem("templates");
     let templatesmap = JSON.parse(templatesStr);
@@ -38,4 +38,8 @@ function CreateTemplate(formdata) {
 }
 
 LoadTemplates();
-export {templates, CreateTemplate, templateNamesList, templatesPagesSignal, activeTamplate, templateDesignView};
+export {
+    templates, CreateTemplate, 
+    templateNamesList, templatesPagesSignal,
+    activeTamplate, templateDesignView
+};

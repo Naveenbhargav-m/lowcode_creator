@@ -126,7 +126,12 @@ function IconBox({ config, value, actions }) {
   };
 
   return (
-    <Draggable data={value} onDragStart={(data) => actions?.onDrag?.(data)}>
+    <Draggable data={value} onDragStart={
+      (data) => {
+        console.log("calling actions onDrag", data, actions);
+        actions?.onDrag?.(data);
+      }
+      }>
       <div
         className="flex flex-col items-center justify-center p-2"
         style={mystyle}

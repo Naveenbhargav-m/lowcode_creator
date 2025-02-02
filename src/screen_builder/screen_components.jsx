@@ -113,22 +113,16 @@ const VariableCreator = () => {
 
 const DesktopMockup = ({ children }) => {
   return (
-    <div
-      className="relative flex justify-center items-center h-5/6 w-500 border border-4 border-black rounded-lg m-2 overflow-hidden"
-    >
-      <div className="h-full w-full overflow-auto scrollbar-hide">
-        {children}
+      <div
+        className="flex flex-col justify-center items-center h-5/6 border border-4 border-black rounded-lg m-2 overflow-hidden"
+        style={{"width":"100%"}}
+      >
+        <div className="h-full w-full overflow-auto scrollbar-hide">
+          {children}
+        </div>
+        
       </div>
-      
-      <span className="absolute bottom-0 w-full h-2 bg-black rounded-br-md rounded-bl-md"></span>
-      
-    
-
-      {/* Desktop base stand */}
-      <div className="absolute bottom-[-50px] flex justify-center items-center h-8 w-32 bg-black rounded-t-lg"></div>
-      <div className="absolute bottom-[-70px] flex justify-center items-center h-3 w-48 rounded-lg"></div>
-    </div>
-  );
+    );
 };
 
 
