@@ -84,20 +84,20 @@ function ScreenView() {
 
 
 
-function ScreensList({elementsList, signal}) {
+function ScreensList({elementsList, signal, callBack = (id) => {}}) {
   return (
   <div class="scrollable-div pt-4">
       {elementsList.map((item) => {
           console.log("item:",item);
           return (
-              <ScreenNameTile name={item["name"]} id={item["id"]} signal={signal}/>
+              <ScreenNameTile name={item["name"]} id={item["id"]} signal={signal} callBack={callBack}/>
           );
       })}
   </div>);
 }
 
 
-function ScreenNameTile({ name, id , signal}) {
+function ScreenNameTile({ name, id , signal, callBack = (id) => {}}) {
 
   const tileStyle = {
       padding: "10px",
@@ -117,7 +117,7 @@ function ScreenNameTile({ name, id , signal}) {
           style={tileStyle}
           onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#555")} // Darker on hover
           onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")} // Back to default
-          onClick={(e)=> {e.stopPropagation(); signal.value = id}}
+          onClick={(e)=> {e.stopPropagation(); signal.value = id; callBack(id)}}
       >
           <p>{name}</p>
       </div>
