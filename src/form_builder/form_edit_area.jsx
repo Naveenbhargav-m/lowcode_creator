@@ -2,14 +2,13 @@ import { Drop } from "../components/custom/Drop";
 import { DesktopMockup } from "../screen_builder/screen_components";
 import { FormBuilderLeftPanel } from "./form_builder_left";
 import { Column, Field, PanelField, Row } from "./fields";
-import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal } from "./form_builder_state";
+import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm } from "./form_builder_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
 import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
-import { SetCurrentScreen } from "../screen_builder/screen_state";
 
 
 function RenderRoworColumnChildren(children) {
@@ -185,7 +184,7 @@ function EditArea() {
             </div>
             {
                 formActiveLeftTab.value === "forms" ?
-                <ScreensList elementsList={formLeftNamesList.value} signal={currentForm} callBack={(id) => SetCurrentScreen(id)}/> :
+                <ScreensList elementsList={formLeftNamesList.value} signal={currentForm} callBack={(id) => setCurrentForm(id)}/> :
                 <FormBuilderLeftPanel />
             }
     </div>

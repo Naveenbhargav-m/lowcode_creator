@@ -179,4 +179,4 @@ LoadForms();
 export {formBuilderView, forms, 
     currentForm, currentFormElements, formActiveElement ,
     activeTab,formActiveLeftTab,formLeftNamesList, formRenderSignal, CreateNewForm,
-    AddtoElements, SwapChildrenBasedonView};
+    AddtoElements, SwapChildrenBasedonView, setCurrentForm};
