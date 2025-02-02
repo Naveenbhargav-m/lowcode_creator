@@ -99,7 +99,6 @@ function ScreensList({elementsList, signal}) {
 
 
 function ScreenNameTile({ name, id , signal}) {
-  console.log("name:", name);
 
   const tileStyle = {
       padding: "10px",

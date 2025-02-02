@@ -46,18 +46,18 @@ export const DynamicWrapper = ({ children, config, value }) => {
       }
     }
   };
-
+  console.log("dynamic data:",children, config, dynamicConfig.value, value , dynamicValue.value);
   return (
-    <div
-      style={{display:"contents"}}
-      onClick={handleAction("onClick")}
-      onDblClick={handleAction("onDoubleClick")}
-      onMouseEnter={handleAction("onHoverEnter")}
-      onMouseLeave={handleAction("onHoverLeave")}
-    >
-      {children(dynamicValue.value, dynamicConfig.value)}
-    </div>
-  );
+      <div
+        style={{ display: "contents" }}
+        onClick={handleAction("onClick")}
+        onDblClick={handleAction("onDoubleClick")}
+        onMouseEnter={handleAction("onHoverEnter")}
+        onMouseLeave={handleAction("onHoverLeave")}
+      >
+        {children(dynamicValue?.value ?? {}, dynamicConfig?.value ?? {})}
+      </div>
+    );
 };
 
 
@@ -196,27 +196,30 @@ export const Indicator = ({ active, config }) => {
 };
 
 export const AvatarGroup = ({ avatars, config }) => {
+  console.log("avatar group data:",avatars, config);
   return (
     <DynamicWrapper config={config} value={avatars}>
-      {({ style, value }) => (
-        <div style={style}>
+      {(value , dynamicConfig) => {
+        console.log("config and valuw in Avatar group:", dynamicConfig, value);
+        return (
+        <div style={dynamicConfig["style"]}>
           {value.map((avatar, index) => (
             <img
               key={index}
               src={avatar.src}
               alt=""
               style={{
-                width: style.size || "40px",
-                height: style.size || "40px",
+                width: dynamicConfig["style"].size || "40px",
+                height: dynamicConfig["style"].size || "40px",
                 borderRadius: "50%",
                 objectFit: "cover",
-                border: style.border || "2px solid white",
+                border: dynamicConfig["style"].border || "2px solid white",
                 ...avatar.style,
               }}
             />
           ))}
-        </div>
-      )}
+        </div>);
+      }}
     </DynamicWrapper>
   );
 };

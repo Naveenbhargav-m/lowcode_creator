@@ -7,6 +7,7 @@ import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 import { IconGroup } from "../components/primitives/general_components";
 import { CreateFormButton } from "../template_builder/template_builder_view";
+import MobileMockup from "../components/custom/mobile_mockup";
 
 function renderElement(item) {
   if (item.type === "container" || item.type === "modal") {
@@ -38,35 +39,8 @@ function ScreenBuilderArea() {
     buttonLabel={"Create Screen"}
     buttonCallBack={(data) => {CreatenewScreen(data);}}
      />
-  <div style={{height:"94vh"}}>
-  <DesktopMockup>
-  <div
-    style={{
-      position: "relative",
-      width: "100%",
-      height: "100%",
-      backgroundColor: "#f9f9f9",
-      border: "1px solid #e0e0e0",
-      overflow: "auto",
-      padding: "10px",
-      scrollbarWidth: "none", // For Firefox
-      msOverflowStyle: "none", // For Internet Explorer and Edge
-    }}
-    className="scrollbar-hide" // Additional class to target WebKit browsers
-  >
-    <Drop
-      onDrop={(data) => {handleDrop(data);}}
-      dropElementData={{ element: "screen" }}
-      wrapParent={true}
-    >
-      {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
-            if (!item.value.parent) {
-              return renderElement(item.peek());
-            }
-      })}
-    </Drop>
-    </div>
-    </DesktopMockup>
+  <div className="p-4 flex justify-center" style={{height:"94vh"}}>
+      {screenView.value == "smartphone" ? <MobileView /> : <DesktopView />}
     </div>
     </div>
     );
@@ -75,10 +49,72 @@ function ScreenBuilderArea() {
 
 
 
+function MobileView() {
+  return (
+    <MobileMockup>
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#f9f9f9",
+        border: "1px solid #e0e0e0",
+        overflow: "auto",
+        padding: "10px",
+        scrollbarWidth: "none", // For Firefox
+        msOverflowStyle: "none", // For Internet Explorer and Edge
+      }}
+      className="scrollbar-hide" // Additional class to target WebKit browsers
+    >
+      <Drop
+        onDrop={(data) => {handleDrop(data);}}
+        dropElementData={{ element: "screen" }}
+        wrapParent={true}
+      >
+        {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
+              if (!item.value.parent) {
+                return renderElement(item.peek());
+              }
+        })}
+      </Drop>
+      </div>
+      </MobileMockup>
+  );
+}
 
 
-
-
+function DesktopView() {
+  return (
+    <DesktopMockup>
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#f9f9f9",
+        border: "1px solid #e0e0e0",
+        overflow: "auto",
+        padding: "10px",
+        scrollbarWidth: "none", // For Firefox
+        msOverflowStyle: "none", // For Internet Explorer and Edge
+      }}
+      className="scrollbar-hide" // Additional class to target WebKit browsers
+    >
+      <Drop
+        onDrop={(data) => {handleDrop(data);}}
+        dropElementData={{ element: "screen" }}
+        wrapParent={true}
+      >
+        {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
+              if (!item.value.parent) {
+                return renderElement(item.peek());
+              }
+        })}
+      </Drop>
+      </div>
+      </DesktopMockup>
+  );
+}
 
 
 

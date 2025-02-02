@@ -2,6 +2,7 @@ import { useState } from "preact/hooks";
 import { CreateTemplate, templateDesignView } from "./templates_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { IconGroup } from "../components/primitives/general_components";
+import { DesktopMockup } from "../screen_builder/screen_components";
 
 
 export function TemplateView() {
@@ -9,7 +10,7 @@ export function TemplateView() {
         <div>
           <TemplateCreatorButtons />
           <div className="p-4 flex justify-center">
-            <MobileMockup>
+            {templateDesignView.value == "smartphone" ?  <MobileMockup>
             <div
                 style={{
                 position: "relative",
@@ -26,7 +27,26 @@ export function TemplateView() {
                 className="scrollbar-hide"
             >
         </div>
-            </MobileMockup>
+            </MobileMockup>: 
+             <DesktopMockup>
+             <div
+                 style={{
+                 position: "relative",
+                 width: "100%",
+                 height: "100%",
+                 backgroundColor: "#f9f9f9",
+                 minHeight: "80vh",
+                 border: "1px solid #e0e0e0",
+                 overflow: "auto",
+                 padding: "10px",
+                 scrollbarWidth: "none",
+                 msOverflowStyle: "none",
+                 }}
+                 className="scrollbar-hide"
+             >
+         </div>
+             </DesktopMockup>
+            }
           </div>
       </div>
     );

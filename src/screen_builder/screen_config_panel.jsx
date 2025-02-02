@@ -1,8 +1,5 @@
 import { signal } from "@preact/signals"; // Assuming you have this import in your file
-import { containerConfigmaps } from "../components/configs/container_config_provider";
-import { FormRendererStatic } from "../components/custom/formComponents";
-import { activeConfigTab, activeElement, screenElements } from "./screen_state";
-import { elementConfigmaps } from "../components/configs/primitive_config_provider";
+import { activeConfigTab, activeElement, activeScreen, screenElements, screens } from "./screen_state";
 import AdvnacedForm from "../form_builder/advanced_form";
 import { FlexConfigTab } from "../form_builder/form_edit_area";
 import FlexConfigurator from "../form_builder/flex_config";
@@ -38,7 +35,16 @@ function ScreenRightPanel() {
         temp.configs.valueCode = data["Value"];
         temp.configs.childrenCode = data["ShowHide"];
         screenElements[activeElement.peek()].value = {...temp}; 
-        localStorage.setItem("screen_config", JSON.stringify(screenElements));
+        let temp2 = screens[activeScreen.value];
+        if(temp2 !== undefined) {
+            var elementsNormal = {};
+            for(const key in screenElements) {
+                elementsNormal[key] = screenElements[key].value;
+            }
+            temp2["elements"] = elementsNormal;
+            screens[activeScreen.value] = temp2;
+        } 
+        localStorage.setItem("screen_config", JSON.stringify(screens));
         }
     }
 
@@ -46,8 +52,17 @@ function ScreenRightPanel() {
         if(myelement) {
             let temp = myelement.peek();
             temp.configs.style = {...temp.configs.style, ...data};
-            screenElements[activeElement.peek()].value = {...temp}; 
-            localStorage.setItem("screen_config", JSON.stringify(screenElements));
+            screenElements[activeElement.peek()].value = {...temp};
+            let temp2 = screens[activeScreen.value];
+            if(temp2 !== undefined) {
+                var elementsNormal = {};
+                for(const key in screenElements) {
+                    elementsNormal[key] = screenElements[key].value;
+                }
+                temp2["elements"] = elementsNormal;
+                screens[activeScreen.value] = temp2;
+            } 
+            localStorage.setItem("screen_config", JSON.stringify(screens));
         }
     }
     return (

@@ -103,20 +103,27 @@ function SetCurrentScreen(id) {
     return;
   }
   let elements = screens[id]["elements"];
-  screenElements = {...elements};
+  let newElements = {};
+  for(const key in elements) {
+    let val = elements[key].value;
+    newElements[key] = signal({...elements[key]});
+  }
+  screenElements = {...newElements};
+  console.log("screen elements:", newElements);
   screenElementAdded.value = false;
   screenElementAdded.value = true;
 }
 const handleDrop = (data, parentId = null) => {
   console.log("called on drop:",data, parentId);
-  // Determine the parent container dimensions
-  const parentElement = parentId ? document.querySelector(`[data-id="${parentId}"]`) 
-  : document.querySelector("#screen-container");
+  // // Determine the parent container dimensions
+  // const parentElement = parentId ? document.querySelector(`[data-id="${parentId}"]`) 
+  // : document.querySelector("#screen-container");
     
-  // @ts-ignore
-  const parentWidth = parentElement ? parentElement.offsetWidth : window.innerWidth;
-  // @ts-ignore
-  const parentHeight = parentElement ? parentElement.offsetHeight : window.innerHeight;
+  // // @ts-ignore
+  // const parentWidth = parentElement ? parentElement.offsetWidth : window.innerWidth;
+  // // @ts-ignore
+  // const parentHeight = parentElement ? parentElement.offsetHeight : window.innerHeight;
+
   let i = generateUID();
   let styleObj = {};
   let type = data.data.type;
@@ -126,10 +133,7 @@ const handleDrop = (data, parentId = null) => {
   } else if(type === "container") {
     styleObj = ContainersStylesMap[title];
   }
-  let StyleCode = JSON.stringify(styleObj);
-
-
-  const newItem = {
+    const newItem = {
     id: i,
     type: type,
     template: "element",
@@ -159,10 +163,16 @@ const handleDrop = (data, parentId = null) => {
         screenElements[parentId].value = {...parentElement.value};
   } else {
     screenElements[newItem.id] = signal(newItem);
+    screenElementAdded.value = false;
     screenElementAdded.value = true;
   }
-  
-  localStorage.setItem("screen_config", JSON.stringify(screenElements));
+  let temp = screens[activeScreen.value];
+  if(temp !== undefined) {
+    temp["elements"] = screenElements;
+    screens[activeScreen.value] = temp;
+  }
+  console.log("screens:",screens);
+  localStorage.setItem("screen_config", JSON.stringify(screens));
   let screenData = {
     "configs":JSON.stringify(screenElements)
   };
@@ -198,5 +208,6 @@ export {tabDataSignal , tabSignal,
   isHoveredSignal,screenElements ,activeTab,
   activeConfigTab,handleDrop,activeElement,
   CallbackExecutor, screenElementAdded,
-  activeScreen, screenView,screenLeftTabSignal,screenLeftnamesAndIds, SetCurrentScreen, CreatenewScreen
+  activeScreen, screenView,screenLeftTabSignal,screenLeftnamesAndIds,
+   SetCurrentScreen, CreatenewScreen, screens
 };

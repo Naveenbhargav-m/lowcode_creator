@@ -94,7 +94,10 @@ export const renderPrimitiveElement = (data) => {
             { src: url, alt: "User1" },
             { src: url, alt: "User2" },
           ]}
-          config={{...configObj}}
+          config={{...configObj, "value": [
+            { src: url, alt: "User1" },
+            { src: url, alt: "User2" },
+          ]}}
         />
         </ActiveWrapper>
       );
