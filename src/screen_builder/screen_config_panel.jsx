@@ -1,7 +1,7 @@
 import { signal } from "@preact/signals"; // Assuming you have this import in your file
 import { activeConfigTab, activeElement, activeScreen, screenElements, screens } from "./screen_state";
 import AdvnacedForm from "../form_builder/configs_view/advanced_form";
-import { FlexConfigTab } from "../form_builder/form_edit_area";
+import { FlexConfigTab } from "../form_builder/form_right_elements";
 import FlexConfigurator from "../form_builder/configs_view/flex_config";
 const myconfig = signal({});
 const basicConfig = signal({});

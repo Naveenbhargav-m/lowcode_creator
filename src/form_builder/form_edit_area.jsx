@@ -11,39 +11,7 @@ import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
-
-
-function GetAdvancedConfigs(element, isField) {
-  if(element === undefined) {
-      return {
-        "style": "",
-        "onClick": "",
-        "onChange": "",
-        "onHover": "",
-        "onDoubleTap": "",
-        "onDrop": "",
-        "onDrag": "",
-        "onMount": "",
-        "onDestroy": "",
-        "value": "",
-      };
-  }
-  let blockKeys = ["onClick","onChange","style","value","onHover","onDoubleTap","onDrop","onDrag","onMount","onDestroy"];
-  let Fieldkeys = ["config","onClick","onChange","panelStyle","labelStyle","fieldStyle"];
-  let keys = isField === true ? Fieldkeys : blockKeys;
-  console.log("isField and keys:",isField, keys);
-  let configMap = {};
-  keys.map((value) => {
-    let temp = element[value];
-    if(value === "style") {
-      configMap[value] = JSON.stringify(temp);
-    } else {
-      configMap[value] = temp;
-    }
-  });
-  return configMap;
-}
-
+import { FlexRightPanel } from "./form_right_elements";
 
 
 function RenderRoworColumnChildren(children) {
@@ -188,7 +156,7 @@ function EditArea() {
          onDrop={(data) => {AddtoElements(data)}}
          dropElementData={{ "id":"screen" }}
        >
-          {RenderElements(currentFormElements.value, false)}
+          {currentFormElements.value && RenderElements(currentFormElements.value, false)}
       </Drop>
       </div>
       </DesktopMockup>
@@ -222,103 +190,7 @@ function EditArea() {
   </div>);
   }
   
-  
-  function FlexRightPanel() {
-    let eleID = formActiveElement.value;
-    console.log("element ID renderering:",eleID, currentFormElements);
-    let activeElement = currentFormElements.peek()[eleID];  ;
-    const handleChange = (config) => {
-      console.log("existing element:",activeElement);
-      if(activeElement !== undefined) {
-        console.log("config:",config);
-        activeElement["style"] = {...activeElement["style"],...config};
-        let allElement = currentFormElements.peek();
-        allElement[eleID] = {...activeElement};
-        currentFormElements.value = {...allElement};
-      }
-    };
-  
-    const handleSubmit = (config) => {
-      if(activeElement !== undefined) {
-        activeElement["style"] = {...activeElement["style"],...config};
-        let allElement = currentFormElements.peek();
-        allElement[eleID] = {...activeElement};
-        currentFormElements.value = {...allElement};
-      }
-    };
-    const onAdvancedSubmit = (data) => {
-      console.log("advanced config data:",data);
-      if(activeElement !== undefined) {
-        if(data["style"] !== undefined) {
-            let temp = JSON.parse(data["style"]);
-            if(temp !== undefined) {
-              data["style"] = temp;
-            }
-        }
-        activeElement = {...activeElement,...data};
-        let allElement = currentFormElements.peek();
-        allElement[eleID] = {...activeElement};
-        currentFormElements.value = {...allElement};
-      }
-    }
-  
-    let advancedConfig = {};
-    let type = "column";
-      let configs = {};
-      if(activeElement === undefined) {
-        configs = {};
-      } else {
-        configs = activeElement["style"];
-        type = activeElement["type"];
-        if(type === "column" || type === "row") {
-          advancedConfig = GetAdvancedConfigs(activeElement,false);
 
-        } else {
-          advancedConfig = GetAdvancedConfigs(activeElement,true);
-
-        }
-
-      }
-      return (<div>
-      <FlexConfigTab tablSignal={activeTab} />
-      {activeTab.value === "Basic" ? (
-        type === "column" || type === "row" ? (
-          <FlexConfigurator onChange={handleChange} onSubmit={handleSubmit} existingConfig={configs} />
-        ) : (
-          <FormFieldConfigurator onChange={handleChange} onSubmit={handleSubmit} existingConfig={configs} />
-        )
-      ) : (
-        <AdvnacedForm configsInp={advancedConfig} onSubmit={onAdvancedSubmit} />
-      )}
-    </div>);
-  }
-  
-  
-  export function FlexConfigTab({tablSignal}) {
-    const switchTab = (tab) => {
-      tablSignal.value = tab;
-    };
-  
-    let tabs = ["Basic","Advanced"];
-  
-    return (
-      <div class="flex-config-tab">
-        <div class="tab-header">
-          {tabs.map((value)=>{
-            return (
-              <button
-            class={`tab-button ${tablSignal.value === value ? 'active' : ''}`}
-            onClick={() => switchTab(value)}
-          >
-            {value}
-          </button>
-            );
-          })}
-          </div>
-        </div>
-    );
-  }
-  
   
   /*
    On Click,
