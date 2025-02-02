@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 
-const Drop = ({ wrapParent = true, onDrop, dropElementData, children }) => {
-  const [isHighlighted, setIsHighlighted] = useState(false);
+const Drop = ({ wrapParent = true, userstyle = {}, onDrop, dropElementData, children }) => {
 
   let style = {
-    height: "100%",
-    width: "100%",
+    minHeight: "100%", // Use minHeight instead of height
+    minWidth: "100%",  // Use minWidth instead of width
     transition: "border 0.2s ease",
-    position: "relative", // To ensure proper bounding for children
+    ...userstyle,
   };
 
   if (wrapParent === false) {
@@ -15,6 +14,7 @@ const Drop = ({ wrapParent = true, onDrop, dropElementData, children }) => {
       transition: "border 0.2s ease",
       position: "relative", // Ensures proper bounding for children
       display: "contents", // Lets the wrapper disappear and only the child is visible
+      ...userstyle,
     };
   }
 
@@ -35,11 +35,9 @@ const Drop = ({ wrapParent = true, onDrop, dropElementData, children }) => {
 
   const handleDragOver = (event) => {
     event.preventDefault();
-    setIsHighlighted(true); // Show visual feedback when an item is dragged over
   };
 
   const handleDragLeave = () => {
-    setIsHighlighted(false); // Remove visual feedback when the item is no longer over
   };
 
   return (

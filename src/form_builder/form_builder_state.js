@@ -10,7 +10,7 @@ let formActiveElement = signal("");
 const activeTab = signal('Basic');
 const formActiveLeftTab = signal("forms");
 let formLeftNamesList = signal([]);
-
+let formRenderSignal = signal(true);
 
 function AddtoElements(data) {
     console.log("add to element called:",data);
@@ -52,17 +52,21 @@ function AddtoElements(data) {
       existing[formName] = parent;
     }
     existing[newid] = elementData;
-    currentFormElements.value = {...existing};
-    let currForm = forms[currentForm.value];
-    if(formBuilderView.value === "smartphone") {
-        currForm["mobile_children"] = {...existing};
+    let copy1 = JSON.parse(JSON.stringify(existing));
+    console.log("existing:",copy1);
+    currentFormElements.value = {...copy1};
+    formRenderSignal.value = false;
+    formRenderSignal.value = true;
+    let currForm = forms[currentForm.peek()];
+    if(formBuilderView.peek() === "smartphone") {
+        let copy = JSON.parse(JSON.stringify(existing));
+        currForm["mobile_children"] = {...copy};
     } else {
-        currForm["desktop_children"] =  {...existing};
+        let copy = JSON.parse(JSON.stringify(existing)); 
+        currForm["desktop_children"] =  {...copy};
     }
-    forms[currentForm.value] =  currForm;
-    localStorage.setItem("forms", JSON.stringify(forms));
-    console.log("elements after adding new field:",currentFormElements.value);
-  
+    forms[currentForm.peek()] =  currForm;
+    localStorage.setItem("forms", JSON.stringify(forms));  
   }
 
 
@@ -105,7 +109,7 @@ effect(() => {
     SwapChildrenBasedonView(formBuilderView.value);
 });
 function SwapChildrenBasedonView(formView) {
-    let curForm = forms[currentForm.value];
+    let curForm = forms[currentForm.peek()];
     console.log("currentform:",curForm, formView);
     if(curForm === undefined) {
         return;
@@ -161,8 +165,6 @@ function SwapChildrenBasedonView(formView) {
     forms[currentForm.value] = curForm;
     localStorage.setItem("forms", JSON.stringify(forms));
     currentFormElements.value = {...finalElements};
-    //do not remove this console log:
-    console.log("final desktop block elements:", currentFormElements.value);
 }
 function setCurrentForm(id) {
     let myform = forms[id];
@@ -176,10 +178,11 @@ function setCurrentForm(id) {
         children = myform["desktop_children"];
 
     }
-    currentFormElements.value = {...children};
+    let temp = JSON.parse(JSON.stringify(children));
+    currentFormElements.value = {...temp};
 }
 LoadForms();
 export {formBuilderView, forms, 
     currentForm, currentFormElements, formActiveElement ,
-    activeTab,formActiveLeftTab,formLeftNamesList, CreateNewForm,
+    activeTab,formActiveLeftTab,formLeftNamesList, formRenderSignal, CreateNewForm,
     AddtoElements};
