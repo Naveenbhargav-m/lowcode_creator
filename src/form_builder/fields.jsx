@@ -18,9 +18,73 @@ const FlatpickrWrapper = ({ label, value, onChange, options }) => (
   </div>
 );
 
+function CheckBox({ type, options, value, onChange, fieldStyle = {}, ...props }) {
+  const [checked, setChecked] = useState(value || false);
+  
+  const handleChecked = () => {
+    const newValue = !checked;
+    setChecked(newValue);
+    onChange(newValue);
+  };
+
+  return (
+    <label style={{ display: "inline-block", cursor: "pointer" }}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={handleChecked}
+        style={{ display: "none" }} // Hide default checkbox
+        {...props}
+      />
+      <span
+        style={{
+          width: "20px",
+          height: "20px",
+          display: "inline-block",
+          border: "2px solid black",
+          borderRadius:"8px",
+          backgroundColor: checked ? "black" : "white",
+          transition: "background-color 0.2s ease",
+        }}
+      ></span>
+    </label>
+  );
+}
+
+
+const Toggle = ({ label, onToggle }) => {
+  const [isToggled, setIsToggled] = useState(false);
+
+  const handleToggle = () => {
+    const newState = !isToggled;
+    setIsToggled(newState);
+    if (onToggle) {
+      onToggle(newState);
+    }
+  };
+
+  return (
+    <div className="toggle-container">
+      <div
+        className={`toggle-switch ${isToggled ? 'toggled' : ''}`}
+        onClick={handleToggle}
+      >
+        <div className="toggle-slider" />
+      </div>
+    </div>
+  );
+};
+
+
+
 
 const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) => {
     const renderField = () => {
+
+      function GetStyle(name) {
+        let base = DefaultStyles["name"];
+        return {...base, ...fieldStyle};
+      }
       switch (type) {
         case 'textfield':
           return (
@@ -28,20 +92,19 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
               type="text"
               value={value}
               onChange={onChange}
-              style={fieldStyle}
+              style={GetStyle(type)}
               {...props}
             />
           );
   
         case 'checkbox':
           return (
-            <input
-              type="checkbox"
-              checked={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
+            <CheckBox type={type} 
+            options={options} 
+            value={value} 
+            onChange={onChange} 
+            fieldStyle={fieldStyle} 
+            {...props}/>
           );
   
         case 'radio':
@@ -354,6 +417,7 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
 
 
 import { useState } from "preact/hooks";
+import { DefaultStyles } from "./styles/default_styles";
 
 
 const DatesTest = () => {
