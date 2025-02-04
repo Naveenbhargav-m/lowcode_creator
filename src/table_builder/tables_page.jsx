@@ -265,24 +265,14 @@ const onReconnectEnd = useCallback((_, edge) => {
   return (
     <div className="w-4/6 h-screen bg-background min-h-screen mx-4">
       {/* Top-right Button */}
-      <div className="flex bg-white justify-end p-4">
-        <button
-          onClick={addNode}
-          className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary"
-        >
-          Add Table
-        </button>
-
-        <button
-          onClick={() => {
-            SyncTablesData(currentTableConfigs, currentEdges, tables_id.peek());
-            SaveTablesData();
-          }}
-          className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary ml-4"
-        >
-          Save Changes
-        </button>
+      <div style={{display:"flex", flexDirection:"row", width:"100%", paddingTop:"20px", justifyContent:"space-between", alignItems:"center"}}>
+      <TablesTab onTableSelect={(tab) => console.log("tab selected:", tab)}/>
+      <TablesButtonsBar AddCallBack={addNode} 
+      SaveCallback={() => {
+        SyncTablesData(currentTableConfigs, currentEdges, tables_id.peek());
+        SaveTablesData();}}/>
       </div>
+      
       <div className="h-5/6 w-full bg-white mt-4">
         {/* React Flow Instance */}
         <ReactFlow
@@ -329,4 +319,53 @@ function TablesPage() {
   );
 }
 
+
+
+function TablesButtonsBar({AddCallBack, SaveCallback}) {
+  return (
+    <div className="flex bg-white justify-end p-4" style={{fontSize:"0.8em"}}>
+    <button
+    style={{fontSize:"0.9em"}}
+    onClick={AddCallBack}
+    className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary"
+  >
+    <p>Add Table</p>
+  </button>
+
+  <button
+  style={{fontSize:"0.9em"}}
+    onClick={SaveCallback()}
+    className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary ml-4"
+  >
+    Save Changes
+  </button>
+  </div>
+  );
+} 
+
+function TablesTab({ onTableSelect }) {
+  const [selectedTable, setSelectedTable] = useState(null);
+  const tables = ["Tables", "Views", "Triggers", "Advanced"];
+
+  const handleTableClick = (table) => {
+    setSelectedTable(table);
+    if (onTableSelect) {
+      onTableSelect(table);
+    }
+  };
+
+  return (
+    <div style={{display:"flex", backgroundColor:"white", padding:"20px", fontSize:"0.8em", flexDirection:"row", }}>
+        {tables.map((table) => (
+          <div
+            key={table}
+            className={`p-2 cursor-pointer rounded-md ${selectedTable === table ? "bg-black text-white" : "bg-white"}`}
+            onClick={() => handleTableClick(table)}
+          >
+            {table}
+            </div>
+        ))}
+    </div>
+  );
+}
 export default TablesPage;

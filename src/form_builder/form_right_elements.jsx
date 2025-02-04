@@ -1,7 +1,7 @@
 import AdvnacedForm from "./configs_view/advanced_form";
 import FlexConfigurator from "./configs_view/flex_config";
 import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
-import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, forms } from "./form_builder_state";
+import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms } from "./form_builder_state";
 
 
 function GetAdvancedConfigs(element, isField) {
@@ -39,7 +39,6 @@ function GetAdvancedConfigs(element, isField) {
   
 export function FlexRightPanel() {
     let eleID = formActiveElement.value;
-    console.log("element ID renderering:",eleID, currentFormElements);
     let activeElement = currentFormElements.peek()[eleID];  ;
     const handleChange = (config) => {
       console.log("existing element:",activeElement);
@@ -89,8 +88,10 @@ export function FlexRightPanel() {
             myform["desktop_children"] = currentFormElements.value;
 
         }
+        console.log("my form:", myform, currentFormElements);
         forms[currentForm.value] = myform;
-        localStorage.setItem("form",JSON.stringify(forms));
+        localStorage.setItem("forms",JSON.stringify(forms));
+        formRenderSignal.value = true;
       }
     }
   

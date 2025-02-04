@@ -30,9 +30,7 @@ function SelectAble({children , id}) {
     <div
     style={{ display: "contents" }}
     onClick={(e) => {
-      e.stopPropagation();
       formActiveElement.value = id;
-      console.log("active element ID:", formActiveElement.value);
     }}
   >
     {children}
@@ -87,7 +85,9 @@ function RenderElements(elementsValue , areChildren) {
         panelStyle={style} 
         showError={false} 
         errorMessage={{}}>
-          <Field type={type} options={[{"key":"key", "value":"value"}]} fieldStyle={fieldStyle} value={"test"} onChange={()=> console.log("field changes:",id)} />
+          <Field type={type} options={[{"key":"key", "value":"value"}]} 
+          fieldStyle={fieldStyle} value={"test"} onChange={(data)=> 
+          console.log("field changes:",id, data)} />
         </PanelField>
         </SelectAble>
       );
