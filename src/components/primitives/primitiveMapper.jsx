@@ -7,7 +7,7 @@ let url = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb
 // Function to map drop data to the correct primitive component
 
 
-function ActiveWrapper({children, data}) {
+function ActiveWrapper({data,children }) {
   return (
         <div style={{display:"contents"}} onClick={(e) => {
           activeElement.value = data["id"];
@@ -76,14 +76,15 @@ export const renderPrimitiveElement = (data) => {
       );
 
     case "avatar":
+      console.log("called avatar case:",data);
       return (
-        <ActiveWrapper data={data}>
+        //<ActiveWrapper data={data}>
         <Avatar
           src={url}
           config={{...configObj}}
 
         />
-        </ActiveWrapper>
+      //  </ActiveWrapper>
       );
 
     case "avatar_group":

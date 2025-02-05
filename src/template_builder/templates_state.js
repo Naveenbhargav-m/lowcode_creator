@@ -27,32 +27,42 @@ function LoadTemplates( ) {
         names.push({"name":name, "id": id, "order":order})
     });
     templateNamesList.value = names;
+    console.log("templates loaded:",templates);
 
 }
 
-function SetTemplateActiveElements(templateID) {
+function SetTemplateActiveElements() {
+  let templateID = activeTamplate.peek();
   console.log("called SetTemplate Active Elements ,", templateID);
     let curTemplate = templates[templateID];
     let designView = templateDesignView.peek();
+    if(curTemplate === undefined) {
+      return;
+    }
     let elements = {};
+    console.log("design view:",designView);
     if(designView === "smartphone") {
         elements = JSON.parse(JSON.stringify(curTemplate["mobile_children"]));
         if(IsObjectEmpty(elements)) {
+          console.log("ISObject Empty for mobile_children",elements);
             elements = JSON.parse(JSON.stringify(curTemplate["desktop_children"]));
             curTemplate["mobile_children"] = JSON.parse(JSON.stringify(elements));
         }
     } else {
         elements = JSON.parse(JSON.stringify(curTemplate["desktop_children"]));
         if(IsObjectEmpty(elements)) {
+            console.log("ISObject Empty for desktop_children",elements);
             elements = JSON.parse(JSON.stringify(curTemplate["mobile_children"]));
             curTemplate["desktop_children"] = JSON.parse(JSON.stringify(elements));
         }
     }
+    console.log("elements:",elements);
     templates[templateID] = curTemplate;
     localStorage.setItem("templates", JSON.stringify(templates));
-    for(const mykey in elements) {
-        activeTemplateElements[mykey] = signal({...elements[mykey]});
-    }
+    activeTemplateElements = {};
+    Object.entries(elements).forEach(([key, value]) => {
+      activeTemplateElements[key] = signal({ ...value });
+  });
     console.log("active template Elements in set template active:",activeTemplateElements);
     isTemplateChanged.value = templateID;
 }
@@ -131,19 +141,19 @@ function HandleTemplateDrop(data, parentId = null) {
   console.log("temp:", temp);
   if(temp !== undefined) {
     let view = templateDesignView.peek();
+    console.log("view in handle drop:",view);
     let key = "mobile_children";
     if(view !== "smartphone" ) {
         key = "desktop_children";
     }
     console.log("elements key:", key);
-
     temp[key] = JSON.parse(JSON.stringify(activeTemplateElements));
     templates[activeTemp] = temp;
   }
   isTemplateChanged.value = "";
   isTemplateChanged.value = activeTemp;
   console.log("templates:",templates);
-  localStorage.setItem("screen_config", JSON.stringify(templates));
+  localStorage.setItem("templates", JSON.stringify(templates));
 //   let screenData = {
 //     "configs":JSON.stringify(screenElements)
 //   };

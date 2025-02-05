@@ -17,7 +17,9 @@ function TemplatePage() {
             <div className="min-h-screen h-screen w-full bg-white flex">
             <div className="w-2/12 bg-white p-4 h-screen">
             <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
-            <TemplateOptionTabs tabs={["templates", "components"]} onChange={(tab) => { templatesPagesSignal.value = tab; console.log("templates list value:",templatesPagesSignal.value); } }/>
+            <TemplateOptionTabs tabs={["templates", "components"]} onChange={(tab) => { 
+                templatesPagesSignal.value = tab; 
+                console.log("templates list value:",templatesPagesSignal.value); } }/>
             </div>
             {
                 templatesPagesSignal.value === "templates" ?

@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { activeTemplateElements, CreateTemplate, HandleTemplateDrop, isTemplateChanged, templateDesignView } from "./templates_state";
+import { activeTemplateElements, CreateTemplate, HandleTemplateDrop, isTemplateChanged, SetTemplateActiveElements, templateDesignView } from "./templates_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { IconGroup } from "../components/primitives/general_components";
 import { DesktopMockup } from "../screen_builder/screen_components";
@@ -182,7 +182,11 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
     }}>
         {/* Centered IconGroup */}
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-            <IconGroup names={["smartphone", "app-window-mac"]} onChange={(data) => { templateDesignView.value = data; console.log("template view:",templateDesignView.value); }} />
+            <IconGroup names={["smartphone", "app-window-mac"]} onChange={(data) => { 
+              templateDesignView.value = data;
+               console.log("template view:",templateDesignView.value); 
+               SetTemplateActiveElements();
+               }} />
         </div>
     
         {/* Right-Aligned CreateFormButton */}
@@ -220,7 +224,7 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
               {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
                 let myitem = activeTemplateElements[key].value;
                 console.log("my item",myitem);
-                RenderElement(myitem, HandleTemplateDrop);
+                return RenderElement(myitem, HandleTemplateDrop);
               })}
                 </Drop>
         </div>
@@ -249,8 +253,8 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
                 wrapParent={true}
               >
               {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
-                let myitem = activeTemplateElements[key].value;
-                RenderElement(myitem, HandleTemplateDrop);
+                let myitem = activeTemplateElements[key];
+                return RenderElement(myitem.peek(), HandleTemplateDrop);
               })}
                 </Drop>
                 </div>

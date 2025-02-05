@@ -34,7 +34,7 @@ function TemplateTile({ name, id }) {
             style={tileStyle}
             onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#555")} // Darker on hover
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")} // Back to default
-            onClick={(e)=> {e.stopPropagation(); activeTamplate.value = id; SetTemplateActiveElements(id)}}
+            onClick={(e)=> {e.stopPropagation(); activeTamplate.value = id; SetTemplateActiveElements()}}
         >
             <p>{name}</p>
         </div>
