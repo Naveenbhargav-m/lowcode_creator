@@ -1,51 +1,22 @@
 import { useState } from "preact/hooks";
-import { CreateTemplate, templateDesignView } from "./templates_state";
+import { activeTemplateElements, CreateTemplate, HandleTemplateDrop, isTemplateChanged, templateDesignView } from "./templates_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { IconGroup } from "../components/primitives/general_components";
 import { DesktopMockup } from "../screen_builder/screen_components";
+import { RenderElement } from "../screen_builder/screen-areas_2";
+import { Drop } from "../components/custom/Drop";
 
 
 export function TemplateView() {
     return (
         <div>
           <TemplateCreatorButtons />
-          <div className="p-4 flex justify-center">
-            {templateDesignView.value == "smartphone" ?  <MobileMockup>
-            <div
-                style={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                backgroundColor: "#f9f9f9",
-                minHeight: "80vh",
-                border: "1px solid #e0e0e0",
-                overflow: "auto",
-                padding: "10px",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-                }}
-                className="scrollbar-hide"
-            >
-        </div>
-            </MobileMockup>: 
-             <DesktopMockup>
-             <div
-                 style={{
-                 position: "relative",
-                 width: "100%",
-                 height: "100%",
-                 backgroundColor: "#f9f9f9",
-                 minHeight: "80vh",
-                 border: "1px solid #e0e0e0",
-                 overflow: "auto",
-                 padding: "10px",
-                 scrollbarWidth: "none",
-                 msOverflowStyle: "none",
-                 }}
-                 className="scrollbar-hide"
-             >
-         </div>
-             </DesktopMockup>
+          <div className="p-4 flex justify-center"
+          style={{height:"100vh", width:"90%", padding:"20px"}}
+          >
+            {
+            templateDesignView.value == "smartphone" ? 
+              <TemplateMobileView /> : <TemplateDesktopView />
             }
           </div>
       </div>
@@ -223,5 +194,66 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
              callback={(data) => { CreateTemplate(data)}}/>
         </div>
     </div>
+    );
+  }
+
+
+  function TemplateMobileView() {
+    return (
+      <MobileMockup>
+            <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "#f9f9f9",
+                  border: "1px solid #e0e0e0",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+                className="scrollbar-hide"
+            >
+             <Drop
+                onDrop={(data) => {HandleTemplateDrop(data);}}
+                dropElementData={{ element: "screen" }}
+                wrapParent={true}
+              >
+              {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
+                let myitem = activeTemplateElements[key].value;
+                console.log("my item",myitem);
+                RenderElement(myitem, HandleTemplateDrop);
+              })}
+                </Drop>
+        </div>
+      </MobileMockup>
+    );
+  }
+
+
+  function TemplateDesktopView() {
+    return (
+      <DesktopMockup>
+      <div
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#f9f9f9",
+            border: "1px solid #e0e0e0",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+          className="scrollbar-hide"
+      >
+          <Drop
+                onDrop={(data) => {HandleTemplateDrop(data);}}
+                dropElementData={{ element: "screen" }}
+                wrapParent={true}
+              >
+              {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
+                let myitem = activeTemplateElements[key].value;
+                RenderElement(myitem, HandleTemplateDrop);
+              })}
+                </Drop>
+                </div>
+      </DesktopMockup>
     );
   }

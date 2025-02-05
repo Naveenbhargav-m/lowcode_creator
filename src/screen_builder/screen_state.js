@@ -115,14 +115,6 @@ function SetCurrentScreen(id) {
 }
 const handleDrop = (data, parentId = null) => {
   console.log("called on drop:",data, parentId);
-  // // Determine the parent container dimensions
-  // const parentElement = parentId ? document.querySelector(`[data-id="${parentId}"]`) 
-  // : document.querySelector("#screen-container");
-    
-  // // @ts-ignore
-  // const parentWidth = parentElement ? parentElement.offsetWidth : window.innerWidth;
-  // // @ts-ignore
-  // const parentHeight = parentElement ? parentElement.offsetHeight : window.innerHeight;
 
   let i = generateUID();
   let styleObj = {};

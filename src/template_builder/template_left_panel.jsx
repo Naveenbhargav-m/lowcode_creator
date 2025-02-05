@@ -1,4 +1,4 @@
-import { activeTamplate, templateNamesList } from "./templates_state";
+import { activeTamplate, SetTemplateActiveElements, templateNamesList } from "./templates_state";
 
 function TemplatesListPanel({elementsList}) {
     return (
@@ -34,7 +34,7 @@ function TemplateTile({ name, id }) {
             style={tileStyle}
             onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#555")} // Darker on hover
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")} // Back to default
-            onClick={(e)=> {e.stopPropagation(); activeTamplate.value = id}}
+            onClick={(e)=> {e.stopPropagation(); activeTamplate.value = id; SetTemplateActiveElements(id)}}
         >
             <p>{name}</p>
         </div>

@@ -9,17 +9,17 @@ import { IconGroup } from "../components/primitives/general_components";
 import { CreateFormButton } from "../template_builder/template_builder_view";
 import MobileMockup from "../components/custom/mobile_mockup";
 
-function renderElement(item) {
+function RenderElement(item , dropCallBack) {
   if (item.type === "container" || item.type === "modal") {
     return (
-      <Drop onDrop={(data) => handleDrop(data, item.id)} dropElementData={{ element: item.id }}>
-        {renderContainer(item)}
+      <Drop onDrop={(data) => dropCallBack(data, item.id)} dropElementData={{ element: item.id }}>
+        {renderContainer(item, dropCallBack)}
       </Drop>
     );
   } else if (item.type === "template") {
     return (
-      <Drop onDrop={(data) => handleDrop(data, item.id)} dropElementData={{ element: item.id }}>
-        {renderTemplate(item)}
+      <Drop onDrop={(data) => dropCallBack(data, item.id)} dropElementData={{ element: item.id }}>
+        {renderTemplate(item, dropCallBack)}
       </Drop>
     );
   }
@@ -73,7 +73,7 @@ function MobileView() {
       >
         {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
-                return renderElement(item.peek());
+                return RenderElement(item.peek());
               }
         })}
       </Drop>
@@ -107,7 +107,7 @@ function DesktopView() {
       >
         {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
-                return renderElement(item.peek());
+                return RenderElement(item.peek(),handleDrop);
               }
         })}
       </Drop>
@@ -145,4 +145,4 @@ function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHol
   );
 }
 
-export  {ScreenBuilderArea, CreateAndbuttonbar};
+export  {ScreenBuilderArea, CreateAndbuttonbar, RenderElement};
