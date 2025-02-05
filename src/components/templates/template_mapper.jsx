@@ -8,7 +8,7 @@ import { renderContainer } from "../containers/containers_mapper";
 import DataTable from "./table";
 
 
-export function renderTemplate(layoutItem, dropCallBack) {
+export function renderTemplate(layoutItem, dropCallBack, activeSignal) {
 
     layoutItem.configs["i"] = layoutItem.i;
     const { title, children } = layoutItem;
@@ -35,10 +35,10 @@ export function renderTemplate(layoutItem, dropCallBack) {
           <div style={{ display: "contents" }} onClick={() => { activeElement.value = child.i }}>
             {(child.type === "container" || child.type === "modal") ? (
               <Drop onDrop={(data) => dropCallBack(data, child.i)} dropElementData={{ element: child.i }}>
-                {renderContainer(child, dropCallBack)}
+                {renderContainer(child, dropCallBack, activeSignal)}
               </Drop>
             ) : (
-              renderPrimitiveElement(child)
+              renderPrimitiveElement(child, activeSignal)
             )}
           </div>
       ));

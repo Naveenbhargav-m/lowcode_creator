@@ -10,6 +10,8 @@ let templatesPagesSignal = signal("components");
 let activeTamplate = signal("");
 let templateDesignView = signal("smartphone");
 let activeTemplateElements = {};
+let activeTemplateElement = signal("");
+let templateRightPanelActiveTab = signal("Basic");
 let isTemplateChanged = signal("");
 function LoadTemplates( ) {
     let templatesStr = localStorage.getItem("templates");
@@ -161,7 +163,8 @@ function HandleTemplateDrop(data, parentId = null) {
 }
 LoadTemplates();
 export {
-    templates, CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements,
-    templateNamesList, templatesPagesSignal,
-    activeTamplate, templateDesignView, activeTemplateElements, isTemplateChanged
+    templates,  CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements,
+    templateNamesList, templatesPagesSignal, templateRightPanelActiveTab,
+    activeTamplate, templateDesignView, activeTemplateElements, 
+    isTemplateChanged, activeTemplateElement
 };

@@ -7,16 +7,16 @@ let url = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb
 // Function to map drop data to the correct primitive component
 
 
-function ActiveWrapper({data,children }) {
+function ActiveWrapper({data,activeSignal ,children }) {
   return (
         <div style={{display:"contents"}} onClick={(e) => {
           activeElement.value = data["id"];
-          console.log("active element in primitive:",activeElement.value);
+          console.log("active element in primitive:",activeSignal.value);
         }}>
           {children}
         </div>);
 }
-export const renderPrimitiveElement = (data) => {
+export const renderPrimitiveElement = (data, activeSignal) => {
   let configs = { ...data.configs };
   let configObj = {};
   for (let key of Object.keys(data)) {
@@ -35,7 +35,7 @@ export const renderPrimitiveElement = (data) => {
   switch (data.title) {
     case "text":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Text
           value={"Sample Text " + data.id}
           config={{...configObj}}
@@ -45,7 +45,7 @@ export const renderPrimitiveElement = (data) => {
       
     case "number":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Number
           value={42}
           config={{...configObj}}
@@ -55,7 +55,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "text_area":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <TextArea
           value="Sample Text Area"
           config={{...configObj}}
@@ -66,7 +66,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "progress_bar":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <ProgressBar
           progress={50}
           config={{...configObj}}
@@ -78,18 +78,18 @@ export const renderPrimitiveElement = (data) => {
     case "avatar":
       console.log("called avatar case:",data);
       return (
-        //<ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Avatar
           src={url}
           config={{...configObj}}
 
         />
-      //  </ActiveWrapper>
+      </ActiveWrapper>
       );
 
     case "avatar_group":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <AvatarGroup
           avatars={[
             { src: url, alt: "User1" },
@@ -105,7 +105,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "drop_down":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Dropdown
           value=""
           options={[
@@ -119,7 +119,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "button":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Button
           value="Click Me"
           config={{...configObj}}
@@ -130,7 +130,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "image":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Image
           src={url}
           config={{...configObj}}
@@ -141,7 +141,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "badge":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Badge
           value="Badge"
           config={{...configObj}}
@@ -152,7 +152,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "icon":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Icon
           name="menu"
           config={{...configObj}}
@@ -163,7 +163,7 @@ export const renderPrimitiveElement = (data) => {
 
     case "icon_button":
       return (
-        <ActiveWrapper data={data}>
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <IconButton
           icon="mouse-pointer"
           config={{...configObj}}

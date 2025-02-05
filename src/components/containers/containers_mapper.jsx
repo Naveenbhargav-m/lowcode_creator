@@ -10,7 +10,7 @@ import { effect, signal } from '@preact/signals';
 import { renderTemplate } from "../templates/template_mapper";
 
 
-export function renderContainer(layoutItem , dropCallBack) {
+export function renderContainer(layoutItem , dropCallBack , activeSignal) {
   layoutItem.configs["id"] = layoutItem.id;
   const { title, children } = layoutItem;
   let childrenSignal = signal(children);
@@ -37,9 +37,9 @@ export function renderContainer(layoutItem , dropCallBack) {
         <div style={{ display: "contents"}} onClick={() => { activeElement.value = child.id  }}>
           {(child.type === "container" || child.type === "modal") ? (
             <Drop onDrop={(data) => dropCallBack(data, child.id)} dropElementData={{ element: child.id }}>
-              {renderContainer(child,dropCallBack)}
+              {renderContainer(child,dropCallBack, activeSignal)}
             </Drop>
-          ) : child.type === "template"  ? (renderTemplate(child, dropCallBack)) : (renderPrimitiveElement(child))}
+          ) : child.type === "template"  ? (renderTemplate(child, dropCallBack, activeSignal)) : (renderPrimitiveElement(child, activeSignal))}
         </div>
     ));
   console.log("title:", title);

@@ -2,14 +2,14 @@ import { Drop } from "../components/custom/Drop";
 import { Rnd } from "react-rnd";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen  } from "./screen_state";
+import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 import { IconGroup } from "../components/primitives/general_components";
 import { CreateFormButton } from "../template_builder/template_builder_view";
 import MobileMockup from "../components/custom/mobile_mockup";
 
-function RenderElement(item , dropCallBack) {
+function RenderElement(item , dropCallBack, activeSignal) {
   if (item.type === "container" || item.type === "modal") {
     return (
       <Drop onDrop={(data) => dropCallBack(data, item.id)} dropElementData={{ element: item.id }}>
@@ -19,11 +19,11 @@ function RenderElement(item , dropCallBack) {
   } else if (item.type === "template") {
     return (
       <Drop onDrop={(data) => dropCallBack(data, item.id)} dropElementData={{ element: item.id }}>
-        {renderTemplate(item, dropCallBack)}
+        {renderTemplate(item, dropCallBack, activeSignal)}
       </Drop>
     );
   }
-  return renderPrimitiveElement(item);
+  return renderPrimitiveElement(item, activeSignal);
 }
 
 
@@ -73,7 +73,7 @@ function MobileView() {
       >
         {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
-                return RenderElement(item.peek());
+                return RenderElement(item.peek(), handleDrop,activeElement);
               }
         })}
       </Drop>
@@ -107,7 +107,7 @@ function DesktopView() {
       >
         {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
-                return RenderElement(item.peek(),handleDrop);
+                return RenderElement(item.peek(),handleDrop, activeElement);
               }
         })}
       </Drop>
