@@ -1,6 +1,7 @@
 import { TabComponent } from "../screen_builder/screen_components";
 import { ScreenRightPanel } from "../screen_builder/screen_config_panel";
 import { ScreenLeftPanel, TabElement, Tabs } from "../screen_builder/screen_left_panel";
+import { TemplateBuilderRightView } from "./template_builder_right";
 import { TemplateView } from "./template_builder_view";
 import { TemplatesListPanel } from "./template_left_panel";
 import { templateNamesList, templatesPagesSignal } from "./templates_state";
@@ -17,7 +18,9 @@ function TemplatePage() {
             <div className="min-h-screen h-screen w-full bg-white flex">
             <div className="w-2/12 bg-white p-4 h-screen">
             <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
-            <TemplateOptionTabs tabs={["templates", "components"]} onChange={(tab) => { templatesPagesSignal.value = tab; console.log("templates list value:",templatesPagesSignal.value); } }/>
+            <TemplateOptionTabs tabs={["templates", "components"]} onChange={(tab) => { 
+                templatesPagesSignal.value = tab; 
+                console.log("templates list value:",templatesPagesSignal.value); } }/>
             </div>
             {
                 templatesPagesSignal.value === "templates" ?
@@ -34,7 +37,7 @@ function TemplatePage() {
 
             </div>
             <div className="w-2/12 bg-white h-screen scrollable-div">
-                <ScreenRightPanel />
+                <TemplateBuilderRightView />
             </div>
             </div>
         </div>
