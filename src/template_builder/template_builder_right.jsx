@@ -38,29 +38,26 @@ function GetAdvancedConfigs(element, isField) {
 
 export function TemplateBuilderRightView() {
     let activeElementID = activeTemplateElement.value;
-    let activeElement = activeTemplateElements[activeElementID];  ;
+    let activeElement = {};
+    if(activeElementID.length === 0) {
+        return <div></div>;
+    } else {
+      activeElement = activeTemplateElements[activeElementID].value;
+    } 
+    console.log("active template element changed:",activeElementID);
     const handleChange = (config) => {
       console.log("existing element:",activeElement);
       if(activeElement !== undefined) {
         console.log("config:",config);
-        activeElement["style"] = {...activeElement["style"],...config};
-        activeTemplateElements[activeElement].value = {...activeElement};
-        // let mytemp = templates[activeTamplate.peek()];
-        // if(templateDesignView.value === "smartphone") {
-        //     mytemp["mobile_children"] = JSON.parse(JSON.stringify(activeTemplateElements));
-        // } else {
-        //     mytemp["desktop_children"] =  JSON.parse(JSON.stringify(activeTemplateElements));
-
-        // }
-        // templates[activeTamplate.peek()] = mytemp;
-        // localStorage.setItem("templates",JSON.stringify(templates));
+        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...config};
+        activeTemplateElements[activeElementID].value = {...activeElement};
       }
     };
   
     const handleSubmit = (config) => {
       if(activeElement !== undefined) {
-        activeElement["style"] = {...activeElement["style"],...config};
-        activeTemplateElements[activeElement].value = {...activeElement};
+        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...config};
+        activeTemplateElements[activeElementID].value = {...activeElement};
         let mytemp = templates[activeTamplate.peek()];
         if(templateDesignView.value === "smartphone") {
             mytemp["mobile_children"] = JSON.parse(JSON.stringify(activeTemplateElements));
@@ -81,8 +78,8 @@ export function TemplateBuilderRightView() {
               data["style"] = temp;
             }
         }
-        activeElement = {...activeElement,...data};
-        activeTemplateElements[activeElement].value = {...activeElement};
+        activeElement["configs"] = {...activeElement["configs"],...data};
+        activeTemplateElements[activeElementID].value = {...activeElement};
         let mytemp = templates[activeTamplate.peek()];
         if(templateDesignView.value === "smartphone") {
             mytemp["mobile_children"] = JSON.parse(JSON.stringify(activeTemplateElements));
@@ -100,7 +97,8 @@ export function TemplateBuilderRightView() {
     if(activeElement === undefined) {
         configs = {};
     } else {
-        configs = activeElement["style"];
+        console.log("active Element:",activeElement);
+        configs = activeElement["configs"]["style"];
         advancedConfig = GetAdvancedConfigs(activeElement,false);
     }
     return (<div>

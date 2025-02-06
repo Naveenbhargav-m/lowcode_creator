@@ -1,7 +1,6 @@
 
 
 import { Text, Number, TextArea, ProgressBar, Avatar, AvatarGroup, Dropdown, Button, Image, Badge, Icon, IconButton } from "./primitivies";
-import { activeElement, CallbackExecutor } from "../../screen_builder/screen_state";
 
 let url = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
 // Function to map drop data to the correct primitive component
@@ -10,7 +9,8 @@ let url = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb
 function ActiveWrapper({data,activeSignal ,children }) {
   return (
         <div style={{display:"contents"}} onClick={(e) => {
-          activeElement.value = data["id"];
+          e.stopPropagation();
+          activeSignal.value = data["id"];
           console.log("active element in primitive:",activeSignal.value);
         }}>
           {children}
