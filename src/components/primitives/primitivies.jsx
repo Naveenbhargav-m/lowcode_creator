@@ -36,7 +36,7 @@ export const DynamicWrapper = ({ children, config, value }) => {
   const { config: dynamicConfig, value: dynamicValue } = useDynamicConfig(config, value);
 
   const handleAction = (actionType) => (e) => {
-    e.stopPropagation();
+    // e.stopPropagation();
     ActionExecutor(dynamicConfig.value.id, actionType);
     if (actionType === "onClick" && dynamicConfig.value.actions?.onClick) {
       const clickAction = FunctionExecutor({}, dynamicConfig.value.actions.onClick);
