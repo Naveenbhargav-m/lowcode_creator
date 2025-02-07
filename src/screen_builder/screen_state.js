@@ -58,14 +58,20 @@ const activeScreen = signal("");
 const screenView = signal("smartphone");
 let screenLeftnamesAndIds = signal([]);
 const screenLeftTabSignal = signal("");
+let screens = {};
+let screenElements = { };
+const screenElementAdded = signal(false);
+screenElementAdded.value = true;
 
-let screenConfigjson = localStorage.getItem("screen_config");
+
+
+function LoadScreens() {
+  let screenConfigjson = localStorage.getItem("screen_config");
 let screenConfigsMap = JSON.parse(screenConfigjson);
 
 if (screenConfigsMap === null || screenConfigsMap === undefined) {
   screenConfigsMap = {};
 } else {
-  // Convert each object in screenConfigsMap to a signal
   var tempnames = [];
   for (const key in screenConfigsMap) {
     if (screenConfigsMap.hasOwnProperty(key)) {
@@ -73,41 +79,46 @@ if (screenConfigsMap === null || screenConfigsMap === undefined) {
       if(currentScreen === undefined) {
         continue
       }
-
-      let elements = currentScreen["elements"];
-      let newElements = {};
-      for (const elekey in elements) {
-        newElements[elekey] = signal(elements[elekey]);
-      }
       tempnames.push({"name": currentScreen["name"], "id":currentScreen["id"]});
-      let newScreen = {
-        "id": currentScreen["id"],
-        "name": currentScreen["name"],
-        "order": currentScreen["order"],
-        "elements": currentScreen["elements"]
-      };
 
-      screenConfigsMap[key] = newScreen;
     }
   }
   screenLeftnamesAndIds.value = [...tempnames];
 }
-const screens = screenConfigsMap;
-let screenElements = { };
-const screenElementAdded = signal(false);
-screenElementAdded.value = true;
+  screens = screenConfigsMap;
+}
 
 
-function SetCurrentScreen(id) {
+
+function SetCurrentScreen() {
+  let id = activeScreen.value;
   if (screens[id] === undefined) {
     return;
   }
-  let elements = screens[id]["elements"];
+  let key = "mobile_children";
+  let otherkey = "desktop_children";
+  if(screenView.value !== "smartphone") {
+    key = "desktop_children";
+    otherkey = "mobile_children"
+  }
+  console.log("key and other key:",key,otherkey);
+  let elements = JSON.parse(JSON.stringify(screens[id][key]));
+  console.log("existing elements:",elements);
+  if(IsEmptyMap(elements)) {
+
+    let elements = JSON.parse(JSON.stringify(screens[id][otherkey]));
+    console.log("in empty map existing elements:",elements, otherkey);
+    if(!IsEmptyMap(elements)) {
+      screens[id][key] = JSON.parse(JSON.stringify(elements));
+      console.log("setting other elements to current key:",elements, key, screens);
+    }
+  }
   let newElements = {};
   for(const key in elements) {
     let val = elements[key].value;
     newElements[key] = signal({...elements[key]});
   }
+  localStorage.setItem("screen_config",JSON.stringify(screens));
   screenElements = {...newElements};
   console.log("screen elements:", newElements);
   screenElementAdded.value = false;
@@ -160,26 +171,26 @@ const handleDrop = (data, parentId = null) => {
   }
   let temp = screens[activeScreen.value];
   if(temp !== undefined) {
-    temp["elements"] = screenElements;
+    let key = "mobile_children";
+    if(screenView.peek() !== "smartphone") {
+      key = "desktop_children";
+    }
+    console.log("in handle drop: setting elements for:",key, screenElements);
+    temp[key] = JSON.parse(JSON.stringify(screenElements));
     screens[activeScreen.value] = temp;
   }
-  console.log("screens:",screens);
   localStorage.setItem("screen_config", JSON.stringify(screens));
-  let screenData = {
-    "configs":JSON.stringify(screenElements)
-  };
+  // let screenData = {
+  //   "configs":JSON.stringify(screenElements)
+  // };
   // SetScreenToAPI(screenData,1);
 };
-
-effect(()=> {
-  SetCurrentScreen(activeScreen.value);
-});
 
 function CreatenewScreen(data) {
   let name = data["name"];
   let length = Object.keys(screens).length;
   let id = generateUID();
-  let newScreenData = {"id": id, "name": name, "elements": {}, "order":length};
+  let newScreenData = {"id": id, "name": name, "mobile_children": {}, "desktop_children":{},"order":length};
   screens[id] = newScreenData;
   screenElements = {};
   let existingnames = screenLeftnamesAndIds.peek();
@@ -196,6 +207,17 @@ function CallbackExecutor(key , input) {
   actionsmap[key](input);
 }
 
+function IsEmptyMap(curmap) {
+  if(curmap === undefined || curmap === null) {
+    return true;
+  }
+  if(Object.keys(curmap).length === 0) {
+    return true;
+  }
+  return false;
+}
+
+LoadScreens();
 export {tabDataSignal , tabSignal, 
   isHoveredSignal,screenElements ,activeTab,
   activeConfigTab,handleDrop,activeElement,

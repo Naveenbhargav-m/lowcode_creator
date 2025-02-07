@@ -1,5 +1,5 @@
 import { signal } from "@preact/signals"; // Assuming you have this import in your file
-import { activeConfigTab, activeElement, activeScreen, screenElements, screens } from "./screen_state";
+import { activeConfigTab, activeElement, activeScreen, screenElements, screens, screenView } from "./screen_state";
 import AdvnacedForm from "../form_builder/configs_view/advanced_form";
 import { FlexConfigTab } from "../form_builder/form_right_elements";
 import FlexConfigurator from "../form_builder/configs_view/flex_config";
@@ -37,11 +37,11 @@ function ScreenRightPanel() {
         screenElements[activeElement.peek()].value = {...temp}; 
         let temp2 = screens[activeScreen.value];
         if(temp2 !== undefined) {
-            var elementsNormal = {};
-            for(const key in screenElements) {
-                elementsNormal[key] = screenElements[key].value;
+            let key = "mobile_children";
+            if(screenView.peek() !== "smartphone") {
+                key = "desktop_children";
             }
-            temp2["elements"] = elementsNormal;
+            temp2[key] = JSON.parse(JSON.stringify(screenElements));
             screens[activeScreen.value] = temp2;
         } 
         localStorage.setItem("screen_config", JSON.stringify(screens));
@@ -55,11 +55,11 @@ function ScreenRightPanel() {
             screenElements[activeElement.peek()].value = {...temp};
             let temp2 = screens[activeScreen.value];
             if(temp2 !== undefined) {
-                var elementsNormal = {};
-                for(const key in screenElements) {
-                    elementsNormal[key] = screenElements[key].value;
+                let key = "mobile_children";
+                if(screenView.peek() !== "smartphone") {
+                    key = "desktop_children";
                 }
-                temp2["elements"] = elementsNormal;
+                temp2[key] = JSON.parse(JSON.stringify(screenElements));
                 screens[activeScreen.value] = temp2;
             } 
             localStorage.setItem("screen_config", JSON.stringify(screens));

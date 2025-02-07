@@ -3,7 +3,7 @@ import { TemplateView } from "../template_builder/template_builder_view";
 import {TabComponent , VariableCreator} from "./screen_components";
 import { ScreenRightPanel } from "./screen_config_panel";
 import { ScreenLeftPanel } from "./screen_left_panel";
-import { activeScreen, activeTab, screenLeftnamesAndIds, screenLeftTabSignal } from "./screen_state";
+import { activeScreen, activeTab, screenLeftnamesAndIds, screenLeftTabSignal, SetCurrentScreen } from "./screen_state";
 import {ScreenBuilderArea} from "./screen-areas_2";
 import { TemplateOptionTabs, TemplatePage } from "../template_builder/templates_page";
 
@@ -65,7 +65,7 @@ function ScreenView() {
             </div>
             {
                 screenLeftTabSignal.value === "screens" ?
-                <ScreensList elementsList={screenLeftnamesAndIds.value} signal={activeScreen}/> :
+                <ScreensList elementsList={screenLeftnamesAndIds.value} signal={activeScreen} callBack={(id) => SetCurrentScreen()}/> :
                 <ScreenLeftPanel config={{ tabs_path: config["paths"], views_path: config["views_path"] }}
                 value={{}}
                 actions={{}}/>
