@@ -32,8 +32,7 @@ const Popup = ({ isOpen, onClose, onSubmit, value, label }) => {
   );
 };
 
-// TextAreaWithPopup component
-const TextAreaWithPopup = ({ label, configKey, valueSignal, onChange }) => {
+const TextAreaWithPopup = ({ label, configKey, valueSignal, onChange , wrapperStyle = {}, labelStyle={}, style  = {}}) => {
   const isPopupOpen = useSignal(false);
 
   const handleTextAreaClick = () => {
@@ -43,26 +42,61 @@ const TextAreaWithPopup = ({ label, configKey, valueSignal, onChange }) => {
   const handlePopupSubmit = (newValue) => {
     valueSignal.value = newValue;
     onChange(configKey, newValue);
+    isPopupOpen.value = false;
   };
 
   return (
-    <div className="form-field">
-      <label>{label}</label>
+    <div className="form-field" style={{...wrapperStyle}}>
+      <label style={{...labelStyle}}>{label}</label>
       <textarea
         readOnly
-        value={valueSignal}
+        value={valueSignal.value} // ✅ Use `.value` here
         onClick={handleTextAreaClick}
+        style={{...style}}
       />
       <Popup
         isOpen={isPopupOpen.value}
         onClose={() => (isPopupOpen.value = false)}
         onSubmit={handlePopupSubmit}
-        value={valueSignal}
+        value={valueSignal.value} // ✅ Use `.value` here
         label={label}
       />
     </div>
   );
 };
+
+// TextAreaWithPopup component
+// const TextAreaWithPopup = ({ label, configKey, valueSignal, onChange }) => {
+//   const isPopupOpen = useSignal(false);
+
+//   const handleTextAreaClick = () => {
+//     isPopupOpen.value = true;
+//   };
+
+//   const handlePopupSubmit = (newValue) => {
+//     valueSignal.value = newValue;
+//     onChange(configKey, newValue);
+//     isPopupOpen.value = false;
+//   };
+
+//   return (
+//     <div className="form-field">
+//       <label>{label}</label>
+//       <textarea
+//         readOnly
+//         value={valueSignal}
+//         onClick={handleTextAreaClick}
+//       />
+//       <Popup
+//         isOpen={isPopupOpen.value}
+//         onClose={() => (isPopupOpen.value = false)}
+//         onSubmit={handlePopupSubmit}
+//         value={valueSignal}
+//         label={label}
+//       />
+//     </div>
+//   );
+// };
 
 // Main Form component
 const AdvnacedForm = ({ configsInp,onSubmit  }) => {
@@ -146,4 +180,4 @@ const handleSubmit = () => {
   );
 };
 
-export default AdvnacedForm;
+export  {AdvnacedForm, TextAreaWithPopup , Popup};

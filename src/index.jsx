@@ -18,9 +18,11 @@ import { PreviewArea } from "./preview/preview";
 import { sideBarEnable } from "./states/global_state";
 import AppCreatorPage from "./app_creator/app_creator";
 import { FormBuilderTest } from "./form_builder/form_edit_area";
-
+import { ThemeCreator } from "./theme_creator/theme_config_area";
+import { Provider } from "./components/ui/provider";
 export function App() {
   return (
+    <Provider>
     <ThemeProvider>
     <LocationProvider>
    <div className="flex bg-white">
@@ -38,6 +40,7 @@ export function App() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
       <Route path="/preview" component={PreviewArea} />
+      <Route path="/test" component={ThemeCreator} />
       <Route default component={() => <div>Not Found</div>} />
     </Router>
   </main>
@@ -45,6 +48,7 @@ export function App() {
 
     </LocationProvider>
     </ThemeProvider>
+    </Provider>
   );
 }
 

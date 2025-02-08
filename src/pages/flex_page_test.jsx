@@ -6,10 +6,9 @@ import DynamicIcon from '../components/custom/dynamic_icon';
 import { Drop } from '../components/custom/Drop';
 import { DesktopMockup } from '../screen_builder/screen_components';
 import { generateUID } from '../utils/helpers';
-import { FormRightPanel } from '../form_builder/form_page_right';
-import { CreateFormButton } from '../form_builder/formBuilder3';
 import FlexConfigurator from './flex_config';
 import AdvnacedForm from './advanced_form';
+import { CreateFormButton } from '../template_builder/template_builder_view';
 
 let defaultStyle = {
     flexDirection: 'row',
@@ -254,7 +253,7 @@ export function FormsPageNew() {
 
   {/* Main content area */}
   <div className="w-4/6 h-screen bg-background scrollable-div">
-      <CreateFormButton />
+      {/* <CreateFormButton /> */}
       <EditArea />
   </div>
 

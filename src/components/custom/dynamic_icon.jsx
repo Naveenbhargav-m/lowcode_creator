@@ -77,12 +77,14 @@ import {
   Clock2,
   AppWindowMac,
   Smartphone,
+  Plus,
 } from "lucide-react";
 
 export default function DynamicIcon({ name, size }) {
   const icon_map = {
     instagram: <Instagram size={size} />,
     store: <Store size={size} />,
+    "plus": <Plus size={size}/>,
     "notebook-text": <NotebookText size={size} />,
     "square-plus": <SquarePlus size={size} />,
     shirt: <Shirt size={size} />,
@@ -159,7 +161,7 @@ export default function DynamicIcon({ name, size }) {
     "rows-3": <Rows3 size={size}/>,
     "clock-2": <Clock2 size={size}/>,
     "app-window-mac": <AppWindowMac size={size}/>,
-    "smartphone":<Smartphone size={size}/>
+    "smartphone":<Smartphone size={size}/>,
   };
 
   return icon_map[name] || null;
