@@ -10,7 +10,7 @@ let defaultStyle = {
     flexBasis: 'auto',
     order: 0,
     alignSelf: 'auto',
-    width: '40%',
+    width: '100%',
     height: 'auto',
     color: '#000000',
     backgroundColor: '#ffffff',

@@ -7,37 +7,132 @@ import "flatpickr/dist/themes/material_blue.css"; // Choose your preferred theme
 
 import { useState } from "preact/hooks";
 import { DefaultStyles } from "./styles/default_styles";
-import { Input} from "@chakra-ui/react";
+import { Input, RadioGroup, Stack} from "@chakra-ui/react";
 import { PasswordInput } from "../components/ui/password-input";
 import { Switch } from "../components/ui/switch";
+import { Checkbox } from "../components/ui/checkbox";
+import { fieldStyle } from "./configs_view/constantConfigs";
+import { Radio } from "../components/ui/radio";
 
-function TextField({config}) {
-  let value = config["value"] || "";
-  let style = config["sttyle"] || {};
-  let placeHolder = config["placeholder"] || "";
+
+function TextField({ config = {} }) {
+  const { value = "", style = {}, placeholder = "", ...rest } = config;
+  return <Input style={style} placeholder={placeholder} defaultValue={value} {...rest} />;
+}
+
+function PasswordField({ config = {} }) {
+  const { value = "", style = {}, placeholder = "", ...rest } = config;
+  return <PasswordInput style={style} placeholder={placeholder} defaultValue={value} {...rest} />;
+}
+
+function SwitchElement({ config = {} }) {
+  const { value = false, style = {}, ...rest } = config;
+  return <Switch style={style} variant="raised" checked={value} {...rest} />;
+}
+
+
+function CheckBoxElement({ config = {} }) {
+  const { value = false, style = {}, onChange, label = "", ...rest } = config;
+
   return (
-    <Input style={{...style}} placeholder={placeHolder} />
+    <Checkbox 
+      isChecked={value} 
+      onChange={onChange} 
+      colorScheme="blue" 
+      style={{ ...style }} 
+      {...rest}
+    >
+      {label}
+    </Checkbox>
+  );
+}
+
+function RadioGroupElement({ config = {} }) {
+  const {
+    value = "",
+    onChange,
+    options = [],
+    direction = "column",
+    defaultValue,
+    style = {},
+    ...rest
+  } = config;
+
+  return (
+    <RadioGroup value={value} onChange={onChange} defaultValue={defaultValue} {...rest}>
+      <Stack direction={direction} style={{ ...style }}>
+        {options.map((option) => (
+          <Radio key={option.value} value={option.value} colorScheme="blue">
+            {option.label}
+          </Radio>
+        ))}
+      </Stack>
+    </RadioGroup>
   );
 }
 
 
-function password({config}) {
-  let value = config["value"] || "";
-  let style = config["sttyle"] || {};
-  let placeHolder = config["placeholder"] || "";
+import Select from "react-select";
+
+function SelectElement({ config = {} }) {
+  const {
+    value = "",
+    onChange,
+    options = [],
+    placeholder = "Select an option",
+    defaultValue,
+    style = {},
+    ...rest
+  } = config;
+
   return (
-    <PasswordInput style={{...style}} placeholder={placeHolder} />
+    <Select 
+      value={value} 
+      onChange={onChange} 
+      defaultValue={defaultValue} 
+      placeholder={placeholder} 
+      style={{ ...style }} 
+      {...rest}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </Select>
   );
 }
 
-function SwitchElement({config}) {
-  let value = config["value"] || "";
-  let style = config["sttyle"] || {};
-  let placeHolder = config["placeholder"] || "";
+
+
+function MultiSelectElement({ config = {} }) {
+  const {
+    value = [],
+    onChange,
+    options = [],
+    placeholder = "Select options",
+    style = {},
+    ...rest
+  } = config;
+
   return (
-    <Switch varient={"raised"}/>
+    <Select
+      isMulti
+      value={value}
+      onChange={onChange}
+      options={options}
+      placeholder={placeholder}
+      styles={{
+        control: (base) => ({
+          ...base,
+          ...style,
+        }),
+      }}
+      {...rest}
+    />
   );
 }
+
 const FlatpickrWrapper = ({ label, value, onChange, options }) => (
   <div className="flex flex-col w-full mb-4">
     <label className="mb-2 font-semibold text-gray-700">{label}</label>
@@ -117,77 +212,75 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
         let base = DefaultStyles["name"];
         return {...base, ...fieldStyle};
       }
+      let  configObj = {"style": fieldStyle, "value": value, "onChange":onChange, "placeHolder":"chakra Field Here"};
       switch (type) {
         case 'textfield':
           return (
-            <TextField config={{"style": fieldStyle, "value": value, "onChange":onChange, "placeHolder":"chakra Field Here"}}/>
+            <TextField config={configObj}/>
           );
         case "switch":
           return (
-            <SwitchElement config={{"style": fieldStyle, "value": value, "onChange":onChange, "placeHolder":"chakra Field Here"}}/>
+            <SwitchElement config={configObj}/>
           );
         case 'checkbox':
           return (
-            <CheckBox type={type} 
-            options={options} 
-            value={value} 
-            onChange={onChange} 
-            fieldStyle={fieldStyle} 
-            {...props}/>
+          <CheckBoxElement config={configObj} />
           );
   
         case 'radio':
           return (
-            <div style={fieldStyle}>
-              {options.map((option) => (
-                <label key={option.value}>
-                  <input
-                    type="radio"
-                    name={props.name}
-                    value={option.value}
-                    checked={value === option.value}
-                    onChange={onChange}
-                  />
-                  {option.label}
-                </label>
-              ))}
-            </div>
+            <RadioGroupElement
+              config={{
+                value: "option1",
+                onChange: (val) => console.log(val),
+                options: [
+                  { value: "option1", label: "Option 1" },
+                  { value: "option2", label: "Option 2" },
+                  { value: "option3", label: "Option 3" }
+                ],
+                direction: "row",
+              }}
+            />
           );
   
         case 'dropdown':
           return (
-            <select
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            >
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <SelectElement
+            config={{
+              value: "option2",
+              onChange: (e) => console.log(e.target.value),
+              options: [
+                { value: "option1", label: "Option 1" },
+                { value: "option2", label: "Option 2" },
+                { value: "option3", label: "Option 3" }
+              ],
+              placeholder: "Choose an option",
+            }}
+          />
+          
           );
   
-        case 'multi-select':
+        case 'multi_select':
           return (
-            <select
-              multiple
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            >
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <MultiSelectElement
+            config={{
+              value: [
+                { value: "option1", label: "Option 1" },
+                { value: "option2", label: "Option 2" }
+              ],
+              onChange: (selected) => console.log(selected),
+              options: [
+                { value: "option1", label: "Option 1" },
+                { value: "option2", label: "Option 2" },
+                { value: "option3", label: "Option 3" }
+              ],
+              placeholder: "Choose options",
+            }}
+/>
+
           );
   
-        case 'range-slider':
+        case 'range_slider':
           return (
             <input
               type="range"
@@ -198,7 +291,7 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
             />
           );
   
-        case 'two-slider':
+        case 'two_slider':
           return (
             <div style={fieldStyle}>
               <input
