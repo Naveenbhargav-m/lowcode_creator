@@ -5,7 +5,39 @@ import "flatpickr/dist/themes/material_blue.css"; // Choose your preferred theme
 
 
 
+import { useState } from "preact/hooks";
+import { DefaultStyles } from "./styles/default_styles";
+import { Input} from "@chakra-ui/react";
+import { PasswordInput } from "../components/ui/password-input";
+import { Switch } from "../components/ui/switch";
 
+function TextField({config}) {
+  let value = config["value"] || "";
+  let style = config["sttyle"] || {};
+  let placeHolder = config["placeholder"] || "";
+  return (
+    <Input style={{...style}} placeholder={placeHolder} />
+  );
+}
+
+
+function password({config}) {
+  let value = config["value"] || "";
+  let style = config["sttyle"] || {};
+  let placeHolder = config["placeholder"] || "";
+  return (
+    <PasswordInput style={{...style}} placeholder={placeHolder} />
+  );
+}
+
+function SwitchElement({config}) {
+  let value = config["value"] || "";
+  let style = config["sttyle"] || {};
+  let placeHolder = config["placeholder"] || "";
+  return (
+    <Switch varient={"raised"}/>
+  );
+}
 const FlatpickrWrapper = ({ label, value, onChange, options }) => (
   <div className="flex flex-col w-full mb-4">
     <label className="mb-2 font-semibold text-gray-700">{label}</label>
@@ -88,15 +120,12 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
       switch (type) {
         case 'textfield':
           return (
-            <input
-              type="text"
-              value={value}
-              onChange={onChange}
-              style={GetStyle(type)}
-              {...props}
-            />
+            <TextField config={{"style": fieldStyle, "value": value, "onChange":onChange, "placeHolder":"chakra Field Here"}}/>
           );
-  
+        case "switch":
+          return (
+            <SwitchElement config={{"style": fieldStyle, "value": value, "onChange":onChange, "placeHolder":"chakra Field Here"}}/>
+          );
         case 'checkbox':
           return (
             <CheckBox type={type} 
@@ -414,11 +443,6 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
     );
   }
   
-
-
-import { useState } from "preact/hooks";
-import { DefaultStyles } from "./styles/default_styles";
-
 
 const DatesTest = () => {
   const [date, setDate] = useState(new Date());
