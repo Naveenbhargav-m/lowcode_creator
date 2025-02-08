@@ -1,4 +1,4 @@
-import AdvnacedForm from "../form_builder/configs_view/advanced_form";
+import {AdvnacedForm} from "../form_builder/configs_view/advanced_form";
 import FlexConfigurator from "../form_builder/configs_view/flex_config";
 import { FlexConfigTab } from "../form_builder/form_right_elements";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";

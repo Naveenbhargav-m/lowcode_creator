@@ -6,6 +6,7 @@ import { ScreenLeftPanel } from "./screen_left_panel";
 import { activeScreen, activeTab, screenLeftnamesAndIds, screenLeftTabSignal, SetCurrentScreen } from "./screen_state";
 import {ScreenBuilderArea} from "./screen-areas_2";
 import { TemplateOptionTabs, TemplatePage } from "../template_builder/templates_page";
+import { ThemePage } from "../theme_creator/theme_config_area";
 
 let config = {
   paths: ["id", "tabs", "tab"],
@@ -25,7 +26,7 @@ function ScreenPage() {
       {activeTab.value == "Screen" ? 
       <ScreenView /> :activeTab.value == "Template" ?
        <TemplatepageView /> : activeTab.value == "Components" ?
-        <ScreenView /> : <VariableView /> }
+        <ScreenView /> : activeTab.value === "Themes" ? <ThemePage /> : <VariableView /> }
     </div>
   );
 }
