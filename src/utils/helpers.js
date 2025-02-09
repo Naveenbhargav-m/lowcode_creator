@@ -18,4 +18,14 @@ function generateUID(length = 10) {
     return uid;
 }
 
-export {generateRandomName, generateUID};
+const getSortedFields = (elementsObject) => {
+    if(elementsObject === undefined || elementsObject === null) {
+        return [];
+    }
+    return Object.entries(elementsObject)
+      .sort((a, b) => a[1].order - b[1].order) // Sort by order
+      .map(([key, value]) => ({ key, ...value })); // Convert back to array format
+  };
+  
+
+export {generateRandomName, generateUID, getSortedFields};

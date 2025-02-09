@@ -17,11 +17,14 @@ function AddtoElements(data) {
     let fieldData = data["data"];
     let formName = data["dropElementData"]["id"];
     let newid = generateUID();
+    let existing = currentFormElements.peek();
+    let length = Object.keys(existing).length;
     let elementData = {
       "type":fieldData[1],
       "id": newid,
       "parent": formName,
       "children": [],
+      "order": length, 
       "size_class": "",
       "grow":"",
       "srink":"",
@@ -44,7 +47,6 @@ function AddtoElements(data) {
       "value": "",
       "valueData": "",
     };
-    let existing = currentFormElements.peek();
     if(formName != "screen") {
       elementData["parent"] = formName;
       let parent = existing[formName];

@@ -1,7 +1,8 @@
 import { Drop } from "../components/custom/Drop";
 import { DesktopMockup } from "../screen_builder/screen_components";
 import { FormBuilderLeftPanel } from "./form_builder_left";
-import { Column, Field, PanelField, Row } from "./fields";
+import { Column, PanelField, Row } from "./fields/fields";
+import { Field } from "./fields/chakra_fields";
 import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm } from "./form_builder_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
@@ -9,92 +10,8 @@ import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
 import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
-
-
-function RenderRoworColumnChildren(children) {
-  if(children === undefined) {
-    return <></>;
-  }
-  let childElements = {};
-  for(var i=0;i<children.length;i++) {
-    let childID = children[i];
-    let temp = currentFormElements.value[childID];
-    childElements[childID] = temp;
-  }
-  return RenderElements(childElements, true);
-}
-
-
-function SelectAble({children , id}) {
-  return (
-    <div
-    style={{ display: "contents" }}
-    onClick={(e) => {
-      formActiveElement.value = id;
-    }}
-  >
-    {children}
-  </div>
-  );
-}
-
-function RenderElements(elementsValue , areChildren) {
-    if(elementsValue === undefined) {
-      return <></>;
-    }
-    return (<div style={{display:"contents"}}>
-    {Object.values(elementsValue).map(value => {
-        let type = value["type"];
-        let id = value["id"];
-        let parent = value["parent"];
-        if(parent !== "screen" && !areChildren) {
-          return;
-        }
-        if(type === "column") {
-          let children = value["children"];
-          return (
-            <SelectAble id={id}>
-            <Column config={value} onDrop={AddtoElements}>
-              {RenderRoworColumnChildren(children)}
-            </Column>
-            </SelectAble>
-          
-          );
-
-        }
-        if(type === "row") {
-          let children = value["children"];
-          return (
-            <SelectAble id={id}>
-            <Row config={value} onDrop={AddtoElements}>
-              {RenderRoworColumnChildren(children)}
-            </Row>
-            </SelectAble>
-          );
-        }
-        let style = value["panelStyle"];
-        let labelStyle = value["labelStyle"];
-        let fieldStyle = value["fieldStyle"];
-        let config = value["config"];
-        return (
-        <SelectAble id={id}>
-        <PanelField 
-        label={"test label"} 
-        labelPosition={"top"} 
-        labelStyle={labelStyle} 
-        panelStyle={style} 
-        showError={false} 
-        errorMessage={{}}>
-          <Field type={type} options={[{"key":"key", "value":"value"}]} 
-          fieldStyle={fieldStyle} value={"test"} onChange={(data)=> 
-          console.log("field changes:",id, data)} />
-        </PanelField>
-        </SelectAble>
-      );
-    })} 
-    </div>);
-}
-
+import { RenderElements } from "./form_renderer";
+import { getSortedFields } from "../utils/helpers";
 
 function EditArea() {
     return (
@@ -119,7 +36,8 @@ function EditArea() {
     useEffect(() => {
       console.log("Re-render triggered");
     },[]);
-    let values = currentFormElements.value;
+    let temp = currentFormElements.value;
+    let values = getSortedFields(temp);
     return (
       <MobileMockup>
     <div
@@ -147,7 +65,8 @@ function EditArea() {
   
   
   function FormEditDesktopView() {
-    let values = currentFormElements.value;
+    let temp = currentFormElements.value;
+    let values = getSortedFields(temp);
     return (
       <DesktopMockup>
     <div
