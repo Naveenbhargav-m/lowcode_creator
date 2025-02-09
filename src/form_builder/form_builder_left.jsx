@@ -44,6 +44,7 @@ function FormBuilderLeftPanel() {
       ["calendar-fold","month"],
       ["palette","color"],
       ["text","textarea"],
+      ["upload","file_upload"],
       ["letter-text","rich_text"],
       ["hash","markdown"],
       ["star","rating"],

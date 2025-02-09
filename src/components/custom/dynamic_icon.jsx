@@ -78,6 +78,7 @@ import {
   AppWindowMac,
   Smartphone,
   Plus,
+  Upload,
 } from "lucide-react";
 
 export default function DynamicIcon({ name, size }) {
@@ -162,6 +163,7 @@ export default function DynamicIcon({ name, size }) {
     "clock-2": <Clock2 size={size}/>,
     "app-window-mac": <AppWindowMac size={size}/>,
     "smartphone":<Smartphone size={size}/>,
+    "upload": <Upload size={size}/>
   };
 
   return icon_map[name] || null;

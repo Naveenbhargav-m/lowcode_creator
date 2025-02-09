@@ -7,143 +7,22 @@ import "flatpickr/dist/themes/material_blue.css"; // Choose your preferred theme
 
 import { useState } from "preact/hooks";
 import { DefaultStyles } from "./styles/default_styles";
-import { Input, RadioGroup, Stack} from "@chakra-ui/react";
-import { PasswordInput } from "../components/ui/password-input";
-import { Switch } from "../components/ui/switch";
-import { Checkbox } from "../components/ui/checkbox";
-import { fieldStyle } from "./configs_view/constantConfigs";
-import { Radio } from "../components/ui/radio";
+import { CheckBoxElement, ColorElement, FileUploadElement, MultiSelectElement, RadioGroupElement, RatingElement, SelectElement, SliderElement, SliderRangeElement, SwitchElement, TextAreaElement, TextField, UrlElement } from "./fields/chakra_fields";
+import { TextAreaWithPopup } from "./configs_view/advanced_form";
+import { Rating } from "../components/ui/rating";
 
-
-function TextField({ config = {} }) {
-  const { value = "", style = {}, placeholder = "", ...rest } = config;
-  return <Input style={style} placeholder={placeholder} defaultValue={value} {...rest} />;
-}
-
-function PasswordField({ config = {} }) {
-  const { value = "", style = {}, placeholder = "", ...rest } = config;
-  return <PasswordInput style={style} placeholder={placeholder} defaultValue={value} {...rest} />;
-}
-
-function SwitchElement({ config = {} }) {
-  const { value = false, style = {}, ...rest } = config;
-  return <Switch style={style} variant="raised" checked={value} {...rest} />;
-}
-
-
-function CheckBoxElement({ config = {} }) {
-  const { value = false, style = {}, onChange, label = "", ...rest } = config;
-
-  return (
-    <Checkbox 
-      isChecked={value} 
-      onChange={onChange} 
-      colorScheme="blue" 
-      style={{ ...style }} 
-      {...rest}
-    >
-      {label}
-    </Checkbox>
-  );
-}
-
-function RadioGroupElement({ config = {} }) {
-  const {
-    value = "",
-    onChange,
-    options = [],
-    direction = "column",
-    defaultValue,
-    style = {},
-    ...rest
-  } = config;
-
-  return (
-    <RadioGroup value={value} onChange={onChange} defaultValue={defaultValue} {...rest}>
-      <Stack direction={direction} style={{ ...style }}>
-        {options.map((option) => (
-          <Radio key={option.value} value={option.value} colorScheme="blue">
-            {option.label}
-          </Radio>
-        ))}
-      </Stack>
-    </RadioGroup>
-  );
-}
-
-
-import Select from "react-select";
-
-function SelectElement({ config = {} }) {
-  const {
-    value = "",
-    onChange,
-    options = [],
-    placeholder = "Select an option",
-    defaultValue,
-    style = {},
-    ...rest
-  } = config;
-
-  return (
-    <Select 
-      value={value} 
-      onChange={onChange} 
-      defaultValue={defaultValue} 
-      placeholder={placeholder} 
-      style={{ ...style }} 
-      {...rest}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </Select>
-  );
-}
-
-
-
-function MultiSelectElement({ config = {} }) {
-  const {
-    value = [],
-    onChange,
-    options = [],
-    placeholder = "Select options",
-    style = {},
-    ...rest
-  } = config;
-
-  return (
-    <Select
-      isMulti
-      value={value}
-      onChange={onChange}
-      options={options}
-      placeholder={placeholder}
-      styles={{
-        control: (base) => ({
-          ...base,
-          ...style,
-        }),
-      }}
-      {...rest}
-    />
-  );
-}
-
-const FlatpickrWrapper = ({ label, value, onChange, options }) => (
+const FlatpickrWrapper = ({ label, value, onChange, options, enableTime = false, noCalendar = false, mode = "single" }) => (
   <div className="flex flex-col w-full mb-4">
     <label className="mb-2 font-semibold text-gray-700">{label}</label>
     <Flatpickr
       value={value}
-      onChange={(selectedDates) => onChange(selectedDates[0])}
-      options={options}
+      onChange={(selectedDates) => onChange(mode === "multiple" || mode === "range" ? selectedDates : selectedDates[0])}
+      options={{ ...options, enableTime, noCalendar, mode }} // Ensure correct options are merged
       className="p-2 border rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-300"
     />
   </div>
 );
+
 
 function CheckBox({ type, options, value, onChange, fieldStyle = {}, ...props }) {
   const [checked, setChecked] = useState(value || false);
@@ -282,42 +161,17 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
   
         case 'range_slider':
           return (
-            <input
-              type="range"
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
+            <SliderElement />
           );
   
         case 'two_slider':
           return (
-            <div style={fieldStyle}>
-              <input
-                type="range"
-                value={value[0]}
-                onChange={(e) => onChange([e.target["value"], value[1]])}
-                {...props}
-              />
-              <input
-                type="range"
-                value={value[1]}
-                onChange={(e) => onChange([value[0], e.target["value"]])}
-                {...props}
-              />
-            </div>
+           <SliderRangeElement />
           );
   
         case 'url':
           return (
-            <input
-              type="url"
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
+            <UrlElement />
           );
   
         case 'phone':
@@ -331,110 +185,101 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
             />
           );
   
-        case 'date':
-          return (
-            <FlatpickrWrapper
-            label="Select Date"
-            value={value}
-            onChange={onChange}
-            options={{ dateFormat: "Y-m-d" }}
-          />
-          );
-  
-        case 'date-time':
-          return (
-            <input
-              type="datetime-local"
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
-          );
-  
-        case 'time':
-          return (
-            <input
-              type="time"
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
-          );
-  
-        case 'date-range':
-          return (
-            <div style={fieldStyle}>
-              <input
-                type="date"
-                value={value[0]}
-                onChange={(e) => onChange([e.target["value"], value[1]])}
-                {...props}
+          case 'date':
+            return (
+              <FlatpickrWrapper
+                label="Select Date"
+                value={value}
+                onChange={onChange}
+                options={{ dateFormat: "Y-m-d" }}
               />
-              <input
-                type="date"
-                value={value[1]}
-                onChange={(e) => onChange([value[0], e.target["value"]])}
-                {...props}
+            );
+        
+          case 'date_time':
+            return (
+              <FlatpickrWrapper
+                label="Select Date & Time"
+                value={value}
+                onChange={onChange}
+                options={{ dateFormat: "Y-m-d H:i" }}
+                enableTime={true}
               />
-            </div>
-          );
-  
-        case 'week':
-          return (
-            <input
-              type="week"
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
-          );
-  
-        case 'month':
-          return (
-            <input
-              type="month"
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
-          );
-  
+            );
+        
+          case 'time':
+            return (
+              <FlatpickrWrapper
+                label="Select Time"
+                value={value}
+                onChange={onChange}
+                options={{ dateFormat: "H:i" }}
+                enableTime={true}
+                noCalendar={true}
+              />
+            );
+        
+          case 'date_range':
+            return (
+              <FlatpickrWrapper
+                label="Select Date Range"
+                value={value}
+                onChange={onChange}
+                options={{ dateFormat: "Y-m-d" }}
+                mode="range"
+              />
+            );
+        
+          case 'multi_date':
+            return (
+              <FlatpickrWrapper
+                label="Select Multiple Dates"
+                value={value}
+                onChange={onChange}
+                options={{ dateFormat: "Y-m-d" }}
+                mode="multiple"
+              />
+            );
+        
+          case 'week':
+            return (
+              <FlatpickrWrapper
+                label="Select Week"
+                value={value}
+                onChange={onChange}
+                options={{
+                  dateFormat: "Y-m-d",
+                  weekNumbers: true, // Shows week numbers
+                }}
+              />
+            );
+        
+          case 'month':
+            return (
+              <FlatpickrWrapper
+                label="Select Month"
+                value={value}
+                onChange={onChange}
+                options={{
+                  dateFormat: "Y-m", // Year & Month only
+                  noCalendar: false,
+                }}
+              />);
+          
         case 'color':
           return (
-            <input
-              type="color"
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
+            <ColorElement />
           );
   
         case 'textarea':
           return (
-            <textarea
-              value={value}
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
+            <TextAreaElement />
           );
-  
-        case 'file-upload':
+        case 'file_upload':
           return (
-            <input
-              type="file"
-              onChange={onChange}
-              style={fieldStyle}
-              {...props}
-            />
+            <FileUploadElement />
           );
   
-        case 'rich-text':
+        case 'rich_text':
           return (
             <div
               contentEditable
@@ -457,19 +302,7 @@ const Field = ({ type, options, value, onChange, fieldStyle = {}, ...props }) =>
   
         case 'rating':
           return (
-            <div style={fieldStyle}>
-              {options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => onChange(option.value)}
-                  style={{
-                    background: value === option.value ? 'yellow' : 'transparent',
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+           <RatingElement />
           );
   
         default:
