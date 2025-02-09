@@ -10,7 +10,7 @@ let defaultStyle = {
     flexBasis: 'auto',
     order: 0,
     alignSelf: 'auto',
-    width: '40%',
+    width: '100%',
     height: 'auto',
     color: '#000000',
     backgroundColor: '#ffffff',
@@ -25,21 +25,9 @@ let defaultStyle = {
 
 
 let fieldStyle = {
-    flexDirection: 'column',
-    display:"flex",
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    alignContent: 'center',
-    flexWrap: 'nowrap',
-    flexGrow: 0,
-    flexShrink: 1,
-    flexBasis: 'auto',
-    order: 0,
-    alignSelf: 'auto',
     width: '100%',
     height: 'auto',
     color: '#000000',
-    backgroundColor: '#ffffff',
     padding: '10px',
     margin: '0px',
     border: '2px solid black',
@@ -48,17 +36,6 @@ let fieldStyle = {
 };
 
 let labelStyle = {
-    flexDirection: 'column',
-    display:"flex",
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    alignContent: 'flex-start',
-    flexWrap: 'nowrap',
-    flexGrow: 0,
-    flexShrink: 1,
-    flexBasis: 'auto',
-    order: 0,
-    alignSelf: 'auto',
     width: '100%',
     height: 'auto',
     color: '#000000',
