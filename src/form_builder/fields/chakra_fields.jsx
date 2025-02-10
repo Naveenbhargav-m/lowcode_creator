@@ -14,6 +14,7 @@ import DynamicIcon from "../../components/custom/dynamic_icon";
 import { Rating } from "../../components/ui/rating";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_blue.css";
+import { forwardRef } from "preact/compat";
 
 let defaultConfig =  {"style": {}, "value": "test", "onChange":(data) => {console.log("cahnged");}, "placeHolder":"chakra Field Here"};
 
@@ -23,101 +24,102 @@ let configs ={
   "checkbox": {...defaultConfig, value:true},
 };
 // Common field wrapper
-const FieldWrapper = ({ children, config }) => {
-  return <div style={config.style || {}}>{children}</div>;
-};
+// Common Field Wrapper
+const FieldWrapper = ({ children, config, onAction }) => {
+  console.log("In Field Wrapper : children , config, onAction:", children, config, onAction);
+  const handleEvent = (event) => {
+    console.log("event :",event.type, event);
+  };
 
-// Form Components
-const TextField = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <Input placeholder={config.
-// @ts-ignore
-    placeholder || ""} defaultValue={config.value || ""} {...config} />
-  </FieldWrapper>
-);
-
-const PasswordField = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <PasswordInput 
-// @ts-ignore
-    placeholder={config.placeholder || ""} defaultValue={config.value || ""} {...config} />
-  </FieldWrapper>
-);
-
-const SwitchElement = ({ config = {} }) => {
-  console.log("config:",config);
   return (
-    <FieldWrapper config={config}>
-    <Switch 
-// @ts-ignore
-    checked={config.value || false} {...config} colorPalette={config["colorPalette"]} />
-  </FieldWrapper>
+    <div
+      style={config.style || {}}
+      onChange={handleEvent}
+      onBlur={handleEvent}
+      onFocus={handleEvent}
+      onClick={handleEvent}
+      onKeyDown={handleEvent}
+    >
+      {children}
+    </div>
   );
 };
 
-const CheckBoxElement = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <Checkbox 
-// @ts-ignore
-    isChecked={config.value || false} onChange={config.onChange} {...config}>
-      {config.
-// @ts-ignore
-      label}
-    </Checkbox>
+
+// Form Components
+const TextField = forwardRef(({ config = {}, onAction }, ref) => {
+  return (
+    <FieldWrapper config={config} onAction={onAction}>
+      <Input
+        ref={ref}
+        placeholder={config.placeholder || ""}
+        defaultValue={config.value || ""}
+        style={{ ...config.style }}
+      />
+    </FieldWrapper>
+  );
+});
+
+// Text Field
+// Password Field
+const PasswordField = forwardRef(({ config = {}, onAction }, ref) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Input ref={ref} type="password" placeholder={config.placeholder || ""} defaultValue={config.value || ""} />
+  </FieldWrapper>
+));
+
+// Switch Element
+const SwitchElement = forwardRef(({ config = {}, onAction }, ref) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Switch isChecked={config.value || false} style={config.style} colorPalette={config.color} />
+  </FieldWrapper>
+));
+
+// Checkbox Element
+const CheckBoxElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Checkbox isChecked={config.value || false}>{config.label}</Checkbox>
   </FieldWrapper>
 );
 
-const RadioGroupElement = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <RadioGroup value={config.
-// @ts-ignore
-    value} onChange={config.onChange} {...config}>
-      <Stack direction={config.
-// @ts-ignore
-      direction || "column"}>
-        {config.
-// @ts-ignore
-        options?.map((option) => (
-          <Radio key={option.value} 
-// @ts-ignore
-          value={option.value}>
-            {option.label}
-          </Radio>
-        ))}
-      </Stack>
-    </RadioGroup>
+// Radio Group
+const RadioGroupElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Stack direction={config.direction || "column"}>
+      {config.options?.map((option) => (
+        <Radio key={option.value} value={option.value}>
+          {option.label}
+        </Radio>
+      ))}
+    </Stack>
   </FieldWrapper>
 );
 
-const SelectElement = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <Select options={config.
-// @ts-ignore
-    options} placeholder={config.placeholder} {...config} />
+// Select Element
+const SelectElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Select options={config.options} placeholder={config.placeholder} />
   </FieldWrapper>
 );
 
-const MultiSelectElement = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <Select isMulti options={config.
-// @ts-ignore
-    options} placeholder={config.placeholder} {...config} />
+// Multi-Select Element
+const MultiSelectElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Select isMulti options={config.options} placeholder={config.placeholder} />
   </FieldWrapper>
 );
 
-const SliderElement = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <Slider 
-// @ts-ignore
-    defaultValue={config.value || [40]} {...config} />
+// Slider Element
+const SliderElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Slider defaultValue={config.value || 40} />
   </FieldWrapper>
 );
 
-const ColorElement = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <ColorPickerRoot 
-// @ts-ignore
-    defaultValue={config.value || "#eb5e41"}>
+// Color Picker
+const ColorElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <ColorPickerRoot defaultValue={config.value || "#eb5e41"}>
       <ColorPickerLabel>Color</ColorPickerLabel>
       <ColorPickerControl>
         <ColorPickerInput />
@@ -131,33 +133,39 @@ const ColorElement = ({ config = {} }) => (
   </FieldWrapper>
 );
 
-const TextAreaElement = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <Textarea placeholder={config.
-// @ts-ignore
-    placeholder || ""} defaultValue={config.value || ""} {...config} />
+// Text Area
+const TextAreaElement = forwardRef(({ config = {}, onAction }, ref) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Textarea ref={ref} placeholder={config.placeholder || ""} defaultValue={config.value || ""} />
+  </FieldWrapper>
+));
+
+// File Upload
+const FileUploadElement = ({ onAction }) => (
+  <FieldWrapper onAction={onAction}>
+    <FileUploadRoot>
+      <FileUploadLabel>Upload file</FileUploadLabel>
+      <InputGroup
+        startElement={<DynamicIcon name="upload" size={20} />}
+        endElement={
+          <FileUploadClearTrigger asChild>
+            <CloseButton size="xs" />
+          </FileUploadClearTrigger>
+        }
+      >
+        <FileUploadInput />
+      </InputGroup>
+    </FileUploadRoot>
   </FieldWrapper>
 );
 
-const FileUploadElement = () => (
-  <FileUploadRoot>
-    <FileUploadLabel>Upload file</FileUploadLabel>
-    <InputGroup 
-// @ts-ignore
-    startElement={<DynamicIcon name="upload" size={20} />} endElement={<FileUploadClearTrigger asChild><CloseButton size="xs" /></FileUploadClearTrigger>}>
-      <FileInput />
-    </InputGroup>
-  </FileUploadRoot>
-);
+// Rating Element
+const RatingElement = ({ config = {} }) => <Rating colorPalette={config.color || "green"} />;
 
-// @ts-ignore
-const RatingElement = () => <Rating colorPalette="green" />;
-
-const FlatpickrWrapper = ({ config = {} }) => (
-  <FieldWrapper config={config}>
-    <Flatpickr options={config.
-// @ts-ignore
-    options} value={config.value} onChange={config.onChange} className="p-2 border rounded" />
+// Date Picker (Flatpickr)
+const FlatpickrWrapper = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Flatpickr options={config.options} value={config.value} className="p-2 border rounded" />
   </FieldWrapper>
 );
 
@@ -178,8 +186,10 @@ const Field = ({ type, config }) => {
     date: FlatpickrWrapper,
   };
 
+  console.log("field Data:", config, type);
+
   const Component = fieldComponents[type] || (() => null);
-  return <Component config={configs[type]} />;
+  return <Component config={config} />;
 };
 
 

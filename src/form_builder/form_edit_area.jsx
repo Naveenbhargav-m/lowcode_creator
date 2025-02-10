@@ -10,8 +10,9 @@ import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
 import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
-import { RenderElements } from "./form_renderer";
+import { DynamicFormComponent, RenderElements } from "./form_renderer";
 import { getSortedFields } from "../utils/helpers";
+import { CallOnChange, configs } from "./form_test_data";
 
 function EditArea() {
     return (
@@ -110,7 +111,15 @@ function EditArea() {
   
     {/* Main content area */}
     <div className="bg-background scrollable-div" style={{height:"100vh", width:"90%", padding:"20px"}}>
-        <EditArea />
+            <div>
+              <DynamicFormComponent
+               configs={configs}
+               values={{"01":"Hello this is the text", "02":true}} 
+               onChange={(data) => {CallOnChange(data)}}
+               onSubmit={(data) => CallOnChange(data)}
+               />
+            </div>
+        {/* <EditArea /> */}
     </div>
   
     <div className="w-1/6 bg-white h-screen scrollable-div">
