@@ -1,282 +1,196 @@
-import { Group, Input, InputAddon, Stack, HStack, parseColor , Textarea } from "@chakra-ui/react";
+import { Input, Stack, Textarea } from "@chakra-ui/react";
 import { PasswordInput } from "../../components/ui/password-input";
 import { Switch } from "../../components/ui/switch";
 import { Checkbox } from "../../components/ui/checkbox";
-import { Radio , RadioGroup} from "../../components/ui/radio";
+import { Radio, RadioGroup } from "../../components/ui/radio";
 import Select from "react-select";
 import { Slider } from "../../components/ui/slider";
 import { CloseButton } from "../../components/ui/close-button";
-
-import {  ColorPickerArea,
-  ColorPickerContent,
-  ColorPickerControl,
-  ColorPickerEyeDropper,
-  ColorPickerInput,
-  ColorPickerLabel,
-  ColorPickerRoot,
-  ColorPickerSliders,
-  ColorPickerTrigger} from "../../components/ui/color-picker" ;
-  import {
-    FileInput,
-    FileUploadClearTrigger,
-    FileUploadLabel,
-    FileUploadRoot,
-  } from "../../components/ui/file-upload"
-  import { InputGroup } from "../../components/ui/input-group"
+// @ts-ignore
+import { ColorPickerRoot, ColorPickerLabel, ColorPickerControl, ColorPickerInput, ColorPickerTrigger, ColorPickerContent, ColorPickerArea, ColorPickerEyeDropper, ColorPickerSliders } from "../../components/ui/color-picker";
+import { FileInput, FileUploadClearTrigger, FileUploadLabel, FileUploadRoot } from "../../components/ui/file-upload";
+import { InputGroup } from "../../components/ui/input-group";
 import DynamicIcon from "../../components/custom/dynamic_icon";
 import { Rating } from "../../components/ui/rating";
-// @ts-ignore
-export function TextField({ config = {}}) {
-  // @ts-ignore
-  const { value = "", style = {}, placeholder = "", ...rest } = config || {};
-  return <Input style={style} placeholder={placeholder} defaultValue={value} {...rest} />;
-}
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/material_blue.css";
+import { forwardRef } from "preact/compat";
 
-// @ts-ignore
-export function PasswordField({ config = {} }) {
-  // @ts-ignore
-  const { value = "", style = {}, placeholder = "", ...rest } = config || {};
-  // @ts-ignore
-  return <PasswordInput style={style} placeholder={placeholder} defaultValue={value} {...rest} />;
-}
+let defaultConfig =  {"style": {}, "value": "test", "onChange":(data) => {console.log("cahnged");}, "placeHolder":"chakra Field Here"};
 
-// @ts-ignore
-export function SwitchElement({ config = {} }) {
-  // @ts-ignore
-  const { value = false, style = {}, ...rest } = config || {};
-  // @ts-ignore
-  return <Switch style={style} variant="raised" checked={value} {...rest} />;
-}
-
-
-
-// @ts-ignore
-export function CheckBoxElement({ config = {} }) {
-  // @ts-ignore
-  const { value = false, style = {}, onChange, label = "", ...rest } = config || {};
+let configs ={
+  "textfield": defaultConfig,
+  "switch":{...defaultConfig, "colorPalette":"green"},
+  "checkbox": {...defaultConfig, value:true},
+};
+// Common field wrapper
+// Common Field Wrapper
+const FieldWrapper = ({ children, config, onAction }) => {
+  console.log("In Field Wrapper : children , config, onAction:", children, config, onAction);
+  const handleEvent = (event) => {
+    console.log("event :",event.type, event);
+  };
 
   return (
-    <Checkbox 
-      // @ts-ignore
-      isChecked={value} 
-      onChange={onChange} 
-      colorScheme="blue" 
-      style={{ ...style }} 
-      {...rest}
+    <div
+      style={config.style || {}}
+      onChange={handleEvent}
+      onBlur={handleEvent}
+      onFocus={handleEvent}
+      onClick={handleEvent}
+      onKeyDown={handleEvent}
     >
-      {label}
-    </Checkbox>
+      {children}
+    </div>
   );
-}
+};
 
-// @ts-ignore
-export function RadioGroupElement({ config = {} }) {
-  const {
-    // @ts-ignore
-    value = "",
-    // @ts-ignore
-    onChange,
-    // @ts-ignore
-    options = [],
-    // @ts-ignore
-    direction = "column",
-    // @ts-ignore
-    defaultValue,
-    // @ts-ignore
-    style = {},
-    ...rest
-  } = config || {};
 
+// Form Components
+const TextField = forwardRef(({ config = {}, onAction }, ref) => {
   return (
-
-    <RadioGroup value={value} onChange={onChange} defaultValue={defaultValue} {...rest}>
-      <Stack direction={direction} style={{ ...style }}>
-        {options.map((option) => (
-          <Radio key={option.value} 
-// @ts-ignore
-          value={option.value} colorScheme="blue">
-            {option.label}
-          </Radio>
-        ))}
-      </Stack>
-    </RadioGroup>
+    <FieldWrapper config={config} onAction={onAction}>
+      <Input
+        ref={ref}
+        placeholder={config.placeholder || ""}
+        defaultValue={config.value || ""}
+        style={{ ...config.style }}
+      />
+    </FieldWrapper>
   );
-}
+});
 
+// Text Field
+// Password Field
+const PasswordField = forwardRef(({ config = {}, onAction }, ref) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Input ref={ref} type="password" placeholder={config.placeholder || ""} defaultValue={config.value || ""} />
+  </FieldWrapper>
+));
 
+// Switch Element
+const SwitchElement = forwardRef(({ config = {}, onAction }, ref) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Switch isChecked={config.value || false} style={config.style} colorPalette={config.color} />
+  </FieldWrapper>
+));
 
-// @ts-ignore
-export function SelectElement({ config = {} }) {
-  const {
-    // @ts-ignore
-    value = "",
-    // @ts-ignore
-    onChange,
-    // @ts-ignore
-    options = [],
-    // @ts-ignore
-    placeholder = "Select an option",
-    // @ts-ignore
-    defaultValue,
-    // @ts-ignore
-    style = {},
-    ...rest
-  } = config;
+// Checkbox Element
+const CheckBoxElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Checkbox isChecked={config.value || false}>{config.label}</Checkbox>
+  </FieldWrapper>
+);
 
-  return (
-    <
-// @ts-ignore
-    Select 
-      value={value} 
-      onChange={onChange} 
-      defaultValue={defaultValue} 
-      placeholder={placeholder} 
-      style={{ ...style }} 
-      {...rest}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
+// Radio Group
+const RadioGroupElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Stack direction={config.direction || "column"}>
+      {config.options?.map((option) => (
+        <Radio key={option.value} value={option.value}>
           {option.label}
-        </option>
+        </Radio>
       ))}
-    </Select>
-  );
-}
+    </Stack>
+  </FieldWrapper>
+);
 
+// Select Element
+const SelectElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Select options={config.options} placeholder={config.placeholder} />
+  </FieldWrapper>
+);
 
+// Multi-Select Element
+const MultiSelectElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Select isMulti options={config.options} placeholder={config.placeholder} />
+  </FieldWrapper>
+);
 
-// @ts-ignore
-export function MultiSelectElement({ config = {} }) {
-  const {
-    // @ts-ignore
-    value = [],
-    // @ts-ignore
-    onChange,
-    // @ts-ignore
-    options = [],
-    // @ts-ignore
-    placeholder = "Select options",
-    // @ts-ignore
-    style = {},
-    ...rest
-  } = config;
+// Slider Element
+const SliderElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Slider defaultValue={config.value || 40} />
+  </FieldWrapper>
+);
 
-  return (
-    <Select
-      isMulti
-      value={value}
-      onChange={onChange}
-      options={options}
-      placeholder={placeholder}
-      styles={{
-        control: (base) => ({
-          ...base,
-          ...style,
-        }),
-      }}
-      {...rest}
-    />
-  );
-}
-
-
-
-export function SliderElement({config = {value:false, style:{},onChange: () =>{}, label:""}}) {
-  const { value = false, style = {}, onChange, label = "", ...rest } = config || {};
-  return (
-      // @ts-ignore
-    <Slider label="Quantity" width="200px" colorPalette="green" defaultValue={[40]} />
-  );
-
-}
-
-
-export function SliderRangeElement({config = {value:false, style:{},onChange: () =>{}, label:""}}) {
-  const { value = false, style = {}, onChange, label = "", ...rest } = config || {};
-  return (
-      // @ts-ignore
-    <Slider colorPalette="green" width="200px" defaultValue={[40, 80]} />
-  );
-
-}
-
-export function UrlElement({config = {value:false, style:{},onChange: () =>{}, label:""}}) {
-  const { value = false, style = {}, onChange, label = "", ...rest } = config || {};
-  return (
-      // @ts-ignore
-      <Group attached>
-      <InputAddon colorPalette="white" style={{backgroundColor:"white"}}>https://</InputAddon>
-      <Input placeholder="Url..." />
-    </Group>
-
-  );
-
-}
-
-
-export function ColorElement({config = {value:false, style:{},onChange: () =>{}, label:""}}) {
-  const { value = false, style = {}, onChange, label = "", ...rest } = config || {};
-  return (
-    <ColorPickerRoot 
-// @ts-ignore
-    defaultValue={parseColor("#eb5e41")} maxW="200px">
-    <ColorPickerLabel>Color</ColorPickerLabel>
-    <ColorPickerControl>
-      <ColorPickerInput />
-      <ColorPickerTrigger />
-    </ColorPickerControl>
-    <ColorPickerContent>
-      <ColorPickerArea />
-      <HStack>
-        <ColorPickerEyeDropper />
+// Color Picker
+const ColorElement = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <ColorPickerRoot defaultValue={config.value || "#eb5e41"}>
+      <ColorPickerLabel>Color</ColorPickerLabel>
+      <ColorPickerControl>
+        <ColorPickerInput />
+        <ColorPickerTrigger />
+      </ColorPickerControl>
+      <ColorPickerContent>
+        <ColorPickerArea />
         <ColorPickerSliders />
-      </HStack>
-    </ColorPickerContent>
-  </ColorPickerRoot>
-  );
-}
+      </ColorPickerContent>
+    </ColorPickerRoot>
+  </FieldWrapper>
+);
 
+// Text Area
+const TextAreaElement = forwardRef(({ config = {}, onAction }, ref) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Textarea ref={ref} placeholder={config.placeholder || ""} defaultValue={config.value || ""} />
+  </FieldWrapper>
+));
 
-
-export function TextAreaElement({config = {value:false, style:{},onChange: () =>{}, label:""}}) {
-  const { value = false, style = {}, onChange, label = "", ...rest } = config || {};
-  return (
-    <Textarea placeholder={"textArea....."}/>
-  );
-}
-
-
-export function FileUploadElement({}) {
-  return (
-    <FileUploadRoot gap="1" maxWidth="300px">
+// File Upload
+const FileUploadElement = ({ onAction }) => (
+  <FieldWrapper onAction={onAction}>
+    <FileUploadRoot>
       <FileUploadLabel>Upload file</FileUploadLabel>
       <InputGroup
-        w="full"
-        startElement={<DynamicIcon name={"upload"} size={20}/>}
+        startElement={<DynamicIcon name="upload" size={20} />}
         endElement={
           <FileUploadClearTrigger asChild>
-            <CloseButton
-              me="-1"
-              size="xs"
-              variant="plain"
-              focusVisibleRing="inside"
-              focusRingWidth="2px"
-              pointerEvents="auto"
-              color="fg.subtle"
-            />
+            <CloseButton size="xs" />
           </FileUploadClearTrigger>
         }
       >
-        <FileInput />
+        <FileUploadInput />
       </InputGroup>
     </FileUploadRoot>
-  )
+  </FieldWrapper>
+);
 
-}
+// Rating Element
+const RatingElement = ({ config = {} }) => <Rating colorPalette={config.color || "green"} />;
+
+// Date Picker (Flatpickr)
+const FlatpickrWrapper = ({ config = {}, onAction }) => (
+  <FieldWrapper config={config} onAction={onAction}>
+    <Flatpickr options={config.options} value={config.value} className="p-2 border rounded" />
+  </FieldWrapper>
+);
+
+const Field = ({ type, config }) => {
+  const fieldComponents = {
+    textfield: TextField,
+    password: PasswordField,
+    switch: SwitchElement,
+    checkbox: CheckBoxElement,
+    radio: RadioGroupElement,
+    dropdown: SelectElement,
+    multi_select: MultiSelectElement,
+    slider: SliderElement,
+    color: ColorElement,
+    textarea: TextAreaElement,
+    file_upload: FileUploadElement,
+    rating: RatingElement,
+    date: FlatpickrWrapper,
+  };
+
+  console.log("field Data:", config, type);
+
+  const Component = fieldComponents[type] || (() => null);
+  return <Component config={config} />;
+};
 
 
-export function RatingElement() {
-  return (
-    <Rating colorPalette="green"/>
-  );
-}
+export { Field, TextField, PasswordField, SwitchElement, CheckBoxElement, RadioGroupElement, SelectElement, MultiSelectElement, SliderElement, ColorElement, TextAreaElement, FileUploadElement, RatingElement, FlatpickrWrapper };
