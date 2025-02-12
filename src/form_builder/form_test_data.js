@@ -1,8 +1,9 @@
 import { signal } from "@preact/signals";
 import { defaultStyle, fieldStyle, labelStyle } from "./configs_view/constantConfigs";
+import { FunctionExecutor } from "../states/common_actions";
 
 let elementData = {
-    "type":"textfield",
+    "type":"checkbox",
     "id": "01",
     "parent": "screen",
     "children": [],
@@ -28,16 +29,33 @@ let elementData = {
     "onDestroy": "",
     "value": "",
     "valueData": "",
+    "label":"Check me"
   };
 
 const configs = [
-    signal({...elementData, "onChange": 'return {"01":{"style":{"borderRadius":"30px"}},"02":{"value":false}};'}),
-    signal({...elementData, "type":"switch", "id":"02", "color":"green"})
+    signal({...elementData, "onChange": 'console.log("called on Change:",cur_value);return {"01":{"style":{"borderRadius":"30px"}, "value":!cur_value},"02":{"value":false}};'}),
+    signal({...elementData, "id":"02","type":"radio", "options":[{"label":"Option1", "value":"1"}, {"label":"option2","value":"2"}]})
 ];
 
 let values = signal({"01":"Hello this is the text", "02":true});
 function UpdateConfig(input) {
-    let newconfigs = input["config"];
+    let config = input["config"];
+    let key = input["key"];
+    let curvalue = input["value"];
+    let eventCode = config[key];
+    if (!eventCode || eventCode.length === 0) {
+      return;
+    }
+    let functionParams = {"cur_element": config,"cur_value":curvalue, "configs": JSON.stringify(configs), "values": JSON.stringify(values)}
+    var resp = FunctionExecutor(functionParams, eventCode);
+    const id = config["id"];
+    let newconfigs = {};
+    if(resp !== undefined) {
+        newconfigs = {...resp};
+    }
+     else {
+        newconfigs = {...config};
+     }
     let newval = input["value"];
     if(newconfigs === undefined) {
         return;

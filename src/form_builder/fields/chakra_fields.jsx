@@ -1,4 +1,4 @@
-import { Input, Stack, Textarea } from "@chakra-ui/react";
+import { HStack, Input, Stack, Textarea } from "@chakra-ui/react";
 import { PasswordInput } from "../../components/ui/password-input";
 import { Switch } from "../../components/ui/switch";
 import { Checkbox } from "../../components/ui/checkbox";
@@ -59,65 +59,94 @@ const FieldWrapper = ({ children, config, onAction }) => {
 };
 
 // Form Component
-function TextField({ config = {}, handleEvent = () => {} }) {
+function TextField({ config = {}, onAction}) {
   return (
       <Input
-        placeholder={config.placeholder || ""}
-        value={config.value || ""}
-        style={{ ...config.style }}
-        onBlur={(e) => handleEvent(e, "onBlur")}
-        onFocus={(e) => handleEvent(e, "onFocus")}
-        onClick={(e) => handleEvent(e, "onClick")}
-        onKeyDown={(e) => handleEvent(e, "onKeyDown")}
-        onMouseEnter={(e) => handleEvent(e, "onMouseEnter")}
+        placeholder={config["placeholder"] || ""}
+        value={config["value"] || ""}
+        style={{ ...config["style"] }}
+        onBlur={(e) => onAction(e, "onBlur", config["value"])}
+        onFocus={(e) => onAction(e, "onFocus",config["value"])}
+        onClick={(e) => onAction(e, "onClick",config["value"])}
+        onKeyDown={(e) => onAction(e, "onKeyDown",config["value"])}
+        onMouseEnter={(e) => onAction(e, "onMouseEnter",config["value"])}
       />
   );
 }
 
 
 // Password Field
-const PasswordField = forwardRef(({ config = {}, onAction }, ref) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Input ref={ref} type="password" placeholder={config.placeholder || ""} />
-  </FieldWrapper>
-));
+function PasswordField({ config = {}, onAction }){
+    return (
+    <Input type="password" 
+    placeholder={config["placeholder"] || ""}
+    value={config["value"] || ""}
+    style={{ ...config["style"] }}
+    onBlur={(e) => onAction(e, "onBlur", config["value"])}
+    onFocus={(e) => onAction(e, "onFocus",config["value"])}
+    onClick={(e) => onAction(e, "onClick",config["value"])}
+    onKeyDown={(e) => onAction(e, "onKeyDown",config["value"])}
+    onMouseEnter={(e) => onAction(e, "onMouseEnter",config["value"])}
+     />
+    );
+}
 
 
 
 function SwitchElement({ config = {}, onAction }) {
 
-  console.log("new switch value:", config.value);
-
+  // console.log("new switch value:", config["value"]);
   return (
     <Switch
-      checked={config.value}
-      onCheckedChange={(e) => {onAction(e,"onChange")}}
-      style={config.style}
-      colorPalette={config.color}
+      // @ts-ignore
+      checked={config["value"]}
+      onCheckedChange={(e) => {onAction(e,"onChange",config["value"])}}
+      style={config["style"]}
+      colorPalette={config["color"]}
     />
   );
 }
 
 
 
-const CheckBoxElement = ({ config = {}, onAction }) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Checkbox isChecked={config.value}>{config.label}</Checkbox>
-  </FieldWrapper>
-);
+function CheckBoxElement({ config = {}, onAction }) {
+  console.log("called checkbox:",config);
+  return (
+    <div>
+    <Checkbox 
+    // @ts-ignore
+    style={{"display":"flex","flexDirection":"row"}}
+    colorPalette={"green"}
+// @ts-ignore
+    checked={config["value"]} 
+    onCheckedChange={(e) => {onAction(e, "onChange",config["value"])}}>
+      {config["label"]}
+      </Checkbox>
+      </div>
+      );
+}
 
 // Radio Group
-const RadioGroupElement = ({ config = {}, onAction }) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Stack direction={config.direction || "column"}>
-      {config.options?.map((option) => (
-        <Radio key={option.value} value={option.value}>
-          {option.label}
-        </Radio>
-      ))}
-    </Stack>
-  </FieldWrapper>
-);
+function RadioGroupElement({ config = {}, onAction }){
+  console.log("radio group options:",config["options"]);
+  return (
+    <RadioGroup defaultValue="1" 
+    colorPalette={"green"}
+     onValueChange={(e) => {onAction(e, "onChange", e.value);}}>
+        {config.
+// @ts-ignore
+        options?.map((option) => (
+          <div style={{display:"flex", "flexDirection":"row"}}>
+          <Radio 
+// @ts-ignore
+          style={{"display":"flex","flexDirection":"row"}} key={option.value} value={option.value} orientation="horizontal">
+            {option.label}
+          </Radio>
+          </div>
+        ))}
+      </RadioGroup>
+  );
+}
 
 // Select Element
 const SelectElement = ({ config = {}, onAction }) => (
@@ -210,24 +239,17 @@ const Field = ({ type, config , Action}) => {
     date: FlatpickrWrapper,
   };
 
-  const handleEvent = (event, key) => {
+  const handleEvent = (event, key , value) => {
     if (key === "onKeyDown") {
       key = "onChange";
     }
-    let eventCode = config[key];
-    if (!eventCode || eventCode.length === 0) {
-      return;
-    }
-    var resp = FunctionExecutor({}, eventCode);
-    const id = config["id"];
-    var valuedata = { [id]: event.target.value };
-    Action({ config: resp, value: valuedata });
+    Action({ "config": config, "key":key, "value": value });
   };
 
 
 
   const Component = fieldComponents[type] || (() => null);
-  return <Component config={config} handleEvent={handleEvent} />;
+  return <Component config={config} onAction={handleEvent} />;
 };
 
 
