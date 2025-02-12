@@ -1,5 +1,6 @@
 // src/components/ReorderableList.js
-import React, { useState } from 'react';
+import React from "preact/compat";
+import { useState } from "preact/hooks";
 
 const ReorderableList = ({ children, data, onReorder }) => {
   const [order, setOrder] = useState(data.elements);

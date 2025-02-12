@@ -1,5 +1,4 @@
 // src/components/Drag.js
-import React from "react";
 
 const Draggable = ({ data, onDragStart, children }) => {
   const handleDragStart = (event) => {

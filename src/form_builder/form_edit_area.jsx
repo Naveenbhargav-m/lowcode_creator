@@ -12,7 +12,7 @@ import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
 import { DynamicFormComponent, RenderElements } from "./form_renderer";
 import { getSortedFields } from "../utils/helpers";
-import { CallOnChange, configs } from "./form_test_data";
+import { CallOnChange, configs, UpdateConfig, values } from "./form_test_data";
 
 function EditArea() {
     return (
@@ -114,9 +114,10 @@ function EditArea() {
             <div>
               <DynamicFormComponent
                configs={configs}
-               values={{"01":"Hello this is the text", "02":true}} 
+               values={values} 
                onChange={(data) => {CallOnChange(data)}}
                onSubmit={(data) => CallOnChange(data)}
+               updateCallback={(data) => UpdateConfig(data)}
                />
             </div>
         {/* <EditArea /> */}
