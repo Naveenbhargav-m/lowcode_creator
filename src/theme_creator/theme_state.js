@@ -28,10 +28,16 @@ function LoadThemes() {
             firstkey = key;
             firstKeyAdded = true;
         }
+        if(themes[key] === undefined) {
+            continue;
+        }
         let temp = {"id":themes[key]["id"], "name": themes[key]["name"]}
         myarr.push(temp);
     }
     themeNameAndIDSList.value = [...myarr];
+    if(themes[firstkey] === undefined) {
+        return;
+    }
     ActiveTheme.value = themes[firstkey]["id"];
 }
 

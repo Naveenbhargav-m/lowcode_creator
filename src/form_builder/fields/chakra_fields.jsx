@@ -14,7 +14,9 @@ import DynamicIcon from "../../components/custom/dynamic_icon";
 import { Rating } from "../../components/ui/rating";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_blue.css";
-import { forwardRef } from "preact/compat";
+import { forwardRef, useEffect, useState } from "preact/compat";
+import { FunctionExecutor } from "../../states/common_actions";
+import React from "preact/compat";
 
 let defaultConfig =  {"style": {}, "value": "test", "onChange":(data) => {console.log("cahnged");}, "placeHolder":"chakra Field Here"};
 
@@ -23,62 +25,84 @@ let configs ={
   "switch":{...defaultConfig, "colorPalette":"green"},
   "checkbox": {...defaultConfig, value:true},
 };
-// Common field wrapper
-// Common Field Wrapper
+
 const FieldWrapper = ({ children, config, onAction }) => {
-  console.log("In Field Wrapper : children , config, onAction:", children, config, onAction);
-  const handleEvent = (event) => {
-    console.log("event :",event.type, event);
+
+  const handleEvent = (event, key) => {
+    if (key === "onKeyDown") {
+      key = "onChange";
+    }
+    let eventCode = config[key];
+    if (!eventCode || eventCode.length === 0) {
+      return;
+    }
+    var resp = FunctionExecutor({}, eventCode);
+    const id = config["id"];
+    var valuedata = { [id]: event.target.value };
+    onAction({ config: resp, value: valuedata });
   };
 
+  console.log("rerendering:", config);
   return (
     <div
       style={config.style || {}}
-      onChange={handleEvent}
-      onBlur={handleEvent}
-      onFocus={handleEvent}
-      onClick={handleEvent}
-      onKeyDown={handleEvent}
+      onBlur={(e) => handleEvent(e, "onBlur")}
+      onFocus={(e) => handleEvent(e, "onFocus")}
+      onClick={(e) => handleEvent(e, "onClick")}
+      onKeyDown={(e) => handleEvent(e, "onKeyDown")}
+      onMouseEnter={(e) => handleEvent(e, "onHover")}
     >
       {children}
+
     </div>
   );
 };
 
-
-// Form Components
-const TextField = forwardRef(({ config = {}, onAction }, ref) => {
+// Form Component
+function TextField({ config = {}, handleEvent = () => {} }) {
   return (
-    <FieldWrapper config={config} onAction={onAction}>
       <Input
-        ref={ref}
         placeholder={config.placeholder || ""}
-        defaultValue={config.value || ""}
+        value={config.value || ""}
         style={{ ...config.style }}
+        onBlur={(e) => handleEvent(e, "onBlur")}
+        onFocus={(e) => handleEvent(e, "onFocus")}
+        onClick={(e) => handleEvent(e, "onClick")}
+        onKeyDown={(e) => handleEvent(e, "onKeyDown")}
+        onMouseEnter={(e) => handleEvent(e, "onMouseEnter")}
       />
-    </FieldWrapper>
   );
-});
+}
 
-// Text Field
+
 // Password Field
 const PasswordField = forwardRef(({ config = {}, onAction }, ref) => (
   <FieldWrapper config={config} onAction={onAction}>
-    <Input ref={ref} type="password" placeholder={config.placeholder || ""} defaultValue={config.value || ""} />
+    <Input ref={ref} type="password" placeholder={config.placeholder || ""} />
   </FieldWrapper>
 ));
 
-// Switch Element
-const SwitchElement = forwardRef(({ config = {}, onAction }, ref) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Switch isChecked={config.value || false} style={config.style} colorPalette={config.color} />
-  </FieldWrapper>
-));
 
-// Checkbox Element
+
+function SwitchElement({ config = {}, onAction }) {
+
+  console.log("new switch value:", config.value);
+
+  return (
+    <Switch
+      checked={config.value}
+      onCheckedChange={(e) => {onAction(e,"onChange")}}
+      style={config.style}
+      colorPalette={config.color}
+    />
+  );
+}
+
+
+
 const CheckBoxElement = ({ config = {}, onAction }) => (
   <FieldWrapper config={config} onAction={onAction}>
-    <Checkbox isChecked={config.value || false}>{config.label}</Checkbox>
+    <Checkbox isChecked={config.value}>{config.label}</Checkbox>
   </FieldWrapper>
 );
 
@@ -169,7 +193,7 @@ const FlatpickrWrapper = ({ config = {}, onAction }) => (
   </FieldWrapper>
 );
 
-const Field = ({ type, config }) => {
+const Field = ({ type, config , Action}) => {
   const fieldComponents = {
     textfield: TextField,
     password: PasswordField,
@@ -186,10 +210,24 @@ const Field = ({ type, config }) => {
     date: FlatpickrWrapper,
   };
 
-  console.log("field Data:", config, type);
+  const handleEvent = (event, key) => {
+    if (key === "onKeyDown") {
+      key = "onChange";
+    }
+    let eventCode = config[key];
+    if (!eventCode || eventCode.length === 0) {
+      return;
+    }
+    var resp = FunctionExecutor({}, eventCode);
+    const id = config["id"];
+    var valuedata = { [id]: event.target.value };
+    Action({ config: resp, value: valuedata });
+  };
+
+
 
   const Component = fieldComponents[type] || (() => null);
-  return <Component config={config} />;
+  return <Component config={config} handleEvent={handleEvent} />;
 };
 
 

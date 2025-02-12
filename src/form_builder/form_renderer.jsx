@@ -6,7 +6,9 @@ import { AddtoElements, currentFormElements, formActiveElement } from "./form_bu
 
 export function RenderRoworColumnChildren(children,values = {}, 
   onChange = (data) => {console.log("form submition data:",data);}, 
-  onSubmit = (data) => {console.log("form submition data:",data); }) {
+  onSubmit = (data) => {console.log("form submition data:",data); },
+  updateCallback = (newdata) => {},
+) {
     if(children === undefined) {
       return <></>;
     }
@@ -16,7 +18,7 @@ export function RenderRoworColumnChildren(children,values = {},
       let temp = currentFormElements.value[childID];
       childElements.push(temp);
     }
-    return RenderElements(childElements, true, values, onChange, onSubmit);
+    return RenderElements(childElements, true, values, onChange, onSubmit, updateCallback);
   }
   
   
@@ -37,12 +39,15 @@ export function RenderRoworColumnChildren(children,values = {},
   
   export function RenderElements(elementsValue = [], areChildren = false, values = {}, 
     onChange = (data) => {console.log("form submition data:",data);}, 
-    onSubmit = (data) => {console.log("form submition data:",data); }) {
+    onSubmit = (data) => {console.log("form submition data:",data);},
+    updateCallback = (newdata) => {},
+  ) {
       if(elementsValue === undefined) {
         return <></>;
       }
       return (<div style={{display:"contents"}}>
-      {Object.values(elementsValue).map(value => {
+      {Object.values(elementsValue).map(curVal => {
+          let value = curVal.value;
           let type = value["type"];
           let id = value["id"];
           let parent = value["parent"];
@@ -54,7 +59,7 @@ export function RenderRoworColumnChildren(children,values = {},
             return (
               <SelectAble id={id}>
               <Column config={value} onDrop={AddtoElements}>
-                {RenderRoworColumnChildren(children, values, onChange, onSubmit)}
+                {RenderRoworColumnChildren(children, values, onChange, onSubmit, updateCallback)}
               </Column>
               </SelectAble>
             
@@ -66,7 +71,7 @@ export function RenderRoworColumnChildren(children,values = {},
             return (
               <SelectAble id={id}>
               <Row config={value} onDrop={AddtoElements}>
-                {RenderRoworColumnChildren(children,values, onChange, onSubmit)}
+                {RenderRoworColumnChildren(children,values, onChange, onSubmit, updateCallback)}
               </Row>
               </SelectAble>
             );
@@ -75,7 +80,8 @@ export function RenderRoworColumnChildren(children,values = {},
           let labelStyle = value["labelStyle"];
           let fieldStyle = value["fieldStyle"];
           let config = value["config"];
-          let prefil = values[value["id"]];
+          let prefil = values.peek()[value["id"]];
+          console.log("prefil:",prefil);
           value["value"] = prefil;
           return (
           <SelectAble id={id}>
@@ -91,6 +97,7 @@ export function RenderRoworColumnChildren(children,values = {},
                 config={
                   value
                 }
+                Action={updateCallback}
             />
           </PanelField>
           </SelectAble>
@@ -105,7 +112,9 @@ export function DynamicFormComponent({
   configs = [], 
   values = {}, 
   onChange = (data) => {console.log("form submition data:",data);}, 
-  onSubmit = (data) => {console.log("form submition data:",data); }}) {
+  onSubmit = (data) => {console.log("form submition data:",data); },
+  updateCallback = (newdata) => {},
+}) {
     
-    return RenderElements(configs, false, values, onChange, onSubmit);
+    return RenderElements(configs, false, values, onChange, onSubmit, updateCallback);
   }
