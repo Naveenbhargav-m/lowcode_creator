@@ -1,76 +1,18 @@
-import { HStack, Input, Stack, Textarea } from "@chakra-ui/react";
-import { PasswordInput } from "../../components/ui/password-input";
-import { Switch } from "../../components/ui/switch";
-import { Checkbox } from "../../components/ui/checkbox";
-import { Radio, RadioGroup } from "../../components/ui/radio";
-import Select from "react-select";
-import { Slider } from "../../components/ui/slider";
-import { CloseButton } from "../../components/ui/close-button";
-// @ts-ignore
-import { ColorPickerRoot, ColorPickerLabel, ColorPickerControl, ColorPickerInput, ColorPickerTrigger, ColorPickerContent, ColorPickerArea, ColorPickerEyeDropper, ColorPickerSliders } from "../../components/ui/color-picker";
-import { FileInput, FileUploadClearTrigger, FileUploadLabel, FileUploadRoot } from "../../components/ui/file-upload";
-import { InputGroup } from "../../components/ui/input-group";
-import DynamicIcon from "../../components/custom/dynamic_icon";
-import { Rating } from "../../components/ui/rating";
-import Flatpickr from "react-flatpickr";
-import "flatpickr/dist/themes/material_blue.css";
-import { forwardRef, useEffect, useState } from "preact/compat";
-import { FunctionExecutor } from "../../states/common_actions";
-import React from "preact/compat";
-
-let defaultConfig =  {"style": {}, "value": "test", "onChange":(data) => {console.log("cahnged");}, "placeHolder":"chakra Field Here"};
-
-let configs ={
-  "textfield": defaultConfig,
-  "switch":{...defaultConfig, "colorPalette":"green"},
-  "checkbox": {...defaultConfig, value:true},
-};
-
-const FieldWrapper = ({ children, config, onAction }) => {
-
-  const handleEvent = (event, key) => {
-    if (key === "onKeyDown") {
-      key = "onChange";
-    }
-    let eventCode = config[key];
-    if (!eventCode || eventCode.length === 0) {
-      return;
-    }
-    var resp = FunctionExecutor({}, eventCode);
-    const id = config["id"];
-    var valuedata = { [id]: event.target.value };
-    onAction({ config: resp, value: valuedata });
-  };
-
-  console.log("rerendering:", config);
-  return (
-    <div
-      style={config.style || {}}
-      onBlur={(e) => handleEvent(e, "onBlur")}
-      onFocus={(e) => handleEvent(e, "onFocus")}
-      onClick={(e) => handleEvent(e, "onClick")}
-      onKeyDown={(e) => handleEvent(e, "onKeyDown")}
-      onMouseEnter={(e) => handleEvent(e, "onHover")}
-    >
-      {children}
-
-    </div>
-  );
-};
 
 // Form Component
 function TextField({ config = {}, onAction}) {
   return (
-      <Input
-        placeholder={config["placeholder"] || ""}
-        value={config["value"] || ""}
-        style={{ ...config["style"] }}
-        onBlur={(e) => onAction(e, "onBlur", config["value"])}
-        onFocus={(e) => onAction(e, "onFocus",config["value"])}
-        onClick={(e) => onAction(e, "onClick",config["value"])}
-        onKeyDown={(e) => onAction(e, "onKeyDown",config["value"])}
-        onMouseEnter={(e) => onAction(e, "onMouseEnter",config["value"])}
-      />
+      <input type="text"
+       name="text" 
+       placeholder={config["placeholder"] || ""} 
+       aria-label="Text"
+       style={{ ...config["style"] }}
+       onBlur={(e) => onAction(e, "onBlur", config["value"])}
+       onFocus={(e) => onAction(e, "onFocus",config["value"])}
+       onClick={(e) => onAction(e, "onClick",config["value"])}
+       onKeyDown={(e) => onAction(e, "onKeyDown",config["value"])}
+       onMouseEnter={(e) => onAction(e, "onMouseEnter",config["value"])}
+       ></input>
   );
 }
 
@@ -78,32 +20,35 @@ function TextField({ config = {}, onAction}) {
 // Password Field
 function PasswordField({ config = {}, onAction }){
     return (
-    <Input type="password" 
-    placeholder={config["placeholder"] || ""}
-    value={config["value"] || ""}
-    style={{ ...config["style"] }}
-    onBlur={(e) => onAction(e, "onBlur", config["value"])}
-    onFocus={(e) => onAction(e, "onFocus",config["value"])}
-    onClick={(e) => onAction(e, "onClick",config["value"])}
-    onKeyDown={(e) => onAction(e, "onKeyDown",config["value"])}
-    onMouseEnter={(e) => onAction(e, "onMouseEnter",config["value"])}
-     />
+      <input type="password"
+      name="text" 
+      placeholder={config["placeholder"] || ""} 
+      aria-label="Text"
+      style={{ ...config["style"] }}
+      onBlur={(e) => onAction(e, "onBlur", config["value"])}
+      onFocus={(e) => onAction(e, "onFocus",config["value"])}
+      onClick={(e) => onAction(e, "onClick",config["value"])}
+      onKeyDown={(e) => onAction(e, "onKeyDown",config["value"])}
+      onMouseEnter={(e) => onAction(e, "onMouseEnter",config["value"])}
+      ></input>
     );
 }
 
 
 
 function SwitchElement({ config = {}, onAction }) {
-
-  // console.log("new switch value:", config["value"]);
   return (
-    <Switch
-      // @ts-ignore
-      checked={config["value"]}
-      onCheckedChange={(e) => {onAction(e,"onChange",config["value"])}}
-      style={config["style"]}
-      colorPalette={config["color"]}
+    <label>
+    <input name="terms" 
+    type="checkbox" 
+    role="switch" 
+    checked={config["value"]}
+    style={config["style"]}
+    onChange={(e) => {onAction(e,"onChange",config["value"])}}
+
     />
+    I agree to the Terms
+  </label>
   );
 }
 
@@ -111,109 +56,134 @@ function SwitchElement({ config = {}, onAction }) {
 
 function CheckBoxElement({ config = {}, onAction }) {
   console.log("called checkbox:",config);
+  let fieldStyle = {"display":"flex", "flexDirection":"row"};
+
   return (
-    <div>
-    <Checkbox 
-    // @ts-ignore
-    style={{"display":"flex","flexDirection":"row"}}
-    colorPalette={"green"}
-// @ts-ignore
-    checked={config["value"]} 
-    onCheckedChange={(e) => {onAction(e, "onChange",config["value"])}}>
-      {config["label"]}
-      </Checkbox>
-      </div>
+    <fieldset>      
+        {config["options"].map((entity) => {
+          return (
+            <label style={fieldStyle}>
+            <input 
+            type="radio"
+              name="language"
+              id={entity["value"]}
+              checked={config["value"] === entity["value"]} 
+              onChange={(e) => onAction(e,"onChange",entity["value"])}
+              />
+            {entity["label"]}
+            </label>
+          );
+        })}
+    </fieldset>
       );
 }
 
 // Radio Group
 function RadioGroupElement({ config = {}, onAction }){
   console.log("radio group options:",config["options"]);
+  let fieldStyle = {"display":"flex", "flexDirection":"row"};
   return (
-    <RadioGroup defaultValue="1" 
-    colorPalette={"green"}
-     onValueChange={(e) => {onAction(e, "onChange", e.value);}}>
-        {config.
-// @ts-ignore
-        options?.map((option) => (
-          <div style={{display:"flex", "flexDirection":"row"}}>
-          <Radio 
-// @ts-ignore
-          style={{"display":"flex","flexDirection":"row"}} key={option.value} value={option.value} orientation="horizontal">
-            {option.label}
-          </Radio>
-          </div>
-        ))}
-      </RadioGroup>
+      <fieldset>      
+        {config["options"].map((entity) => {
+          return (
+            <label style={fieldStyle}>
+            <input 
+            type="radio"
+             name="language"
+             id={entity["value"]}
+              checked />
+            {entity["label"]}
+            </label>
+          );
+        })}
+    </fieldset>
   );
 }
 
 // Select Element
-const SelectElement = ({ config = {}, onAction }) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Select options={config.options} placeholder={config.placeholder} />
-  </FieldWrapper>
-);
+function SelectElement({ config = {}, onAction }) {
+  return (
+    <select name={config["name"]} aria-label="Select your favorite cuisine..." required>
+      {config["options"].map((inner_option) => {
+        return (
+          <option 
+          selected={inner_option["value"] === config["value"]} 
+          onChange={(e) => onAction(e, "onChange", inner_option["value"])}>
+            {inner_option["label"]}
+          </option>
+        );
+      })}
+    </select>
+  );
+
+}
 
 // Multi-Select Element
-const MultiSelectElement = ({ config = {}, onAction }) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Select isMulti options={config.options} placeholder={config.placeholder} />
-  </FieldWrapper>
-);
-
+function MultiSelectElement({ config = {}, onAction }) {
+  return (
+    <select name={config["name"]} aria-label="Select your favorite cuisine..." required>
+      {config["options"].map((inner_option) => {
+        return (
+          <option 
+          selected={inner_option["value"] === config["value"]} 
+          onChange={(e) => onAction(e, "onChange", inner_option["value"])}>
+            {inner_option["label"]}
+          </option>
+        );
+      })}
+    </select>);
+}
 // Slider Element
-const SliderElement = ({ config = {}, onAction }) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Slider defaultValue={config.value || 40} />
-  </FieldWrapper>
-);
+function SliderElement({ config = {}, onAction }) {
+  return (
+    <label>
+  {config["label"]}
+  <input type="range" value={config["value"]} onChange={(e) => {onAction(e, "onChange", config["value"]);}}/>
+</label>
+  );
+}
 
 // Color Picker
-const ColorElement = ({ config = {}, onAction }) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <ColorPickerRoot defaultValue={config.value || "#eb5e41"}>
-      <ColorPickerLabel>Color</ColorPickerLabel>
-      <ColorPickerControl>
-        <ColorPickerInput />
-        <ColorPickerTrigger />
-      </ColorPickerControl>
-      <ColorPickerContent>
-        <ColorPickerArea />
-        <ColorPickerSliders />
-      </ColorPickerContent>
-    </ColorPickerRoot>
-  </FieldWrapper>
-);
+function ColorElement({ config = {}, onAction }){
+  return (
+    <input
+  type="color"
+  value={config["value"]}
+  aria-label="Color picker"
+  onChange={(e) => onAction(e, "onChange", config["value"])}
+></input>
+  );
+}
 
 // Text Area
-const TextAreaElement = forwardRef(({ config = {}, onAction }, ref) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Textarea ref={ref} placeholder={config.placeholder || ""} defaultValue={config.value || ""} />
-  </FieldWrapper>
-));
+function TextAreaElement() {
+  return(
+    <textarea
+    name="bio"
+  placeholder="Write a professional short bio..."
+  aria-label="Professional short bio"
+>
+</textarea>
+  );
+}
 
 // File Upload
-const FileUploadElement = ({ onAction }) => (
-  <FieldWrapper onAction={onAction}>
-    <FileUploadRoot>
-      <FileUploadLabel>Upload file</FileUploadLabel>
-      <InputGroup
-        startElement={<DynamicIcon name="upload" size={20} />}
-        endElement={
-          <FileUploadClearTrigger asChild>
-            <CloseButton size="xs" />
-          </FileUploadClearTrigger>
-        }
-      >
-        <FileUploadInput />
-      </InputGroup>
-    </FileUploadRoot>
-  </FieldWrapper>
-);
+function FileUploadElement({ onAction }) {
+  return (
+    <input type="file"></input>
+  );
+}
 
 // Rating Element
-const RatingElement = ({ config = {} }) => <Rating colorPalette={config.color || "green"} />;
+function RatingElement({config, onAction}) {
+  return (
+    <label>
+  Brightness
+  <input type="range" />
+</label>
+
+  );
+}
 
 // Date Picker (Flatpickr)
 const FlatpickrWrapper = ({ config = {}, onAction }) => (
@@ -221,6 +191,8 @@ const FlatpickrWrapper = ({ config = {}, onAction }) => (
     <Flatpickr options={config.options} value={config.value} className="p-2 border rounded" />
   </FieldWrapper>
 );
+
+/* This the fields using Daisi ui and pico css*/
 
 const Field = ({ type, config , Action}) => {
   const fieldComponents = {

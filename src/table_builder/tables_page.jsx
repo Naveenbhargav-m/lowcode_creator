@@ -17,13 +17,15 @@ import "@xyflow/react/dist/style.css";
 
 import { PageBuilderLeftGrid } from "./page_builder_left";
 import TableBuilderRight from "./table_builder_right";
-import { tables, addContainer, addField, tablesFlag, activeTable, activeField, UpdateTableEdges, table_edges, currentTableConfigs, currentEdges, tables_id, Deletefield, UpdateRelation } from "./table_builder_state";
+import { tables, addContainer, addField, tablesFlag, activeTable, activeField, UpdateTableEdges, table_edges, currentTableConfigs, currentEdges, tables_id, Deletefield, UpdateRelation, dbViewSignal } from "./table_builder_state";
 import { Drop } from "../components/custom/Drop";
 import { SyncTablesData } from "../api/api";
 import { SaveTablesData, TablesDataSetterFromAPI } from "./table_builder_helpers";
 import { useSignal } from "@preact/signals";
 import DynamicIcon from "../components/custom/dynamic_icon";
 import { generateUID } from "../utils/helpers";
+import { ViewArea } from "../view_creator/view_page";
+import { AdvancedView } from "../view_creator/advnaced_views";
 
 
 const ResizableTableNode = ({ id, selected, onDeleteField }) => {
@@ -266,7 +268,7 @@ const onReconnectEnd = useCallback((_, edge) => {
     <div className="w-4/6 h-screen bg-background min-h-screen mx-4">
       {/* Top-right Button */}
       <div style={{display:"flex", flexDirection:"row", width:"100%", paddingTop:"20px", justifyContent:"space-between", alignItems:"center"}}>
-      <TablesTab onTableSelect={(tab) => console.log("tab selected:", tab)}/>
+      <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab}/>
       <TablesButtonsBar AddCallBack={addNode} 
       SaveCallback={() => {
         SyncTablesData(currentTableConfigs, currentEdges, tables_id.peek());
@@ -298,28 +300,28 @@ const onReconnectEnd = useCallback((_, edge) => {
 }
 
 
-function TablesPage() {
+
+
+function TableBuilderView() {
   return (
     <div className="min-h-screen h-screen w-full flex text-black bg-background">
-      {/* Left Panel */}
-      <div className="w-1/6 bg-white p-4 min-h-screen">
-        <PageBuilderLeftGrid />
-      </div>
-
-      {/* Main Content Area */}
-      <ReactFlowProvider>
-        <MyFlow />
-      </ReactFlowProvider>
-
-      {/* Right Panel */}
-      <div className="w-1/6 bg-white h-screen scrollable-div">
-        <TableBuilderRight />
-      </div>
+    {/* Left Panel */}
+    <div className="w-1/6 bg-white p-4 min-h-screen">
+      <PageBuilderLeftGrid />
     </div>
+
+    {/* Main Content Area */}
+    <ReactFlowProvider>
+      <MyFlow />
+    </ReactFlowProvider>
+
+    {/* Right Panel */}
+    <div className="w-1/6 bg-white h-screen scrollable-div">
+      <TableBuilderRight />
+    </div>
+  </div>
   );
 }
-
-
 
 function TablesButtonsBar({AddCallBack, SaveCallback}) {
   return (
@@ -344,7 +346,7 @@ function TablesButtonsBar({AddCallBack, SaveCallback}) {
 } 
 
 function TablesTab({ onTableSelect }) {
-  const [selectedTable, setSelectedTable] = useState(null);
+  const [selectedTable, setSelectedTable] = useState(dbViewSignal.value);
   const tables = ["Tables", "Views", "Triggers", "Advanced"];
 
   const handleTableClick = (table) => {
@@ -368,4 +370,21 @@ function TablesTab({ onTableSelect }) {
     </div>
   );
 }
-export default TablesPage;
+
+
+function TablesPage() {
+  return (
+    <>
+      {
+      dbViewSignal.value == "Tables" ? <TableBuilderView /> : 
+      dbViewSignal.value == "Views" ? <ViewArea /> :
+      dbViewSignal.value == "Triggers" ? <ViewArea/> :
+      <AdvancedView />
+      }
+    </>
+  );
+}
+
+
+
+export {TablesPage, TablesTab};

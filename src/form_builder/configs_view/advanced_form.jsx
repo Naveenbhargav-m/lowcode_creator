@@ -4,7 +4,7 @@ import { useState } from 'preact/hooks';
 import '../styles/AdvancedFormStyle.css';
 
 // Popup component
-const Popup = ({ isOpen, onClose, onSubmit, value, label }) => {
+const Popup = ({ isOpen, onClose, onSubmit, value, label , closeText="Cancel", submitText="Save" }) => {
   if (!isOpen) return null;
 
   const [inputValue, setInputValue] = useState(value);
@@ -17,15 +17,15 @@ const Popup = ({ isOpen, onClose, onSubmit, value, label }) => {
   return (
     <div className="popup-overlay">
       <div className="popup-container">
-        <h3>Edit {label}</h3>
+        <h3>{label}</h3>
         <textarea
           className="popup-textarea"
           value={inputValue}
           onInput={(e) => setInputValue(e.target["value"])}
         />
         <div className="popup-actions">
-          <button onClick={onClose}>Cancel</button>
-          <button onClick={handleSave}>Save</button>
+          <button onClick={onClose}>{closeText}</button>
+          <button onClick={handleSave}>{submitText}</button>
         </div>
       </div>
     </div>
