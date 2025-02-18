@@ -5,11 +5,12 @@ import "/node_modules/react-resizable/css/styles.css";
 import "./index.css";
 import "bulma/css/bulma.css";
 import "./styles/theme.css";
+import "@picocss/pico/css/pico.min.css";
 
 import { ThemeProvider } from "./components/theme_provider";
 
 import SideBar from "./components/sidebar.jsx";
-import TablesPage from "./table_builder/tables_page";
+import { TablesPage } from "./table_builder/tables_page";
 import {ScreenPage} from "./screen_builder/screen_page";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import { UsersPage } from "./users/users_page";

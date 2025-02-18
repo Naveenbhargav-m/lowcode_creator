@@ -3,7 +3,7 @@ import { defaultStyle, fieldStyle, labelStyle } from "./configs_view/constantCon
 import { FunctionExecutor } from "../states/common_actions";
 
 let elementData = {
-    "type":"checkbox",
+    "type":"textfield",
     "id": "01",
     "parent": "screen",
     "children": [],
@@ -34,7 +34,7 @@ let elementData = {
 
 const configs = [
     signal({...elementData, "onChange": 'console.log("called on Change:",cur_value);return {"01":{"style":{"borderRadius":"30px"}, "value":!cur_value},"02":{"value":false}};'}),
-    signal({...elementData, "id":"02","type":"radio", "options":[{"label":"Option1", "value":"1"}, {"label":"option2","value":"2"}]})
+    signal({...elementData, "id":"02","type":"switch", "options":[{"label":"Option1", "value":"1"}, {"label":"option2","value":"2"}]})
 ];
 
 let values = signal({"01":"Hello this is the text", "02":true});

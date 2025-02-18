@@ -12,7 +12,7 @@ let originalTablesdata = signal({});
 let currentTableConfigs = {};
 let currentEdges = {};
 
-
+let dbViewSignal = signal("Tables");
 const tablesFlag = signal("");
 const activeTable = signal("");
 const activeField = signal({});
@@ -281,4 +281,5 @@ export { setDragData, addContainer, deleteContainer, addField,
    tables,tablesFlag , activeField , activeTable, setTableField,
    tableNames,UpdateTableEdges,table_edges,currentTableConfigs , currentEdges,
    tables_id,Deletefield, UpdateRelation, originalTablesdata,
+   dbViewSignal,
   };
