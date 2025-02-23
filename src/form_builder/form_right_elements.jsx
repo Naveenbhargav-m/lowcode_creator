@@ -1,7 +1,8 @@
+import { setElementByID } from "../utils/helpers";
 import {AdvnacedForm} from "./configs_view/advanced_form";
 import FlexConfigurator from "./configs_view/flex_config";
 import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
-import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms } from "./form_builder_state";
+import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms, setCurrentElements } from "./form_builder_state";
 
 
 function GetAdvancedConfigs(element, isField) {
@@ -39,29 +40,33 @@ function GetAdvancedConfigs(element, isField) {
   
 export function FlexRightPanel() {
     let eleID = formActiveElement.value;
-    let activeElement = currentFormElements.peek()[eleID];  ;
+    let temp = currentFormElements[eleID];
+    if(temp === undefined) {
+      return <div></div>;
+    }
+    let activeElement = temp.peek();
     const handleChange = (config) => {
       console.log("existing element:",activeElement);
       if(activeElement !== undefined) {
         console.log("config:",config);
         activeElement["style"] = {...activeElement["style"],...config};
-        let allElement = currentFormElements.peek();
-        allElement[eleID] = {...activeElement};
-        currentFormElements.value = {...allElement};
+        let allElement = currentFormElements;
+        allElement = setElementByID(allElement, eleID, activeElement);
+        setCurrentElements(allElement);
       }
     };
   
     const handleSubmit = (config) => {
       if(activeElement !== undefined) {
         activeElement["style"] = {...activeElement["style"],...config};
-        let allElement = currentFormElements.peek();
-        allElement[eleID] = {...activeElement};
-        currentFormElements.value = {...allElement};
+        let allElement = currentFormElements;
+        allElement = setElementByID(allElement, eleID, activeElement);
+        setCurrentElements(allElement);
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
-            myform["mobile_children"] = currentFormElements.value;
+            myform["mobile_children"] = currentFormElements;
         } else {
-            myform["desktop_children"] = currentFormElements.value;
+            myform["desktop_children"] = currentFormElements;
 
         }
         forms[currentForm.value] = myform;
@@ -78,14 +83,14 @@ export function FlexRightPanel() {
             }
         }
         activeElement = {...activeElement,...data};
-        let allElement = currentFormElements.peek();
-        allElement[eleID] = {...activeElement};
-        currentFormElements.value = {...allElement};
+        let allElement = currentFormElements;
+        allElement = setElementByID(allElement, eleID, activeElement);
+        setCurrentElements(allElement);
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
-            myform["mobile_children"] = currentFormElements.value;
+            myform["mobile_children"] = currentFormElements;
         } else {
-            myform["desktop_children"] = currentFormElements.value;
+            myform["desktop_children"] = currentFormElements;
 
         }
         console.log("my form:", myform, currentFormElements);

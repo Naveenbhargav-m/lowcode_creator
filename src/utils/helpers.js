@@ -28,4 +28,33 @@ const getSortedFields = (elementsObject) => {
   };
   
 
-export {generateRandomName, generateUID, getSortedFields};
+
+  const getSortedSignalFields = (elementsObject) => {
+    if (!elementsObject) return [];
+  
+    return Object.entries(elementsObject)
+      .sort((a, b) => a[1].value.order - b[1].value.order) // Access order via .value
+      .map(([key, value]) => ({ key, ...Object.fromEntries(
+        Object.entries(value).map(([k, v]) => [k, v]) // Convert signals to raw values
+      )}));
+  };
+
+
+  function getElementByID(array, id) {
+    return array.find(item => item.value.id === id);
+}
+
+function setElementByID(array, id, newValue) {
+    let newarr =  array.map((item) => {
+        let itemval = item.peek();
+        if(itemval.id === id) {
+            itemval = {...newValue};
+            item.value = {...itemval};
+        }
+        return item;
+    }
+    );
+    return newarr;
+}
+  
+export {generateRandomName, generateUID, getSortedFields,getSortedSignalFields, getElementByID, setElementByID};

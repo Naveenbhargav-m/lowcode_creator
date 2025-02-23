@@ -43,7 +43,7 @@ function SwitchElement({ config = {}, onAction }) {
     type="checkbox" 
     role="switch" 
     checked={config["value"]}
-    style={config["style"]}
+    style={{...config["style"]}}
     onChange={(e) => {onAction(e,"onChange",config["value"])}}
 
     />
@@ -185,16 +185,21 @@ function RatingElement({config, onAction}) {
   );
 }
 
-// Date Picker (Flatpickr)
-const FlatpickrWrapper = ({ config = {}, onAction }) => (
-  <FieldWrapper config={config} onAction={onAction}>
-    <Flatpickr options={config.options} value={config.value} className="p-2 border rounded" />
-  </FieldWrapper>
-);
+function DatePickerElement({config, onAction}) {
+  return (
+    <input type="date" 
+    name="date" 
+    aria-label="Date"
+    value={config["value"]}
+    onChange={(e) => {onAction(e,"onChange",config["value"]);}}
+    >
 
-/* This the fields using Daisi ui and pico css*/
+    </input>
+  );
+}
 
 const Field = ({ type, config , Action}) => {
+  console.log("called field element:",config, type);
   const fieldComponents = {
     textfield: TextField,
     password: PasswordField,
@@ -208,7 +213,7 @@ const Field = ({ type, config , Action}) => {
     textarea: TextAreaElement,
     file_upload: FileUploadElement,
     rating: RatingElement,
-    date: FlatpickrWrapper,
+    date: DatePickerElement,
   };
 
   const handleEvent = (event, key , value) => {
@@ -225,4 +230,4 @@ const Field = ({ type, config , Action}) => {
 };
 
 
-export { Field, TextField, PasswordField, SwitchElement, CheckBoxElement, RadioGroupElement, SelectElement, MultiSelectElement, SliderElement, ColorElement, TextAreaElement, FileUploadElement, RatingElement, FlatpickrWrapper };
+export { Field, TextField, PasswordField, SwitchElement, CheckBoxElement, RadioGroupElement, SelectElement, MultiSelectElement, SliderElement, ColorElement, TextAreaElement, FileUploadElement, RatingElement, DatePickerElement };

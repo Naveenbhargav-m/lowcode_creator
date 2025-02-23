@@ -46,4 +46,69 @@ let labelStyle = {
     boxShadow: 'none',
 };
 
-export {defaultStyle, labelStyle , fieldStyle};
+
+const commonConfig = {
+    "size_class": "",
+    "grow":"",
+    "srink":"",
+    "height": 50,
+    "width":50,
+    "config": {},
+    "class":"dp25",
+    "style": defaultStyle,
+    "panelStyle": defaultStyle,
+    "fieldStyle": fieldStyle,
+    "labelStyle":labelStyle,
+    "onClick": "",
+    "onChange": "",
+    "onHover": "",
+    "onDoubleTap": "",
+    "onDrop": "",
+    "onDrag": "",
+    "onMount": "",
+    "onDestroy": "",
+    "value": "",
+    "valueData": ""
+};
+
+
+const textFieldConfig = {
+    ...commonConfig,
+    "value":"Text Value Here..."
+};
+
+const passwordConfig = {
+    ...commonConfig,
+    "place_holder": "password Here..."
+};
+
+const switchConfig = {
+    ...commonConfig,
+    "value": true,
+    "color":"green",
+    "style":{"color":"green", "backgroundColor":"black", "--pico-color":"green"},
+};
+
+const checkBoxConfig = {
+    ...commonConfig,
+    "value": true,
+    "color":"green",
+    "style":{...commonConfig["style"], "color":"green", "backgroundColor":"black"},
+    "options": [{"label":"option1", "value": "option1"}, {"label":"option2", "value":"option2"}],
+};
+
+const radioConfigs = {
+    ...commonConfig,
+    "value": true,
+    "color":"green",
+    "style":{...commonConfig["style"], "color":"green", "backgroundColor":"black"},
+    "options": [{"label":"option1", "value": "option1"}, {"label":"option2", "value":"option2"}],
+};
+const fieldsConfigs = {
+    "textfield": textFieldConfig,
+    "passwordfield": passwordConfig,
+    "switch":switchConfig,
+    "checkbox": checkBoxConfig,
+    "radio": radioConfigs,
+};
+export {defaultStyle, labelStyle , fieldStyle, fieldsConfigs};

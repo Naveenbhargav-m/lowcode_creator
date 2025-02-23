@@ -4,6 +4,7 @@ import { generateUID } from "../utils/helpers";
 let themes = {};
 const themeNameAndIDSList = signal([]);
 const ActiveTheme = signal("");
+const currentThemes = [signal(""), signal("")];
 function AddTheme(data) {
     let name = data["name"];
     let id = generateUID();
@@ -39,7 +40,16 @@ function LoadThemes() {
         return;
     }
     ActiveTheme.value = themes[firstkey]["id"];
+    SetCurrentTheme();
+}
+
+function SetCurrentTheme() {
+    let currTheme = themes[ActiveTheme.peek()];
+    let light = currTheme["light"];
+    let dark = currTheme["dark"];
+    currentThemes[0].value = JSON.stringify(dark);
+    currentThemes[1].value = JSON.stringify(light);
 }
 
 LoadThemes();
-export {themes, ActiveTheme, AddTheme, themeNameAndIDSList};
+export {themes, ActiveTheme, AddTheme, themeNameAndIDSList, currentThemes, SetCurrentTheme};

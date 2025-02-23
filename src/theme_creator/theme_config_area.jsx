@@ -1,21 +1,44 @@
 
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import { ActiveTheme, AddTheme, themeNameAndIDSList, themes } from "./theme_state";
+import { ActiveTheme, AddTheme, currentThemes, SetCurrentTheme, themeNameAndIDSList, themes } from "./theme_state";
 import { TabComponent } from "../screen_builder/screen_components";
 import { ScreensList } from "../screen_builder/screen_page";
 import { TextAreaWithPopup } from "../form_builder/configs_view/advanced_form";
-import { useComputed } from "@preact/signals";
+import { useComputed, useSignal } from "@preact/signals";
 
 const ThemeCreator = () => {
     const devStyle = {
-        "height":"inherit"
+        "height":"inherit",
     };
   return (
     <div style={devStyle} >
         <CreateThemeRow />
+        <MakeDefault isDefault={true} isdark={"light"}/>
         <ThemeEditArea />
     </div>
   )
+}
+
+
+function MakeDefault({isDefault , isdark}) {
+    let rowstyle = {
+        display:"flex",
+        "flexDirection": "row-reverse",
+        "justifyContent": "space-between",
+        "padding":"10px 35px",
+        "alignItems":"center"
+    };
+    return (
+        <div style={{...rowstyle}}>
+        <div style={{width:"150px"}}>
+            <label>Default Theme:<input name="is_default" type="checkbox" role="switch" checked={isDefault} /></label>
+            <select name="favorite-cuisine" aria-label="Select your favorite cuisine...">
+                    <option selected={isdark === "dark"}>dark</option>
+                    <option selected={isdark === "light"}>light</option>
+            </select>
+        </div>
+        </div>
+    );
 }
 
 function ThemeEditArea() {
@@ -47,18 +70,12 @@ function ThemeEditArea() {
 
     console.log("active Theme ID:", activeTheme);
 
-    // ✅ Use `useComputed` so it updates when `activeTheme` changes
-    let dark = useComputed(() => JSON.stringify({ ...themes[ActiveTheme.value]["dark"] }));
-    let light = useComputed(() => JSON.stringify({ ...themes[ActiveTheme.value]["light"]}));
-
-    console.log("light and dark:", light.value, dark.value);
-
     return (
         <div style={devStyle}>
             <div style={fieldStyle}>
                 <TextAreaWithPopup
                     label={"dark Theme"}
-                    valueSignal={dark}
+                    valueSignal={currentThemes[0]}
                     configKey={"dark"}
                     onChange={(key, value) => SetTheme(key, value)}
                     style={{"height":"100%"}}
@@ -68,7 +85,7 @@ function ThemeEditArea() {
             <div style={fieldStyle}>
                 <TextAreaWithPopup
                     label={"light Theme"}
-                    valueSignal={light}
+                    valueSignal={currentThemes[1]}
                     configKey={"light"}
                     onChange={(key, value) => SetTheme(key, value)}
                     style={{"height":"100%"}}
@@ -104,7 +121,7 @@ function ThemePage() {
     return (
     <div className="min-h-screen h-screen w-full bg-white flex">
       <div className="w-2/12 bg-white p-4 h-screen">
-        <ScreensList elementsList={themeNameAndIDSList.value} signal={ActiveTheme} callBack={(id) =>  ActiveTheme.value = id}/>
+        <ScreensList elementsList={themeNameAndIDSList.value} signal={ActiveTheme} callBack={(id) => { ActiveTheme.value = id; SetCurrentTheme();}}/>
       </div>
 
       <div className="w-10/12 h-screen bg-background scrollable-div">

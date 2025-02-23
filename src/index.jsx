@@ -12,7 +12,6 @@ import { ThemeProvider } from "./components/theme_provider";
 import SideBar from "./components/sidebar.jsx";
 import { TablesPage } from "./table_builder/tables_page";
 import {ScreenPage} from "./screen_builder/screen_page";
-import { WorkFlowPage } from "./workflows/workflow_page";
 import { UsersPage } from "./users/users_page";
 import { SettingsPage } from "./settings/settings_page";
 import { PreviewArea } from "./preview/preview";
@@ -21,6 +20,7 @@ import AppCreatorPage from "./app_creator/app_creator";
 import { FormBuilderTest } from "./form_builder/form_edit_area";
 import { ThemeCreator } from "./theme_creator/theme_config_area";
 import { Provider } from "./components/ui/provider";
+import { NewFlowBuilder } from "./workflows/flow_builder";
 export function App() {
   return (
     <Provider>
@@ -36,7 +36,7 @@ export function App() {
       <Route path="/forms" component={FormBuilderTest} />
       <Route path="/screens" component={ScreenPage}/>
       <Route path="/containers" component={TablesPage} />
-      <Route path="/workflows" component={WorkFlowPage} />
+      <Route path="/workflows" component={NewFlowBuilder} />
       <Route path="/users" component={UsersPage}/>
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
