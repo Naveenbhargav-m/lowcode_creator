@@ -82,6 +82,7 @@ import {
   Database,
   Parentheses,
   Workflow,
+  Pipette,
 } from "lucide-react";
 
 export default function DynamicIcon({ name, size }) {
@@ -169,7 +170,8 @@ export default function DynamicIcon({ name, size }) {
     "upload": <Upload size={size}/>,
     "database": <Database size={size} />,
     "parentheses": <Parentheses size={size}/>,
-    "workflow": <Workflow size={size}/>
+    "workflow": <Workflow size={size}/>,
+    "pipette": <Pipette size={size}/>
   };
 
   return icon_map[name] || null;
