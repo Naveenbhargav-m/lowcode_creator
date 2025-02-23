@@ -11,10 +11,10 @@ function OptionsMapper({ options }) {
             <Draggable data={innerlist} onDragStart={(data) => {console.log("data:", data)}}>
               <div className="cell p-2 bg-white rounded-md my-2 border-2 border-highlight">
                 <div className="flex flex-row items-center scroll-px-4">
-                  <div className="px-2">
+                  <div className="px-2 accent-content">
                     <DynamicIcon name={innerlist[0]} size={30} />
                   </div>
-                  <p className="text-sm">{innerlist[1]}</p>
+                  <p className="text-sm accent-content">{innerlist[1]}</p>
                 </div>
               </div>
             </Draggable>

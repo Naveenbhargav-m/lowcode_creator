@@ -11,7 +11,7 @@ import { ScreensList } from "../screen_builder/screen_page";
 import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
 import { DynamicFormComponent, RenderElements } from "./form_renderer";
-import { getSortedFields } from "../utils/helpers";
+import { getSortedFields , getSortedSignalFields } from "../utils/helpers";
 import { CallOnChange, configs, UpdateConfig, values } from "./form_test_data";
 
 function EditArea() {
@@ -37,8 +37,9 @@ function EditArea() {
     useEffect(() => {
       console.log("Re-render triggered");
     },[]);
-    let temp = currentFormElements.value;
-    let values = getSortedFields(temp);
+    let temp = currentFormElements;
+
+    let values = temp;
     return (
       <MobileMockup>
     <div
@@ -66,8 +67,8 @@ function EditArea() {
   
   
   function FormEditDesktopView() {
-    let temp = currentFormElements.value;
-    let values = getSortedFields(temp);
+    let temp = currentFormElements;
+    let values = temp;
     return (
       <DesktopMockup>
     <div
@@ -111,7 +112,7 @@ function EditArea() {
   
     {/* Main content area */}
     <div className="bg-background scrollable-div" style={{height:"100vh", width:"90%", padding:"20px"}}>
-            <div>
+            {/* <div>
               <DynamicFormComponent
                configs={configs}
                values={values} 
@@ -119,8 +120,8 @@ function EditArea() {
                onSubmit={(data) => CallOnChange(data)}
                updateCallback={(data) => UpdateConfig(data)}
                />
-            </div>
-        {/* <EditArea /> */}
+            </div> */}
+        <EditArea />
     </div>
   
     <div className="w-1/6 bg-white h-screen scrollable-div">

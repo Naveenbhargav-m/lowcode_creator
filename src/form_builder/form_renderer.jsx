@@ -1,3 +1,4 @@
+import { getElementByID } from "../utils/helpers";
 import { Field } from "./fields/chakra_fields";
 import { Column, PanelField, Row } from "./fields/fields";
 import { AddtoElements, currentFormElements, formActiveElement } from "./form_builder_state";
@@ -15,7 +16,7 @@ export function RenderRoworColumnChildren(children,values = {},
     let childElements = [];
     for(var i=0;i<children.length;i++) {
       let childID = children[i];
-      let temp = currentFormElements.value[childID];
+      let temp = getElementByID(currentFormElements, childID);
       childElements.push(temp);
     }
     return RenderElements(childElements, true, values, onChange, onSubmit, updateCallback);
@@ -42,16 +43,19 @@ export function RenderRoworColumnChildren(children,values = {},
     onSubmit = (data) => {console.log("form submition data:",data);},
     updateCallback = (newdata) => {},
   ) {
+    console.log("called RenderElements :",elementsValue);
       if(elementsValue === undefined) {
         return <></>;
       }
       return (<div style={{display:"contents"}}>
-      {Object.values(elementsValue).map(curVal => {
+      {elementsValue.map((curVal) => {
+          console.log("in the map",curVal);
           let value = curVal.value;
           let type = value["type"];
           let id = value["id"];
           let parent = value["parent"];
           if(parent !== "screen" && !areChildren) {
+            console.log("in the map not parent and not children",curVal);
             return;
           }
           if(type === "column") {
@@ -80,9 +84,9 @@ export function RenderRoworColumnChildren(children,values = {},
           let labelStyle = value["labelStyle"];
           let fieldStyle = value["fieldStyle"];
           let config = value["config"];
-          let prefil = values.peek()[value["id"]];
-          console.log("prefil:",prefil);
-          value["value"] = prefil;
+          // let prefil = values.peek()[value["id"]];
+          // console.log("prefil:",prefil);
+          value["value"] = "";
           return (
           <SelectAble id={id}>
           <PanelField 
