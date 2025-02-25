@@ -59,7 +59,7 @@ function CheckBoxElement({ config = {}, onAction }) {
   let fieldStyle = {"display":"flex", "flexDirection":"row"};
 
   return (
-    <fieldset>      
+    <fieldset class="pico">      
         {config["options"].map((entity) => {
           return (
             <label style={fieldStyle}>
@@ -226,7 +226,7 @@ const Field = ({ type, config , Action}) => {
 
 
   const Component = fieldComponents[type] || (() => null);
-  return <Component config={config} onAction={handleEvent} />;
+  return <form class="pico"> <Component config={config} onAction={handleEvent} /></form>;
 };
 
 

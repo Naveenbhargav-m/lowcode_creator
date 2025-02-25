@@ -89,7 +89,9 @@ function PopupFieldPicker({isOpen, closeCallBack}) {
         <dialog open={isOpen}>
         <article>
         <header>
-            <button aria-label="Close" rel="prev" onClick={(e) => closeCallBack()}></button>
+            <button aria-label="Close" 
+// @ts-ignore
+            rel="prev" onClick={(e) => closeCallBack()}></button>
         </header>
           <FieldsDataAccordian />
         </article>

@@ -47,7 +47,7 @@ export function RenderRoworColumnChildren(children,values = {},
       if(elementsValue === undefined) {
         return <></>;
       }
-      return (<div style={{display:"contents"}}>
+      return (<div  style={{display:"contents"}}>
       {elementsValue.map((curVal) => {
           console.log("in the map",curVal);
           let value = curVal.value;

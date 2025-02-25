@@ -1,5 +1,6 @@
 import { signal } from "@preact/signals";
 import { generateUID } from "../utils/helpers";
+import { DefaultTheme, DefaultThemeID } from "../states/global_state";
 
 let themes = {};
 const themeNameAndIDSList = signal([]);
@@ -43,6 +44,20 @@ function LoadThemes() {
     SetCurrentTheme();
 }
 
+function UpdateDefaultTheme() {
+    let DefaultID = DefaultThemeID.value;
+    if(DefaultID === undefined) {
+        return;
+    }
+    console.log("myt theme  ID:",DefaultID);
+    let mytheme = themes[DefaultID];
+    if(mytheme === undefined) {
+        return;
+    }
+    console.log("my theme:",mytheme);
+    DefaultTheme.value = mytheme;
+}
+
 function SetCurrentTheme() {
     let currTheme = themes[ActiveTheme.peek()];
     let light = currTheme["light"];
@@ -52,4 +67,4 @@ function SetCurrentTheme() {
 }
 
 LoadThemes();
-export {themes, ActiveTheme, AddTheme, themeNameAndIDSList, currentThemes, SetCurrentTheme};
+export {themes, ActiveTheme, AddTheme, themeNameAndIDSList, currentThemes, SetCurrentTheme, UpdateDefaultTheme};

@@ -1,9 +1,6 @@
 import { render } from "preact";
 import { LocationProvider, Router, Route } from "preact-iso";
-import "/node_modules/react-grid-layout/css/styles.css";
-import "/node_modules/react-resizable/css/styles.css";
 import "./index.css";
-import "bulma/css/bulma.css";
 import "./styles/theme.css";
 import "@picocss/pico/css/pico.min.css";
 

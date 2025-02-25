@@ -1,17 +1,10 @@
 import { signal } from "@preact/signals";
 import { SetGlobalFieldsToAPI } from "../api/api";
 
-let activeElementID = signal(null);
 let sideBarEnable = signal(true);
 
 
 let showFormPopup = signal("");
-
-
-
-let test1 = {};
-test1["click1"] = signal(0);
-
 
 
 // Retrieve stored variables from localStorage
@@ -44,11 +37,16 @@ const addVariable = () => {
     SetGlobalFieldsToAPI({"states":JSON.stringify(variableMap), "screen_id":1,"screen_name":"Sample Screen"},1);
 };
 
+
+const DefaultThemeID = signal("");
+const DefaultMode = signal("light");
+const DefaultTheme = signal({});
+
 // Export variables and functions
 export {
     sideBarEnable, 
-    addVariable, variableMap, variableKeys, newVariableKey,
-    test1 , showFormPopup
+    addVariable, variableMap, variableKeys, newVariableKey, showFormPopup,
+    DefaultMode, DefaultTheme, DefaultThemeID
 };
 
 
