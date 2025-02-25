@@ -1,10 +1,11 @@
 
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import { ActiveTheme, AddTheme, currentThemes, SetCurrentTheme, themeNameAndIDSList, themes } from "./theme_state";
+import { ActiveTheme, AddTheme, currentThemes, SetCurrentTheme, themeNameAndIDSList, themes, UpdateDefaultTheme } from "./theme_state";
 import { TabComponent } from "../screen_builder/screen_components";
 import { ScreensList } from "../screen_builder/screen_page";
 import { TextAreaWithPopup } from "../form_builder/configs_view/advanced_form";
 import { useComputed, useSignal } from "@preact/signals";
+import { DefaultMode, DefaultThemeID } from "../states/global_state";
 
 const ThemeCreator = () => {
     const devStyle = {
@@ -13,14 +14,18 @@ const ThemeCreator = () => {
   return (
     <div style={devStyle} >
         <CreateThemeRow />
-        <MakeDefault isDefault={true} isdark={"light"}/>
+        <MakeDefault 
+        isDefault={DefaultThemeID.value} 
+        isdark={DefaultMode.value} 
+        currentID={ActiveTheme.value}
+        />
         <ThemeEditArea />
     </div>
   )
 }
 
 
-function MakeDefault({isDefault , isdark}) {
+function MakeDefault({isDefault,isdark, currentID}) {
     let rowstyle = {
         display:"flex",
         "flexDirection": "row-reverse",
@@ -28,11 +33,25 @@ function MakeDefault({isDefault , isdark}) {
         "padding":"10px 35px",
         "alignItems":"center"
     };
+    function DefaultChange() {
+        DefaultThemeID.value = currentID;
+        UpdateDefaultTheme();
+    }
+    function SetMode(e) {
+        if(DefaultThemeID.peek() === currentID) {
+            let val = e.target.value;
+            DefaultMode.value = val;
+        }
+    }
     return (
         <div style={{...rowstyle}}>
         <div style={{width:"150px"}}>
-            <label>Default Theme:<input name="is_default" type="checkbox" role="switch" checked={isDefault} /></label>
-            <select name="favorite-cuisine" aria-label="Select your favorite cuisine...">
+            <label>Default Theme:<input name="is_default"
+             type="checkbox" role="switch"
+             checked={isDefault === currentID} 
+             onChange={(e) => DefaultChange()}
+             /></label>
+            <select name="favorite-cuisine" aria-label="Select your favorite cuisine..." onChange={(e) => SetMode(e)}>
                     <option selected={isdark === "dark"}>dark</option>
                     <option selected={isdark === "light"}>light</option>
             </select>
@@ -125,8 +144,8 @@ function ThemePage() {
       </div>
 
       <div className="w-10/12 h-screen bg-background scrollable-div">
-      <TabComponent />
-      <ThemeCreator />
+        <TabComponent />
+        <ThemeCreator />
       </div>
     </div>
     );

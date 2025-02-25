@@ -1,17 +1,4 @@
 let defaultStyle = {
-    flexDirection: 'column',
-    display:"flex",
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    alignContent: 'center',
-    flexWrap: 'nowrap',
-    flexGrow: 0,
-    flexShrink: 1,
-    flexBasis: 'auto',
-    order: 0,
-    alignSelf: 'auto',
-    width: '100%',
-    height: 'auto',
     color: '#000000',
     backgroundColor: '#ffffff',
     padding: '10px',
@@ -74,7 +61,8 @@ const commonConfig = {
 
 const textFieldConfig = {
     ...commonConfig,
-    "value":"Text Value Here..."
+    "value":"Text Value Here...",
+    "style":{ "backgroundColor":"black", "--pico-color":"green", "borderRadius":"20px", "border":"2px solid black"},
 };
 
 const passwordConfig = {

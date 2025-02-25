@@ -40,7 +40,7 @@ const addVariable = () => {
 
 const DefaultThemeID = signal("");
 const DefaultMode = signal("light");
-const DefaultTheme = {};
+const DefaultTheme = signal({});
 
 // Export variables and functions
 export {
