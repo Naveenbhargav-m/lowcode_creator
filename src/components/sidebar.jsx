@@ -61,9 +61,9 @@ const Sidebar = () => {
                 className="flex items-center w-full no-underline text-white"
                 style={{ textDecoration: 'none', color: 'inherit' }} // Prevent blue and underline
               >
-                <div>{icons[index]}</div>
+                <div style={{color:"black"}}>{icons[index]}</div>
                 {expanded && (
-                  <span className="ml-4 transition-opacity duration-300 ease-in-out">
+                  <span style={{"color":"black"}} className="ml-4 transition-opacity duration-300 ease-in-out">
                     {value}
                   </span>
                 )}
