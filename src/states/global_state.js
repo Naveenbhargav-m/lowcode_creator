@@ -46,7 +46,6 @@ const DefaultTheme = signal({});
 let previousKeys = new Set(Object.keys(DefaultTheme.value));
 
 effect(() => {
-  console.log("updating the document with new theme:",DefaultTheme.value);
   const root = document.documentElement;
   let currentTheme = DefaultTheme.value;
   let mode = DefaultMode.value;
