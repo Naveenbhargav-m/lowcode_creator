@@ -1,7 +1,7 @@
 import { useContext, useState } from 'preact/hooks';
 import FlowBuilder, { NodeContext } from 'react-flow-builder';
 import "./flow_css.css";
-import { DragComponent } from './flow_left_panel';
+import { DragComponent, WorkflowsList } from './flow_left_panel';
 import { FlowBuilderDrawer } from './flow_right';
 
 const commonStyle = {"borderRadius":"20px", "color":"white", "backgroundColor":"black", "display":"flex", "flexDirection":"column", "justifyContent":"center","alignItems":"center"}
@@ -123,7 +123,7 @@ const NewFlowBuilder = () => {
   return (
     <FlowBuilder 
         draggable
-        DragComponent={DragComponent}
+        DragComponent={WorkflowsList}
         nodes={nodes}
         onChange={handleChange}
         DrawerComponent={FlowBuilderDrawer}
