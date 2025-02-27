@@ -28,10 +28,27 @@ function LoadWorkflows() {
     workflows.value = [...workflowObj];
 }
 
+
+function UpdateActiveWorkflowNodes(updatedNodes) {
+    activeWorkFlow.value = [...updatedNodes];
+    let activeID = activeWorkFlow.peek()["id"];
+    let flows = workflows.value;
+    flows.map((flow1, ind) => {
+        if(flow1["id"] === activeID) {
+            flows[ind] = activeWorkFlow.peek();
+        }
+    })
+    workflows.value = [...flows];
+    localStorage.setItem("workflows", JSON.stringify(workflows));
+} 
 function CreateWorkflow(data) {
     let name = data["name"];
     let id = generateUID();
-    let obj = {"name": name, "id": id, "flow": []};
+    let endID = generateUID();
+    let startID = generateUID();
+    let obj = {"name": name, "id": id, "flow": [
+        {id:startID, type :'start',name : 'start' , path : [ '0' ]} ,
+        {id:endID ,  type :'end', name : 'end' ,  path : [ '3' ] , }]};
     let exist = workflows.peek();
     exist.push(obj);
     workflows.value = [...exist];
@@ -51,4 +68,4 @@ function SetWorkFlowActive(id) {
     })
 }
 LoadWorkflows();
-export {activeWorkFlow, workflows, workflownames, CreateWorkflow, SetWorkFlowActive, flowTab};
+export {activeWorkFlow, workflows, workflownames, CreateWorkflow, SetWorkFlowActive, flowTab, UpdateActiveWorkflowNodes};
