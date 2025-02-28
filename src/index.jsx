@@ -17,7 +17,7 @@ import AppCreatorPage from "./app_creator/app_creator";
 import { FormBuilderTest } from "./form_builder/form_edit_area";
 import { ThemeCreator } from "./theme_creator/theme_config_area";
 import { Provider } from "./components/ui/provider";
-import { NewFlowBuilder } from "./workflows/flow_builder";
+import { WorkFlowPage } from "./workflows/workflow_page";
 export function App() {
   return (
     <Provider>
@@ -29,11 +29,11 @@ export function App() {
     }
   <main className="flex-grow bg-white">
     <Router>
-      <Route path="/home" component={TablesPage} />
+      <Route path="/home" component={AppCreatorPage} />
       <Route path="/forms" component={FormBuilderTest} />
       <Route path="/screens" component={ScreenPage}/>
       <Route path="/containers" component={TablesPage} />
-      <Route path="/workflows" component={NewFlowBuilder} />
+      <Route path="/workflows" component={WorkFlowPage} />
       <Route path="/users" component={UsersPage}/>
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />

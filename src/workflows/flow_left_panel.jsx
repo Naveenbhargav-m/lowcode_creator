@@ -1,5 +1,4 @@
 import { useContext } from "preact/hooks";
-import { BuilderContext } from "react-flow-builder";
 import DynamicIcon from "../components/custom/dynamic_icon";
 import { activeWorkFlow, CreateWorkflow, flowTab, SetWorkFlowActive, workflownames } from "./workflow_state";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
@@ -14,9 +13,9 @@ const icons = [
     "workflow",
 ];
 
-function WorkflowsList({onDragStart ,onDragEnd}) {
+function WorkflowsList() {
   return (
-           <div className="w-2/12 bg-white p-4" style={{height:"93%"}}>
+           <div>
             <CreateFormButton
              formLabel={"New Flow"} 
              placeHolder={"Flow Name:"} 
@@ -27,7 +26,7 @@ function WorkflowsList({onDragStart ,onDragEnd}) {
                   flowTab.value = tab; 
                   console.log("flow tab:",flowTab.value); } }/>
               </div>
-        {flowTab.value === "blocks" ?   <DragComponent onDragEnd={onDragEnd} onDragStart={onDragStart}/> :
+        {flowTab.value === "blocks" ?   <DragComponent /> :
           <WorkflowsListPanel />
         }
     </div>
@@ -71,26 +70,19 @@ function WorkflowNameTile({ obj }) {
   );
 }
 
-function DragComponent( {    
-    onDragStart ,
-    onDragEnd ,
-  } ) {  
-    const { registerNodes } = useContext ( BuilderContext ) ;   
-  
+function DragComponent( ) {  
+  let registerNodes = [{"name": "Insert Row"}, {"name":"update Row"}, {"name":"condition"},];
     return ( 
       < div className = " custom-drag-list "> 
-        { registerNodes.filter( ( item ) => ! item . isStart && ! item . isEnd ).map ( ( item , ind) => {
+        { registerNodes.map ( ( item , ind) => {
             console.log("ind", ind);
            return (
             < div
-            style={{"display":"flex", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 20px", padding:"20px", borderRadius:"20px"}}
+            style={{"display":"flex", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 0px", padding:"18px", borderRadius:"20px"}}
               key = {ind}
               className = " custom-drag-item "
-              draggable
-              onDragStart = { ( ) => onDragStart ( item . type ) }  
-              onDragEnd = { onDragEnd }
             >
-              <DynamicIcon name={icons[ind]} size={20}/>
+              <div style={{"padding":"0px 4px"}}><DynamicIcon name={icons[ind]} size={20}/></div>
               { item.name }
             </ div >
            ); 

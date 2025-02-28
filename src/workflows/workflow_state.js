@@ -46,9 +46,9 @@ function CreateWorkflow(data) {
     let id = generateUID();
     let endID = generateUID();
     let startID = generateUID();
-    let obj = {"name": name, "id": id, "flow": [
-        {id:startID, type :'start',name : 'start' , path : [ '0' ]} ,
-        {id:endID ,  type :'end', name : 'end' ,  path : [ '3' ] , }]};
+    let obj = {"name": name, "id": id,
+         "nodes": [{"label":"start", "id": startID, position: { x: 250, y: 250 }}, {"label":"end", "id": endID, position: { x: 350, y: 250 },}],
+         "edges": [{"id": startID + "_"+ endID, "source": startID, "end": endID}]};
     let exist = workflows.peek();
     exist.push(obj);
     workflows.value = [...exist];
