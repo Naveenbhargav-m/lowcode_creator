@@ -83,7 +83,7 @@ export const Text = ({ value, config }) => (
 export const Number = ({ value, config }) => (
   <DynamicWrapper config={config} value={value}>
     {(dynamicValue) => (
-      <span>{dynamicValue}</span>
+      <span style={config.style}>{dynamicValue}</span>
     )}
   </DynamicWrapper>
 );
@@ -92,7 +92,7 @@ export const Number = ({ value, config }) => (
 export const TextArea = ({ value, config }) => (
   <DynamicWrapper config={config} value={value}>
     {(dynamicValue) => (
-      <textarea>{dynamicValue}</textarea>
+      <textarea style={config.style}>{dynamicValue}</textarea>
     )}
   </DynamicWrapper>
 );
@@ -139,37 +139,54 @@ export const Badge = ({ value, config }) => (
 );
 
 
-export const Dropdown = ({ value, config, options }) => {
+export const Dropdown = ({ value, config }) => {
   return (
     <DynamicWrapper config={config} value={value}>
-    <select
-      style={config.value.style}
+    {(dynamicValue) => (
+      <select
+      style={config.style}
       onChange={(e) => {
         e.stopPropagation();
         value.value = e.target["value"];
         ActionExecutor(config.value.id, "onChange");
       }}
     >
-      {config.value.map((option) => (
+      {config.options.map((option) => (
         <option value={option} key={option.value}>
           {option.label}
         </option>
       ))}
     </select>
+    )}
     </DynamicWrapper>
   );
 };
 
 
-export const ProgressBar = ({ progress, config }) => {
+
+
+
+/*
+export const Text = ({ value, config }) => (
+  <DynamicWrapper config={config} value={value}>
+    {(dynamicValue) => (
+      <p style={config.style}>{dynamicValue}</p>
+    )}
+  </DynamicWrapper>
+);
+*/
+
+
+export const ProgressBar = ({ value, config }) => {
+  console.log("progress bar:",config, value);
   return (
-    <DynamicWrapper config={config} value={progress}>
-      {({ style, value }) => (
-        <div style={style}>
+    <DynamicWrapper config={config} value={value}>
+      {(dynamicValue) => (
+        <div style={config.style}>
           <div
             style={{
-              width: `${value}%`,
-              backgroundColor: style.primary || "#76c7c0",
+              width: `${dynamicValue}%`,
+              backgroundColor: config["style"]["color"] || "#76c7c0",
               height: "100%",
               transition: "width 0.3s ease",
             }}
@@ -227,9 +244,9 @@ export const AvatarGroup = ({ avatars, config }) => {
 export const Icon = ({ name, config }) => {
   return (
     <DynamicWrapper config={config} value={name}>
-      {({ style, value }) => (
-        <span style={style}>
-          <DynamicIcon name={value} size={style.size} />
+      {(dynamicValue) => (
+        <span style={config["style"]}>
+          <DynamicIcon name={dynamicValue} size={config["style"].size} />
         </span>
       )}
     </DynamicWrapper>

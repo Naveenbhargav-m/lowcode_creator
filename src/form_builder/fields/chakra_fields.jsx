@@ -5,7 +5,7 @@ function TextField({ config = {}, onAction}) {
       <input type="text"
        name="text" 
        placeholder={config["placeholder"] || ""} 
-       aria-label="Text"
+       aria-label={config["label"]}
        style={{ ...config["style"] }}
        onBlur={(e) => onAction(e, "onBlur", config["value"])}
        onFocus={(e) => onAction(e, "onFocus",config["value"])}
@@ -23,7 +23,7 @@ function PasswordField({ config = {}, onAction }){
       <input type="password"
       name="text" 
       placeholder={config["placeholder"] || ""} 
-      aria-label="Text"
+      aria-label={config["label"]}
       style={{ ...config["style"] }}
       onBlur={(e) => onAction(e, "onBlur", config["value"])}
       onFocus={(e) => onAction(e, "onFocus",config["value"])}
@@ -47,7 +47,7 @@ function SwitchElement({ config = {}, onAction }) {
     onChange={(e) => {onAction(e,"onChange",config["value"])}}
 
     />
-    I agree to the Terms
+    {config["label"]}
   </label>
   );
 }
@@ -103,7 +103,7 @@ function RadioGroupElement({ config = {}, onAction }){
 // Select Element
 function SelectElement({ config = {}, onAction }) {
   return (
-    <select name={config["name"]} aria-label="Select your favorite cuisine..." required>
+    <select name={config["name"]} aria-label={config["name"]} required>
       {config["options"].map((inner_option) => {
         return (
           <option 
@@ -121,7 +121,7 @@ function SelectElement({ config = {}, onAction }) {
 // Multi-Select Element
 function MultiSelectElement({ config = {}, onAction }) {
   return (
-    <select name={config["name"]} aria-label="Select your favorite cuisine..." required>
+    <select name={config["name"]} aria-label={config["name"]} required>
       {config["options"].map((inner_option) => {
         return (
           <option 
@@ -136,10 +136,7 @@ function MultiSelectElement({ config = {}, onAction }) {
 // Slider Element
 function SliderElement({ config = {}, onAction }) {
   return (
-    <label>
-  {config["label"]}
   <input type="range" value={config["value"]} onChange={(e) => {onAction(e, "onChange", config["value"]);}}/>
-</label>
   );
 }
 
@@ -149,19 +146,19 @@ function ColorElement({ config = {}, onAction }){
     <input
   type="color"
   value={config["value"]}
-  aria-label="Color picker"
+  aria-label={config["label"]}
   onChange={(e) => onAction(e, "onChange", config["value"])}
 ></input>
   );
 }
 
 // Text Area
-function TextAreaElement() {
+function TextAreaElement({config = {}, onAction}) {
   return(
     <textarea
     name="bio"
-  placeholder="Write a professional short bio..."
-  aria-label="Professional short bio"
+  placeholder={config["placeholder"]}
+  aria-label={config["label"]}
 >
 </textarea>
   );
@@ -177,11 +174,7 @@ function FileUploadElement({ onAction }) {
 // Rating Element
 function RatingElement({config, onAction}) {
   return (
-    <label>
-  Brightness
   <input type="range" />
-</label>
-
   );
 }
 
@@ -189,7 +182,7 @@ function DatePickerElement({config, onAction}) {
   return (
     <input type="date" 
     name="date" 
-    aria-label="Date"
+    aria-label={config["label"]}
     value={config["value"]}
     onChange={(e) => {onAction(e,"onChange",config["value"]);}}
     >

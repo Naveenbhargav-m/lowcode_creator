@@ -82,15 +82,13 @@ export function RenderRoworColumnChildren(children,values = {},
           }
           let style = value["panelStyle"];
           let labelStyle = value["labelStyle"];
-          let fieldStyle = value["fieldStyle"];
-          let config = value["config"];
           // let prefil = values.peek()[value["id"]];
           // console.log("prefil:",prefil);
           value["value"] = "";
           return (
           <SelectAble id={id}>
           <PanelField 
-          label={"test label"} 
+          label={value["label"]} 
           labelPosition={"top"} 
           labelStyle={labelStyle} 
           panelStyle={style} 
