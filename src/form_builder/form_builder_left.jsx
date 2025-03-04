@@ -27,29 +27,32 @@ function OptionsMapper({ options }) {
 function FormBuilderLeftPanel() {
     let elements = [
       ["text-cursor-input","textfield"],
+      ["text-cursor-input","password"],
       ["toggle-right","switch"],
       ["vote","checkbox"],
       ["circle-check","radio"],
       ["chevron-down","dropdown"],
       ["list-filter-plus","multi_select"],
-      ["chart-no-axes-gantt","range_slider"],
-      ["sliders-horizantal","two_slider"],
+      ["chart-no-axes-gantt","slider"],
+      ["palette","color"],
+      ["text","textarea"],
+      ["upload","file_upload"],
+      ["star","rating"],
+      ["calendar","date"],
+
+
       ["link-2","url"],
       ["phone","phone"],
-      ["calendar","date"],
       ["calendar-clock","date_time"],
       ["clock-2","time"],
       ["calendar-range","date_range"],
       ["calendar-days","week"],
       ["calendar-fold","month"],
-      ["palette","color"],
-      ["text","textarea"],
-      ["upload","file_upload"],
       ["letter-text","rich_text"],
       ["hash","markdown"],
-      ["star","rating"],
       ["columns-3","column"],
       ["rows-3","row"],
+      ["sliders-horizantal","two_slider"],
      
     ];
     return (

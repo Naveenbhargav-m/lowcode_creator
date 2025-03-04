@@ -68,7 +68,7 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <ProgressBar
-          progress={50}
+          value={50}
           config={{...configObj}}
 
         />
@@ -108,11 +108,10 @@ export const renderPrimitiveElement = (data, activeSignal) => {
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Dropdown
           value=""
-          options={[
+          config={{...configObj, "options":[
             { value: "1", label: "Option 1" },
             { value: "2", label: "Option 2" },
-          ]}
-          config={{...configObj}}
+          ]}}
         />
         </ActiveWrapper>
       );

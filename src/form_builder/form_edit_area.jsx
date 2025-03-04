@@ -13,6 +13,7 @@ import { useEffect } from "preact/hooks";
 import { DynamicFormComponent, RenderElements } from "./form_renderer";
 import { getSortedFields , getSortedSignalFields } from "../utils/helpers";
 import { CallOnChange, configs, UpdateConfig, values } from "./form_test_data";
+import { ReorderableList } from "../components/custom/ReorderList";
 
 function EditArea() {
     return (
@@ -58,7 +59,7 @@ function EditArea() {
           onDrop={(data) => {AddtoElements(data)}}
           dropElementData={{ "id":"screen" }}
        >
-          {formRenderSignal.value && RenderElements(values, false)}
+          {formRenderSignal.value && <ReorderableList data={values} onReorder={(nedata) => {console.log("reorder data:",nedata);}}>{RenderElements(values, false)}</ReorderableList>}
       </Drop>
       </div>
       </MobileMockup>

@@ -1,7 +1,6 @@
 import { effect, signal } from "@preact/signals";
 import { generateUID, getElementByID, setElementByID } from "../utils/helpers";
-import { defaultStyle, fieldsConfigs, fieldStyle, labelStyle } from "./configs_view/constantConfigs";
-import { commonConfig } from "../components/configs/common_config_provider";
+import { fieldsConfigs } from "./fields/field_styles";
 
 let forms = {};
 let currentForm = signal("");
