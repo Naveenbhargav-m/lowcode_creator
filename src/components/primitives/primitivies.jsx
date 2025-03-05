@@ -46,7 +46,6 @@ export const DynamicWrapper = ({ children, config, value }) => {
       }
     }
   };
-  console.log("dynamic data:",children, config, dynamicConfig.value, value , dynamicValue.value);
   return (
       <div
         style={{ display: "contents" }}
@@ -65,7 +64,7 @@ export const DynamicWrapper = ({ children, config, value }) => {
 export const Button = ({ value, config }) => (
   <DynamicWrapper config={config} value={value}>
     {(dynamicValue) => (
-      <button>{dynamicValue}</button>
+      <button style={{...config["style"]}}>{dynamicValue}</button>
     )}
   </DynamicWrapper>
 );
@@ -102,7 +101,7 @@ export const TextArea = ({ value, config }) => (
 export const IconButton = ({ icon, config }) => (
   <DynamicWrapper config={config} value={icon}>
     {(dynamicValue) => (
-      <button>
+      <button style={{...config["style"]}}>
         <DynamicIcon name={dynamicValue} size={config.style?.iconSize} />
       </button>
     )}
@@ -133,7 +132,7 @@ export const Avatar = ({ src, config }) => {
 export const Badge = ({ value, config }) => (
   <DynamicWrapper config={config} value={value}>
     {(dynamicValue) => (
-      <span>{dynamicValue}</span>
+      <span style={{...config["style"]}}>{dynamicValue}</span>
     )}
   </DynamicWrapper>
 );

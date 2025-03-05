@@ -161,6 +161,7 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       );
 
     case "icon_button":
+      console.log("icon button data:",data, activeSignal);
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <IconButton

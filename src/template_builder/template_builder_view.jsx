@@ -223,7 +223,6 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
               >
               {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
                 let myitem = activeTemplateElements[key].value;
-                console.log("my item",myitem);
                 return RenderElement(myitem, HandleTemplateDrop, activeTemplateElement);
               })}
                 </Drop>

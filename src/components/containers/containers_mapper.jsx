@@ -42,7 +42,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal) {
           ) : child.type === "template"  ? (renderTemplate(child, dropCallBack, activeSignal)) : (renderPrimitiveElement(child, activeSignal))}
         </div>
     ));
-  console.log("title:", title);
+  console.log("title:", title, layoutItem);
   switch (title) {
     case "card":
       return <Card {...layoutItem}>{renderChildren(childElements)}</Card>;

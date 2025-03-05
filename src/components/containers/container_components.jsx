@@ -45,25 +45,25 @@ export const Card = ({ configs, value, action, children }) => (
 );
 
 // Generic Container
-export const Container = ({ config, value, action, children }) => (
-  <ContainerTemplate config={config} value={value} action={action}>
+export const Container = ({ configs, value, action, children }) => (
+  <ContainerTemplate config={{...configs}} value={value} action={action}>
     {children}
   </ContainerTemplate>
 );
 
 // Grid View Container
-export const GridView = ({ config, value, action, children }) => {
+export const GridView = ({ configs, value, action, children }) => {
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: config.columns || 'repeat(3, 1fr)',
-    gridGap: config.gap || '10px',
-    ...config.customStyles
+    gridTemplateColumns: configs.columns || 'repeat(3, 1fr)',
+    gridGap: configs.gap || '10px',
+    ...configs.style,
   };
 
   return (
-    <div style={gridStyle} onClick={action}>
-      {children || value}
-    </div>
+    <ContainerTemplate config={{...configs, "style": gridStyle}} value={value} action={action}>
+    {children}
+  </ContainerTemplate>
   );
 };
 
@@ -83,7 +83,6 @@ export const Row = ({ configs, value, action, children }) => (
 
 // Column Container
 export const Column = ({ configs, value, action, children }) => {
-  console.log("column configs:",configs);
  return (
   <ContainerTemplate config={{...configs}} value={value} action={action}>
   {children}
