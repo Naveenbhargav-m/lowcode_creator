@@ -55,8 +55,6 @@ export const Container = ({ configs, value, action, children }) => (
 export const GridView = ({ configs, value, action, children }) => {
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: configs.columns || 'repeat(3, 1fr)',
-    gridGap: configs.gap || '10px',
     ...configs.style,
   };
 
@@ -68,8 +66,8 @@ export const GridView = ({ configs, value, action, children }) => {
 };
 
 // List View Container
-export const ListView = ({ config, value, action, children }) => (
-  <ContainerTemplate config={{ "direction":"column",...config}} value={value} action={action}>
+export const ListView = ({ configs, value, action, children }) => (
+  <ContainerTemplate config={{ "direction":"column",...configs}} value={value} action={action}>
     {children}
   </ContainerTemplate>
 );
@@ -91,11 +89,10 @@ export const Column = ({ configs, value, action, children }) => {
 };
 
 // Scroll Area Container
-export const ScrollArea = ({ config, value, action, children }) => {
+export const ScrollArea = ({ configs, value, action, children }) => {
   const scrollStyle = {
     overflowY: 'auto',
-    maxHeight: config.maxHeight || '300px',
-    ...config.customStyles
+    ...configs.style
   };
 
   return (
@@ -106,12 +103,12 @@ export const ScrollArea = ({ config, value, action, children }) => {
 };
 
 // Carousel Container (Simple Example)
-export const Carousel = ({ config, value, action, children }) => {
+export const Carousel = ({ configs, value, action, children }) => {
   const carouselStyle = {
     display: 'flex',
     overflowX: 'scroll',
     scrollSnapType: 'x mandatory',
-    ...config.customStyles
+    ...configs.style
   };
 
   return (

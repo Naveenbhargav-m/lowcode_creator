@@ -1,3 +1,5 @@
+
+let url = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
 const text_base_style = {
     display: "flex",
     overflow: "hidden",
@@ -109,19 +111,188 @@ const icon_button_base_style = {
     cursor: "pointer",
 };
 
+
+const Text_base_config = {
+    value:"This is the sample Text Value",
+    configs: {
+      style: text_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};",
+    },
+};
+
+const NumberBaseConfig = {
+    value: 70,
+    configs: {
+      style: number_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};",
+    },
+};
+
+const TextAreabaseConfig = {
+    value: "This the is the base text value for the Text Area",
+    configs: {
+      style: text_area_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};",
+    },
+};
+
+
+const AvatarConfig = {
+    value: url,
+    configs: {
+      style: text_area_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};",
+    },
+};
+
+
+const AvatarGroupConfig = {
+    value: [url, url],
+    configs: {
+      style: text_area_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
+
+const ProgressBarConfig = {
+    value: 40,
+    configs: {
+      style: progress_bar_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
+
+
+const DropdownConfig = {
+    value: "test",
+    configs: {
+      style: drop_down_base_style,
+      "options": [
+        { value: "1", label: "Option 1" },
+        { value: "2", label: "Option 2" },],
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
+
+const ButtonConfig = {
+    value: "Cick meee",
+    configs: {
+      style: button_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
+
+
+const ImageConfig = {
+    value: url,
+    configs: {
+      style: image_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
+
+
+const BadgeConfig = {
+    value: "triller",
+    configs: {
+      style: badge_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
+
+
+const IconConfig = {
+    value: "database",
+    configs: {
+      style: icon_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
+
+const IconButtonConfig = {
+    value: "database",
+    configs: {
+      style: icon_button_base_style,
+      onClick: "return {};",
+      onDoubleClick: "return {};",
+      onHover:"return {};",
+      onHoverEnter:"return {};",
+      onHoverLeave:"return {};",
+      valueCode: "return {};",
+      childrenCode:"return {};"}
+};
 const PrimitivesStylesMap = {
-    text: text_base_style,
-    number: number_base_style,
-    text_area: text_area_base_style,
-    avatar: avatar_base_style,
-    avatar_group: avatar_group_base_style,
-    progress_bar: progress_bar_base_style,
-    drop_down: drop_down_base_style,
-    button: button_base_style,
-    image: image_base_style,
-    badge: badge_base_style,
-    icon: icon_base_style,
-    icon_button: icon_button_base_style,
+    text: Text_base_config,
+    number: NumberBaseConfig,
+    text_area: TextAreabaseConfig,
+    avatar: AvatarConfig,
+    avatar_group: AvatarGroupConfig,
+    progress_bar: ProgressBarConfig,
+    drop_down: DropdownConfig,
+    button: ButtonConfig,
+    image: ImageConfig,
+    badge: BadgeConfig,
+    icon: IconConfig,
+    icon_button: IconButtonConfig,
 };
 
 export { PrimitivesStylesMap };
