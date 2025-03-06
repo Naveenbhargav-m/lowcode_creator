@@ -53,7 +53,6 @@ const ResizableTableNode = ({ id, selected, onDeleteField }) => {
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
         }}
       >
-        {/* Resizer */}
         <NodeResizer isVisible={selected} color="#007AFF" />
         <div
           className="bg-white"

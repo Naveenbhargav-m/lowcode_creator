@@ -1,10 +1,17 @@
 import { addEdge, applyEdgeChanges, applyNodeChanges, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import { activeWorkFlow } from "./workflow_state";
 import { useCallback, useEffect, useState } from "preact/hooks";
+import { Condition, End, InsertRow, Start, UpdateRow } from "./block_ components";
 
 
 
-
+let nodeTypes = {
+  "insert_row": InsertRow,
+  "update_row": UpdateRow,
+  "condition": Condition,
+  "start": Start,
+  "end": End,
+};
 
 function FlowBuilder() {
   
@@ -37,6 +44,7 @@ function FlowBuilder() {
         onNodesChange={onNodesChange} 
         onEdgesChange={onEdgesChange} 
         onConnect={onConnect}
+        nodeTypes={nodeTypes}
         fitView 
       />
     </div>
