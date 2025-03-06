@@ -2,7 +2,7 @@
 
 import { Text, Number, TextArea, ProgressBar, Avatar, AvatarGroup, Dropdown, Button, Image, Badge, Icon, IconButton } from "./primitivies";
 
-let url = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
+
 // Function to map drop data to the correct primitive component
 
 
@@ -80,7 +80,7 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Avatar
-          src={url}
+          src={data}
           config={{...configObj}}
 
         />
@@ -91,14 +91,8 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <AvatarGroup
-          avatars={[
-            { src: url, alt: "User1" },
-            { src: url, alt: "User2" },
-          ]}
-          config={{...configObj, "value": [
-            { src: url, alt: "User1" },
-            { src: url, alt: "User2" },
-          ]}}
+          avatars={[]}
+          config={{...configObj}}
         />
         </ActiveWrapper>
       );
@@ -131,7 +125,7 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Image
-          src={url}
+          src={data}
           config={{...configObj}}
 
         />
@@ -161,6 +155,7 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       );
 
     case "icon_button":
+      console.log("icon button data:",data, activeSignal);
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <IconButton

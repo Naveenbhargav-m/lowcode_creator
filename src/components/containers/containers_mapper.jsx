@@ -11,6 +11,7 @@ import { renderTemplate } from "../templates/template_mapper";
 
 
 export function renderContainer(layoutItem , dropCallBack , activeSignal) {
+  console.log("temp:",layoutItem);
   layoutItem.configs["id"] = layoutItem.id;
   const { title, children } = layoutItem;
   let childrenSignal = signal(children);
@@ -42,7 +43,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal) {
           ) : child.type === "template"  ? (renderTemplate(child, dropCallBack, activeSignal)) : (renderPrimitiveElement(child, activeSignal))}
         </div>
     ));
-  console.log("title:", title);
+  console.log("title:", title, layoutItem);
   switch (title) {
     case "card":
       return <Card {...layoutItem}>{renderChildren(childElements)}</Card>;
@@ -56,7 +57,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal) {
       return <Row {...layoutItem}>{renderChildren(childElements)}</Row>;
     case "column":
       return <Column {...layoutItem}>{renderChildren(childElements)}</Column>;
-    case "scroll_view":
+    case "scroll_area":
       return <ScrollArea {...layoutItem}>{renderChildren(childElements)}</ScrollArea>;
     case "carousel":
       return <Carousel {...layoutItem}>{renderChildren(childElements)}</Carousel>;

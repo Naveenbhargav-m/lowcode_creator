@@ -128,13 +128,13 @@ const handleDrop = (data, parentId = null) => {
   console.log("called on drop:",data, parentId);
 
   let i = generateUID();
-  let styleObj = {};
+  let myconfig = {};
   let type = data.data.type;
   let title = data.data.value;
   if(type === "primitive") {
-    styleObj = PrimitivesStylesMap[title];
+    myconfig = PrimitivesStylesMap[title];
   } else if(type === "container") {
-    styleObj = ContainersStylesMap[title];
+    myconfig = ContainersStylesMap[title];
   }
     const newItem = {
     id: i,
@@ -144,17 +144,7 @@ const handleDrop = (data, parentId = null) => {
     "parent_container":{...containerBounds},
     parent: parentId,
     children: [],
-    value:"",
-    configs: {
-      style: styleObj,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};",
-    },
+    ...myconfig,
   };
 
   if (parentId != null) {
