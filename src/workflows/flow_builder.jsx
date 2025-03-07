@@ -2,6 +2,7 @@ import { addEdge, applyEdgeChanges, applyNodeChanges, ReactFlow, useEdgesState, 
 import { activeWorkFlow } from "./workflow_state";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { Condition, End, InsertRow, Start, UpdateRow } from "./block_ components";
+import { Drop } from "../components/custom/Drop";
 
 
 
@@ -37,7 +38,8 @@ function FlowBuilder() {
 
 
   return (
-    <div style={{ height: "100%", width: "100%" }}>
+    <Drop onDrop={(data) => {console.log("droped on me :", data);}} dropElementData={{"element":"screen"}} wrapParent={true}>
+    <div style={{height:"90vh", width:"70vw"}}>
       <ReactFlow 
         nodes={nodes} 
         edges={edges} 
@@ -48,6 +50,7 @@ function FlowBuilder() {
         fitView 
       />
     </div>
+    </Drop>
   );
 }
 

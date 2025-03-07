@@ -59,6 +59,12 @@ function CreateWorkflow(data) {
 }
 
 
+function HandleWorkFlowBlockDrop(data) {
+    console.log("data:",data);
+}
+
+
+
 function SetWorkFlowActive(id) {
     let flow = workflows.peek();
     flow.map((value) => {
@@ -68,4 +74,4 @@ function SetWorkFlowActive(id) {
     })
 }
 LoadWorkflows();
-export {activeWorkFlow, workflows, workflownames, CreateWorkflow, SetWorkFlowActive, flowTab, UpdateActiveWorkflowNodes};
+export {activeWorkFlow, workflows, workflownames, CreateWorkflow, SetWorkFlowActive, flowTab, UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop};
