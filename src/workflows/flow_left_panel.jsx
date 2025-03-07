@@ -3,6 +3,7 @@ import DynamicIcon from "../components/custom/dynamic_icon";
 import { activeWorkFlow, CreateWorkflow, flowTab, SetWorkFlowActive, workflownames } from "./workflow_state";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { CreateFormButton } from "../template_builder/template_builder_view";
+import { Draggable } from "../components/custom/Drag";
 
 
 
@@ -71,12 +72,13 @@ function WorkflowNameTile({ obj }) {
 }
 
 function DragComponent( ) {  
-  let registerNodes = [{"name": "Insert Row"}, {"name":"update Row"}, {"name":"condition"},];
+  let registerNodes = [{"name": "Insert Row", "type":"insert_row"}, {"name":"update Row", "type":"update_row"}, {"name":"condition", "type":"condition"},];
     return ( 
       < div className = " custom-drag-list "> 
         { registerNodes.map ( ( item , ind) => {
             console.log("ind", ind);
            return (
+            <Draggable onDragStart={(data) => {console.log("drag data:",data);}} data={{...item}}>
             < div
             style={{"display":"flex", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 0px", padding:"18px", borderRadius:"20px"}}
               key = {ind}
@@ -85,6 +87,7 @@ function DragComponent( ) {
               <div style={{"padding":"0px 4px"}}><DynamicIcon name={icons[ind]} size={20}/></div>
               { item.name }
             </ div >
+            </Draggable>
            ); 
         } ) }
       </ div >
