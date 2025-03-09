@@ -46,8 +46,10 @@ function CreateWorkflow(data) {
     let id = generateUID();
     let endID = generateUID();
     let startID = generateUID();
+    let StarthandleID = generateUID();
+    let stopHandleID = generateUID();
     let obj = {"name": name, "id": id,
-         "nodes": [{"label":"start", "type":"start", "id": startID, position: { x: 250, y: 250 }}, {"label":"end", "type":"end","id": endID, position: { x: 350, y: 250 },}],
+         "nodes": [{"label":"start", "type":"start", "id": startID, "data": {"handles": [{"id":startID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }}, {"label":"end", "type":"end","id": endID, "data" :{ "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
          "edges": [{"id": startID + "_"+ endID, "source": startID, "end": endID}]};
     let exist = workflows.peek();
     exist.push(obj);
@@ -60,7 +62,23 @@ function CreateWorkflow(data) {
 
 
 function HandleWorkFlowBlockDrop(data) {
-    console.log("data:",data);
+    let operation = data["data"]["type"];
+    let name = data["data"]["name"];
+    let newid = generateUID();
+    let handles = data["data"]["handles"];
+    for(let i = 0;i<handles.length;i++) {
+        let id = generateUID();
+        handles[i]["id"] = id;
+    }
+    let newnode = {"label": name, "type":  operation, "id": newid , position: { x: 250, y: 250 }, data:{"handles": [...handles]}};
+    let curFlow = activeWorkFlow.value;
+    let nodes = curFlow["nodes"];
+    let lastVal = curFlow["nodes"].pop();
+    nodes.push(newnode);
+    nodes.push(lastVal);
+    curFlow["nodes"] = [...nodes];
+    activeWorkFlow.value = {...curFlow};
+    console.log("current flow:",curFlow);
 }
 
 

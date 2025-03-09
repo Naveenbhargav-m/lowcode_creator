@@ -72,7 +72,10 @@ function WorkflowNameTile({ obj }) {
 }
 
 function DragComponent( ) {  
-  let registerNodes = [{"name": "Insert Row", "type":"insert_row"}, {"name":"update Row", "type":"update_row"}, {"name":"condition", "type":"condition"},];
+  let registerNodes = [
+    {"name": "Insert Row", "type":"insert_row", "handles":[{"position": "bottom", "type":"source"}, {"position": "top", "type":"target"}]}, 
+    {"name":"update Row", "type":"update_row","handles":[{"position": "bottom","type":"source"}, {"position": "top","type":"target"}]}, 
+    {"name":"condition", "type":"condition","handles":[{"position": "bottom","type":"source"}, {"position": "top","type":"target"}]},];
     return ( 
       < div className = " custom-drag-list "> 
         { registerNodes.map ( ( item , ind) => {
