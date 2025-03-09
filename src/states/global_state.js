@@ -2,8 +2,9 @@ import { effect, signal } from "@preact/signals";
 import { SetGlobalFieldsToAPI } from "../api/api";
 
 let sideBarEnable = signal(true);
-
-
+const PrestDBaseUrl = "http://localhost:8000";
+const CreatorBackendUrl = "http://localhost:8001";
+const AppID = signal("doctors_app1chjxp");
 let showFormPopup = signal("");
 
 
@@ -71,7 +72,8 @@ effect(() => {
 export {
     sideBarEnable, 
     addVariable, variableMap, variableKeys, newVariableKey, showFormPopup,
-    DefaultMode, DefaultTheme, DefaultThemeID
+    DefaultMode, DefaultTheme, DefaultThemeID,
+    PrestDBaseUrl, CreatorBackendUrl, AppID
 };
 
 

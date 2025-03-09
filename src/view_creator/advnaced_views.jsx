@@ -3,6 +3,7 @@ import { signal } from "@preact/signals";
 import { dbViewSignal } from "../table_builder/table_builder_state";
 import { TablesTab } from "../table_builder/tables_page";
 import { TablesButtonsBar } from "./buttonBar";
+import { RunViewCode } from "./view_api";
 
 
 const command = signal("");
@@ -27,7 +28,7 @@ const RoundedTextarea = () => {
       />
       <RunButton
         submitTitle={"Run"} ClearTitle={"clear"} 
-      onSubmit={() => {console.log("command:",command.peek());}} 
+      onSubmit={() => {RunViewCode(command.peek())}} 
       onClear={() => {command.value = "" }} />
     </div>
   );

@@ -2,7 +2,7 @@ import { NodeResizer } from "@xyflow/react";
 import DynamicIcon from "../components/custom/dynamic_icon";
 
 
-import { Handle, Position } from '@xyflow/react';
+import { Handle } from '@xyflow/react';
 
 export function InsertRow({ data }) {
     let name = "Insert Row";
@@ -97,7 +97,7 @@ export function Condition({data, isConnectable}) {
     );
 }
 
-export function Start({data, isConnectable}) {
+export function Start({data}) {
     let name = "Start";
     let icon = "network";
     let  style={"display":"flex", height:"inherit", width:"inherit", alignItems:"center",justifyContent:"center", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 0px", padding:"10 10px", borderRadius:"20px"};
