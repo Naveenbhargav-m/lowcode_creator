@@ -2,7 +2,7 @@ import { Drop } from "../components/custom/Drop";
 import { Rnd } from "react-rnd";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement, SetCurrentScreen  } from "./screen_state";
+import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement, SetCurrentScreen, activeScreen, screens  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 import { IconGroup } from "../components/primitives/general_components";
@@ -50,6 +50,12 @@ function ScreenBuilderArea() {
 
 
 function MobileView() {
+  let curScreen = activeScreen.value;
+  let style = {};
+  if(curScreen !== "" && curScreen !== undefined) {
+    console.log("screen styles:", curScreen);
+    style = screens[curScreen]["mobile_style"];
+  }
   return (
     <MobileMockup>
     <div
@@ -71,11 +77,13 @@ function MobileView() {
         dropElementData={{ element: "screen" }}
         wrapParent={true}
       >
+        <div style={{...style}} onClick={(e) => {activeElement.value = "screen"}}>
         {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
                 return RenderElement(item.peek(), handleDrop,activeElement);
               }
         })}
+        </div>
       </Drop>
       </div>
       </MobileMockup>
@@ -84,6 +92,12 @@ function MobileView() {
 
 
 function DesktopView() {
+  let curScreen = activeScreen.value;
+  let style = {};
+  if(curScreen !== "" && curScreen !== undefined) {
+    console.log("screen styles:", curScreen);
+    style = screens[curScreen]["desktop_style"];
+  }
   return (
     <DesktopMockup>
     <div
@@ -105,11 +119,13 @@ function DesktopView() {
         dropElementData={{ element: "screen" }}
         wrapParent={true}
       >
+        <div style={style}>
         {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
                 return RenderElement(item.peek(),handleDrop, activeElement);
               }
         })}
+        </div>
       </Drop>
       </div>
       </DesktopMockup>

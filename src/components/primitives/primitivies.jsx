@@ -118,13 +118,13 @@ export const Image = ({ src, config }) => (
 );
 
 // Refactored Avatar Component
-export const Avatar = ({ src, config }) => {
-    console.log("avatar configs:",config);
+export const Avatar = ({config }) => {
     return (
-      <DynamicWrapper config={config} value={src}>
-    {(dynamicValue) => (
-      <img src={dynamicValue} alt="" style={{ ...config.style, borderRadius: "50%" }} />
-    )}
+      <DynamicWrapper config={config} value={config["value"]}>
+    {(dynamicValue) => {
+      console.log("dynamic value:", dynamicValue);
+      return <img src={dynamicValue} alt="" style={{ ...config.style, borderRadius: "50%" }} />
+    }}
   </DynamicWrapper>
     );
 }

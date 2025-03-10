@@ -1,3 +1,4 @@
+import { APIManager } from "../api/api_manager";
 import { AppID, CreatorBackendUrl } from "../states/global_state";
 
 let api = new APIManager(CreatorBackendUrl);

@@ -6,6 +6,9 @@ import { generateUID } from "../utils/helpers";
 import { PrimitivesStylesMap } from "../components/primitives/primitives_base_styles";
 import { ContainersStylesMap } from "../components/containers/containers_bse_styles";
 
+
+const screenStyle = {"display":"flex","flexDirection":"column","minHeight":"200px", "minWidth":"150px","height":"100%", "width":"100%"};
+
 const tabSignal = signal("primitives");
 const tabDataSignal = signal({
   "tabs": ["primitives", "containers", "templates"],
@@ -101,16 +104,12 @@ function SetCurrentScreen() {
     key = "desktop_children";
     otherkey = "mobile_children"
   }
-  console.log("key and other key:",key,otherkey);
   let elements = JSON.parse(JSON.stringify(screens[id][key]));
-  console.log("existing elements:",elements);
   if(IsEmptyMap(elements)) {
 
     let elements = JSON.parse(JSON.stringify(screens[id][otherkey]));
-    console.log("in empty map existing elements:",elements, otherkey);
     if(!IsEmptyMap(elements)) {
       screens[id][key] = JSON.parse(JSON.stringify(elements));
-      console.log("setting other elements to current key:",elements, key, screens);
     }
   }
   let newElements = {};
@@ -120,13 +119,10 @@ function SetCurrentScreen() {
   }
   localStorage.setItem("screen_config",JSON.stringify(screens));
   screenElements = {...newElements};
-  console.log("screen elements:", newElements);
   screenElementAdded.value = false;
   screenElementAdded.value = true;
 }
 const handleDrop = (data, parentId = null) => {
-  console.log("called on drop:",data, parentId);
-
   let i = generateUID();
   let myconfig = {};
   let type = data.data.type;
@@ -165,22 +161,17 @@ const handleDrop = (data, parentId = null) => {
     if(screenView.peek() !== "smartphone") {
       key = "desktop_children";
     }
-    console.log("in handle drop: setting elements for:",key, screenElements);
     temp[key] = JSON.parse(JSON.stringify(screenElements));
     screens[activeScreen.value] = temp;
   }
   localStorage.setItem("screen_config", JSON.stringify(screens));
-  // let screenData = {
-  //   "configs":JSON.stringify(screenElements)
-  // };
-  // SetScreenToAPI(screenData,1);
 };
 
 function CreatenewScreen(data) {
   let name = data["name"];
   let length = Object.keys(screens).length;
   let id = generateUID();
-  let newScreenData = {"id": id, "name": name, "mobile_children": {}, "desktop_children":{},"order":length};
+  let newScreenData = {"id": id, "name": name, "mobile": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
   screens[id] = newScreenData;
   screenElements = {};
   let existingnames = screenLeftnamesAndIds.peek();

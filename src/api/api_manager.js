@@ -105,3 +105,5 @@ class APIManager {
     }
   }
   
+
+  export {APIManager}

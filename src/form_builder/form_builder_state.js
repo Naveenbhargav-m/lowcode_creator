@@ -2,6 +2,8 @@ import { effect, signal } from "@preact/signals";
 import { generateUID, getElementByID, setElementByID } from "../utils/helpers";
 import { fieldsConfigs } from "./fields/field_styles";
 
+const formStyle = {"display":"flex","flexDirection":"column","minHeight":"200px", "minWidth":"150px","height":"100%", "width":"100%"};
+
 let forms = {};
 let currentForm = signal("");
 let currentFormElements = [];
@@ -28,7 +30,7 @@ function AddtoElements(data) {
       "order": length, 
       ...commonConfig,
     };
-    if(formName != "screen") {
+    if(formName !== "screen") {
       elementData["parent"] = formName;
       let parent = getElementByID(existing,formName).peek();
       parent["children"].push(newid);
@@ -62,7 +64,7 @@ function AddtoElements(data) {
     } else {
         length = Object.keys(forms).length
     };
-    let newdata = {"id": id, "name":name, "mobile_children": [] , "desktop_children": [],"order":length};
+    let newdata = {"id": id, "name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
     forms[id] = newdata;
     let existing = formLeftNamesList.peek();
     existing.push({"id":id, "name":name});

@@ -3,7 +3,7 @@ import { DesktopMockup } from "../screen_builder/screen_components";
 import { FormBuilderLeftPanel } from "./form_builder_left";
 import { Column, PanelField, Row } from "./fields/fields";
 import { Field } from "./fields/chakra_fields";
-import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm } from "./form_builder_state";
+import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm, forms } from "./form_builder_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
@@ -14,6 +14,7 @@ import { DynamicFormComponent, RenderElements } from "./form_renderer";
 import { getSortedFields , getSortedSignalFields } from "../utils/helpers";
 import { CallOnChange, configs, UpdateConfig, values } from "./form_test_data";
 import { ReorderableList } from "../components/custom/ReorderList";
+import { activeElement } from "../screen_builder/screen_state";
 
 function EditArea() {
     return (
@@ -35,11 +36,12 @@ function EditArea() {
 
 
   function FormEditMobileView() {
-    useEffect(() => {
-      console.log("Re-render triggered");
-    },[]);
     let temp = currentFormElements;
-
+   let curScreen = currentForm.value;
+    let style = {"display":"content"};
+    if(curScreen !== undefined && curScreen !== "") {
+      style = forms[curScreen]["mobile_style"];
+    }
     let values = temp;
     return (
       <MobileMockup>
@@ -59,7 +61,9 @@ function EditArea() {
           onDrop={(data) => {AddtoElements(data)}}
           dropElementData={{ "id":"screen" }}
        >
-          {formRenderSignal.value && <ReorderableList data={values} onReorder={(nedata) => {console.log("reorder data:",nedata);}}>{RenderElements(values, false)}</ReorderableList>}
+        <div style={style} onClick={(e) => {formActiveElement.value = "form" }}>
+          {formRenderSignal.value && RenderElements(values, false)}
+          </div>
       </Drop>
       </div>
       </MobileMockup>
@@ -70,6 +74,11 @@ function EditArea() {
   function FormEditDesktopView() {
     let temp = currentFormElements;
     let values = temp;
+    let curScreen = currentForm.value;
+    let style = {"display":"content"};
+    if(curScreen !== undefined && curScreen !== "") {
+      style = forms[curScreen]["desktop_style"];
+    }
     return (
       <DesktopMockup>
     <div
@@ -88,7 +97,9 @@ function EditArea() {
          onDrop={(data) => {AddtoElements(data)}}
          dropElementData={{ "id":"screen" }}
        >
+        <div style={style} onClick={(e) => {formActiveElement.value = "form" }}>
           {formRenderSignal.value && RenderElements(values, false)}
+          </div>
       </Drop>
       </div>
       </DesktopMockup>
