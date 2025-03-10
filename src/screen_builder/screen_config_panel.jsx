@@ -1,5 +1,5 @@
 import { signal } from "@preact/signals"; // Assuming you have this import in your file
-import { activeConfigTab, activeElement, activeScreen, screenElements, screens, screenView } from "./screen_state";
+import { activeConfigTab, activeElement, activeScreen, screenElementAdded, screenElements, screens, screenView } from "./screen_state";
 import {AdvnacedForm} from "../form_builder/configs_view/advanced_form";
 import { FlexConfigTab } from "../form_builder/form_right_elements";
 import FlexConfigurator from "../form_builder/configs_view/flex_config";
@@ -7,8 +7,14 @@ const myconfig = signal({});
 const basicConfig = signal({});
 
 function ScreenRightPanel() {
-    let myelement = screenElements[activeElement.value];
-    console.log("active element in screen config panel:",activeElement.value, activeConfigTab.value);
+    let actElem = activeElement.value;
+    console.log("activity element:",actElem);
+    let myelement = null;
+    if(actElem === "screen") {
+
+    } else {
+        myelement = screenElements[activeElement.value];
+    }
     const updateConfig = () => {
 
         if (myelement) {
@@ -24,7 +30,22 @@ function ScreenRightPanel() {
 
             basicConfig.value = {...configs["style"]};
             console.log("basic config value:",basicConfig.value, configs);
-    }};
+    } else {
+        let configs = screens[activeScreen.value];
+        if(configs === undefined) {
+            return;
+        }
+        let view = screenView.value;
+        let key = "desktop_style";
+        if(view === "smartphone") {
+            key = "mobile_style"
+        }
+        myconfig.value = {
+            "Style":configs[key]
+        };
+        basicConfig.value = {...configs[key]};
+    }
+};
     updateConfig();
     const updateDataback = (data) => {
         if (myelement) {
@@ -44,8 +65,17 @@ function ScreenRightPanel() {
             temp2[key] = JSON.parse(JSON.stringify(screenElements));
             screens[activeScreen.value] = temp2;
         } 
-        localStorage.setItem("screen_config", JSON.stringify(screens));
+        } else {
+            let view = screenView.value;
+            let key = "desktop_style";
+            if(view === "smartphone") {
+                key = "mobile_style"
+            }
+            screens[activeScreen.value][key] = data["Style"];
         }
+        localStorage.setItem("screen_config", JSON.stringify(screens));
+        screenElementAdded.value = false;
+        screenElementAdded.value = true;
     }
 
     const updateStyleback = (data) => {
@@ -62,8 +92,18 @@ function ScreenRightPanel() {
                 temp2[key] = JSON.parse(JSON.stringify(screenElements));
                 screens[activeScreen.value] = temp2;
             } 
-            localStorage.setItem("screen_config", JSON.stringify(screens));
+        } else {
+            let view = screenView.value;
+            let key = "desktop_style";
+            if(view === "smartphone") {
+                key = "mobile_style"
+            }
+            screens[activeScreen.value][key] = {...data};
+            
         }
+        screenElementAdded.value = false;
+        screenElementAdded.value = true;
+        localStorage.setItem("screen_config", JSON.stringify(screens));
     }
     return (
         <div>

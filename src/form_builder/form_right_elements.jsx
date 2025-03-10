@@ -40,24 +40,39 @@ function GetAdvancedConfigs(element, isField) {
   
 export function FlexRightPanel() {
     let eleID = formActiveElement.value;
-    let temp = currentFormElements[eleID];
-    if(temp === undefined) {
-      return <div></div>;
+    let temp = undefined;
+    let activeElement = undefined;
+    let isform = false;
+    if(eleID !== "form") {
+      temp = currentFormElements[eleID];
+      if(temp === undefined) {
+        return <div></div>;
+      }
+      activeElement = temp.peek();
+    } else {
+        isform = true;
     }
-    let activeElement = temp.peek();
     const handleChange = (config) => {
-      console.log("existing element:",activeElement);
-      if(activeElement !== undefined) {
-        console.log("config:",config);
+      if(activeElement !== undefined && !isform) {
         activeElement["style"] = {...activeElement["style"],...config};
         let allElement = currentFormElements;
         allElement = setElementByID(allElement, eleID, activeElement);
         setCurrentElements(allElement);
       }
+      if(isform) {
+        let key = "mobile_style";
+        let view = formBuilderView.value;
+        if(view !== "smartphone") {
+          key = "desktop_style";
+        }
+        forms[currentForm.value][key] = {...config};
+      }
+      formRenderSignal.value = false;
+      formRenderSignal.value = true;
     };
   
     const handleSubmit = (config) => {
-      if(activeElement !== undefined) {
+      if(activeElement !== undefined && !isform) {
         activeElement["style"] = {...activeElement["style"],...config};
         let allElement = currentFormElements;
         allElement = setElementByID(allElement, eleID, activeElement);
@@ -70,12 +85,21 @@ export function FlexRightPanel() {
 
         }
         forms[currentForm.value] = myform;
-        localStorage.setItem("form",JSON.stringify(forms));
+      } else if(isform) {
+        let key = "mobile_style";
+        let view = formBuilderView.value;
+        if(view !== "smartphone") {
+          key = "desktop_style";
+        }
+        forms[currentForm.value][key] = {...config};
       }
+      formRenderSignal.value = false;
+      formRenderSignal.value = true;
+      localStorage.setItem("forms",JSON.stringify(forms));
     };
     const onAdvancedSubmit = (data) => {
       console.log("advanced config data:",data);
-      if(activeElement !== undefined) {
+      if(activeElement !== undefined && !isform) {
         if(data["style"] !== undefined) {
             let temp = JSON.parse(data["style"]);
             if(temp !== undefined) {
@@ -95,17 +119,39 @@ export function FlexRightPanel() {
         }
         console.log("my form:", myform, currentFormElements);
         forms[currentForm.value] = myform;
-        localStorage.setItem("forms",JSON.stringify(forms));
-        formRenderSignal.value = true;
+      }  else if(isform) {
+        let key = "mobile_style";
+        let view = formBuilderView.value;
+        if(view !== "smartphone") {
+          key = "desktop_style";
+        }
+        forms[currentForm.value][key] = JSON.parse(data["style"]);
       }
+      formRenderSignal.value = false;
+      formRenderSignal.value = true;
+      localStorage.setItem("forms",JSON.stringify(forms));
+
     }
   
     let advancedConfig = {};
     let type = "column";
       let configs = {};
-      if(activeElement === undefined) {
+      if(activeElement === undefined && !isform) {
         configs = {};
-      } else {
+      } else if(isform) {
+        let key = "mobile_style";
+        let view = formBuilderView.value;
+        if(view !== "smartphone") {
+          key = "desktop_style";
+        }
+        let curForm = forms[currentForm.value];
+        if(curForm === undefined) {
+          return;
+        }
+        configs = curForm[key];
+        advancedConfig = {"style": configs};
+      }
+         else {
         configs = activeElement["style"];
         type = activeElement["type"];
         if(type === "column" || type === "row") {
