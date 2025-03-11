@@ -1,12 +1,12 @@
 import { APIManager } from "../api/api_manager";
-import { AppID, CreatorBackendUrl } from "../states/global_state";
+import { AppID, CreatorBackendUrl, PrestDBaseUrl } from "../states/global_state";
 
-let api = new APIManager(CreatorBackendUrl);
-
+let creatorapi = new APIManager(CreatorBackendUrl);
+let prestApi = new APIManager(PrestDBaseUrl);
 
 
 async function RunViewCode(code) {
-    let resp = await api.get(`/api/views/${AppID.value}`, {body:{"code": code}});
+    let resp = await creatorapi.post(`/api/views/${AppID.value}`, {body:{"code": code}});
     console.log("resp from view:",resp);
 }
 

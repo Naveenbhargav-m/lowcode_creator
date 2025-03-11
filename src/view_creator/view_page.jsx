@@ -3,6 +3,7 @@ import { Popup } from "../form_builder/configs_view/advanced_form";
 import { dbViewSignal } from "../table_builder/table_builder_state";
 import { TablesTab } from "../table_builder/tables_page";
 import { TablesButtonsBar } from "./buttonBar";
+import { RunViewCode } from "./view_api";
 
 const popupOpen = signal(false);
 function handleViewCreate() {
@@ -28,7 +29,7 @@ function ViewArea() {
        <Popup 
         isOpen={popupOpen.value}
         onClose={() => popupOpen.value = false}
-        onSubmit={(value) => console.log("called on submit:",value)}
+        onSubmit={(value) => RunViewCode(value)}
         value={"CREATE OR REPLACE VIEW "}
         label={"Create View"}
         closeText={"Cancel"}
