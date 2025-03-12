@@ -28,6 +28,8 @@ export function RenderRoworColumnChildren(children,values = {},
       <div
       style={{ display: "contents" }}
       onClick={(e) => {
+        e.stopPropagation();
+        console.log("called Selectable onClick:",id);
         formActiveElement.value = id;
       }}
     >

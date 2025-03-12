@@ -4,6 +4,7 @@ import { dbViewSignal } from "../table_builder/table_builder_state";
 import { TablesTab } from "../table_builder/tables_page";
 import { TablesButtonsBar } from "./buttonBar";
 import { RunViewCode } from "./view_api";
+import { views } from "./views_state";
 
 const popupOpen = signal(false);
 function handleViewCreate() {
@@ -23,8 +24,30 @@ function ViewArea() {
             />
             </div>
         </div>
-       <div style={{"backgroundColor":"white", borderRadius:"20px",height:"80%", width:"90%" ,marginTop:"30px" }}>
-                this is others
+       <div style={{"display":"flex", "flexDirection":"row","backgroundColor":"white", borderRadius:"20px",height:"80%", width:"90%" ,marginTop:"30px" }}>
+                {views.value.map((item) => {
+                    return (
+                        <div style={{"padding":"0px 0px","margin":"10px",backgroundColor:"white", "height":"40%","width":"30%",border:"2px solid black", borderRadius:"20px"}}>
+                            <div style={{"padding":"4px 8px", "color":"black", "backgroundColor":"#C0EBA6", "borderRadius":"20px"}}>
+                            {item.view_name}
+                            </div>
+                            <div style={{"padding":"4px 8px", "color":"black"}}>
+                                {item.view_columns.map((column) => {
+                                   return(
+                                    <div style={{"padding":"4px 0px","display":"flex", "flexDirection":"row", "alignItems":"center", "justifyContent":"space-between"}}>
+                                    <div style={{padding:"0px 4px"}}>
+                                        <span>{column.name}</span>
+                                    </div>
+                                    <div style={{padding:"0px 4px"}}>
+                                    <span>{column.type}</span>
+                                    </div>
+                                </div>
+                                   );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })}
        </div>
        <Popup 
         isOpen={popupOpen.value}

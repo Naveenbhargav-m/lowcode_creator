@@ -93,7 +93,7 @@ async function GenericApiCall(url, method = "GET", data = {}, type = "body", hea
             console.log("config:",response.json());
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
+        console.log("before the returning the data:",response);
         // Parse and return the JSON response
         return await response.json();
     } catch (error) {

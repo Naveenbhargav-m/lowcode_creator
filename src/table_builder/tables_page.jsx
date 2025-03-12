@@ -44,16 +44,14 @@ const ResizableTableNode = ({ id, selected, onDeleteField }) => {
         style={{
           position: "relative",
           background: "white",
-          border: "1px solid #ddd",
           borderRadius: 8,
           width: "100%",
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <NodeResizer isVisible={selected} color="#007AFF" />
+        <NodeResizer handleStyle={{"background":"transparent", "border":"none", "padding":"0px"}} isVisible={selected} color="#007AFF" />
         <div
           className="bg-white"
           style={{
@@ -74,6 +72,7 @@ const ResizableTableNode = ({ id, selected, onDeleteField }) => {
               borderBottom: "1px solid #ddd",
               fontSize: "12px",
               borderRadius: "8px 8px 0px 0px",
+              "color":"black"
             }}
             onClick={() => {
               activeTable.value = table.id;
@@ -113,7 +112,7 @@ const ResizableTableNode = ({ id, selected, onDeleteField }) => {
       }}
     >
       {/* Left: Field Name */}
-      <span style={{ flex: 1, textAlign: "left" }}>{field.name}</span>
+      <span style={{ flex: 1, textAlign: "left", "color":"black" }}>{field.name}</span>
       {/* Right: Field Type */}
       <span
         style={{
@@ -264,12 +263,13 @@ const onReconnectEnd = useCallback((_, edge) => {
 
 
   return (
-    <div className="w-4/6 h-screen bg-background min-h-screen mx-4">
+    <div className="w-4/6 h-screen min-h-screen mx-4">
       {/* Top-right Button */}
       <div style={{display:"flex", flexDirection:"row", width:"100%", paddingTop:"20px", justifyContent:"space-between", alignItems:"center"}}>
       <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab}/>
       <TablesButtonsBar AddCallBack={addNode} 
       SaveCallback={() => {
+        console.log("save call Back is executing:");
         SyncTablesData(currentTableConfigs, currentEdges, tables_id.peek());
         SaveTablesData();}}/>
       </div>
@@ -335,7 +335,7 @@ function TablesButtonsBar({AddCallBack, SaveCallback}) {
 
   <button
   style={{fontSize:"0.9em"}}
-    onClick={SaveCallback()}
+    onClick={(e) => SaveCallback()}
     className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary ml-4"
   >
     Save Changes

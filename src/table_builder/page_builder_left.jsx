@@ -37,7 +37,7 @@ export function PageBuilderLeftGrid() {
 
 function OptionsMapper({ options }) {
   return (
-    <div className="block">
+    <div>
       {options.map((innerlist) => {
         return (
           <Draggable data={innerlist} onDragStart={(data) => setDragData(data)}>

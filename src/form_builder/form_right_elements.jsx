@@ -1,4 +1,4 @@
-import { setElementByID } from "../utils/helpers";
+import { getElementByID, setElementByID } from "../utils/helpers";
 import {AdvnacedForm} from "./configs_view/advanced_form";
 import FlexConfigurator from "./configs_view/flex_config";
 import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
@@ -44,19 +44,24 @@ export function FlexRightPanel() {
     let activeElement = undefined;
     let isform = false;
     if(eleID !== "form") {
-      temp = currentFormElements[eleID];
+      temp = getElementByID(currentFormElements, eleID);
+      console.log("temp:",temp, currentFormElements);
       if(temp === undefined) {
         return <div></div>;
       }
       activeElement = temp.peek();
+      console.log("active element:",activeElement);
     } else {
         isform = true;
     }
     const handleChange = (config) => {
+      console.log("called handleChange:",config, activeElement, isform);
       if(activeElement !== undefined && !isform) {
+        console.log("--------------- active element handle change not form:", config, activeElement);
         activeElement["style"] = {...activeElement["style"],...config};
         let allElement = currentFormElements;
         allElement = setElementByID(allElement, eleID, activeElement);
+        console.log("final All elements:", allElement);
         setCurrentElements(allElement);
       }
       if(isform) {
@@ -137,8 +142,10 @@ export function FlexRightPanel() {
     let type = "column";
       let configs = {};
       if(activeElement === undefined && !isform) {
+        console.log("if:", isform, activeElement);
         configs = {};
       } else if(isform) {
+        console.log("else id form:", isform, activeElement);
         let key = "mobile_style";
         let view = formBuilderView.value;
         if(view !== "smartphone") {
@@ -152,6 +159,7 @@ export function FlexRightPanel() {
         advancedConfig = {"style": configs};
       }
          else {
+          console.log("ellse:", isform, activeElement);
         configs = activeElement["style"];
         type = activeElement["type"];
         if(type === "column" || type === "row") {
