@@ -4,6 +4,7 @@ import { currentEdges, currentTableConfigs, originalTablesdata, table_edges, tab
 
 
 function TablesDataSetterFromAPI() {
+  console.log("called Tables Data Settr API");
   GetAllTableDataFromAPI().then((data) => {
     if(data !== undefined) {
       if(data["length"] === 0) {
@@ -41,6 +42,7 @@ function TablesDataSetterFromAPI() {
 
 
 function SaveTablesData() {
+  console.log("called Save Tables Data");
   let alltables = tables;
   let alledges = table_edges;
   let tablesJson = JSON.stringify(alltables);
