@@ -18,6 +18,7 @@ import { FormBuilderTest } from "./form_builder/form_edit_area";
 import { ThemeCreator } from "./theme_creator/theme_config_area";
 import { Provider } from "./components/ui/provider";
 import { WorkFlowPage } from "./workflows/workflow_page";
+import TestRV from "./components/general/recordset_list";
 export function App() {
   return (
     <Provider>
@@ -37,6 +38,7 @@ export function App() {
       <Route path="/users" component={UsersPage}/>
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
+      <Route path="/test_comp" component={TestRV} />
       <Route path="/preview" component={PreviewArea} />
       <Route path="/test" component={ThemeCreator} />
       <Route default component={() => <div>Not Found</div>} />

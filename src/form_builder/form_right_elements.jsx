@@ -5,6 +5,7 @@ import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
 import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms, setCurrentElements } from "./form_builder_state";
 
 
+
 function GetAdvancedConfigs(element, isField) {
     if(element === undefined) {
         return {
@@ -54,14 +55,11 @@ export function FlexRightPanel() {
     } else {
         isform = true;
     }
-    const handleChange = (config) => {
-      console.log("called handleChange:",config, activeElement, isform);
+    const handleFlexChange = (config) => {
       if(activeElement !== undefined && !isform) {
-        console.log("--------------- active element handle change not form:", config, activeElement);
         activeElement["style"] = {...activeElement["style"],...config};
         let allElement = currentFormElements;
         allElement = setElementByID(allElement, eleID, activeElement);
-        console.log("final All elements:", allElement);
         setCurrentElements(allElement);
       }
       if(isform) {
@@ -76,7 +74,7 @@ export function FlexRightPanel() {
       formRenderSignal.value = true;
     };
   
-    const handleSubmit = (config) => {
+    const handleFlexSubmit = (config) => {
       if(activeElement !== undefined && !isform) {
         activeElement["style"] = {...activeElement["style"],...config};
         let allElement = currentFormElements;
@@ -102,15 +100,33 @@ export function FlexRightPanel() {
       formRenderSignal.value = true;
       localStorage.setItem("forms",JSON.stringify(forms));
     };
-    const onAdvancedSubmit = (data) => {
+    const onAdvancedFlexSubmit = (data) => {
       console.log("advanced config data:",data);
       if(activeElement !== undefined && !isform) {
-        if(data["style"] !== undefined) {
-            let temp = JSON.parse(data["style"]);
+          if(data["style"] !== undefined) {
+              let temp = JSON.parse(data["style"]);
+              if(temp !== undefined) {
+                data["style"] = temp;
+              }
+          }
+          if(data["fieldStyle"] !== undefined) {
+            let temp = data["fieldStyle"];
             if(temp !== undefined) {
-              data["style"] = temp;
+              data["fieldStyle"] = temp;
             }
         }
+        if(data["labelStyle"] !== undefined) {
+          let temp = data["labelStyle"];
+          if(temp !== undefined) {
+            data["labelStyle"] = temp;
+          }
+      }
+      if(data["panelStyle"] !== undefined) {
+        let temp = data["panelStyle"];
+        if(temp !== undefined) {
+          data["panelStyle"] = temp;
+        }
+      }
         activeElement = {...activeElement,...data};
         let allElement = currentFormElements;
         allElement = setElementByID(allElement, eleID, activeElement);
@@ -135,7 +151,6 @@ export function FlexRightPanel() {
       formRenderSignal.value = false;
       formRenderSignal.value = true;
       localStorage.setItem("forms",JSON.stringify(forms));
-
     }
   
     let advancedConfig = {};
@@ -160,27 +175,49 @@ export function FlexRightPanel() {
       }
          else {
           console.log("ellse:", isform, activeElement);
-        configs = activeElement["style"];
-        type = activeElement["type"];
-        if(type === "column" || type === "row") {
-          advancedConfig = GetAdvancedConfigs(activeElement,false);
+          type = activeElement["type"];
+          if(type === "column" || type === "row") {
+            advancedConfig = GetAdvancedConfigs(activeElement,false);
+            configs = activeElement["style"];
 
-        } else {
-          advancedConfig = GetAdvancedConfigs(activeElement,true);
+          } else {
+            advancedConfig = GetAdvancedConfigs(activeElement,true);
+            configs = {"fieldStyle": activeElement["fieldStyle"],"labelStyle": activeElement["labelStyle"],"panelStyle": activeElement["panelStyle"]};
+          }
 
+      }
+
+      function handleFormFieldSubmit(data) {
+        if(activeElement !== undefined && !isform) {
+          activeElement["fieldStyle"] = {...activeElement["fieldStyle"],...data["fieldStyle"]};
+          activeElement["labelStyle"] = {...activeElement["labelStyle"],...data["labelStyle"]};
+          activeElement["panelStyle"] = {...activeElement["panelStyle"],...data["panelStyle"]};
+          let allElement = currentFormElements;
+          allElement = setElementByID(allElement, eleID, activeElement);
+          setCurrentElements(allElement);
+          let myform = forms[currentForm.value];
+          if(formBuilderView.value === "smartphone") {
+              myform["mobile_children"] = currentFormElements;
+          } else {
+              myform["desktop_children"] = currentFormElements;
+  
+          }
+          forms[currentForm.value] = myform;
+          formRenderSignal.value = false;
+          formRenderSignal.value = true;
+          localStorage.setItem("forms",JSON.stringify(forms));
         }
-
       }
       return (<div>
       <FlexConfigTab tablSignal={activeTab} />
       {activeTab.value === "Basic" ? (
         type === "column" || type === "row" ? (
-          <FlexConfigurator onChange={handleChange} onSubmit={handleSubmit} existingConfig={configs} />
+          <FlexConfigurator onChange={handleFlexChange} onSubmit={handleFlexSubmit} existingConfig={configs} />
         ) : (
-          <FormFieldConfigurator onChange={handleChange} onSubmit={handleSubmit} existingConfig={configs} />
+          <FormFieldConfigurator onChange={handleFormFieldSubmit} onSubmit={handleFormFieldSubmit} existingConfig={configs} />
         )
       ) : (
-        <AdvnacedForm configsInp={advancedConfig} onSubmit={onAdvancedSubmit} />
+        <AdvnacedForm configsInp={advancedConfig} onSubmit={onAdvancedFlexSubmit} />
       )}
     </div>);
   }
