@@ -6,7 +6,7 @@ function TextField({ config = {}, onAction}) {
        name="text" 
        placeholder={config["placeholder"] || ""} 
        aria-label={config["label"]}
-       style={{ ...config["style"] }}
+       style={{ ...config["fieldStyle"] }}
        onBlur={(e) => onAction(e, "onBlur", config["value"])}
        onFocus={(e) => onAction(e, "onFocus",config["value"])}
        onClick={(e) => onAction(e, "onClick",config["value"])}
@@ -24,7 +24,7 @@ function PasswordField({ config = {}, onAction }){
       name="text" 
       placeholder={config["placeholder"] || ""} 
       aria-label={config["label"]}
-      style={{ ...config["style"] }}
+      style={{ ...config["fieldStyle"] }}
       onBlur={(e) => onAction(e, "onBlur", config["value"])}
       onFocus={(e) => onAction(e, "onFocus",config["value"])}
       onClick={(e) => onAction(e, "onClick",config["value"])}
@@ -43,7 +43,7 @@ function SwitchElement({ config = {}, onAction }) {
     type="checkbox" 
     role="switch" 
     checked={config["value"]}
-    style={{...config["style"]}}
+    style={{...config["fieldStyle"]}}
     onChange={(e) => {onAction(e,"onChange",config["value"])}}
 
     />

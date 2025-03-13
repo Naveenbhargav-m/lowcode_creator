@@ -89,10 +89,11 @@ const flexConfigSchema = {
 // Flex Configurator Component
 const FlexConfigurator = ({ onChange, onSubmit, existingConfig }) => {
   let config = { ...existingConfig };
-
+  console.log("configs in flex Configurator:", config);
   const updateConfig = (key, value) => {
     config = { ...config, [key]: value };
-    if (onChange) onChange(config);
+    console.log("updated Config:",config);
+    // if (onChange) onChange(config);
   };
 
   const handleSubmit = (e) => {

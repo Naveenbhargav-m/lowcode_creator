@@ -5,7 +5,7 @@ import "../styles/formFieldConfigurator.css";
 
 // Updated Configuration Schema
 const formFieldConfigSchema = {
-    panel: {
+    panelStyle: {
       height: { label: "Height", type: "text" },
       width: { label: "Width", type: "text" },
       backgroundColor: { label: "Background Color", type: "color" },
@@ -20,7 +20,7 @@ const formFieldConfigSchema = {
         ],
       },
     },
-    field: {
+    fieldStyle: {
       height: { label: "Height", type: "text" },
       width: { label: "Width", type: "text" },
       backgroundColor: { label: "Background Color", type: "color" },
