@@ -3,6 +3,7 @@ import DynamicIcon from "../components/custom/dynamic_icon";
 
 
 import { Handle } from '@xyflow/react';
+import { activeworkFlowBlock } from "./workflow_state";
 
 export function InsertRow({ data }) {
     let name = "Insert Row";
@@ -21,8 +22,8 @@ export function InsertRow({ data }) {
         borderRadius: "20px"
     };
     return (
-        <div>
-            <NodeResizer isVisible={true} />
+        <div onClick={(e) => {activeworkFlowBlock.value = {...data};}}>
+            <NodeResizer  isVisible={true} />
             {data.handles?.map((handle) => (
                 <Handle
                     key={handle.id}
@@ -49,7 +50,7 @@ export function UpdateRow({data, isConnectable}) {
     let  style={"display":"flex", height:"inherit", width:"inherit", alignItems:"center",justifyContent:"center", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 0px", padding:"10 10px", borderRadius:"20px"};
 
     return (
-        <div>
+        <div onClick={(e) => { console.log("setting the active workflow block");activeworkFlowBlock.value = {...data};}}>
         <NodeResizer isVisible={true} />
         {data.handles?.map((handle) => (
             <Handle
@@ -76,7 +77,7 @@ export function Condition({data, isConnectable}) {
     let  style={"display":"flex", height:"inherit", width:"inherit", alignItems:"center",justifyContent:"center", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 0px", padding:"10 10px", borderRadius:"20px"};
 
     return (
-        <div>
+        <div onClick={(e) => {activeworkFlowBlock.value = {...data};}}>
         <NodeResizer isVisible={true} />
         {data.handles?.map((handle) => (
             <Handle
@@ -103,7 +104,7 @@ export function Start({data}) {
     let  style={"display":"flex", height:"inherit", width:"inherit", alignItems:"center",justifyContent:"center", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 0px", padding:"10 10px", borderRadius:"20px"};
 
     return (
-        <div>
+        <div onClick={(e) => {activeworkFlowBlock.value = {...data};}}>
         <NodeResizer isVisible={true} />
         {data.handles?.map((handle) => (
             <Handle
@@ -130,7 +131,7 @@ export function End({data}) {
     let  style={"display":"flex", height:"inherit", width:"inherit", alignItems:"center",justifyContent:"center", "flexDirection":"row",backgroundColor:"black", "fontSize":"0.8em",margin:"10px 0px", padding:"10 10px", borderRadius:"20px"};
 
     return (
-        <div>
+        <div onClick={(e) => {activeworkFlowBlock.value = {...data};}}>
             <NodeResizer isVisible={true} />
             {data.handles?.map((handle) => (
                 <Handle

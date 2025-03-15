@@ -1,21 +1,35 @@
 import React, { useState, cloneElement } from 'react';
 import { Trash } from 'lucide-react';
 
+
+function generateUID(length = 10) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let uid = '';
+  for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      uid += characters[randomIndex];
+  }
+  return uid;
+}
+
+
 const RecordsetList = ({ 
   children, 
   initialRecords = [], 
   onRecordsChange = () => {},
-  addButtonText = "Add Record" 
+  addButtonText = "Add Record",
+  showDelete = true,
+
 }) => {
   // State to manage the list of records
   const [records, setRecords] = useState(initialRecords.length > 0 
     ? initialRecords 
-    : [{ id: Date.now(), data: {} }]
+    : [{ id: generateUID(), data: {} }]
   );
 
   // Add a new empty record
   const addRecord = () => {
-    const newRecords = [...records, { id: Date.now(), data: {} }];
+    const newRecords = [...records, { id: generateUID(), data: {} }];
     setRecords(newRecords);
     onRecordsChange(newRecords);
   };
@@ -38,9 +52,9 @@ const RecordsetList = ({
 
   return (
     <div className="w-full mx-auto">
-      <div className="space-y-4">
+      <div>
         {records.map((record) => (
-          <div key={record.id} className="flex items-start gap-2" style={{"display": "flex", "flexDirection": "row", "alignItems":"center"}}>
+          <div key={record.id} className="flex items-start" style={{"display": "flex", "flexDirection": "row", "alignItems":"center"}}>
             <div className="flex-1">
               {children && cloneElement(children, {
                 data: record.data,
@@ -48,7 +62,7 @@ const RecordsetList = ({
                 recordId: record.id
               })}
             </div>
-            <button
+              {showDelete ? (  <button
               onClick={() => removeRecord(record.id)}
               className="p-2 bg-white text-red-500 hover:text-red-700 hover:bg-white flex-shrink-0 mt-1"
               aria-label="Remove record"
@@ -57,7 +71,7 @@ const RecordsetList = ({
               <div>
               <Trash size={18} />
               </div>
-            </button>
+            </button>): <></>}
           </div>
         ))}
       </div>
@@ -107,4 +121,4 @@ const TestRV = () => {
   );
 };
 
-export default TestRV;
+export {RecordsetList, TestRV};

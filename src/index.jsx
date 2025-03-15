@@ -1,8 +1,8 @@
 import { render } from "preact";
 import { LocationProvider, Router, Route } from "preact-iso";
+import "@picocss/pico/css/pico.min.css";
 import "./index.css";
 import "./styles/theme.css";
-import "@picocss/pico/css/pico.min.css";
 
 import { ThemeProvider } from "./components/theme_provider";
 
@@ -18,7 +18,7 @@ import { FormBuilderTest } from "./form_builder/form_edit_area";
 import { ThemeCreator } from "./theme_creator/theme_config_area";
 import { Provider } from "./components/ui/provider";
 import { WorkFlowPage } from "./workflows/workflow_page";
-import TestRV from "./components/general/recordset_list";
+import {TestRV} from "./components/general/recordset_list";
 export function App() {
   return (
     <Provider>

@@ -49,6 +49,7 @@ function FlowBuilder() {
     <Drop onDrop={(data) => {HandleWorkFlowBlockDrop(data)}} dropElementData={{"element":"screen"}} wrapParent={true}>
     <div style={{height:"90vh", width:"70vw"}}>
       <ReactFlow 
+      style={{"--pico-primary-background":"black", "--pico-primary-hover-background": "black"}}
         nodes={nodes} 
         edges={edges} 
         onNodesChange={onNodesChange} 

@@ -3,8 +3,11 @@ import { generateUID } from "../utils/helpers";
 
 
 let activeWorkFlow = signal({});
+let activeWorkFlowData = signal({});
 let workflows = signal([]);
+let workflow_datas = signal([]);
 let workflownames = signal([]);
+let activeworkFlowBlock = signal({});
 let flowTab = signal("blocks");
 let activeFloweUpdated = signal("");
 
@@ -61,6 +64,9 @@ function UpdateActiveWorkflowEdges(updatedEdges) {
     if(existingFlow === undefined || updatedEdges === undefined) {
         return;
     }
+    for(let i=0;i<updatedEdges.length;i++) {
+        updatedEdges[i]["type"] = "smoothstep";
+    }
     activeWorkFlow.value = {
         ...existingFlow,
         edges: updatedEdges,
@@ -92,7 +98,9 @@ function CreateWorkflow(data) {
     let StarthandleID = generateUID();
     let stopHandleID = generateUID();
     let obj = {"name": name, "id": id,
-         "nodes": [{"label":"start", "type":"start", "id": startID, "data": {"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }}, {"label":"end", "type":"end","id": endID, "data" :{ "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
+         "nodes": [
+          {"label":"start", "type":"start", "id": startID, "data": {"type":"start", "id": startID,"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }},
+          {"label":"end", "type":"end","id": endID, "data" :{ "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
          "edges": []};
     let exist = workflows.peek();
     exist.push(obj);
@@ -113,7 +121,7 @@ function HandleWorkFlowBlockDrop(data) {
         let id = generateUID();
         handles[i]["id"] = id;
     }
-    let newnode = {"label": name, "type":  operation, "id": newid , position: { x: 250, y: 250 }, data:{"handles": [...handles]}};
+    let newnode = {"label": name, "type":  operation, "id": newid , position: { x: 250, y: 250 }, data:{"type":  operation, "id": newid,"handles": [...handles]}};
     let curFlow = activeWorkFlow.value;
     let nodes = curFlow["nodes"];
     let lastVal = curFlow["nodes"].pop();
@@ -142,5 +150,5 @@ LoadWorkflows();
 export {activeWorkFlow, workflows, workflownames, 
     CreateWorkflow, SetWorkFlowActive, flowTab, 
     UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop,UpdateActiveWorkflowEdges,
-    activeFloweUpdated,
+    activeFloweUpdated, activeWorkFlowData, workflow_datas, activeworkFlowBlock
 };
