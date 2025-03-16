@@ -7,6 +7,10 @@ const CreatorBackendUrl = "http://localhost:8001";
 const AppID = signal("doctors_app1chjxp");
 let showFormPopup = signal("");
 
+let globalConfigs = signal({
+  "tables": ["customers", "Products", "sales", "teams", "items", "catalogs"],
+  "screens": ["home", "customers", "others"],
+});
 
 // Retrieve stored variables from localStorage
 let localVars = localStorage.getItem("global_var");
@@ -73,7 +77,7 @@ export {
     sideBarEnable, 
     addVariable, variableMap, variableKeys, newVariableKey, showFormPopup,
     DefaultMode, DefaultTheme, DefaultThemeID,
-    PrestDBaseUrl, CreatorBackendUrl, AppID
+    PrestDBaseUrl, CreatorBackendUrl, AppID, globalConfigs
 };
 
 
