@@ -44,7 +44,7 @@ function FlowBuilder() {
         [],
   );
 
-
+  console.log("rendering the flow builder", nodes);
   return (
     <Drop onDrop={(data) => {HandleWorkFlowBlockDrop(data)}} dropElementData={{"element":"screen"}} wrapParent={true}>
     <div style={{height:"90vh", width:"70vw"}}>
@@ -62,45 +62,5 @@ function FlowBuilder() {
     </Drop>
   );
 }
-
-
-// function FlowBuilder() {
-//   console.log("nodes:",activeWorkFlow.value["nodes"]);
-//   console.log("edges:",activeWorkFlow.value["edges"]);
-//   const onNodesChange = useCallback((nodes) => {
-//       console.log("updated nodes:",nodes);
-//       UpdateActiveWorkflowNodes(nodes);
-//   }, []);
-
-//   const onEdgesChange = useCallback((edges) => {
-//     UpdateActiveWorkflowEdges(edges);
-//   }, []);
-
-//   const onConnect = useCallback((params) => {
-//       console.log("on connect params:",params);
-//   }, []);
-
-
-//   return (
-//     <Drop
-//       onDrop={(data) => HandleWorkFlowBlockDrop(data)}
-//       dropElementData={{ element: "screen" }}
-//       wrapParent={true}
-//     >
-//       <div style={{ height: "90vh", width: "70vw" }}>
-//         <ReactFlow
-//           nodes={activeWorkFlow.value.nodes}
-//           edges={activeWorkFlow.value.edges}
-//           onNodesChange={onNodesChange}
-//           onEdgesChange={onEdgesChange}
-//           onConnect={onConnect}
-//           nodeTypes={nodeTypes}
-//           fitView
-//         />
-//       </div>
-//     </Drop>
-//   );
-// }
-
 
 export {FlowBuilder};

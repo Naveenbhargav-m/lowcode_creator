@@ -5,6 +5,8 @@ import { generateUID } from "../utils/helpers";
 import { activeworkFlowBlock, activeWorkFlowData } from "./workflow_state";
 import { blocksRequirements } from "./blocks_requirements";
 import { globalConfigs } from "../states/global_state";
+import { TextAreaWithPopup } from "../form_builder/configs_view/advanced_form";
+import { signal } from "@preact/signals";
 
 export function MappingComponent() {
     const data = [{"id":generateUID(),"data":{"name":"Name", "value": "customers"}}, {"id":generateUID(),"data":{"name":"age", "value":24}}];
@@ -207,15 +209,41 @@ export function WorkflowConfigBlock() {
     if(config === undefined) {
         return <></>;
     }
-    let eleStyle ={"padding": "8px 0px"}
+    let workflowdata = activeWorkFlowData.value[id] || {};
+    let eleStyle ={"padding": "8px 0px"};
+    let codeSig = signal("");
+
+
+    function UpdateworkflowData(label , value) {
+        workflowdata[label] = value;
+        let existing = activeWorkFlowData.peek();
+        existing[id] = workflowdata;
+        activeWorkFlowData.value = {...existing};
+        // localStorage.setItem("workflow_data", JSON.stringify(workflowdata));
+    }
     return (
         <div style={{"padding": "8px 0px"}}>
             {config["dependency"].map((value, ind) => {
                 switch(value) {
+                    case "code":
+                        return (
+                            <TextAreaWithPopup
+                            key={id}
+                            label={"code"}
+                            configKey={"code"}
+                            valueSignal={codeSig}
+                            onChange={(data) => {
+                                UpdateworkflowData(config["labels"][ind], codeSig.value);
+                            }
+                            }
+                          />
+                        );
                     case "dynamic_mapping":
                         return (
                             <div style={eleStyle}>
-                            <RecordsetList>
+                            <RecordsetList onRecordsChange={(data) => 
+                                {UpdateworkflowData(config["labels"][ind], data);
+                                }}>
                                 <MapRowDynamic data={{}} onChange={() => {}} recordId={""}/>
                             </RecordsetList>
                             </div>
