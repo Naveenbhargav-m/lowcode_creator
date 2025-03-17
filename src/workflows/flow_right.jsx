@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import DynamicIcon from "../components/custom/dynamic_icon";
 import { RecordsetList } from "../components/general/recordset_list";
 import { generateUID } from "../utils/helpers";
-import { activeworkFlowBlock, activeWorkFlowData } from "./workflow_state";
+import { activeWorkFlow, activeworkFlowBlock, workflow_datas } from "./workflow_state";
 import { blocksRequirements } from "./blocks_requirements";
 import { globalConfigs } from "../states/global_state";
 import { TextAreaWithPopup } from "../form_builder/configs_view/advanced_form";
@@ -209,17 +209,18 @@ export function WorkflowConfigBlock() {
     if(config === undefined) {
         return <></>;
     }
-    let workflowdata = activeWorkFlowData.value[id] || {};
+    let temp = workflow_datas.value[activeWorkFlow.value["id"]] || {};
+    let workflowdata = temp[id];
     let eleStyle ={"padding": "8px 0px"};
     let codeSig = signal("");
 
 
     function UpdateworkflowData(label , value) {
         workflowdata[label] = value;
-        let existing = activeWorkFlowData.peek();
+        let existing = temp;
         existing[id] = workflowdata;
-        activeWorkFlowData.value = {...existing};
-        // localStorage.setItem("workflow_data", JSON.stringify(workflowdata));
+        workflow_datas.value[activeWorkFlow.value["id"]] = {...existing};
+        localStorage.setItem("workflow_data", JSON.stringify(workflow_datas));
     }
     return (
         <div style={{"padding": "8px 0px"}}>
@@ -251,31 +252,37 @@ export function WorkflowConfigBlock() {
                     case "table":
                         return (
                             <div style={eleStyle}>
-                            <select name="tables" aria-label="Select your favorite cuisine..." required>
+                            <select
+                                name="tables"
+                                aria-label="Select your favorite cuisine..."
+                                required
+                                onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.value)}
+                                >
                                 <option selected disabled value="">
                                     Select a table...
                                 </option>
-                                {globalConfigs.value["tables"].map((table) => {
-                                    return (
-                                        <option>
-                                            {table}
-                                        </option>
-                                    );
-                                })}
+                                {globalConfigs.value["tables"].map((table) => (
+                                    <option key={table} value={table}>
+                                    {table}
+                                    </option>
+                                ))}
                             </select>
                             </div>
                         )
                     case "base_url":
                         return (
                             <div style={eleStyle}>
-                            <input type="url" name="url" placeholder="Url" aria-label="Base url" />
+                            <input type="url" name="url" placeholder="Url" aria-label="Base url" 
+                            onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.value)}
+                            />
                             </div>
                             );
                     case "http_method":
                         let methods = ["get", "post", "patch", "put", "delete"];
                         return(
                             <div style={eleStyle}>
-                            <select name="http_method" aria-label="http_method..." required>
+                            <select name="http_method" aria-label="http_method..." required 
+                            onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.value)}>
                         <option selected disabled value="">
                             Select a method
                         </option>
@@ -293,7 +300,8 @@ export function WorkflowConfigBlock() {
                         return (
                             <div style={eleStyle}>
                             <fieldset>
-                            <input type="checkbox" name="is_background" id={ind} aria-invalid="false" />
+                            <input type="checkbox" name="is_background" id={ind} aria-invalid="false"
+                            onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.checked)}/>
                             <label htmlFor="is_background">is_background</label>
                             </fieldset>
                             </div>

@@ -3,9 +3,8 @@ import { generateUID } from "../utils/helpers";
 
 
 let activeWorkFlow = signal({});
-let activeWorkFlowData = signal({});
 let workflows = signal([]);
-let workflow_datas = signal([]);
+let workflow_datas = signal({});
 let workflownames = signal([]);
 let activeworkFlowBlock = signal({});
 let flowTab = signal("blocks");
@@ -150,5 +149,5 @@ LoadWorkflows();
 export {activeWorkFlow, workflows, workflownames, 
     CreateWorkflow, SetWorkFlowActive, flowTab, 
     UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop,UpdateActiveWorkflowEdges,
-    activeFloweUpdated, activeWorkFlowData, workflow_datas, activeworkFlowBlock
+    activeFloweUpdated, workflow_datas, activeworkFlowBlock
 };
