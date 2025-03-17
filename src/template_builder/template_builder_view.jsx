@@ -5,6 +5,7 @@ import { IconGroup } from "../components/primitives/general_components";
 import { DesktopMockup } from "../screen_builder/screen_components";
 import { RenderElement } from "../screen_builder/screen-areas_2";
 import { Drop } from "../components/custom/Drop";
+import { List, arrayMove } from "react-movable";
 
 
 export function TemplateView() {
@@ -202,34 +203,91 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
   }
 
 
-  function TemplateMobileView() {
-    return (
-      <MobileMockup>
-            <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  backgroundColor: "#f9f9f9",
-                  border: "1px solid #e0e0e0",
-                  scrollbarWidth: "none",
-                  msOverflowStyle: "none",
-                }}
-                className="scrollbar-hide"
-            >
-             <Drop
-                onDrop={(data) => {HandleTemplateDrop(data);}}
-                dropElementData={{ element: "screen" }}
-                wrapParent={true}
-              >
-              {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
-                let myitem = activeTemplateElements[key].value;
-                return RenderElement(myitem, HandleTemplateDrop, activeTemplateElement);
-              })}
-                </Drop>
-        </div>
-      </MobileMockup>
-    );
-  }
+  // function TemplateMobileView() {
+  //   return (
+  //     <MobileMockup>
+  //           <div
+  //               style={{
+  //                 width: "100%",
+  //                 height: "100%",
+  //                 backgroundColor: "#f9f9f9",
+  //                 border: "1px solid #e0e0e0",
+  //                 scrollbarWidth: "none",
+  //                 msOverflowStyle: "none",
+  //               }}
+  //               className="scrollbar-hide"
+  //           >
+  //            <Drop
+  //               onDrop={(data) => {HandleTemplateDrop(data);}}
+  //               dropElementData={{ element: "screen" }}
+  //               wrapParent={true}
+  //             >
+  //             <List 
+  //             values={}
+  //             onChange={}
+  //             {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
+  //               let myitem = activeTemplateElements[key].value;
+  //               return RenderElement(myitem, HandleTemplateDrop, activeTemplateElement);
+  //             })}
+  //             />
+  //               </Drop>
+  //       </div>
+  //     </MobileMockup>
+  //   );
+  // }
+
+
+
+function TemplateMobileView() {
+  return (
+    <MobileMockup>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#f9f9f9",
+          border: "1px solid #e0e0e0",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+        className="scrollbar-hide"
+      >
+        <Drop
+          onDrop={(data) => HandleTemplateDrop(data)}
+          dropElementData={{ element: "screen" }}
+          wrapParent={true}
+        >
+          {isTemplateChanged.value && 
+                    <List
+                    values={Object.keys(activeTemplateElements)}
+                    onChange={({ oldIndex, newIndex }) => {
+                      // isTemplateChanged.value = true;
+                      const newOrder = arrayMove(
+                        Object.keys(activeTemplateElements),
+                        oldIndex,
+                        newIndex
+                      );
+                      // Update the state accordingly
+                      // UpdateActiveTemplateElements(newOrder);
+                      console.log("new order:", newOrder);
+                      console.log("old order:",Object.keys(activeTemplateElements));
+                    }}
+                    renderList={({ children, props }) => <ul {...props}>{children}</ul>}
+                    renderItem={({ value, props, index }) => {
+                      let myitem = activeTemplateElements[value].value;
+                      return (
+                        <li {...props} key={value}>
+                          {isTemplateChanged.value && RenderElement(myitem, HandleTemplateDrop, activeTemplateElement)}
+                        </li>
+                      );
+                    }}
+                  />
+          }
+        </Drop>
+      </div>
+    </MobileMockup>
+  );
+}
 
 
   function TemplateDesktopView() {
