@@ -4,13 +4,15 @@ import { useEffect, useState } from "preact/hooks";
 import { apps, GetAppsfromDB, saveAppToStorage, showForm } from "./apps_signal";
 import { generateRandomName } from "../utils/helpers";
 import { CreateDatabase, databaseSignal, InsertAppToAPI } from "../api/api";
-
+import { AppID, sideBarEnable } from "../states/global_state";
+import { useLocation } from "preact-iso";
 function AppList({ apps }) {
   useEffect((()=>{
     GetAppsfromDB();
   }),[]);
+  let router = useLocation();
   return(
-    <div class="app-list grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="app-list grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{height:"85vh"}}>
       {apps.value.length > 0 ? (
         apps.value.map((app) => (
           <div
@@ -19,7 +21,9 @@ function AppList({ apps }) {
             onClick={()=> {
                 let newappname = app["gen_name"]+"/";
                 localStorage.setItem("db_name",newappname);
-                databaseSignal.value = newappname;
+                AppID.value = newappname;
+                sideBarEnable.value = true;
+                router.route("/home");
                }}
           >
             <span class="text-center font-medium text-black">{app.name}</span>
@@ -88,6 +92,9 @@ const CreateAppButton = ({ onClick }) => (
   );
 
   function AppCreatorPage() {
+    useEffect((()=> {
+      sideBarEnable.value = false;
+    }), []);
     return (
       <div class="flex flex-col px-4">
         <h1 class="text-center text-lg font-bold mb-4">Low-Code App Builder</h1>

@@ -3,7 +3,6 @@ import { LocationProvider, Router, Route } from "preact-iso";
 import "@picocss/pico/css/pico.min.css";
 import "./index.css";
 import "./styles/theme.css";
-
 import { ThemeProvider } from "./components/theme_provider";
 
 import SideBar from "./components/sidebar.jsx";
@@ -19,6 +18,7 @@ import { ThemeCreator } from "./theme_creator/theme_config_area";
 import { Provider } from "./components/ui/provider";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import {TestRV} from "./components/general/recordset_list";
+import { AppHomeScreen } from "./home/app_home";
 export function App() {
   return (
     <Provider>
@@ -30,7 +30,7 @@ export function App() {
     }
   <main className="flex-grow bg-white">
     <Router>
-      <Route path="/home" component={AppCreatorPage} />
+      <Route path="/home" component={AppHomeScreen} />
       <Route path="/forms" component={FormBuilderTest} />
       <Route path="/screens" component={ScreenPage}/>
       <Route path="/containers" component={TablesPage} />
