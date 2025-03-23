@@ -22,6 +22,7 @@ export function MappingComponent() {
     );
 }
 
+// @ts-ignore
 export function MapRow({ fieldName, value = "" }) {
     const [popup, setpopUp] = useState(false);
     function CloseCallBack() {
@@ -60,6 +61,7 @@ export function MapRow({ fieldName, value = "" }) {
                 aria-label="Text"
             />
             <span style={{ display: "flex", "marginBottom":"10px",alignItems: "center", justifyContent: "center" , "padding":"0px 10px" }}
+             // @ts-ignore
              onClick={(e) => {setpopUp(true);}}>
                 <DynamicIcon name={"pipette"} size={20} />
             </span>
@@ -70,6 +72,7 @@ export function MapRow({ fieldName, value = "" }) {
 
 
 export function FieldsDataAccordian() {
+    // @ts-ignore
     const [isopen, setOpen] = useState(0);
     const tables = ["customers", "employees", "carts",];
     const fields = [["name", "age", "role", "salary"], ["capacity", "isBooked", "id"], ["check_in_time", "floor", "in_cart", "is_recuring"]];
@@ -99,6 +102,7 @@ export function PopupFieldPicker({isOpen, closeCallBack}) {
         <header>
             <button aria-label="Close" 
 // @ts-ignore
+            // @ts-ignore
             rel="prev" onClick={(e) => closeCallBack()}></button>
         </header>
           <FieldsDataAccordian />
@@ -123,6 +127,7 @@ export function TablesDropDown() {
 }
 
 
+// @ts-ignore
 export function MapRowDynamic({ data, onChange, recordId, showPicker = false }) {
     const [popup, setpopUp] = useState(false);
     function CloseCallBack() {
@@ -159,6 +164,7 @@ export function MapRowDynamic({ data, onChange, recordId, showPicker = false }) 
             placeholder="Key:" 
             aria-label="Text"
             value={data["name"]} 
+            // @ts-ignore
             onChange={(e) => {data["name"] = e.target.value; onChange( data)}}
             />
             <input 
@@ -166,6 +172,7 @@ export function MapRowDynamic({ data, onChange, recordId, showPicker = false }) 
                 type="text" 
                 name="value" 
                 value={data["value"]}
+                // @ts-ignore
                 onChange={(e) => {data["value"] = e.target.value; console.log("on change value:",data);onChange(data)}}
                 placeholder="value:" 
                 aria-label="Text"
@@ -173,6 +180,7 @@ export function MapRowDynamic({ data, onChange, recordId, showPicker = false }) 
             {showPicker ?  
             <div>
                 <span style={{ display: "flex", "marginBottom":"10px",alignItems: "center", justifyContent: "center" , "padding":"0px 10px" }}
+                    // @ts-ignore
                     onClick={(e) => {setpopUp(true);}}>
                         <DynamicIcon name={"pipette"} size={20} />
                 </span>
@@ -194,6 +202,7 @@ export function InsertRowComp() {
 
 
 export function WorkflowConfigBlock() {
+    let activeWorkflowID = activeWorkFlow.value["id"];
     let curblock = activeworkFlowBlock.value;
     console.log("current active workflow block:", curblock);
     if(curblock === undefined) {
@@ -209,42 +218,53 @@ export function WorkflowConfigBlock() {
     if(config === undefined) {
         return <></>;
     }
-    let temp = workflow_datas.value[activeWorkFlow.value["id"]] || {};
-    let workflowdata = temp[id];
+    let temp = workflow_datas.value[activeWorkflowID] || {};
+    console.log("workflows data:", workflow_datas.value);
+    let workflowdata = temp[id] || {};
+    console.log("workflowdata:", workflowdata);
     let eleStyle ={"padding": "8px 0px"};
-    let codeSig = signal("");
 
 
     function UpdateworkflowData(label , value) {
         workflowdata[label] = value;
         let existing = temp;
         existing[id] = workflowdata;
-        workflow_datas.value[activeWorkFlow.value["id"]] = {...existing};
+        let copy = workflow_datas.peek();
+        existing["_change_type"] = "update";
+        copy[activeWorkflowID] = {...existing}
+        workflow_datas.value = {...copy};
         localStorage.setItem("workflow_data", JSON.stringify(workflow_datas));
     }
     return (
         <div style={{"padding": "8px 0px"}}>
             {config["dependency"].map((value, ind) => {
+                let label = config["labels"][ind];
                 switch(value) {
                     case "code":
+                        let code_data = workflowdata[label] || {};
+                        let codeSig = signal(code_data);
                         return (
                             <TextAreaWithPopup
                             key={id}
                             label={"code"}
                             configKey={"code"}
                             valueSignal={codeSig}
+                            // @ts-ignore
                             onChange={(data) => {
-                                UpdateworkflowData(config["labels"][ind], codeSig.value);
+                                UpdateworkflowData(label, codeSig.value);
                             }
                             }
                           />
                         );
                     case "dynamic_mapping":
+                        let initData = workflowdata[label] || [];
                         return (
                             <div style={eleStyle}>
-                            <RecordsetList onRecordsChange={(data) => 
-                                {UpdateworkflowData(config["labels"][ind], data);
-                                }}>
+                            <RecordsetList
+                                initialRecords={initData}
+                                onRecordsChange={(data) => 
+                                    {UpdateworkflowData(label, data);
+                                    }}>
                                 <MapRowDynamic data={{}} onChange={() => {}} recordId={""}/>
                             </RecordsetList>
                             </div>
@@ -256,6 +276,7 @@ export function WorkflowConfigBlock() {
                                 name="tables"
                                 aria-label="Select your favorite cuisine..."
                                 required
+                                // @ts-ignore
                                 onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.value)}
                                 >
                                 <option selected disabled value="">
@@ -273,7 +294,8 @@ export function WorkflowConfigBlock() {
                         return (
                             <div style={eleStyle}>
                             <input type="url" name="url" placeholder="Url" aria-label="Base url" 
-                            onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.value)}
+                            // @ts-ignore
+                            onChange={(e) => UpdateworkflowData(label, e.target.value)}
                             />
                             </div>
                             );
@@ -282,7 +304,8 @@ export function WorkflowConfigBlock() {
                         return(
                             <div style={eleStyle}>
                             <select name="http_method" aria-label="http_method..." required 
-                            onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.value)}>
+                            // @ts-ignore
+                            onChange={(e) => UpdateworkflowData(label, e.target.value)}>
                         <option selected disabled value="">
                             Select a method
                         </option>
@@ -297,11 +320,13 @@ export function WorkflowConfigBlock() {
                     </div>
                         );
                     case "is_background":
+                        let background = workflowdata[label] || false;
                         return (
                             <div style={eleStyle}>
                             <fieldset>
-                            <input type="checkbox" name="is_background" id={ind} aria-invalid="false"
-                            onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.checked)}/>
+                            <input checked={background} type="checkbox" name="is_background" id={ind} aria-invalid="false"
+                            // @ts-ignore
+                            onChange={(e) => UpdateworkflowData(label, e.target.checked)}/>
                             <label htmlFor="is_background">is_background</label>
                             </fieldset>
                             </div>
@@ -312,9 +337,4 @@ export function WorkflowConfigBlock() {
             })}
         </div>
     );
-}
-
-
-function FormCompMapper({type, onchange, params}) {
-
 }

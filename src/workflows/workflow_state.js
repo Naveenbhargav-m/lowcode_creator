@@ -10,18 +10,24 @@ let activeworkFlowBlock = signal({});
 let flowTab = signal("blocks");
 let activeFloweUpdated = signal("");
 
-function LoadWorkflows() {
-    let jsonstr = localStorage.getItem("workflows");
+
+function LoadDataFromKey( key ) {
+    let jsonstr = localStorage.getItem(key);
     if(jsonstr === null || jsonstr === undefined) {
-        return;
+        return [];
     }
     if(jsonstr.length === 0) {
         return;
     }
     let workflowObj = JSON.parse(jsonstr);
     if(workflowObj === undefined) {
-        return;
+        return [];
     }
+    return workflowObj;
+}
+
+function LoadWorkflows() {
+    let workflowObj = LoadDataFromKey("workflows");
     let mylist = [];
     workflowObj.map((value) => {
         let obj = {"name": value["name"], "id": value["id"]};
@@ -29,6 +35,10 @@ function LoadWorkflows() {
     })
     workflownames.value = [...mylist];
     workflows.value = [...workflowObj];
+}
+function LoadWorkFlowData() {
+    let workflowObj = LoadDataFromKey("workflow_data");
+    workflow_datas.value = {...workflowObj};
 }
 
 function UpdateActiveWorkflowNodes(updatedNodes) {
@@ -50,9 +60,11 @@ function UpdateActiveWorkflowNodes(updatedNodes) {
             nodes.push(updatedNode); // Add new node if it doesn’t exist
         }
     });
+    let isChanged = existingFlow["_change_type"] || "update";
     activeWorkFlow.value = {
         ...existingFlow,
         nodes: nodes,
+        "_change_type": isChanged
     };
     UpdateWorkflowsWithLatest(existingFlow);
 }
@@ -66,9 +78,11 @@ function UpdateActiveWorkflowEdges(updatedEdges) {
     for(let i=0;i<updatedEdges.length;i++) {
         updatedEdges[i]["type"] = "smoothstep";
     }
+    let isChanged = existingFlow["_change_type"] || "update";
     activeWorkFlow.value = {
         ...existingFlow,
         edges: updatedEdges,
+        "_change_type": isChanged
     };
     UpdateWorkflowsWithLatest(existingFlow);
 } 
@@ -96,11 +110,14 @@ function CreateWorkflow(data) {
     let startID = generateUID();
     let StarthandleID = generateUID();
     let stopHandleID = generateUID();
-    let obj = {"name": name, "id": id,
+    let obj = {"name": name, 
+         "id": id,
          "nodes": [
           {"label":"start", "type":"start", "id": startID, "data": {"type":"start", "id": startID,"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }},
           {"label":"end", "type":"end","id": endID, "data" :{ "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
-         "edges": []};
+         "edges": [],
+         "_change_type": "create"
+        };
     let exist = workflows.peek();
     exist.push(obj);
     workflows.value = [...exist];
@@ -127,7 +144,8 @@ function HandleWorkFlowBlockDrop(data) {
     nodes.push(newnode);
     nodes.push(lastVal);
     curFlow["nodes"] = [...nodes];
-    activeWorkFlow.value = {...curFlow};
+    let isChanged = curFlow["_change_type"] || "update";
+    activeWorkFlow.value = {...curFlow, "_change_type": isChanged};
     console.log("current flow:",curFlow);
     activeFloweUpdated.value = operation; 
     UpdateWorkflowsWithLatest(curFlow);
@@ -146,6 +164,7 @@ function SetWorkFlowActive(id) {
     console.log("setting active workflow:",activeWorkFlow);
 }
 LoadWorkflows();
+LoadWorkFlowData();
 export {activeWorkFlow, workflows, workflownames, 
     CreateWorkflow, SetWorkFlowActive, flowTab, 
     UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop,UpdateActiveWorkflowEdges,

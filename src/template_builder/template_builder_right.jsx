@@ -61,8 +61,10 @@ export function TemplateBuilderRightView() {
         let mytemp = templates[activeTamplate.peek()];
         if(templateDesignView.value === "smartphone") {
             mytemp["mobile_children"] = JSON.parse(JSON.stringify(activeTemplateElements));
+            mytemp["_change_type"] = mytemp["_change_type"] || "update";
         } else {
             mytemp["desktop_children"] =  JSON.parse(JSON.stringify(activeTemplateElements));
+            mytemp["_change_type"] = mytemp["_change_type"] || "update";
 
         }
         templates[activeTamplate.peek()] = mytemp;
@@ -83,8 +85,10 @@ export function TemplateBuilderRightView() {
         let mytemp = templates[activeTamplate.peek()];
         if(templateDesignView.value === "smartphone") {
             mytemp["mobile_children"] = JSON.parse(JSON.stringify(activeTemplateElements));
+            mytemp["_change_type"] = mytemp["_change_type"] || "update";
         } else {
             mytemp["desktop_children"] =  JSON.parse(JSON.stringify(activeTemplateElements));
+            mytemp["_change_type"] = mytemp["_change_type"] || "update";
 
         }
         templates[activeTamplate.peek()] = mytemp;

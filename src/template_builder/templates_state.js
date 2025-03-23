@@ -49,6 +49,7 @@ function SetTemplateActiveElements() {
           console.log("ISObject Empty for mobile_children",elements);
             elements = JSON.parse(JSON.stringify(curTemplate["desktop_children"]));
             curTemplate["mobile_children"] = JSON.parse(JSON.stringify(elements));
+            curTemplate["_change_type"] = curTemplate["_change_type"] || "update";
         }
     } else {
         elements = JSON.parse(JSON.stringify(curTemplate["desktop_children"]));
@@ -56,9 +57,11 @@ function SetTemplateActiveElements() {
             console.log("ISObject Empty for desktop_children",elements);
             elements = JSON.parse(JSON.stringify(curTemplate["mobile_children"]));
             curTemplate["desktop_children"] = JSON.parse(JSON.stringify(elements));
+            curTemplate["_change_type"] = curTemplate["_change_type"] || "update";
         }
     }
     console.log("elements:",elements);
+
     templates[templateID] = curTemplate;
     localStorage.setItem("templates", JSON.stringify(templates));
     activeTemplateElements = {};
@@ -75,7 +78,7 @@ function CreateTemplate(formdata) {
     let currentLen = Object.keys(templates).length;
     let order = currentLen + 1;
     let uID = generateUID();
-    templates[uID] = {"name":name, "id": uID, "order":order,"mobile_children":{}, "desktop_children":{}};
+    templates[uID] = {"name":name,"_change_type": "add" ,"id": uID, "order":order,"mobile_children":{}, "desktop_children":{}};
     let existingList = templateNamesList.peek();
     templateNamesList.value = [...existingList, { "name": name, "id": uID }];
     localStorage.setItem("templates", JSON.stringify(templates));
@@ -150,6 +153,7 @@ function HandleTemplateDrop(data, parentId = null) {
     }
     console.log("elements key:", key);
     temp[key] = JSON.parse(JSON.stringify(activeTemplateElements));
+    temp["_change_type"] = temp["_change_type"] || "update";
     templates[activeTemp] = temp;
   }
   isTemplateChanged.value = "";

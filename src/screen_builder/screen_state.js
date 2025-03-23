@@ -109,6 +109,7 @@ function SetCurrentScreen() {
 
     let elements = JSON.parse(JSON.stringify(screens[id][otherkey]));
     if(!IsEmptyMap(elements)) {
+      screens[id]["_change_type"] = screens[id]["_change_type"] || "update";
       screens[id][key] = JSON.parse(JSON.stringify(elements));
     }
   }
@@ -163,6 +164,7 @@ const handleDrop = (data, parentId = null) => {
     }
     temp[key] = JSON.parse(JSON.stringify(screenElements));
     screens[activeScreen.value] = temp;
+    screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
   }
   localStorage.setItem("screen_config", JSON.stringify(screens));
 };
@@ -171,7 +173,7 @@ function CreatenewScreen(data) {
   let name = data["name"];
   let length = Object.keys(screens).length;
   let id = generateUID();
-  let newScreenData = {"id": id, "name": name, "mobile": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
+  let newScreenData = {"id": id, "_change_type": "add","name": name, "mobile": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
   screens[id] = newScreenData;
   screenElements = {};
   let existingnames = screenLeftnamesAndIds.peek();

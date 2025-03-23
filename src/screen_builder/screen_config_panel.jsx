@@ -63,7 +63,9 @@ function ScreenRightPanel() {
                 key = "desktop_children";
             }
             temp2[key] = JSON.parse(JSON.stringify(screenElements));
+            temp2["_change_type"] = temp2["_change_type"] || "update";
             screens[activeScreen.value] = temp2;
+
         } 
         } else {
             let view = screenView.value;
@@ -72,6 +74,8 @@ function ScreenRightPanel() {
                 key = "mobile_style"
             }
             screens[activeScreen.value][key] = data["Style"];
+            screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
+
         }
         localStorage.setItem("screen_config", JSON.stringify(screens));
         screenElementAdded.value = false;
@@ -90,6 +94,8 @@ function ScreenRightPanel() {
                     key = "desktop_children";
                 }
                 temp2[key] = JSON.parse(JSON.stringify(screenElements));
+                temp2["_change_type"] = temp2["_change_type"] || "update";
+
                 screens[activeScreen.value] = temp2;
             } 
         } else {
@@ -99,7 +105,7 @@ function ScreenRightPanel() {
                 key = "mobile_style"
             }
             screens[activeScreen.value][key] = {...data};
-            
+            screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
         }
         screenElementAdded.value = false;
         screenElementAdded.value = true;

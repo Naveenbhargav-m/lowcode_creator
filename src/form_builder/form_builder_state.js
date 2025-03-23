@@ -49,6 +49,7 @@ function AddtoElements(data) {
         let copy = JSON.parse(JSON.stringify(existing)); 
         currForm["desktop_children"] =  [...copy];
     }
+    currForm["_change_type"] = currForm["_change_type"] || "update";
     forms[currentForm.peek()] =  currForm;
     localStorage.setItem("forms", JSON.stringify(forms));  
   }
@@ -64,7 +65,7 @@ function AddtoElements(data) {
     } else {
         length = Object.keys(forms).length
     };
-    let newdata = {"id": id, "name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
+    let newdata = {"id": id, "is_change_type": "add", "name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
     forms[id] = newdata;
     let existing = formLeftNamesList.peek();
     existing.push({"id":id, "name":name});
@@ -140,6 +141,7 @@ function SwapChildrenBasedonView(formView) {
         viewName = "desktop_children";
     }
     curForm[viewName] = finalElements;
+    curForm["_change_type"] = curForm["_change_type"] || "update";
     forms[currentForm.value] = curForm;
     localStorage.setItem("forms", JSON.stringify(forms));
     let finalElementSignals = [];

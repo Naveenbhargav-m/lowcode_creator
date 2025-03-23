@@ -69,6 +69,8 @@ export function FlexRightPanel() {
           key = "desktop_style";
         }
         forms[currentForm.value][key] = {...config};
+        forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
+
       }
       formRenderSignal.value = false;
       formRenderSignal.value = true;
@@ -83,8 +85,10 @@ export function FlexRightPanel() {
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
             myform["mobile_children"] = currentFormElements;
+            myform["_change_type"] = myform["_change_type"] || "update";
         } else {
             myform["desktop_children"] = currentFormElements;
+            myform["_change_type"] = myform["_change_type"] || "update";
 
         }
         forms[currentForm.value] = myform;
@@ -95,6 +99,7 @@ export function FlexRightPanel() {
           key = "desktop_style";
         }
         forms[currentForm.value][key] = {...config};
+        forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
       }
       formRenderSignal.value = false;
       formRenderSignal.value = true;
@@ -134,8 +139,10 @@ export function FlexRightPanel() {
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
             myform["mobile_children"] = currentFormElements;
+            myform["_change_type"] = myform["_change_type"] || "update";
         } else {
             myform["desktop_children"] = currentFormElements;
+            myform["_change_type"] = myform["_change_type"] || "update";
 
         }
         console.log("my form:", myform, currentFormElements);
@@ -147,6 +154,7 @@ export function FlexRightPanel() {
           key = "desktop_style";
         }
         forms[currentForm.value][key] = JSON.parse(data["style"]);
+        forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
       }
       formRenderSignal.value = false;
       formRenderSignal.value = true;
@@ -198,8 +206,11 @@ export function FlexRightPanel() {
           let myform = forms[currentForm.value];
           if(formBuilderView.value === "smartphone") {
               myform["mobile_children"] = currentFormElements;
+              myform["_change_type"] = myform["_change_type"] || "update";
+
           } else {
               myform["desktop_children"] = currentFormElements;
+              myform["_change_type"] = myform["_change_type"] || "update";
   
           }
           forms[currentForm.value] = myform;
