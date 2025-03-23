@@ -1,6 +1,7 @@
 import { signal } from "@preact/signals";
 import { GetAllTableDataFromAPI, SetTableDataToAPI } from "../api/api";
 import { currentEdges, currentTableConfigs, originalTablesdata, table_edges, tableNames, tables, tables_id, tablesFlag } from "./table_builder_state";
+import { AppID, PrestClient } from "../states/global_state";
 
 
 function TablesDataSetterFromAPI() {
@@ -48,8 +49,8 @@ function SaveTablesData() {
   let tablesJson = JSON.stringify(alltables);
   let edgesJson = JSON.stringify(alledges);
   let data = {"edges":edgesJson,"tables":tablesJson};
-  SetTableDataToAPI(data, tables_id.peek());
+  let baseurl = `${AppID}/public/tables`;
+  PrestClient.patch(baseurl, {"query": {"id": 1}, "body": data});
 }
-
 
 export {TablesDataSetterFromAPI, SaveTablesData};

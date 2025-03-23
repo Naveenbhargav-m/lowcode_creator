@@ -79,6 +79,7 @@ function ThemeEditArea() {
         let valObj = JSON.parse(value);
         console.log("themes:", themes);
         themes[ActiveTheme.value][key] = valObj;
+        themes[ActiveTheme.value]["_change_type"] = themes[ActiveTheme.value]["_change_type"] || "update";
         localStorage.setItem("themes", JSON.stringify(themes));
     }
 

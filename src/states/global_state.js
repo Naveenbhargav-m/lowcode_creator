@@ -1,5 +1,6 @@
 import { effect, signal } from "@preact/signals";
 import { SetGlobalFieldsToAPI } from "../api/api";
+import { APIManager } from "../api/api_manager";
 
 let sideBarEnable = signal(true);
 const PrestDBaseUrl = "http://localhost:8000";
@@ -12,6 +13,8 @@ let globalConfigs = signal({
   "screens": ["home", "customers", "others"],
 });
 
+let ApiClient = new APIManager(CreatorBackendUrl, 1000);
+let PrestClient = new APIManager(PrestDBaseUrl, 1000);
 // Retrieve stored variables from localStorage
 let localVars = localStorage.getItem("global_var");
 let localVarsmap;
@@ -77,7 +80,8 @@ export {
     sideBarEnable, 
     addVariable, variableMap, variableKeys, newVariableKey, showFormPopup,
     DefaultMode, DefaultTheme, DefaultThemeID,
-    PrestDBaseUrl, CreatorBackendUrl, AppID, globalConfigs
+    PrestDBaseUrl, CreatorBackendUrl, AppID, globalConfigs,
+    PrestClient, ApiClient
 };
 
 

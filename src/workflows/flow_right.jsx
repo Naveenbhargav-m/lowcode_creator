@@ -230,9 +230,9 @@ export function WorkflowConfigBlock() {
         let existing = temp;
         existing[id] = workflowdata;
         let copy = workflow_datas.peek();
+        existing["_change_type"] = "update";
         copy[activeWorkflowID] = {...existing}
         workflow_datas.value = {...copy};
-        console.log("workflow_data to be updated:", workflow_datas.value);
         localStorage.setItem("workflow_data", JSON.stringify(workflow_datas));
     }
     return (
@@ -337,10 +337,4 @@ export function WorkflowConfigBlock() {
             })}
         </div>
     );
-}
-
-
-// @ts-ignore
-function FormCompMapper({type, onchange, params}) {
-
 }
