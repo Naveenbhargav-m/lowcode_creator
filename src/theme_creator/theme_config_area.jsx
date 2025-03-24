@@ -6,6 +6,8 @@ import { ScreensList } from "../screen_builder/screen_page";
 import { TextAreaWithPopup } from "../form_builder/configs_view/advanced_form";
 import { useComputed, useSignal } from "@preact/signals";
 import { DefaultMode, DefaultThemeID } from "../states/global_state";
+import { SyncData } from "../api/api_syncer";
+import { SyncButton } from "../components/generic/sync_button";
 
 const ThemeCreator = () => {
     const devStyle = {
@@ -145,7 +147,10 @@ function ThemePage() {
       </div>
 
       <div className="w-10/12 h-screen bg-background scrollable-div">
-        <TabComponent />
+      <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
+                <TabComponent />
+                <SyncButton title={"sync"} onClick={(e) => {SyncData("_themes", themes);}} style={{marginRight:"40px"}}/>
+            </div>
         <ThemeCreator />
       </div>
     </div>

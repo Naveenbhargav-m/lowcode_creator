@@ -2,7 +2,7 @@ import { AppID, PrestClient } from "../states/global_state";
 
 
 
-function SyncData(forms) {
+function SyncData(key,forms) {
     if(forms === undefined) {
         return;
     }
@@ -19,18 +19,18 @@ function SyncData(forms) {
             updateFlows.push(curFlow);
         }
     }
-    InsertBatchData();
-    UpdateBatchData();
+    InsertBatchData(key, createFlows);
+    UpdateBatchData(key, updateFlows);
 }
 
-function UpdateBatchData(forms) {
+function UpdateBatchData(key,forms) {
     if(forms === undefined) {
         return;
     }
     if(forms.length === 0) {
         return;
     }
-    let endpoint = `/${AppID}/public/forms`
+    let endpoint = `/${AppID}/public/${key}`
     for(let i=0;i<forms.length;i++) {
         let formID = forms[i]["id"];
         delete forms[i]["id"];
@@ -39,14 +39,14 @@ function UpdateBatchData(forms) {
 }
 
 
-function InsertBatchData(forms) {
+function InsertBatchData(key,forms) {
     if(forms === undefined) {
         return;
     }
     if(forms.length === 0) {
         return;
     }
-    let endPoint = `/batch${AppID}/public/forms`;
+    let endPoint = `/batch/${AppID}/public/${key}`;
     PrestClient.post(endPoint,  {"body":forms});
 }
 
