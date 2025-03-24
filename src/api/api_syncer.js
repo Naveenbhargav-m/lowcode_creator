@@ -2,28 +2,50 @@ import { AppID, PrestClient } from "../states/global_state";
 
 
 
-function SyncData(key,forms) {
-    if(forms === undefined) {
+function SyncData(key, forms) {
+    console.log("called syncData:", key, forms);
+
+    if (!forms) {
         return;
     }
+
+    // Ensure forms is always an array
+    if (!Array.isArray(forms)) {
+        let temp = [];
+        Object.keys(forms).map((key) => {
+            temp.push(forms[key]);
+        });
+        forms = temp;
+    }
+
     let createFlows = [];
     let updateFlows = [];
-    for(let i=0;i<forms.length;i++) {
-        let curFlow = forms[i];
+    console.log("form before the loop:",forms);
+    for (let i = 0; i < forms.length; i++) {
+        let curFlow = { ...forms[i] }; // Create a shallow copy to avoid modifying original object
         let operation = curFlow["_change_type"] || "";
         delete curFlow["_change_type"];
-
-        if(operation === "add") {
+        console.log("operation:", operation);
+        if (operation === "add") {
             createFlows.push(curFlow);
-        } else if(operation === "update") {
+        } else if (operation === "update") {
             updateFlows.push(curFlow);
         }
     }
-    InsertBatchData(key, createFlows);
-    UpdateBatchData(key, updateFlows);
+    console.log("insert data:", createFlows);
+    console.log("update data:", updateFlows);
+    if (createFlows.length) {
+        InsertBatchData(key, createFlows);
+    }
+
+    if (updateFlows.length) {
+        UpdateBatchData(key, updateFlows);
+    }
 }
 
+
 function UpdateBatchData(key,forms) {
+    console.log("called UpdateBatchData:", key, forms);
     if(forms === undefined) {
         return;
     }
@@ -40,6 +62,7 @@ function UpdateBatchData(key,forms) {
 
 
 function InsertBatchData(key,forms) {
+    console.log("called Insert Batch Data:", key, forms);
     if(forms === undefined) {
         return;
     }
@@ -47,6 +70,13 @@ function InsertBatchData(key,forms) {
         return;
     }
     let endPoint = `/batch/${AppID}/public/${key}`;
+    let temp = [];
+    for(let i=0;i<forms.length;i++) {
+        let temp1 = forms[i];
+        delete temp1["id"];
+        temp.push(temp1);
+
+    }
     PrestClient.post(endPoint,  {"body":forms});
 }
 

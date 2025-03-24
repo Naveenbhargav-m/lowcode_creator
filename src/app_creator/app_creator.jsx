@@ -19,7 +19,7 @@ function AppList({ apps }) {
             key={app.id}
             class="w-40 h-40 border border-white shadow-md rounded-lg flex justify-center items-center bg-white"
             onClick={()=> {
-                let newappname = app["gen_name"]+"/";
+                let newappname = app["gen_name"];
                 localStorage.setItem("db_name",newappname);
                 AppID.value = newappname;
                 sideBarEnable.value = true;
