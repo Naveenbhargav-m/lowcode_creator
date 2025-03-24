@@ -15,10 +15,13 @@ import { getSortedFields , getSortedSignalFields } from "../utils/helpers";
 import { CallOnChange, configs, UpdateConfig, values } from "./form_test_data";
 import { ReorderableList } from "../components/custom/ReorderList";
 import { activeElement } from "../screen_builder/screen_state";
+import { SyncButton } from "../components/generic/sync_button";
+import { SyncData } from "../api/api_syncer";
 
 function EditArea() {
     return (
     <div>
+       <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
       <CreateAndbuttonbar 
          iconNames={["smartphone", "app-window-mac"]} 
          onIconChange={(name) => {formBuilderView.value = name; SwapChildrenBasedonView(formBuilderView.value);}}
@@ -27,6 +30,9 @@ function EditArea() {
          buttonLabel={"Create Form"}
          buttonCallBack={(data) => {CreateNewForm (data);}}
       />
+
+                <SyncButton title={"sync"} onClick={(e) => {SyncData("_forms", forms);}} style={{marginRight:"40px", "marginTop":"10px"}}/>
+            </div>
       <div style={{height:"94vh", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center"}}>
       {formBuilderView.value == "smartphone" ? <FormEditMobileView /> : <FormEditDesktopView />}
       </div>

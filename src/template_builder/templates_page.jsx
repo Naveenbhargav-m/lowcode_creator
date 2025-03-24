@@ -1,10 +1,13 @@
+import { SyncData } from "../api/api_syncer";
+import { SyncButton } from "../components/generic/sync_button";
 import { TabComponent } from "../screen_builder/screen_components";
 import { ScreenRightPanel } from "../screen_builder/screen_config_panel";
 import { ScreenLeftPanel, TabElement, Tabs } from "../screen_builder/screen_left_panel";
+import { themes } from "../theme_creator/theme_state";
 import { TemplateBuilderRightView } from "./template_builder_right";
 import { TemplateView } from "./template_builder_view";
 import { TemplatesListPanel } from "./template_left_panel";
-import { templateNamesList, templatesPagesSignal } from "./templates_state";
+import { templateNamesList, templates, templatesPagesSignal } from "./templates_state";
 
 
 let config = {
@@ -32,7 +35,10 @@ function TemplatePage() {
             </div>
 
             <div className="w-10/12 h-screen bg-background scrollable-div">
-            <TabComponent />
+            <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
+                <TabComponent />
+                <SyncButton title={"sync"} onClick={(e) => {SyncData("_themes", themes);}} style={{marginRight:"40px"}}/>
+            </div>
             <TemplateView />
 
             </div>

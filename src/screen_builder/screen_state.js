@@ -173,7 +173,7 @@ function CreatenewScreen(data) {
   let name = data["name"];
   let length = Object.keys(screens).length;
   let id = generateUID();
-  let newScreenData = {"id": id, "_change_type": "add","name": name, "mobile": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
+  let newScreenData = {"id": id, "_change_type": "add","name": name, "mobile_style": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
   screens[id] = newScreenData;
   screenElements = {};
   let existingnames = screenLeftnamesAndIds.peek();

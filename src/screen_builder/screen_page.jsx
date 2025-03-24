@@ -3,10 +3,13 @@ import { TemplateView } from "../template_builder/template_builder_view";
 import {TabComponent , VariableCreator} from "./screen_components";
 import { ScreenRightPanel } from "./screen_config_panel";
 import { ScreenLeftPanel } from "./screen_left_panel";
-import { activeScreen, activeTab, screenLeftnamesAndIds, screenLeftTabSignal, SetCurrentScreen } from "./screen_state";
+import { activeScreen, activeTab, screenLeftnamesAndIds, screenLeftTabSignal, screens, SetCurrentScreen } from "./screen_state";
 import {ScreenBuilderArea} from "./screen-areas_2";
 import { TemplateOptionTabs, TemplatePage } from "../template_builder/templates_page";
 import { ThemePage } from "../theme_creator/theme_config_area";
+import { SyncButton } from "../components/generic/sync_button";
+import { SyncData } from "../api/api_syncer";
+import { variableMap } from "../states/global_state";
 
 let config = {
   paths: ["id", "tabs", "tab"],
@@ -49,7 +52,10 @@ function VariableView() {
       </div>
 
       <div className="w-10/12 h-screen bg-background scrollable-div">
-      <TabComponent />
+      <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
+                <TabComponent />
+                <SyncButton title={"sync"} onClick={(e) => {SyncData("_global_states", variableMap);}} style={{marginRight:"40px"}}/>
+            </div>
       <VariableCreator />
       </div>
       <div className="w-2/12 bg-white h-screen scrollable-div">
@@ -74,7 +80,10 @@ function ScreenView() {
     </div>
 
     <div className="w-10/12 h-screen bg-background scrollable-div">
+    <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
     <TabComponent />
+    <SyncButton title={"sync"} onClick={(e) => {SyncData("_screens", screens);}} style={{marginRight:"40px"}}/>
+    </div>
     <ScreenBuilderArea />
     </div>
     <div className="w-2/12 bg-white h-screen scrollable-div">
