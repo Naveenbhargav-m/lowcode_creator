@@ -82,6 +82,16 @@ function InsertBatchData(key,forms) {
     PrestClient.post(endPoint,  {"body":forms});
 }
 
+async function GetDataFromAPi(key) {
+    let endpoint = `/${AppID}/public/${key}`;
+    try {
+        let response = await PrestClient.get(endpoint);
+        return response || [];  // Always return an array
+    } catch (error) {
+        console.error(`Error fetching data for key "${key}":`, error);
+        return [];  // Return empty array instead of breaking the app
+    }
+}
 
 
 function ProcessDataToWrite(tableName, data) {
@@ -129,12 +139,13 @@ function ProcessScreenDataToWrite(screens) {
     for(let i=0;i<screens.length;i++) {
         let temp = {};
         let cur = screens[i];
-        temp["screen_name"] = cur["screen_name"];
+        temp["screen_name"] = cur["name"];
         delete cur["screen_name"];
         let json = JSON.stringify(cur);
         temp["configs"] = json;
-        resp.push(screens);
+        resp.push(temp);
     }
+    return resp;
 }
 
 function ProcessScreenDataToRead(data) {
@@ -148,4 +159,4 @@ function ProcessScreenDataToRead(data) {
         resp.push(newobj);
     }
 }
-export {SyncData};
+export {SyncData, GetDataFromAPi};

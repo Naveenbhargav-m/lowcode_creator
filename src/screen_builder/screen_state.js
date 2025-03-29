@@ -5,6 +5,7 @@ import { SetScreenToAPI } from "../api/api";
 import { generateUID } from "../utils/helpers";
 import { PrimitivesStylesMap } from "../components/primitives/primitives_base_styles";
 import { ContainersStylesMap } from "../components/containers/containers_bse_styles";
+import { GetDataFromAPi } from "../api/api_syncer";
 
 
 const screenStyle = {"display":"flex","flexDirection":"column","minHeight":"200px", "minWidth":"150px","height":"100%", "width":"100%"};
@@ -69,26 +70,33 @@ screenElementAdded.value = true;
 
 
 function LoadScreens() {
-  let screenConfigjson = localStorage.getItem("screen_config");
-let screenConfigsMap = JSON.parse(screenConfigjson);
+  console.log("called LoadScreens");
 
-if (screenConfigsMap === null || screenConfigsMap === undefined) {
-  screenConfigsMap = {};
-} else {
-  var tempnames = [];
-  for (const key in screenConfigsMap) {
-    if (screenConfigsMap.hasOwnProperty(key)) {
-      let currentScreen = screenConfigsMap[key];
-      if(currentScreen === undefined) {
-        continue
+  GetDataFromAPi("_screens").then((myscreens) => {
+      console.log("my screens:", myscreens);
+
+      if (!myscreens || myscreens.length === 0) {
+          console.log("my screens is null:", myscreens);
+          screens = {};
+          return;
       }
-      tempnames.push({"name": currentScreen["name"], "id":currentScreen["id"]});
 
-    }
-  }
-  screenLeftnamesAndIds.value = [...tempnames];
-}
-  screens = screenConfigsMap;
+      let tempnames = [];
+      let screensmap = {};
+
+      for (let i = 0; i < myscreens.length; i++) {
+          let curScreen = myscreens[i];
+          screensmap[curScreen["id"]] = { ...curScreen };
+          tempnames.push({ "name": curScreen["screen_name"], "id": curScreen["id"] });
+      }
+
+      screenLeftnamesAndIds.value = [...tempnames];
+
+      console.log("my screens is finally:", myscreens);
+      screens = myscreens;
+  }).catch(error => {
+      console.error("Error loading screens:", error);
+  });
 }
 
 
@@ -173,7 +181,7 @@ function CreatenewScreen(data) {
   let name = data["name"];
   let length = Object.keys(screens).length;
   let id = generateUID();
-  let newScreenData = {"id": id, "_change_type": "add","name": name, "mobile_style": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
+  let newScreenData = {"id": id, "_change_type": "add","screen_name": name, "mobile_style": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
   screens[id] = newScreenData;
   screenElements = {};
   let existingnames = screenLeftnamesAndIds.peek();
@@ -200,11 +208,10 @@ function IsEmptyMap(curmap) {
   return false;
 }
 
-LoadScreens();
 export {tabDataSignal , tabSignal, 
   isHoveredSignal,screenElements ,activeTab,
   activeConfigTab,handleDrop,activeElement,
   CallbackExecutor, screenElementAdded,
   activeScreen, screenView,screenLeftTabSignal,screenLeftnamesAndIds,
-   SetCurrentScreen, CreatenewScreen, screens
+   SetCurrentScreen, CreatenewScreen, screens, LoadScreens
 };

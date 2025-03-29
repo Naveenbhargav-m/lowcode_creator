@@ -3,7 +3,7 @@ import { TemplateView } from "../template_builder/template_builder_view";
 import {TabComponent , VariableCreator} from "./screen_components";
 import { ScreenRightPanel } from "./screen_config_panel";
 import { ScreenLeftPanel } from "./screen_left_panel";
-import { activeScreen, activeTab, screenLeftnamesAndIds, screenLeftTabSignal, screens, SetCurrentScreen } from "./screen_state";
+import { activeScreen, activeTab, LoadScreens, screenLeftnamesAndIds, screenLeftTabSignal, screens, SetCurrentScreen } from "./screen_state";
 import {ScreenBuilderArea} from "./screen-areas_2";
 import { TemplateOptionTabs, TemplatePage } from "../template_builder/templates_page";
 import { ThemePage } from "../theme_creator/theme_config_area";
@@ -65,6 +65,8 @@ function VariableView() {
   );
 }
 function ScreenView() {
+
+  useEffect(()=> {LoadScreens()}, []);
   return ( <div className="min-h-screen h-screen w-full bg-white flex">
     <div className="w-2/12 bg-white p-4 h-screen">
     <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
