@@ -86,14 +86,14 @@ function LoadScreens() {
 
       for (let i = 0; i < myscreens.length; i++) {
           let curScreen = myscreens[i];
-          screensmap[curScreen["id"]] = { ...curScreen };
-          tempnames.push({ "name": curScreen["screen_name"], "id": curScreen["id"] });
+          screensmap[curScreen["id"]] = { ...curScreen["configs"],"id": curScreen["id"] };
+          tempnames.push({ "name": curScreen["screen_name"],"id": curScreen["id"], });
       }
 
       screenLeftnamesAndIds.value = [...tempnames];
 
       console.log("my screens is finally:", myscreens);
-      screens = myscreens;
+      screens = screensmap;
   }).catch(error => {
       console.error("Error loading screens:", error);
   });
@@ -132,6 +132,7 @@ function SetCurrentScreen() {
   screenElementAdded.value = true;
 }
 const handleDrop = (data, parentId = null) => {
+  console.log("called handle drop:",data, parentId);
   let i = generateUID();
   let myconfig = {};
   let type = data.data.type;
@@ -165,6 +166,7 @@ const handleDrop = (data, parentId = null) => {
     screenElementAdded.value = true;
   }
   let temp = screens[activeScreen.value];
+  console.log("temp screens after drop:",temp);
   if(temp !== undefined) {
     let key = "mobile_children";
     if(screenView.peek() !== "smartphone") {
@@ -174,6 +176,7 @@ const handleDrop = (data, parentId = null) => {
     screens[activeScreen.value] = temp;
     screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
   }
+  console.log("new screens after drop:",screens);
   localStorage.setItem("screen_config", JSON.stringify(screens));
 };
 

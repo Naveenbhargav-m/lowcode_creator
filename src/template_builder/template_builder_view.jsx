@@ -5,7 +5,6 @@ import { IconGroup } from "../components/primitives/general_components";
 import { DesktopMockup } from "../screen_builder/screen_components";
 import { RenderElement } from "../screen_builder/screen-areas_2";
 import { Drop } from "../components/custom/Drop";
-import { List, arrayMove } from "react-movable";
 
 
 export function TemplateView() {
@@ -257,32 +256,10 @@ function TemplateMobileView() {
           dropElementData={{ element: "screen" }}
           wrapParent={true}
         >
-          {isTemplateChanged.value && 
-                    <List
-                    values={Object.keys(activeTemplateElements)}
-                    onChange={({ oldIndex, newIndex }) => {
-                      // isTemplateChanged.value = true;
-                      const newOrder = arrayMove(
-                        Object.keys(activeTemplateElements),
-                        oldIndex,
-                        newIndex
-                      );
-                      // Update the state accordingly
-                      // UpdateActiveTemplateElements(newOrder);
-                      console.log("new order:", newOrder);
-                      console.log("old order:",Object.keys(activeTemplateElements));
-                    }}
-                    renderList={({ children, props }) => <ul {...props}>{children}</ul>}
-                    renderItem={({ value, props, index }) => {
-                      let myitem = activeTemplateElements[value].value;
-                      return (
-                        <li {...props} key={value}>
-                          {isTemplateChanged.value && RenderElement(myitem, HandleTemplateDrop, activeTemplateElement)}
-                        </li>
-                      );
-                    }}
-                  />
-          }
+          {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
+                let myitem = activeTemplateElements[key];
+                return RenderElement(myitem.peek(), HandleTemplateDrop , activeTemplateElement);
+              })}
         </Drop>
       </div>
     </MobileMockup>

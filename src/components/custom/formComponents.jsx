@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Drop } from './Drop';
-import { Rnd } from "react-rnd";
 // @ts-ignore
-import CodeEditor from '@uiw/react-textarea-code-editor'
 // Components (you can reuse the ones I shared earlier)
 const TextInput = ({ config, value, onChange }) => {
   // @ts-ignore
@@ -53,56 +50,6 @@ const TextArea = ({ config, value, onChange }) => {
         // @ts-ignore
         onChange={(e) => onChange(e.target.value)}
         style={{ padding: '8px', width: '100%', height:"100px", ...inputStyle }}
-      />
-      {error && (
-        <div
-          className="error text-red-500 mt-1"
-          style={{ pointerEvents: 'none', ...errorStyle }}
-        >
-          {error}
-        </div>
-      )}
-      {(labelPosition === "right" || labelPosition === "bottom") && (
-        <label style={{ display: 'block', marginTop: '4px', ...labelStyle }}>{label}</label>
-      )}
-    </div>
-  );
-};
-
-export const MyCodeEditor = ({ config, value, onChange }) => {
-  const {
-    label,
-    labelPosition,
-    wrapperStyle,
-    inputStyle,
-    labelStyle,
-    error,
-    errorStyle,
-    language = "js", // default language to JS, configurable
-    placeholder = "Please enter code here.", // default placeholder
-  } = config || {};
-
-  return (
-    <div style={{ marginBottom: '1rem', ...wrapperStyle }}>
-      {(labelPosition === "left" || labelPosition === "top") && (
-        <label style={{ display: 'block', marginBottom: '4px', ...labelStyle }}>{label}</label>
-      )}
-      <CodeEditor
-        value={value || 'return value;'}
-        language={language}
-        prefixCls='wrap'
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target["value"])}
-        data-color-mode="dark"
-        padding={15}
-        style={{
-          backgroundColor: "#f5f5f5",
-          fontFamily: 'ui-monospace, SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace',
-          width: '100%',
-          minHeight: '100px',
-          maxHeight: '300px',
-          ...inputStyle,
-        }}
       />
       {error && (
         <div
@@ -945,9 +892,7 @@ export const FormRendererStatic = ({ formConfig, formData, styles, onFormChange,
             case 'inline-text':
               return <InlineTextField {...commonProps} />;
             case 'textarea':
-             return <TextArea {...commonProps}/>
-            case 'code_editor':
-              return <MyCodeEditor {...commonProps}/>
+             return <TextArea {...commonProps}/>;
             default:
               return null;
           }

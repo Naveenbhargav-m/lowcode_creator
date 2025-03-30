@@ -36,7 +36,7 @@ export const DynamicWrapper = ({ children, config, value }) => {
   const { config: dynamicConfig, value: dynamicValue } = useDynamicConfig(config, value);
 
   const handleAction = (actionType) => (e) => {
-    // e.stopPropagation();
+    // // e.stopPropagation();
     ActionExecutor(dynamicConfig.value.id, actionType);
     if (actionType === "onClick" && dynamicConfig.value.actions?.onClick) {
       const clickAction = FunctionExecutor({}, dynamicConfig.value.actions.onClick);
@@ -48,7 +48,7 @@ export const DynamicWrapper = ({ children, config, value }) => {
   };
   return (
       <div
-        style={{ display: "contents" }}
+        // style={{ display: "contents" }}
         onClick={handleAction("onClick")}
         onDblClick={handleAction("onDoubleClick")}
         onMouseEnter={handleAction("onHoverEnter")}
@@ -70,13 +70,15 @@ export const Button = ({ value, config }) => (
 );
 
 // Refactored Text Component
-export const Text = ({ value, config }) => (
-  <DynamicWrapper config={config} value={value}>
+export function Text({ value, config }) {
+  return (
+    <DynamicWrapper config={config} value={value}>
     {(dynamicValue) => (
       <p style={config.style}>{dynamicValue}</p>
     )}
   </DynamicWrapper>
 );
+};
 
 // Refactored Number Component
 export const Number = ({ value, config }) => (
@@ -118,11 +120,10 @@ export const Image = ({ src, config }) => (
 );
 
 // Refactored Avatar Component
-export const Avatar = ({config }) => {
+export function Avatar({config }) {
     return (
       <DynamicWrapper config={config} value={config["value"]}>
     {(dynamicValue) => {
-      console.log("dynamic value:", dynamicValue);
       return <img src={dynamicValue} alt="" style={{ ...config.style, borderRadius: "50%" }} />
     }}
   </DynamicWrapper>

@@ -140,6 +140,7 @@ function ProcessScreenDataToWrite(screens) {
         let temp = {};
         let cur = screens[i];
         temp["screen_name"] = cur["name"];
+        temp["id"] = cur["id"];
         delete cur["screen_name"];
         let json = JSON.stringify(cur);
         temp["configs"] = json;
