@@ -1,7 +1,7 @@
 import { Drop } from "../components/custom/Drop";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement, SetCurrentScreen, activeScreen, screens  } from "./screen_state";
+import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement, SetCurrentScreen, activeScreen, screens, screenViewKey  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 import { IconGroup } from "../components/primitives/general_components";
@@ -77,9 +77,15 @@ function MobileView() {
  const items = useSignal([]);
   
  useEffect(() => {
-   // Update `items.value` when `screenElements` changes
-   items.value = Object.values(screenElements).filter((item) => !item.value.parent);
-   console.log("Updated items:", items.value);
+    console.log("rerendering:");
+    const elementsArray = Object.values(screenElements);
+    const filteredItems = elementsArray.filter((item) => !item.value.parent);
+    const sortedItems = filteredItems.sort((a, b) => {
+                          const orderA = a.value.order ?? Infinity;
+                          const orderB = b.value.order ?? Infinity;
+                          return orderA - orderB;});
+    console.log("sorted Items before rendering:",sortedItems);
+    items.value = sortedItems;
  }, [screenElements]);
 
  const sortableItems = useComputed(() =>
@@ -91,15 +97,27 @@ function MobileView() {
  );
   function SortItems(items, newItems) {
     const itemMap = new Map(items.map((item) => [item.value.id, item]));
-    // console.log("item map:", itemMap);
     let sortedItems = newItems.map(({ id }) => itemMap.get(id)).filter(Boolean);
-    // console.log("orignal items:", items);
-    // console.log("new items:", newItems);
-    // console.log("sorted items:", sortedItems);
+    console.log("sorted Items after first sort:",sortedItems);
     return sortedItems;
   }
 
-  console.log("sorted items:", sortableItems.value);
+  function SetSortedItems(sortedItems) {
+    console.log("set sorted Items:", sortedItems);
+    let updatedItems = [];
+    for(var i=0;i<sortedItems.length;i++) {
+      let cur = sortedItems[i];
+      let id = cur.value["id"]
+      cur.value["order"] = i;
+      screenElements[id].value = {...cur.value};
+      screens[curScreen][screenViewKey] = screenElements;
+      screens[curScreen]["_change_type"] = "update";
+      updatedItems.push(cur);
+    }
+    console.log("set sorted items before updation:", updatedItems);
+    items.value = [...updatedItems];
+    
+  }
 
   return (
     <MobileMockup>
@@ -115,9 +133,8 @@ function MobileView() {
             <ReactSortable
               list={sortableItems.value}
               setList={(newList) => {
-                items.value = [...SortItems(items.value, newList)];
-                console.log("new list:",newList);
-                console.log("new items:", items.value);
+                let temp = [...SortItems(items.value, newList)];
+                SetSortedItems(temp);
               }}
               group="elements"
               animation={150}
@@ -127,7 +144,7 @@ function MobileView() {
                 items.value.map((item) => {
                   if (!item.value.parent) {
                     // return <div key={item.value.id}>{item.value.title}</div>
-                    return RenderElement(item.peek(), handleDrop, activeElement);
+                    return <div>{RenderElement(item.peek(), handleDrop, activeElement)}</div>;
                   }
                 })}
             </ReactSortable>

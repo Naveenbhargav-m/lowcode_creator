@@ -67,6 +67,7 @@ let screenElements = { };
 const screenElementAdded = signal(false);
 screenElementAdded.value = true;
 
+let screenViewKey = "mobile_children";
 
 
 function LoadScreens() {
@@ -138,9 +139,9 @@ const handleDrop = (data, parentId = null) => {
   let type = data.data.type;
   let title = data.data.value;
   if(type === "primitive") {
-    myconfig = PrimitivesStylesMap[title];
+    myconfig = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
   } else if(type === "container") {
-    myconfig = ContainersStylesMap[title];
+    myconfig = JSON.parse(JSON.stringify(ContainersStylesMap[title]));
   }
     const newItem = {
     id: i,
@@ -161,6 +162,8 @@ const handleDrop = (data, parentId = null) => {
         screenElements[newItem.id].value = {...newItem}; 
         screenElements[parentId].value = {...parentElement.value};
   } else {
+    let curLength = Object.keys(screenElements).length + 1;
+    newItem["order"] = curLength;
     screenElements[newItem.id] = signal(newItem);
     screenElementAdded.value = false;
     screenElementAdded.value = true;
@@ -173,6 +176,7 @@ const handleDrop = (data, parentId = null) => {
       key = "desktop_children";
     }
     temp[key] = JSON.parse(JSON.stringify(screenElements));
+    screenViewKey = key;
     screens[activeScreen.value] = temp;
     screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
   }
@@ -184,7 +188,7 @@ function CreatenewScreen(data) {
   let name = data["name"];
   let length = Object.keys(screens).length;
   let id = generateUID();
-  let newScreenData = {"id": id, "_change_type": "add","screen_name": name, "mobile_style": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children":{},"order":length};
+  let newScreenData = {"id": id, "_change_type": "add","screen_name": name, "mobile_style": {...screenStyle}, "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children": {},"order":length};
   screens[id] = newScreenData;
   screenElements = {};
   let existingnames = screenLeftnamesAndIds.peek();
@@ -216,5 +220,5 @@ export {tabDataSignal , tabSignal,
   activeConfigTab,handleDrop,activeElement,
   CallbackExecutor, screenElementAdded,
   activeScreen, screenView,screenLeftTabSignal,screenLeftnamesAndIds,
-   SetCurrentScreen, CreatenewScreen, screens, LoadScreens
+   SetCurrentScreen, CreatenewScreen, screens, LoadScreens, screenViewKey
 };
