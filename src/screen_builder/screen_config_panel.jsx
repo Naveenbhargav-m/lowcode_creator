@@ -49,7 +49,7 @@ function ScreenRightPanel() {
     updateConfig();
     const updateDataback = (data) => {
         if (myelement) {
-        let temp = myelement.peek();
+        let temp = JSON.parse(JSON.stringify(myelement.peek()));
         temp.configs.style = data["Style"];
         temp.configs.onClick = data["OnClick"];
         temp.configs.onDoubleClick = data["OnDoubleClick"];

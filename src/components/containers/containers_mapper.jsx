@@ -1,13 +1,74 @@
 import { renderPrimitiveElement } from "../primitives/primitiveMapper";
 import { Card, GridView, Row, Column, Container, ListView, ScrollArea, Carousel } from "./container_components";
-import { activeElement, screenElements } from "../../screen_builder/screen_state";
+import { activeElement, activeScreen, screenElements, screens, screenViewKey } from "../../screen_builder/screen_state";
 import { Drop } from "../custom/Drop";
-import { handleDrop } from "../../screen_builder/screen_state";
 import { Drawer, HoverModal, PopupModal } from "../model_containers/model_components";
 import { variableKeys, variableMap } from '../../states/global_state';
 import { ActionExecutor, FunctionExecutor } from '../../states/common_actions';
 import { effect, signal } from '@preact/signals';
 import { renderTemplate } from "../templates/template_mapper";
+import { ReactSortable } from "react-sortablejs";
+
+
+
+function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementID }) {
+  function UpdateScreenElementChildren(newchildren, elementID) {
+    console.log(":new sorted Children 1: ",newchildren);
+      let element = screenElements[elementID];
+      if(element === undefined) {
+        return;
+      }
+      let elementVal = element.value;
+      if(elementVal === undefined) {
+        return;
+      }
+      let children = elementVal["children"];
+      let childrenSorted = [];
+      for(var i=0;i<newchildren.length;i++) {
+        let cur = newchildren[i];
+        let id = cur["id"];
+        for(var j=0;j<children.length;j++) {
+          if(children[j] === id) {
+            childrenSorted.push(children[j]);
+            break;
+          }
+        }
+      }
+
+      console.log(":new sorted Children 2: ",childrenSorted);
+      let curScreen = activeScreen.value;
+      elementVal["children"] = childrenSorted;
+      element.value = {...elementVal};
+      screenElements[elementID] = element;
+      screens[curScreen][screenViewKey] = screenElements;
+      screens[curScreen]["_change_type"] = "update";
+  }
+  return (
+    <ReactSortable
+      list={childrenElements}
+      setList={(childs) => {UpdateScreenElementChildren(childs, elementID);}}
+      group="elements"
+      animation={150}
+      ghostClass="element-ghost"
+    >
+     {
+      childrenElements.map((child, ind) => {
+        return(
+          <div onClick={() => { activeElement.value = child.id  }}>
+          {(child.type === "container" || child.type === "modal") ? (
+            <Drop onDrop={(data) => dropCallBack(data, child.id)} dropElementData={{ element: child.id }}>
+              {renderContainer(child,dropCallBack, activeSignal)}
+            </Drop>
+          ) : child.type === "template"  ? (renderTemplate(child, dropCallBack, activeSignal)) : 
+          renderPrimitiveElement(child, activeSignal)}
+        </div>
+        );
+      })
+     }
+    </ReactSortable>
+  );
+}
+
 
 
 export function renderContainer(layoutItem , dropCallBack , activeSignal) {
@@ -32,42 +93,113 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal) {
     }
   });
   let childElements = childrenSignal.value.map(childId => screenElements[childId]?.value);
-  const renderChildren = (children) =>
-    children.map((child, ind) => (
-     
-        <div style={{ display: "contents"}} onClick={() => { activeElement.value = child.id  }}>
-          {(child.type === "container" || child.type === "modal") ? (
-            <Drop onDrop={(data) => dropCallBack(data, child.id)} dropElementData={{ element: child.id }}>
-              {renderContainer(child,dropCallBack, activeSignal)}
-            </Drop>
-          ) : child.type === "template"  ? (renderTemplate(child, dropCallBack, activeSignal)) : (renderPrimitiveElement(child, activeSignal))}
-        </div>
-    ));
   console.log("title:", title, layoutItem);
   switch (title) {
     case "card":
-      return <Card {...layoutItem}>{renderChildren(childElements)}</Card>;
+      return <Card {...layoutItem}>
+              <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+              />
+            </Card>;
     case "grid_view":
-      return <GridView {...layoutItem}>{renderChildren(childElements)}</GridView>;
+      return <GridView {...layoutItem}>
+              <RenderChildren 
+                    dropCallBack={dropCallBack} 
+                    activeSignal={activeSignal} 
+                    childrenElements={childElements}
+                    elementID={layoutItem["id"]}
+
+                    />
+            </GridView>;
     case "container":
-      return <Container {...layoutItem}>{renderChildren(childElements)}</Container>;
+      return <Container {...layoutItem}>
+           <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+              />
+          </Container>;
     case "list_view":
-      return <ListView {...layoutItem}>{renderChildren(childElements)}</ListView>;
+      return <ListView {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+
+              />
+      </ListView>;
     case "row":
-      return <Row {...layoutItem}>{renderChildren(childElements)}</Row>;
+      return <Row {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+
+              />
+      </Row>;
     case "column":
-      return <Column {...layoutItem}>{renderChildren(childElements)}</Column>;
+      return <Column {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+
+              />
+      </Column>;
     case "scroll_area":
-      return <ScrollArea {...layoutItem}>{renderChildren(childElements)}</ScrollArea>;
+      return <ScrollArea {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+
+              />
+      </ScrollArea>;
     case "carousel":
-      return <Carousel {...layoutItem}>{renderChildren(childElements)}</Carousel>;
+      return <Carousel {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+              />
+      </Carousel>;
     case "model":
       console.log("layout item in modal",layoutItem);
-      return <PopupModal {...layoutItem}>{renderChildren(childElements)}</PopupModal>;
+      return <PopupModal {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+              />
+      </PopupModal>;
     case "hover_card":
-      return <HoverModal {...layoutItem}>{renderChildren(childElements)}</HoverModal>;
+      return <HoverModal {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+              />
+      </HoverModal>;
     case "side_drawer":
-      return <Drawer {...layoutItem}>{renderChildren(childElements)}</Drawer>
+      return <Drawer {...layoutItem}>
+         <RenderChildren 
+              dropCallBack={dropCallBack} 
+              activeSignal={activeSignal} 
+              childrenElements={childElements}
+              elementID={layoutItem["id"]}
+              />
+      </Drawer>
     default:
       return <div>Unknown Container</div>;
   }

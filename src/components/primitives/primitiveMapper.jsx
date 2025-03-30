@@ -9,6 +9,8 @@ import { Text, Number, TextArea, ProgressBar, Avatar, AvatarGroup, Dropdown, But
 function ActiveWrapper({data,activeSignal ,children }) {
   return (
         <div style={{display:"contents"}} onClick={(e) => {
+          e.stopPropagation();
+          console.log("setting the active Signal:",data["id"]);
           activeSignal.value = data["id"];
         }}>
           {children}
@@ -30,15 +32,15 @@ export const renderPrimitiveElement = (data, activeSignal) => {
     return <div>No element selected</div>;
   }
 
-  // let style = {"padding": "10px","margin": "10px" ,"backgroundColor": "blue", height:"50px", width:"100px"};
-  // return <div style={{...style}}> </div>;
   switch (data.title) {
     case "text":
       return (
+       <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Text
           value={"Sample Text " + data.id}
           config={{...configObj}}
         />
+      </ActiveWrapper>
       );
       
     case "number":
@@ -76,11 +78,13 @@ export const renderPrimitiveElement = (data, activeSignal) => {
     case "avatar":
       console.log("called avatar case:",data);
       return (
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Avatar
           src={data}
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
     case "avatar_group":
@@ -108,11 +112,13 @@ export const renderPrimitiveElement = (data, activeSignal) => {
 
     case "button":
       return (
+        <ActiveWrapper data={data} activeSignal={activeSignal}>
        <Button
           value="Click Me"
           config={{...configObj}}
 
         />
+        </ActiveWrapper>
       );
 
     case "image":
