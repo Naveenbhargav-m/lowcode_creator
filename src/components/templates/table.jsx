@@ -1,7 +1,7 @@
-import { DataType, EditingMode, SortingMode } from 'ka-table/enums';
-import 'ka-table/style.scss';
+// import { DataType, EditingMode, SortingMode } from 'ka-table/enums';
+// import 'ka-table/style.scss';
 
-import { Table } from 'ka-table';
+// import { Table } from 'ka-table';
 
 const dataArray = Array(10).fill(undefined).map(
     (_, index) => ({
@@ -24,18 +24,19 @@ const DataTable = () => {
     };
 
     return (
-        <Table
-            columns={[
-                { key: 'column1', title: 'Column 1', dataType: DataType.String },
-                { key: 'column2', title: 'Column 2', dataType: DataType.String },
-                { key: 'column3', title: 'Column 3', dataType: DataType.String },
-                { key: 'column4', title: 'Column 4', dataType: DataType.String },
-            ]}
-            data={dataArray}
-            editingMode={EditingMode.Cell}
-            rowKeyField={'id'}
-            sortingMode={SortingMode.Single}
-        />
+        // <Table
+        //     columns={[
+        //         { key: 'column1', title: 'Column 1', dataType: DataType.String },
+        //         { key: 'column2', title: 'Column 2', dataType: DataType.String },
+        //         { key: 'column3', title: 'Column 3', dataType: DataType.String },
+        //         { key: 'column4', title: 'Column 4', dataType: DataType.String },
+        //     ]}
+        //     data={dataArray}
+        //     editingMode={EditingMode.Cell}
+        //     rowKeyField={'id'}
+        //     sortingMode={SortingMode.Single}
+        // />
+        <div>Needed to be implemented</div>
     );
 };
 

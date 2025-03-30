@@ -10,18 +10,15 @@ import { TablesPage } from "./table_builder/tables_page";
 import {ScreenPage} from "./screen_builder/screen_page";
 import { UsersPage } from "./users/users_page";
 import { SettingsPage } from "./settings/settings_page";
-import { PreviewArea } from "./preview/preview";
 import { sideBarEnable } from "./states/global_state";
 import AppCreatorPage from "./app_creator/app_creator";
 import { FormBuilderTest } from "./form_builder/form_edit_area";
 import { ThemeCreator } from "./theme_creator/theme_config_area";
-import { Provider } from "./components/ui/provider";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import {TestRV} from "./components/general/recordset_list";
 import { AppHomeScreen } from "./home/app_home";
 export function App() {
   return (
-    <Provider>
     <ThemeProvider>
     <LocationProvider>
    <div className="flex bg-white">
@@ -39,7 +36,7 @@ export function App() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
       <Route path="/test_comp" component={TestRV} />
-      <Route path="/preview" component={PreviewArea} />
+      {/* <Route path="/preview" component={PreviewArea} /> */}
       <Route path="/test" component={ThemeCreator} />
       <Route default component={() => <div>Not Found</div>} />
     </Router>
@@ -48,7 +45,6 @@ export function App() {
 
     </LocationProvider>
     </ThemeProvider>
-    </Provider>
   );
 }
 

@@ -32,6 +32,8 @@ function SyncData(key, forms) {
             updateFlows.push(curFlow);
         }
     }
+    createFlows = ProcessDataToWrite(key,createFlows);
+    updateFlows = ProcessDataToWrite(key, updateFlows);
     console.log("insert data:", createFlows);
     console.log("update data:", updateFlows);
     if (createFlows.length) {
@@ -80,5 +82,82 @@ function InsertBatchData(key,forms) {
     PrestClient.post(endPoint,  {"body":forms});
 }
 
+async function GetDataFromAPi(key) {
+    let endpoint = `/${AppID}/public/${key}`;
+    try {
+        let response = await PrestClient.get(endpoint);
+        return response || [];  // Always return an array
+    } catch (error) {
+        console.error(`Error fetching data for key "${key}":`, error);
+        return [];  // Return empty array instead of breaking the app
+    }
+}
 
-export {SyncData};
+
+function ProcessDataToWrite(tableName, data) {
+    let tableKeysMap = {
+        "_screens": ProcessScreenDataToWrite,
+        "_forms": { "form_name": "text", "table_name": "text", "fields": "json" },
+        "_global_states": { "state_name": "text", "default_value": "any", "screen_name": "text", "screen_id": "any" },
+        "_templates": { "template_name": "text", "configs": "json", "tags": "text[]" },
+        "_components": { "component_name": "text", "configs": "json" },
+        "_themes": { "theme_name": "text", "dark_theme": "json", "light_theme": "json", "is_default": "bool" },
+        "_tables": { "tables_data": "json" },
+        "_views": { "views_data": "json" },
+        "_workflows": { "nodes": "json", "edges": "json", "flow_data": "json", "name": "text" },
+        "_triggers": { "triggers_data": "json" }
+    };    
+    let respData = [];
+    let tabelFunc = tableKeysMap[tableName];
+    respData = tabelFunc(data);
+    return respData;
+}
+
+
+function ProcessDataToRead(tableName, data) {
+    let tableKeysMap = {
+        "_screens": ProcessScreenDataToRead,
+        "_forms": { "form_name": "text", "table_name": "text", "fields": "json" },
+        "_global_states": { "state_name": "text", "default_value": "any", "screen_name": "text", "screen_id": "any" },
+        "_templates": { "template_name": "text", "configs": "json", "tags": "text[]" },
+        "_components": { "component_name": "text", "configs": "json" },
+        "_themes": { "theme_name": "text", "dark_theme": "json", "light_theme": "json", "is_default": "bool" },
+        "_tables": { "tables_data": "json" },
+        "_views": { "views_data": "json" },
+        "_workflows": { "nodes": "json", "edges": "json", "flow_data": "json", "name": "text" },
+        "_triggers": { "triggers_data": "json" }
+    };    
+    let respData = [];
+    let tabelFunc = tableKeysMap[tableName];
+    respData = tabelFunc(data);
+    return respData;
+}
+
+
+function ProcessScreenDataToWrite(screens) {
+    let resp = [];
+    for(let i=0;i<screens.length;i++) {
+        let temp = {};
+        let cur = screens[i];
+        temp["screen_name"] = cur["name"];
+        temp["id"] = cur["id"];
+        delete cur["screen_name"];
+        let json = JSON.stringify(cur);
+        temp["configs"] = json;
+        resp.push(temp);
+    }
+    return resp;
+}
+
+function ProcessScreenDataToRead(data) {
+    let resp = [];
+    for(let i=0;i<data.length;i++) {
+        let cur = data[i];
+        let obj = {};
+        obj["name"] = cur["name"];
+        let configs = JSON.parse(cur["configs"]);
+        let newobj = {...obj, ...configs};
+        resp.push(newobj);
+    }
+}
+export {SyncData, GetDataFromAPi};
