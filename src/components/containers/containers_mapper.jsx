@@ -13,7 +13,6 @@ import { ReactSortable } from "react-sortablejs";
 
 function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementID }) {
   function UpdateScreenElementChildren(newchildren, elementID) {
-    console.log(":new sorted Children 1: ",newchildren);
       let element = screenElements[elementID];
       if(element === undefined) {
         return;
@@ -35,7 +34,6 @@ function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementI
         }
       }
 
-      console.log(":new sorted Children 2: ",childrenSorted);
       let curScreen = activeScreen.value;
       elementVal["children"] = childrenSorted;
       element.value = {...elementVal};
@@ -72,7 +70,6 @@ function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementI
 
 
 export function renderContainer(layoutItem , dropCallBack , activeSignal) {
-  console.log("temp:",layoutItem);
   layoutItem.configs["id"] = layoutItem.id;
   const { title, children } = layoutItem;
   let childrenSignal = signal(children);
@@ -93,7 +90,6 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal) {
     }
   });
   let childElements = childrenSignal.value.map(childId => screenElements[childId]?.value);
-  console.log("title:", title, layoutItem);
   switch (title) {
     case "card":
       return <Card {...layoutItem}>
@@ -173,7 +169,6 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal) {
               />
       </Carousel>;
     case "model":
-      console.log("layout item in modal",layoutItem);
       return <PopupModal {...layoutItem}>
          <RenderChildren 
               dropCallBack={dropCallBack} 

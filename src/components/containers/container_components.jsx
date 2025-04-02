@@ -22,7 +22,6 @@ const ContainerTemplate = ({ config, value, action, children }) => {
     const newStyles = FunctionExecutor(datamap, containerConfig.value.styleCode);
     containerConfig.value.style = { ...containerConfig.value.style, ...newStyles };
   });
-  console.log("container config:",containerConfig.value.style);
   return (
     <div
       style={containerConfig.value.style}
