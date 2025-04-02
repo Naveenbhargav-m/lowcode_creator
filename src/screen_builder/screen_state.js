@@ -66,7 +66,7 @@ let screens = {};
 let screenElements = { };
 const screenElementAdded = signal(false);
 screenElementAdded.value = true;
-
+let screenElementsSorted = signal("");
 let screenViewKey = "mobile_children";
 
 
@@ -200,6 +200,32 @@ function CreatenewScreen(data) {
 }
 
 
+function DeleteScreenElement(id) {
+  console.log("existing:",screenElements[id]);
+  delete screenElements[id];
+  let keys = Object.keys(screenElements);
+  for(var i=0;i<keys.length;i++) {
+    let currentElement = screenElements[keys[i]].value;
+    let children = currentElement["children"];
+    let newChildren = [];
+    for(var j=0;j<children.length;j++) {
+      if(children[j] === id) {
+        continue
+      }
+      newChildren.push(children[j]);
+    }
+    if(newChildren.length > 0) {
+      currentElement["children"] = newChildren;
+      screenElements[keys[i]].value = currentElement;
+    } 
+  }
+  screens[activeScreen.value][screenViewKey] = JSON.parse(JSON.stringify(screenElements));
+  screens[activeScreen.value]["_change_type"] = "update";
+  screenElementAdded.value = false;
+  screenElementAdded.value = true;
+  screenElementsSorted.value = generateUID();
+}
+
 
 function CallbackExecutor(key , input) {
   actionsmap[key](input);
@@ -220,5 +246,5 @@ export {tabDataSignal , tabSignal,
   activeConfigTab,handleDrop,activeElement,
   CallbackExecutor, screenElementAdded,
   activeScreen, screenView,screenLeftTabSignal,screenLeftnamesAndIds,
-   SetCurrentScreen, CreatenewScreen, screens, LoadScreens, screenViewKey
+   SetCurrentScreen, CreatenewScreen, screens, LoadScreens, screenViewKey, DeleteScreenElement, screenElementsSorted
 };

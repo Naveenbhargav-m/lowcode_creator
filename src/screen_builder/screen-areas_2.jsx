@@ -1,7 +1,7 @@
 import { Drop } from "../components/custom/Drop";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement, SetCurrentScreen, activeScreen, screens, screenViewKey  } from "./screen_state";
+import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement, SetCurrentScreen, activeScreen, screens, screenViewKey, DeleteScreenElement, screenElementsSorted  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 import { IconGroup } from "../components/primitives/general_components";
@@ -10,6 +10,7 @@ import MobileMockup from "../components/custom/mobile_mockup";
 import { ReactSortable } from "react-sortablejs";
 import { useSignal, useComputed } from "@preact/signals";
 import { useEffect } from "preact/hooks";
+import { SelectableComponent } from "../components/custom/selectAble";
 
 
 
@@ -75,7 +76,6 @@ function MobileView() {
 
  // Reactive: Compute items from `screenElements`
  const items = useSignal([]);
-  
  useEffect(() => {
     console.log("rerendering:");
     const elementsArray = Object.values(screenElements);
@@ -86,15 +86,16 @@ function MobileView() {
                           return orderA - orderB;});
     console.log("sorted Items before rendering:",sortedItems);
     items.value = sortedItems;
- }, [screenElements]);
+ }, [screenElements, screenElementsSorted.value]);
 
- const sortableItems = useComputed(() =>
-   items.value.map((item) => ({
-     id: item.value.id,
-     name: item.value.title,
-     style: item.value.style || {},
-   }))
- );
+
+ let sortableItems = useComputed(() => items.value.map((item) => ({
+  id: item.value.id,
+  name: item.value.title,
+  style: item.value.style || {},
+})));
+
+
   function SortItems(items, newItems) {
     const itemMap = new Map(items.map((item) => [item.value.id, item]));
     let sortedItems = newItems.map(({ id }) => itemMap.get(id)).filter(Boolean);
@@ -143,8 +144,17 @@ function MobileView() {
               {screenElementAdded.value &&
                 items.value.map((item) => {
                   if (!item.value.parent) {
-                    // return <div key={item.value.id}>{item.value.title}</div>
-                    return <div>{RenderElement(item.peek(), handleDrop, activeElement)}</div>;
+                   console.log("rendering after removal:",screenElementAdded.value); 
+                    return (<div>
+                      <SelectableComponent 
+                          onChick={(e,id) => {console.log("chicked me:", id);}}
+                          onRemove={(e,id) => {DeleteScreenElement(id)}}
+                          id={item.value["id"]}
+                          isSelected={activeElement.value === item.value.id}
+                          >
+                      {RenderElement(item.peek(), handleDrop, activeElement)}
+                      </SelectableComponent>
+                      </div>);
                   }
                 })}
             </ReactSortable>

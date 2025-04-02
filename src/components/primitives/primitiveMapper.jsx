@@ -10,7 +10,6 @@ function ActiveWrapper({data,activeSignal ,children }) {
   return (
         <div style={{display:"contents"}} onClick={(e) => {
           e.stopPropagation();
-          console.log("setting the active Signal:",data["id"]);
           activeSignal.value = data["id"];
         }}>
           {children}
@@ -76,7 +75,6 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       );
 
     case "avatar":
-      console.log("called avatar case:",data);
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Avatar
@@ -155,7 +153,6 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       );
 
     case "icon_button":
-      console.log("icon button data:",data, activeSignal);
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <IconButton

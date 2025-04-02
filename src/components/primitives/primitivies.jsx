@@ -41,7 +41,6 @@ export const DynamicWrapper = ({ children, config, value }) => {
     if (actionType === "onClick" && dynamicConfig.value.actions?.onClick) {
       const clickAction = FunctionExecutor({}, dynamicConfig.value.actions.onClick);
       if (clickAction?.show_form !== undefined) {
-        console.log("Setting show_form:", clickAction);
         showFormPopup.value = clickAction.show_form;
       }
     }
@@ -178,7 +177,6 @@ export const Text = ({ value, config }) => (
 
 
 export const ProgressBar = ({ value, config }) => {
-  console.log("progress bar:",config, value);
   return (
     <DynamicWrapper config={config} value={value}>
       {(dynamicValue) => (
@@ -213,11 +211,9 @@ export const Indicator = ({ active, config }) => {
 };
 
 export const AvatarGroup = ({ avatars, config }) => {
-  console.log("avatar group data:",avatars, config);
   return (
     <DynamicWrapper config={config} value={avatars}>
       {(value , dynamicConfig) => {
-        console.log("config and valuw in Avatar group:", dynamicConfig, value);
         return (
         <div style={dynamicConfig["style"]}>
           {value.map((avatar, index) => (
