@@ -15,8 +15,9 @@ function WorkFlowPage() {
                 <div className="w-7/12 h-screen bg-background scrollable-div">
                         <FlowBuilder />
                 </div>
-                <div className="w-3/12 p-4 bg-white h-screen scrollable-div">
+                <div className="w-3/12 bg-white h-screen scrollable-div">
                     <InsertRowComp />
+                    {/* <DynamicConfigForm blockConfig={blocksRequirements.insert_row} globalData={["table1", "table2"]} blockData={{}}/> */}
                 </div>
         </div>
     );

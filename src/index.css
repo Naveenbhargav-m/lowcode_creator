@@ -483,3 +483,17 @@ input:focus {
     width: 100%;
   }
   
+
+  /* Default option styling */
+option.custom-option {
+  background-color: white;
+  color: black;
+}
+
+/* Attempt to style highlighted/selected option */
+option.custom-option:checked,
+option.custom-option:hover,
+option.custom-option:focus {
+  background-color: black;
+  color: white;
+}

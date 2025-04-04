@@ -237,53 +237,55 @@ export function WorkflowConfigBlock() {
     }
     return (
         <div style={{"padding": "8px 0px"}}>
-            {config["dependency"].map((value, ind) => {
-                let label = config["labels"][ind];
-                switch(value) {
+            {config["inputs"].map((value, ind) => {
+                let label = value["title"];
+                let type = value["type"];
+                let key = value["key"];
+                switch(type) {
                     case "code":
                         let code_data = workflowdata[label] || {};
                         let codeSig = signal(code_data);
                         return (
                             <TextAreaWithPopup
                             key={id}
-                            label={"code"}
-                            configKey={"code"}
+                            label={label}
+                            configKey={label}
                             valueSignal={codeSig}
                             // @ts-ignore
                             onChange={(data) => {
-                                UpdateworkflowData(label, codeSig.value);
+                                UpdateworkflowData(key, codeSig.value);
                             }
                             }
                           />
                         );
-                    case "dynamic_mapping":
-                        let initData = workflowdata[label] || [];
+                    case "map":
+                        let initData = workflowdata[key] || [];
                         return (
                             <div style={eleStyle}>
                             <RecordsetList
                                 initialRecords={initData}
                                 onRecordsChange={(data) => 
-                                    {UpdateworkflowData(label, data);
+                                    {UpdateworkflowData(key, data);
                                     }}>
                                 <MapRowDynamic data={{}} onChange={() => {}} recordId={""}/>
                             </RecordsetList>
                             </div>
                         );
-                    case "table":
+                    case "select":
+                        let selected = workflowdata[key] || false;
                         return (
                             <div style={eleStyle}>
                             <select
                                 name="tables"
                                 aria-label="Select your favorite cuisine..."
                                 required
-                                // @ts-ignore
-                                onChange={(e) => UpdateworkflowData(config["labels"][ind], e.target.value)}
+                                onChange={(e) => UpdateworkflowData(key, e.target.value)}
                                 >
-                                <option selected disabled value="">
+                                <option selected={!selected} disabled value="">
                                     Select a table...
                                 </option>
                                 {globalConfigs.value["tables"].map((table) => (
-                                    <option key={table} value={table}>
+                                    <option selected={table === selected} key={table} value={table}>
                                     {table}
                                     </option>
                                 ))}
@@ -319,15 +321,18 @@ export function WorkflowConfigBlock() {
                     </select>
                     </div>
                         );
-                    case "is_background":
-                        let background = workflowdata[label] || false;
+                    case "toggle":
+                        let background = workflowdata[key] || false;
                         return (
                             <div style={eleStyle}>
                             <fieldset>
-                            <input checked={background} type="checkbox" name="is_background" id={ind} aria-invalid="false"
+                            <input checked={background} 
+                            className="mr-2"
+                            type="checkbox"
+                             name={label} id={ind} aria-invalid="false"
                             // @ts-ignore
-                            onChange={(e) => UpdateworkflowData(label, e.target.checked)}/>
-                            <label htmlFor="is_background">is_background</label>
+                            onChange={(e) => UpdateworkflowData(key, e.target.checked)}/>
+                            <label htmlFor={label}>{label}</label>
                             </fieldset>
                             </div>
                         );

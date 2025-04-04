@@ -17,6 +17,7 @@ import { ThemeCreator } from "./theme_creator/theme_config_area";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import {TestRV} from "./components/general/recordset_list";
 import { AppHomeScreen } from "./home/app_home";
+
 export function App() {
   return (
     <ThemeProvider>
@@ -26,7 +27,11 @@ export function App() {
       sideBarEnable.value ?   <SideBar /> : <span></span>
     }
   <main className="flex-grow bg-white">
-    <Router>
+    <Router
+     onRouteChange={(url) => console.log('Route changed to', url)}
+     onLoadStart={(url) => console.log('Starting to load', url)}
+     onLoadEnd={(url) => console.log('Finished loading', url)}
+    >
       <Route path="/home" component={AppHomeScreen} />
       <Route path="/forms" component={FormBuilderTest} />
       <Route path="/screens" component={ScreenPage}/>
