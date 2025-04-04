@@ -6,14 +6,12 @@ const Drop = ({ wrapParent = true, userstyle = {}, onDrop, dropElementData, chil
     minHeight: "100%", // Use minHeight instead of height
     minWidth: "100%",  // Use minWidth instead of width
     transition: "border 0.2s ease",
-    "backgroundColor": "grey",
     ...userstyle,
   };
 
   if (wrapParent === false) {
     style = {
       transition: "border 0.2s ease",
-      "backgroundColor": "grey",
       position: "relative", // Ensures proper bounding for children
       display: "contents", // Lets the wrapper disappear and only the child is visible
       ...userstyle,

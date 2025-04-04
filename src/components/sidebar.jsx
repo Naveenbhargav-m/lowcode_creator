@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
 import { Home, Settings, Database, User, BookText, Frame, Workflow } from 'lucide-react';
-
 const Sidebar = () => {
   const [expanded, setExpanded] = useState(false);
   const [selected, setSelected] = useState(null);
