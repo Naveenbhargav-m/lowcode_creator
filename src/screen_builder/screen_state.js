@@ -64,8 +64,8 @@ let screenLeftnamesAndIds = signal([]);
 const screenLeftTabSignal = signal("");
 let screens = {};
 let screenElements = { };
-const screenElementAdded = signal(false);
-screenElementAdded.value = true;
+const screenElementAdded = signal("");
+screenElementAdded.value = "NA";
 let screenElementsSorted = signal("");
 let screenViewKey = "mobile_children";
 
@@ -129,8 +129,7 @@ function SetCurrentScreen() {
   }
   localStorage.setItem("screen_config",JSON.stringify(screens));
   screenElements = {...newElements};
-  screenElementAdded.value = false;
-  screenElementAdded.value = true;
+  screenElementAdded.value = id;
 }
 const handleDrop = (data, parentId = null) => {
   console.log("called handle drop:",data, parentId);
@@ -154,7 +153,7 @@ const handleDrop = (data, parentId = null) => {
     ...myconfig,
   };
 
-  if (parentId != null) {
+  if (parentId !== null) {
       let parentElement = screenElements[parentId];
         parentElement.value.children.push(newItem.id);
         newItem.parent = parentId;
@@ -165,8 +164,8 @@ const handleDrop = (data, parentId = null) => {
     let curLength = Object.keys(screenElements).length + 1;
     newItem["order"] = curLength;
     screenElements[newItem.id] = signal(newItem);
-    screenElementAdded.value = false;
-    screenElementAdded.value = true;
+    screenElements[newItem.id].value = {...newItem}; 
+    screenElementAdded.value = newItem.id;
   }
   let temp = screens[activeScreen.value];
   console.log("temp screens after drop:",temp);
@@ -180,6 +179,8 @@ const handleDrop = (data, parentId = null) => {
     screens[activeScreen.value] = temp;
     screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
   }
+  screenElementAdded.value = i;
+  screenElementsSorted.value = i;
   console.log("new screens after drop:",screens);
   localStorage.setItem("screen_config", JSON.stringify(screens));
 };
@@ -195,8 +196,7 @@ function CreatenewScreen(data) {
   existingnames.push({"name": name, "id":id});
   screenLeftnamesAndIds.value = [...existingnames];
   localStorage.setItem("screen_config",JSON.stringify(screens));
-  screenElementAdded.value = false;
-  screenElementAdded.value = true;
+  screenElementAdded.value = id;
 }
 
 
@@ -220,9 +220,8 @@ function DeleteScreenElement(id) {
     } 
   }
   screens[activeScreen.value][screenViewKey] = JSON.parse(JSON.stringify(screenElements));
-  screens[activeScreen.value]["_change_type"] = "update";
-  screenElementAdded.value = false;
-  screenElementAdded.value = true;
+  screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
+  screenElementAdded.value = generateUID();
   screenElementsSorted.value = generateUID();
 }
 

@@ -3,7 +3,7 @@ import { DesktopMockup } from "../screen_builder/screen_components";
 import { FormBuilderLeftPanel } from "./form_builder_left";
 import { Column, PanelField, Row } from "./fields/fields";
 import { Field } from "./fields/chakra_fields";
-import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm, forms } from "./form_builder_state";
+import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm, forms, LoadForms } from "./form_builder_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
@@ -19,6 +19,11 @@ import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
 
 function EditArea() {
+    useEffect((
+      ()=> {
+        LoadForms();
+      }
+    ),[]);
     return (
     <div>
        <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>

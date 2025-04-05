@@ -1,6 +1,7 @@
 import { effect, signal } from "@preact/signals";
 import { generateUID, getElementByID, setElementByID } from "../utils/helpers";
 import { fieldsConfigs } from "./fields/field_styles";
+import { GetDataFromAPi } from "../api/api_syncer";
 
 const formStyle = {"display":"flex","flexDirection":"column","minHeight":"200px", "minWidth":"150px","height":"100%", "width":"100%"};
 
@@ -65,7 +66,7 @@ function AddtoElements(data) {
     } else {
         length = Object.keys(forms).length
     };
-    let newdata = {"id": id, "is_change_type": "add", "form_name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
+    let newdata = {"id": id, "_change_type": "add", "form_name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
     forms[id] = newdata;
     let existing = formLeftNamesList.peek();
     existing.push({"id":id, "name":name});
@@ -74,16 +75,34 @@ function AddtoElements(data) {
   }
 
 function LoadForms() {
-    let formsjson = localStorage.getItem("forms");
-    let formsObj= JSON.parse(formsjson);
-    let tempNamesObj = [];
-    for(const key in formsObj) {
-        let curform = formsObj[key];
-        let tempdata = {"name": curform["form_name"], "id": curform["id"]};
-        tempNamesObj.push(tempdata);
-    }
-    formLeftNamesList.value = [...tempNamesObj];
-    forms = formsObj;
+    GetDataFromAPi("_forms").then((forms_data) => {
+        if (!forms_data || forms_data.length === 0) {
+            console.log("my forms_data is null:", forms_data);
+            forms = {};
+            return;
+        }
+  
+        let tempnames = [];
+        let screensmap = {};
+        for (let i = 0; i < forms_data.length; i++) {
+            let curForm = forms_data[i];
+            screensmap[curForm["id"]] = { ...curForm["configs"],"id": curForm["id"] };
+            tempnames.push({ "name": curForm["form_name"],"id": curForm["id"], });
+        }
+        forms = screensmap;
+        formLeftNamesList.value = [...tempnames];
+  
+    });
+    // let formsjson = localStorage.getItem("forms");
+    // let formsObj= JSON.parse(formsjson);
+    // let tempNamesObj = [];
+    // for(const key in formsObj) {
+    //     let curform = formsObj[key];
+    //     let tempdata = {"name": curform["form_name"], "id": curform["id"]};
+    //     tempNamesObj.push(tempdata);
+    // }
+    // formLeftNamesList.value = [...tempNamesObj];
+    // forms = formsObj;    
 }
 
 
@@ -173,8 +192,8 @@ function setCurrentForm(id) {
 function setCurrentElements(newElements) {
     currentFormElements = [...newElements];
 }
-LoadForms();
+
 export {formBuilderView, forms, 
     currentForm, currentFormElements, formActiveElement ,
-    activeTab,formActiveLeftTab,formLeftNamesList, formRenderSignal, CreateNewForm,
+    activeTab,formActiveLeftTab,formLeftNamesList, formRenderSignal, LoadForms, CreateNewForm,
     AddtoElements, SwapChildrenBasedonView, setCurrentForm, setCurrentElements};

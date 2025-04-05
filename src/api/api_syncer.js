@@ -97,7 +97,7 @@ async function GetDataFromAPi(key) {
 function ProcessDataToWrite(tableName, data) {
     let tableKeysMap = {
         "_screens": ProcessScreenDataToWrite,
-        "_forms": { "form_name": "text", "table_name": "text", "fields": "json" },
+        "_forms": ProcessFormsDataToWrite,
         "_global_states": { "state_name": "text", "default_value": "any", "screen_name": "text", "screen_id": "any" },
         "_templates": { "template_name": "text", "configs": "json", "tags": "text[]" },
         "_components": { "component_name": "text", "configs": "json" },
@@ -139,7 +139,7 @@ function ProcessScreenDataToWrite(screens) {
     for(let i=0;i<screens.length;i++) {
         let temp = {};
         let cur = screens[i];
-        temp["screen_name"] = cur["name"];
+        temp["screen_name"] = cur["screen_name"];
         temp["id"] = cur["id"];
         delete cur["screen_name"];
         let json = JSON.stringify(cur);
@@ -154,7 +154,7 @@ function ProcessScreenDataToRead(data) {
     for(let i=0;i<data.length;i++) {
         let cur = data[i];
         let obj = {};
-        obj["name"] = cur["name"];
+        obj["screen_name"] = cur["screen_name"];
         let configs = JSON.parse(cur["configs"]);
         let newobj = {...obj, ...configs};
         resp.push(newobj);
@@ -172,7 +172,7 @@ function ProcessFormsDataToWrite(forms) {
         temp["form_name"] = cur["form_name"];
         temp["id"] = cur["id"];
         let json = JSON.stringify(cur);
-        temp["fields"] = json;
+        temp["configs"] = json;
         resp.push(temp);
     }
     return resp;

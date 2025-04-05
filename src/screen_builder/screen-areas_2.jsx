@@ -11,6 +11,7 @@ import { ReactSortable } from "react-sortablejs";
 import { useSignal, useComputed } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { SelectableComponent } from "../components/custom/selectAble";
+import { generateUID } from "../utils/helpers";
 
 
 
@@ -86,6 +87,7 @@ function MobileView() {
                           return orderA - orderB;});
     console.log("sorted Items before rendering:",sortedItems);
     items.value = sortedItems;
+    screenElementAdded.value = generateUID();
  }, [screenElements, screenElementsSorted.value]);
 
 
@@ -112,7 +114,7 @@ function MobileView() {
       cur.value["order"] = i;
       screenElements[id].value = {...cur.value};
       screens[curScreen][screenViewKey] = screenElements;
-      screens[curScreen]["_change_type"] = "update";
+      screens[curScreen]["_change_type"] = screens[curScreen]["_change_type"] || "update";;
       updatedItems.push(cur);
     }
     console.log("set sorted items before updation:", updatedItems);
@@ -141,7 +143,7 @@ function MobileView() {
               animation={150}
               ghostClass="element-ghost"
             >
-              {screenElementAdded.value &&
+              {screenElementAdded.value.length > 0 &&
                 items.value.map((item) => {
                   if (!item.value.parent) {
                    console.log("rendering after removal:",screenElementAdded.value); 
@@ -195,7 +197,7 @@ function DesktopView() {
         wrapParent={true}
       >
         <div style={{...style}}>
-        {screenElementAdded.value && Object.values(screenElements).map((item, ind) => {
+        {screenElementAdded.value.length > 0 && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
                 return <div>{RenderElement(item.peek(),handleDrop, activeElement)}</div>;
               }
