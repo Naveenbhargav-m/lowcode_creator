@@ -117,7 +117,7 @@ function ProcessDataToWrite(tableName, data) {
 function ProcessDataToRead(tableName, data) {
     let tableKeysMap = {
         "_screens": ProcessScreenDataToRead,
-        "_forms": { "form_name": "text", "table_name": "text", "fields": "json" },
+        "_forms": ProcessFormsDataToWrite,
         "_global_states": { "state_name": "text", "default_value": "any", "screen_name": "text", "screen_id": "any" },
         "_templates": { "template_name": "text", "configs": "json", "tags": "text[]" },
         "_components": { "component_name": "text", "configs": "json" },
@@ -159,5 +159,38 @@ function ProcessScreenDataToRead(data) {
         let newobj = {...obj, ...configs};
         resp.push(newobj);
     }
+    return resp;
 }
+
+
+
+function ProcessFormsDataToWrite(forms) {
+    let resp = [];
+    for(let i=0;i<forms.length;i++) {
+        let temp = {};
+        let cur = forms[i];
+        temp["form_name"] = cur["form_name"];
+        temp["id"] = cur["id"];
+        let json = JSON.stringify(cur);
+        temp["fields"] = json;
+        resp.push(temp);
+    }
+    return resp;
+}
+
+function ProcessFormsDataToRead(data) {
+    let resp = [];
+    for(let i=0;i<data.length;i++) {
+        let cur = data[i];
+        let obj = {};
+        obj["form_name"] = cur["form_name"];
+        let configs = JSON.parse(cur["configs"]);
+        let newobj = {...obj, ...configs};
+        resp.push(newobj);
+    }
+    return resp;
+}
+
+
+
 export {SyncData, GetDataFromAPi};

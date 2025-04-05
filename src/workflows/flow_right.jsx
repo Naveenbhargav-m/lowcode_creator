@@ -140,25 +140,23 @@ export function MapRowDynamic({ data, onChange, recordId, showPicker = false }) 
         "margin":"4px 0px",
         flexDirection: "row", 
         alignItems: "center", // Centers everything vertically
-        justifyContent: "center", // Centers everything horizontally
-        gap: "10px" // Adds spacing between elements
+        justifyContent: "space-between", // Centers everything horizontally
     };
 
     const commonStyle = {
         borderRadius: "20px", 
-        "marginTop":"10px",
-        height: "40px", 
+        height: "100%", 
         width: "140px", 
         display: "flex", 
-        alignItems: "center", // Centers vertically
-        justifyContent: "center", // Centers horizontally
+        // alignItems: "center", // Centers vertically
+        // justifyContent: "center", // Centers horizontally
         textAlign: "center"
     };
 
     return (
         <div style={rowStyle}>
             <input 
-            style={{ ...commonStyle, width: "130px", "color":"black","fontSize":'0.8em' }} 
+            style={{ ...commonStyle, width: "120px", "color":"black","fontSize":'0.8em', "marginBottom":"0px" }} 
             type="text" 
             name="key" 
             placeholder="Key:" 
@@ -168,7 +166,7 @@ export function MapRowDynamic({ data, onChange, recordId, showPicker = false }) 
             onChange={(e) => {data["name"] = e.target.value; onChange( data)}}
             />
             <input 
-                style={{ ...commonStyle, width: "130px", "color": "black", "fontSize":'0.8em' }} 
+                style={{ ...commonStyle, width: "160px", "color": "black", "fontSize":'0.8em',"marginBottom":"0px" }} 
                 type="text" 
                 name="value" 
                 value={data["value"]}
@@ -222,11 +220,11 @@ export function WorkflowConfigBlock() {
     console.log("workflows data:", workflow_datas.value);
     let workflowdata = temp[id] || {};
     console.log("workflowdata:", workflowdata);
-    let eleStyle ={"padding": "8px 0px"};
+    let eleStyle ={"padding": "8px 10px"};
 
 
-    function UpdateworkflowData(label , value) {
-        workflowdata[label] = value;
+    function UpdateworkflowData(label , value, type) {
+        workflowdata[label] = {"value": value, "type": type};
         let existing = temp;
         existing[id] = workflowdata;
         let copy = workflow_datas.peek();
@@ -241,11 +239,16 @@ export function WorkflowConfigBlock() {
                 let label = value["title"];
                 let type = value["type"];
                 let key = value["key"];
+                let valuemap = workflowdata[key] || {};
+                let value_data = valuemap["value"];
                 switch(type) {
                     case "code":
-                        let code_data = workflowdata[label] || {};
-                        let codeSig = signal(code_data);
+                        let codeSig = signal(value_data);
                         return (
+                            <div>
+                            <div>
+                            <label htmlFor={label}>{label}</label>
+                            </div>
                             <TextAreaWithPopup
                             key={id}
                             label={label}
@@ -253,39 +256,50 @@ export function WorkflowConfigBlock() {
                             valueSignal={codeSig}
                             // @ts-ignore
                             onChange={(data) => {
-                                UpdateworkflowData(key, codeSig.value);
+                                UpdateworkflowData(key, codeSig.value, "hardcoded");
                             }
                             }
                           />
+                          </div>
                         );
                     case "map":
-                        let initData = workflowdata[key] || [];
                         return (
                             <div style={eleStyle}>
+                            <label htmlFor={label}>{label}</label>
                             <RecordsetList
-                                initialRecords={initData}
+                                initialRecords={value_data}
                                 onRecordsChange={(data) => 
-                                    {UpdateworkflowData(key, data);
+                                    {UpdateworkflowData(key, data, "hardcoded");
                                     }}>
-                                <MapRowDynamic data={{}} onChange={() => {}} recordId={""}/>
+                                <MapRowDynamic data={{}} onChange={() => {}} recordId={""} showPicker={true}/>
                             </RecordsetList>
                             </div>
                         );
                     case "select":
-                        let selected = workflowdata[key] || false;
                         return (
                             <div style={eleStyle}>
+                                  <div style={{"display": "flex", "flexDirection": "row","justifyContent": "space-between", "alignItems": "center", "width":"300px"}}>
+                                    <label htmlFor={label}>{label}</label>
+                                    <div style={{"display": "flex", "flexDirection": "row",width:"50px", "justifyContent": "space-between", "alignItems": "center"}}>
+                                    <div style={{backgroundColor:"black", color:"white",margin:"5px", padding:"5px", borderRadius:"10px"}}>
+                                    <DynamicIcon name={"pipette"} size={20}/>
+                                    </div>
+                                    <div style={{backgroundColor:"black", color:"white", padding:"5px",borderRadius:"10px"}}>
+                                    <DynamicIcon name={"braces"} size={20}/>
+                                    </div>
+                                    </div>
+                            </div>
                             <select
                                 name="tables"
                                 aria-label="Select your favorite cuisine..."
                                 required
-                                onChange={(e) => UpdateworkflowData(key, e.target.value)}
+                                onChange={(e) => UpdateworkflowData(key, e.target.value, "hardcoded")}
                                 >
-                                <option selected={!selected} disabled value="">
+                                <option selected={!value_data} disabled value="">
                                     Select a table...
                                 </option>
                                 {globalConfigs.value["tables"].map((table) => (
-                                    <option selected={table === selected} key={table} value={table}>
+                                    <option selected={table === value_data} key={table} value={table}>
                                     {table}
                                     </option>
                                 ))}
@@ -297,7 +311,7 @@ export function WorkflowConfigBlock() {
                             <div style={eleStyle}>
                             <input type="url" name="url" placeholder="Url" aria-label="Base url" 
                             // @ts-ignore
-                            onChange={(e) => UpdateworkflowData(label, e.target.value)}
+                            onChange={(e) => UpdateworkflowData(label, e.target.value, "hardcoded")}
                             />
                             </div>
                             );
@@ -322,16 +336,26 @@ export function WorkflowConfigBlock() {
                     </div>
                         );
                     case "toggle":
-                        let background = workflowdata[key] || false;
                         return (
                             <div style={eleStyle}>
                             <fieldset>
-                            <input checked={background} 
+                            <div style={{"display": "flex", "flexDirection": "row","justifyContent": "space-between", "alignItems": "center", "width":"300px"}}>
+                                    <label htmlFor={label}>{label}</label>
+                                    <div style={{"display": "flex", "flexDirection": "row",width:"50px", "justifyContent": "space-between", "alignItems": "center"}}>
+                                    <div style={{backgroundColor:"black", color:"white",margin:"5px", padding:"5px", borderRadius:"10px"}}>
+                                    <DynamicIcon name={"pipette"} size={20}/>
+                                    </div>
+                                    <div style={{backgroundColor:"black", color:"white", padding:"5px",borderRadius:"10px"}}>
+                                    <DynamicIcon name={"braces"} size={20}/>
+                                    </div>
+                                    </div>
+                            </div>
+                            <input checked={value_data === true} 
                             className="mr-2"
                             type="checkbox"
                              name={label} id={ind} aria-invalid="false"
                             // @ts-ignore
-                            onChange={(e) => UpdateworkflowData(key, e.target.checked)}/>
+                            onChange={(e) => {UpdateworkflowData(key, e.target.checked, "hardcoded")}}/>
                             <label htmlFor={label}>{label}</label>
                             </fieldset>
                             </div>

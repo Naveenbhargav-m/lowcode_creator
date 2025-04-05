@@ -65,7 +65,7 @@ function AddtoElements(data) {
     } else {
         length = Object.keys(forms).length
     };
-    let newdata = {"id": id, "is_change_type": "add", "name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
+    let newdata = {"id": id, "is_change_type": "add", "form_name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
     forms[id] = newdata;
     let existing = formLeftNamesList.peek();
     existing.push({"id":id, "name":name});
@@ -79,7 +79,7 @@ function LoadForms() {
     let tempNamesObj = [];
     for(const key in formsObj) {
         let curform = formsObj[key];
-        let tempdata = {"name": curform["name"], "id": curform["id"]};
+        let tempdata = {"name": curform["form_name"], "id": curform["id"]};
         tempNamesObj.push(tempdata);
     }
     formLeftNamesList.value = [...tempNamesObj];
