@@ -1,4 +1,4 @@
-import { getElementByID, setElementByID } from "../utils/helpers";
+import { signal } from "@preact/signals";
 import {AdvnacedForm} from "./configs_view/advanced_form";
 import FlexConfigurator from "./configs_view/flex_config";
 import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
@@ -45,7 +45,7 @@ export function FlexRightPanel() {
     let activeElement = undefined;
     let isform = false;
     if(eleID !== "form") {
-      temp = getElementByID(currentFormElements, eleID);
+      temp = currentFormElements[eleID];
       console.log("temp:",temp, currentFormElements);
       if(temp === undefined) {
         return <div></div>;
@@ -58,8 +58,9 @@ export function FlexRightPanel() {
     const handleFlexChange = (config) => {
       if(activeElement !== undefined && !isform) {
         activeElement["style"] = {...activeElement["style"],...config};
+        temp.value = {...activeElement};
         let allElement = currentFormElements;
-        allElement = setElementByID(allElement, eleID, activeElement);
+        allElement[eleID] = temp;
         setCurrentElements(allElement);
       }
       if(isform) {
@@ -80,7 +81,7 @@ export function FlexRightPanel() {
       if(activeElement !== undefined && !isform) {
         activeElement["style"] = {...activeElement["style"],...config};
         let allElement = currentFormElements;
-        allElement = setElementByID(allElement, eleID, activeElement);
+        allElement[eleID] = activeElement;
         setCurrentElements(allElement);
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
@@ -134,7 +135,8 @@ export function FlexRightPanel() {
       }
         activeElement = {...activeElement,...data};
         let allElement = currentFormElements;
-        allElement = setElementByID(allElement, eleID, activeElement);
+        temp.value = {...activeElement};
+        allElement[eleID] = temp;
         setCurrentElements(allElement);
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
@@ -201,7 +203,8 @@ export function FlexRightPanel() {
           activeElement["labelStyle"] = {...activeElement["labelStyle"],...data["labelStyle"]};
           activeElement["panelStyle"] = {...activeElement["panelStyle"],...data["panelStyle"]};
           let allElement = currentFormElements;
-          allElement = setElementByID(allElement, eleID, activeElement);
+          temp.value = {...activeElement};
+          allElement[eleID] =  temp;
           setCurrentElements(allElement);
           let myform = forms[currentForm.value];
           if(formBuilderView.value === "smartphone") {

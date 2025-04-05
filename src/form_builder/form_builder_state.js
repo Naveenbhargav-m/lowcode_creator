@@ -1,5 +1,5 @@
 import { effect, signal } from "@preact/signals";
-import { generateUID, getElementByID, setElementByID } from "../utils/helpers";
+import { generateUID, setElementByID } from "../utils/helpers";
 import { fieldsConfigs } from "./fields/field_styles";
 import { GetDataFromAPi } from "../api/api_syncer";
 
@@ -7,13 +7,14 @@ const formStyle = {"display":"flex","flexDirection":"column","minHeight":"200px"
 
 let forms = {};
 let currentForm = signal("");
-let currentFormElements = [];
+let currentFormElements = {};
 const formBuilderView = signal("smartphone");
 let formActiveElement = signal("");
 const activeTab = signal('Basic');
 const formActiveLeftTab = signal("forms");
 let formLeftNamesList = signal([]);
 let formRenderSignal = signal(true);
+
 
 function AddtoElements(data) {
     console.log("add to element called:",data);
@@ -33,22 +34,23 @@ function AddtoElements(data) {
     };
     if(formName !== "screen") {
       elementData["parent"] = formName;
-      let parent = getElementByID(existing,formName).peek();
+      let parent = existing[formName];
       parent["children"].push(newid);
       existing = setElementByID(existing, formName, parent);
-
     }
-    existing.push(signal({...elementData}));
-    currentFormElements = [...existing];
+    let curLength = existing.length + 1;
+    elementData["order"] = curLength;
+    existing[newid] = signal({...elementData});
+    currentFormElements = {...existing};
     formRenderSignal.value = false;
     formRenderSignal.value = true;
     let currForm = forms[currentForm.peek()];
     if(formBuilderView.peek() === "smartphone") {
         let copy = JSON.parse(JSON.stringify(existing));
-        currForm["mobile_children"] = [...copy];
+        currForm["mobile_children"] = {...copy};
     } else {
         let copy = JSON.parse(JSON.stringify(existing)); 
-        currForm["desktop_children"] =  [...copy];
+        currForm["desktop_children"] =  {...copy};
     }
     currForm["_change_type"] = currForm["_change_type"] || "update";
     forms[currentForm.peek()] =  currForm;
@@ -64,9 +66,9 @@ function AddtoElements(data) {
         forms = new Object();
         length = 0;
     } else {
-        length = Object.keys(forms).length
+        length = Object.keys(forms).length;
     };
-    let newdata = {"id": id, "_change_type": "add", "form_name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": [] , "desktop_children": [],"order":length};
+    let newdata = {"id": id, "_change_type": "add", "form_name":name,"mobile_style":{...formStyle},"desktop_style": {...formStyle},"mobile_children": {} , "desktop_children": {},"order":length};
     forms[id] = newdata;
     let existing = formLeftNamesList.peek();
     existing.push({"id":id, "name":name});
@@ -92,17 +94,7 @@ function LoadForms() {
         forms = screensmap;
         formLeftNamesList.value = [...tempnames];
   
-    });
-    // let formsjson = localStorage.getItem("forms");
-    // let formsObj= JSON.parse(formsjson);
-    // let tempNamesObj = [];
-    // for(const key in formsObj) {
-    //     let curform = formsObj[key];
-    //     let tempdata = {"name": curform["form_name"], "id": curform["id"]};
-    //     tempNamesObj.push(tempdata);
-    // }
-    // formLeftNamesList.value = [...tempNamesObj];
-    // forms = formsObj;    
+    });  
 }
 
 
@@ -163,11 +155,11 @@ function SwapChildrenBasedonView(formView) {
     curForm["_change_type"] = curForm["_change_type"] || "update";
     forms[currentForm.value] = curForm;
     localStorage.setItem("forms", JSON.stringify(forms));
-    let finalElementSignals = [];
+    let finalElementSignals = {};
     for(var key in finalElements) {
-        finalElementSignals.push(signal({...finalElements[key]}));
+        finalElementSignals[key] = signal({...finalElements[key]});
     }
-    currentFormElements = [...finalElementSignals];
+    currentFormElements = {...finalElementSignals};
 }
 function setCurrentForm(id) {
     let myform = forms[id];
@@ -187,13 +179,40 @@ function setCurrentForm(id) {
         finalElementSignals.push(signal({...temp[key]}));
     }
     formRenderSignal.value = id;
-    currentFormElements = [...finalElementSignals];
+    currentFormElements = {...finalElementSignals};
 }
 function setCurrentElements(newElements) {
-    currentFormElements = [...newElements];
+    currentFormElements = {...newElements};
 }
 
+
+function DeleteFormElement(id) {
+    let element = currentFormElements[id];
+    if(element === undefined) {
+        return;
+    }
+    delete currentFormElements[id];
+    let keys = Object.keys(currentFormElements);
+    for(var i=0;i<keys.length;i++) {
+        let ele = currentFormElements[keys[i]];
+        let children = ele.value["children"];
+        if(children === undefined) {
+            continue
+        }
+        let newchildren = [];
+        for(var j=0;j<children.length;j++) {
+            if(children[j] === id) {
+                continue;
+            }
+            newchildren.push(id);
+        }
+        ele.value["children"] = newchildren;
+        currentFormElements[keys[i]] = ele;
+    }
+    let key = formBuilderView.value === "smartphone" ? "mobile_children" : "desktop_children";
+    forms[currentForm.value][key] = JSON.parse(JSON.stringify(currentFormElements));
+}
 export {formBuilderView, forms, 
     currentForm, currentFormElements, formActiveElement ,
     activeTab,formActiveLeftTab,formLeftNamesList, formRenderSignal, LoadForms, CreateNewForm,
-    AddtoElements, SwapChildrenBasedonView, setCurrentForm, setCurrentElements};
+    AddtoElements, SwapChildrenBasedonView, setCurrentForm, setCurrentElements, DeleteFormElement};

@@ -1,8 +1,9 @@
 import { useState } from "preact/hooks";
+import { formActiveElement } from "../../form_builder/form_builder_state";
 
 // The withSelectable HOC
 export function SelectableComponent({ onRemove, onChick, id, isSelected ,children }) {
-      console.log("id:",id);      
+      console.log("id:",id, "is Selected", isSelected, "active form EElement:",formActiveElement.value);      
       const handleClick = (e) => {
         onChick(e, id);
       };
