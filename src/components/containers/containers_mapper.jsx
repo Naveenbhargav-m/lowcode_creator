@@ -1,6 +1,6 @@
 import { renderPrimitiveElement } from "../primitives/primitiveMapper";
 import { Card, GridView, Row, Column, Container, ListView, ScrollArea, Carousel } from "./container_components";
-import { activeElement, activeScreen, screenElements, screens, screenViewKey } from "../../screen_builder/screen_state";
+import { activeElement, activeScreen, DeleteScreenElement, screenElements, screens, screenViewKey } from "../../screen_builder/screen_state";
 import { Drop } from "../custom/Drop";
 import { Drawer, HoverModal, PopupModal } from "../model_containers/model_components";
 import { variableKeys, variableMap } from '../../states/global_state';
@@ -8,39 +8,73 @@ import { ActionExecutor, FunctionExecutor } from '../../states/common_actions';
 import { effect, signal } from '@preact/signals';
 import { renderTemplate } from "../templates/template_mapper";
 import { ReactSortable } from "react-sortablejs";
+import { activeTamplate, activeTemplateElements, templateDesignView, templates } from "../../template_builder/templates_state";
+import { SelectableComponent } from "../custom/selectAble";
 
 
+function UpdateScreenElementChildren(newchildren, elementID) {
+  let element = screenElements[elementID];
+  if(element === undefined) {
+    return;
+  }
+  let elementVal = element.value;
+  if(elementVal === undefined) {
+    return;
+  }
+  let children = elementVal["children"];
+  let childrenSorted = [];
+  for(var i=0;i<newchildren.length;i++) {
+    let cur = newchildren[i];
+    let id = cur["id"];
+    for(var j=0;j<children.length;j++) {
+      if(children[j] === id) {
+        childrenSorted.push(children[j]);
+        break;
+      }
+    }
+  }
+
+  let curScreen = activeScreen.value;
+  elementVal["children"] = childrenSorted;
+  element.value = {...elementVal};
+  screenElements[elementID] = element;
+  screens[curScreen][screenViewKey] = screenElements;
+  screens[curScreen]["_change_type"] = "update";
+}
+
+function UpdateTemplateElementChildren(newchildren , elementID) {
+  let element = activeTemplateElements[elementID];
+  if(element === undefined) {
+    return;
+  }
+  let elementVal = element.value;
+  if(elementVal === undefined) {
+    return;
+  }
+  let children = elementVal["children"];
+  let childrenSorted = [];
+  for(var i=0;i<newchildren.length;i++) {
+    let cur = newchildren[i];
+    let id = cur["id"];
+    for(var j=0;j<children.length;j++) {
+      if(children[j] === id) {
+        childrenSorted.push(children[j]);
+        break;
+      }
+    }
+  }
+
+  let curScreen = activeTamplate.value;
+  elementVal["children"] = childrenSorted;
+  element.value = {...elementVal};
+  activeTemplateElements[elementID] = element;
+  let key = templateDesignView.value === "smartphone" ? "mobile_children" : "desktop_children";
+  templates[curScreen][key] = activeTemplateElements;
+  templates[curScreen]["_change_type"] = "update";
+}
 
 function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementID }) {
-  function UpdateScreenElementChildren(newchildren, elementID) {
-      let element = screenElements[elementID];
-      if(element === undefined) {
-        return;
-      }
-      let elementVal = element.value;
-      if(elementVal === undefined) {
-        return;
-      }
-      let children = elementVal["children"];
-      let childrenSorted = [];
-      for(var i=0;i<newchildren.length;i++) {
-        let cur = newchildren[i];
-        let id = cur["id"];
-        for(var j=0;j<children.length;j++) {
-          if(children[j] === id) {
-            childrenSorted.push(children[j]);
-            break;
-          }
-        }
-      }
-
-      let curScreen = activeScreen.value;
-      elementVal["children"] = childrenSorted;
-      element.value = {...elementVal};
-      screenElements[elementID] = element;
-      screens[curScreen][screenViewKey] = screenElements;
-      screens[curScreen]["_change_type"] = "update";
-  }
+  
   return (
     <ReactSortable
       list={childrenElements}
@@ -52,6 +86,12 @@ function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementI
      {
       childrenElements.map((child, ind) => {
         return(
+          <SelectableComponent
+            id={child.id}
+            onRemove={(id)=> {DeleteScreenElement(child["id"])}}
+            onChick={(e,id)=> {}}
+            isSelected={activeElement.value === child.id}
+          >
           <div onClick={() => { activeElement.value = child.id  }}>
           {(child.type === "container" || child.type === "modal") ? (
             <Drop onDrop={(data) => dropCallBack(data, child.id)} dropElementData={{ element: child.id }}>
@@ -60,6 +100,7 @@ function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementI
           ) : child.type === "template"  ? (renderTemplate(child, dropCallBack, activeSignal)) : 
           renderPrimitiveElement(child, activeSignal)}
         </div>
+        </SelectableComponent>
         );
       })
      }

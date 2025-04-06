@@ -45,7 +45,9 @@ function AppList({ apps }) {
     const handleSubmit = (e) => {
       e.preventDefault(); 
       if (appName.trim()) {
-        const newApp = { created_at: new Date().toISOString(), name: appName , "gen_name":generateRandomName(appName) };
+        let lowerName = appName.toLowerCase();
+        let genname = generateRandomName(lowerName).toLowerCase();
+        const newApp = { created_at: new Date().toISOString(), name: lowerName , "gen_name": genname};
         InsertAppToAPI(newApp);
         CreateDatabase(newApp["gen_name"]);
         const updatedApps = [...apps.value, newApp];

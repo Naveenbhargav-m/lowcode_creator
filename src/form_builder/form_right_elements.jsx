@@ -1,8 +1,9 @@
-import { getElementByID, setElementByID } from "../utils/helpers";
+import { signal } from "@preact/signals";
 import {AdvnacedForm} from "./configs_view/advanced_form";
 import FlexConfigurator from "./configs_view/flex_config";
 import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
 import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms, setCurrentElements } from "./form_builder_state";
+import { generateUID } from "../utils/helpers";
 
 
 
@@ -45,7 +46,7 @@ export function FlexRightPanel() {
     let activeElement = undefined;
     let isform = false;
     if(eleID !== "form") {
-      temp = getElementByID(currentFormElements, eleID);
+      temp = currentFormElements[eleID];
       console.log("temp:",temp, currentFormElements);
       if(temp === undefined) {
         return <div></div>;
@@ -58,8 +59,9 @@ export function FlexRightPanel() {
     const handleFlexChange = (config) => {
       if(activeElement !== undefined && !isform) {
         activeElement["style"] = {...activeElement["style"],...config};
+        temp.value = {...activeElement};
         let allElement = currentFormElements;
-        allElement = setElementByID(allElement, eleID, activeElement);
+        allElement[eleID] = temp;
         setCurrentElements(allElement);
       }
       if(isform) {
@@ -72,15 +74,14 @@ export function FlexRightPanel() {
         forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
 
       }
-      formRenderSignal.value = false;
-      formRenderSignal.value = true;
+      formRenderSignal.value = generateUID();
     };
   
     const handleFlexSubmit = (config) => {
       if(activeElement !== undefined && !isform) {
         activeElement["style"] = {...activeElement["style"],...config};
         let allElement = currentFormElements;
-        allElement = setElementByID(allElement, eleID, activeElement);
+        allElement[eleID] = activeElement;
         setCurrentElements(allElement);
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
@@ -101,8 +102,7 @@ export function FlexRightPanel() {
         forms[currentForm.value][key] = {...config};
         forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
       }
-      formRenderSignal.value = false;
-      formRenderSignal.value = true;
+      formRenderSignal.value = generateUID();
       localStorage.setItem("forms",JSON.stringify(forms));
     };
     const onAdvancedFlexSubmit = (data) => {
@@ -134,7 +134,8 @@ export function FlexRightPanel() {
       }
         activeElement = {...activeElement,...data};
         let allElement = currentFormElements;
-        allElement = setElementByID(allElement, eleID, activeElement);
+        temp.value = {...activeElement};
+        allElement[eleID] = temp;
         setCurrentElements(allElement);
         let myform = forms[currentForm.value];
         if(formBuilderView.value === "smartphone") {
@@ -156,8 +157,7 @@ export function FlexRightPanel() {
         forms[currentForm.value][key] = JSON.parse(data["style"]);
         forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
       }
-      formRenderSignal.value = false;
-      formRenderSignal.value = true;
+      formRenderSignal.value = generateUID();
       localStorage.setItem("forms",JSON.stringify(forms));
     }
   
@@ -201,7 +201,8 @@ export function FlexRightPanel() {
           activeElement["labelStyle"] = {...activeElement["labelStyle"],...data["labelStyle"]};
           activeElement["panelStyle"] = {...activeElement["panelStyle"],...data["panelStyle"]};
           let allElement = currentFormElements;
-          allElement = setElementByID(allElement, eleID, activeElement);
+          temp.value = {...activeElement};
+          allElement[eleID] =  temp;
           setCurrentElements(allElement);
           let myform = forms[currentForm.value];
           if(formBuilderView.value === "smartphone") {
@@ -214,8 +215,7 @@ export function FlexRightPanel() {
   
           }
           forms[currentForm.value] = myform;
-          formRenderSignal.value = false;
-          formRenderSignal.value = true;
+          formRenderSignal.value = generateUID();
           localStorage.setItem("forms",JSON.stringify(forms));
         }
       }
