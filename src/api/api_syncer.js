@@ -98,7 +98,7 @@ function ProcessDataToWrite(tableName, data) {
     let tableKeysMap = {
         "_screens": ProcessScreenDataToWrite,
         "_forms": ProcessFormsDataToWrite,
-        "_global_states": { "state_name": "text", "default_value": "any", "screen_name": "text", "screen_id": "any" },
+        "_global_states": ProcessSignalsToWrite,
         "_templates": { "template_name": "text", "configs": "json", "tags": "text[]" },
         "_components": { "component_name": "text", "configs": "json" },
         "_themes": { "theme_name": "text", "dark_theme": "json", "light_theme": "json", "is_default": "bool" },
@@ -113,26 +113,11 @@ function ProcessDataToWrite(tableName, data) {
     return respData;
 }
 
-
-function ProcessDataToRead(tableName, data) {
-    let tableKeysMap = {
-        "_screens": ProcessScreenDataToRead,
-        "_forms": ProcessFormsDataToWrite,
-        "_global_states": { "state_name": "text", "default_value": "any", "screen_name": "text", "screen_id": "any" },
-        "_templates": { "template_name": "text", "configs": "json", "tags": "text[]" },
-        "_components": { "component_name": "text", "configs": "json" },
-        "_themes": { "theme_name": "text", "dark_theme": "json", "light_theme": "json", "is_default": "bool" },
-        "_tables": { "tables_data": "json" },
-        "_views": { "views_data": "json" },
-        "_workflows": { "nodes": "json", "edges": "json", "flow_data": "json", "name": "text" },
-        "_triggers": { "triggers_data": "json" }
-    };    
-    let respData = [];
-    let tabelFunc = tableKeysMap[tableName];
-    respData = tabelFunc(data);
-    return respData;
+function ProcessSignalsToWrite(variables) {
+    let signals = JSON.stringify(variables["signals"]);
+    let body = [{"signals": signals, "id": variables["id"]}];
+    return body;
 }
-
 
 function ProcessScreenDataToWrite(screens) {
     let resp = [];

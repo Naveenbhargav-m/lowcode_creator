@@ -1,6 +1,7 @@
 import { effect, signal } from "@preact/signals";
 import { SetGlobalFieldsToAPI } from "../api/api";
 import { APIManager } from "../api/api_manager";
+import { GetDataFromAPi, SyncData } from "../api/api_syncer";
 
 let sideBarEnable = signal(true);
 const PrestDBaseUrl = "http://localhost:8000";
@@ -15,37 +16,46 @@ let globalConfigs = signal({
 
 let ApiClient = new APIManager(CreatorBackendUrl, 1000);
 let PrestClient = new APIManager(PrestDBaseUrl, 1000);
-// Retrieve stored variables from localStorage
-let localVars = localStorage.getItem("global_var");
-let localVarsmap;
 
-try {
-  localVarsmap = localVars ? JSON.parse(localVars) : {};
-} catch (error) {
-  localVarsmap = {};
-}
-
+let globalSignalsID = 1;
 const variableMap = {};
-for (const [key, value] of Object.entries(localVarsmap)) {
-  variableMap[key] = signal(value);
-}
+// for (const [key, value] of Object.entries(localVarsmap)) {
+//   variableMap[key] = signal(value);
+// }
 // Initialize signals
 const newVariableKey = signal('');
 const variableKeys = signal(Object.keys(variableMap));
 
+//Add variable will add the new variable to the global signals.
 const addVariable = () => {
     const key = newVariableKey.value.trim();
     if (key && !(key in variableMap)) {
       variableMap[key] = signal({});
-      console.log("in if condition global map", variableMap);
       variableKeys.value = Object.keys(variableMap);
       newVariableKey.value = ''; // Reset the input field
     }
-    localStorage.setItem("global_var", JSON.stringify(variableMap));
-    SetGlobalFieldsToAPI({"states":JSON.stringify(variableMap), "screen_id":1,"screen_name":"Sample Screen"},1);
+    SyncData("_global_states", [{"signals": variableMap, "id": globalSignalsID, "_change_type": "update"}]);
 };
 
+function LoadSignals() {
+  GetDataFromAPi("_global_states").then((value) => {
+    if(value === undefined) {
+      return;
+    }
+    let globalElement = value[0];
+    let id = globalElement["id"];
+    let signals = globalElement["signals"];
+    let keys = Object.keys(signals);
+    for(var i=0;i<keys.length;i++) {
+      variableMap[keys[i]] = signal({});
+    }
+    variableKeys.value = [...keys];
+    globalSignalsID = id;
+  });
+}
 
+// the below code part is regards the themes etc.
+// setting default theme to the document and other stuff.
 const DefaultThemeID = signal("");
 const DefaultMode = signal("light");
 const DefaultTheme = signal({});
@@ -75,13 +85,16 @@ effect(() => {
   previousKeys = new Set(newKeys);
 });
 
+
+
+
 // Export variables and functions
 export {
     sideBarEnable, 
     addVariable, variableMap, variableKeys, newVariableKey, showFormPopup,
     DefaultMode, DefaultTheme, DefaultThemeID,
     PrestDBaseUrl, CreatorBackendUrl, AppID, globalConfigs,
-    PrestClient, ApiClient
+    PrestClient, ApiClient, LoadSignals
 };
 
 
