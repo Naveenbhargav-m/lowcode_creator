@@ -13,7 +13,7 @@ let formActiveElement = signal("");
 const activeTab = signal('Basic');
 const formActiveLeftTab = signal("forms");
 let formLeftNamesList = signal([]);
-let formRenderSignal = signal(true);
+let formRenderSignal = signal("");
 
 
 function AddtoElements(data) {
@@ -42,8 +42,7 @@ function AddtoElements(data) {
     elementData["order"] = curLength;
     existing[newid] = signal({...elementData});
     currentFormElements = {...existing};
-    formRenderSignal.value = false;
-    formRenderSignal.value = true;
+    formRenderSignal.value = generateUID();
     let currForm = forms[currentForm.peek()];
     if(formBuilderView.peek() === "smartphone") {
         let copy = JSON.parse(JSON.stringify(existing));
@@ -174,9 +173,9 @@ function setCurrentForm(id) {
 
     }
     let temp = JSON.parse(JSON.stringify(children));
-    let finalElementSignals = [];
+    let finalElementSignals = {};
     for(var key in temp) {
-        finalElementSignals.push(signal({...temp[key]}));
+        finalElementSignals[key] = signal({...temp[key]});
     }
     formRenderSignal.value = id;
     currentFormElements = {...finalElementSignals};
@@ -209,6 +208,8 @@ function DeleteFormElement(id) {
         ele.value["children"] = newchildren;
         currentFormElements[keys[i]] = ele;
     }
+    formRenderSignal.value = generateUID();
+    forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
     let key = formBuilderView.value === "smartphone" ? "mobile_children" : "desktop_children";
     forms[currentForm.value][key] = JSON.parse(JSON.stringify(currentFormElements));
 }

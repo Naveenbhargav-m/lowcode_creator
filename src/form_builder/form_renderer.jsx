@@ -1,7 +1,7 @@
 import { useComputed, useSignal } from "@preact/signals";
 import { Field } from "./fields/chakra_fields";
 import { Column, PanelField, Row } from "./fields/fields";
-import { AddtoElements, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms } from "./form_builder_state";
+import { AddtoElements, currentForm, currentFormElements, DeleteFormElement, formActiveElement, formBuilderView, formRenderSignal, forms } from "./form_builder_state";
 import { useEffect } from "preact/hooks";
 import { ReactSortable } from "react-sortablejs";
 import { SelectableComponent } from "../components/custom/selectAble";
@@ -55,7 +55,7 @@ export function RenderRoworColumnChildren(children,values = {},
       useEffect(() => {
           console.log("rerendering:", elementsValue);
           const elementsArray = Object.values(elementsValue);
-          const filteredItems = elementsArray.filter((item) => item.value.parent === "screen");
+          const filteredItems = areChildren ? elementsArray  :elementsArray.filter((item) => item.value.parent === "screen");
           const sortedItems = filteredItems.sort((a, b) => {
                                 const orderA = a.value.order ?? Infinity;
                                 const orderB = b.value.order ?? Infinity;
@@ -99,6 +99,7 @@ export function RenderRoworColumnChildren(children,values = {},
       console.log("set sorted items before updation:", updatedItems);
       let key = formBuilderView.value === "smartphone" ? "mobile_children" : "desktop_children";
       forms[currentForm.value][key] = JSON.parse(JSON.stringify(currentFormElements));
+      forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
       items.value = [...updatedItems];
     }
 
@@ -150,7 +151,7 @@ export function RenderRoworColumnChildren(children,values = {},
           return (
             <SelectableComponent 
             onChick={(e,id) => {e.stopPropagation()}}
-            onRemove={(e,id) => {}}
+            onRemove={(e,id) => {DeleteFormElement(id)}}
             id={value["id"]}
             isSelected={formActiveElement.value  === value["id"]}
             >

@@ -3,6 +3,7 @@ import { activeConfigTab, activeElement, activeScreen, screenElementAdded, scree
 import {AdvnacedForm} from "../form_builder/configs_view/advanced_form";
 import { FlexConfigTab } from "../form_builder/form_right_elements";
 import FlexConfigurator from "../form_builder/configs_view/flex_config";
+import { generateUID } from "../utils/helpers";
 const myconfig = signal({});
 const basicConfig = signal({});
 
@@ -78,8 +79,7 @@ function ScreenRightPanel() {
 
         }
         localStorage.setItem("screen_config", JSON.stringify(screens));
-        screenElementAdded.value = false;
-        screenElementAdded.value = true;
+        screenElementAdded.value = generateUID();
     }
 
     const updateStyleback = (data) => {
@@ -107,8 +107,7 @@ function ScreenRightPanel() {
             screens[activeScreen.value][key] = {...data};
             screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
         }
-        screenElementAdded.value = false;
-        screenElementAdded.value = true;
+        screenElementAdded.value = generateUID();
         localStorage.setItem("screen_config", JSON.stringify(screens));
     }
     return (

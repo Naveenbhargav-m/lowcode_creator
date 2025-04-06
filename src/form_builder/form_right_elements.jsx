@@ -3,6 +3,7 @@ import {AdvnacedForm} from "./configs_view/advanced_form";
 import FlexConfigurator from "./configs_view/flex_config";
 import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
 import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms, setCurrentElements } from "./form_builder_state";
+import { generateUID } from "../utils/helpers";
 
 
 
@@ -73,8 +74,7 @@ export function FlexRightPanel() {
         forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
 
       }
-      formRenderSignal.value = false;
-      formRenderSignal.value = true;
+      formRenderSignal.value = generateUID();
     };
   
     const handleFlexSubmit = (config) => {
@@ -102,8 +102,7 @@ export function FlexRightPanel() {
         forms[currentForm.value][key] = {...config};
         forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
       }
-      formRenderSignal.value = false;
-      formRenderSignal.value = true;
+      formRenderSignal.value = generateUID();
       localStorage.setItem("forms",JSON.stringify(forms));
     };
     const onAdvancedFlexSubmit = (data) => {
@@ -158,8 +157,7 @@ export function FlexRightPanel() {
         forms[currentForm.value][key] = JSON.parse(data["style"]);
         forms[currentForm.value]["_change_type"] = forms[currentForm.value]["_change_type"] || "update";
       }
-      formRenderSignal.value = false;
-      formRenderSignal.value = true;
+      formRenderSignal.value = generateUID();
       localStorage.setItem("forms",JSON.stringify(forms));
     }
   
@@ -217,8 +215,7 @@ export function FlexRightPanel() {
   
           }
           forms[currentForm.value] = myform;
-          formRenderSignal.value = false;
-          formRenderSignal.value = true;
+          formRenderSignal.value = generateUID();
           localStorage.setItem("forms",JSON.stringify(forms));
         }
       }
