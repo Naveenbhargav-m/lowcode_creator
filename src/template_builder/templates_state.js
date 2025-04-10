@@ -2,9 +2,8 @@ import { signal } from "@preact/signals";
 import { generateUID } from "../utils/helpers";
 import { PrimitivesStylesMap } from "../components/primitives/primitives_base_styles";
 import { ContainersStylesMap } from "../components/containers/containers_bse_styles";
-
-
-const templates = {};
+import { GetDataFromAPi } from "../api/api_syncer";
+let templates = {};
 let templateNamesList = signal([]);
 let templatesPagesSignal = signal("components");
 let activeTamplate = signal("");
@@ -14,21 +13,29 @@ let activeTemplateElement = signal("");
 let templateRightPanelActiveTab = signal("Basic");
 let isTemplateChanged = signal("");
 function LoadTemplates( ) {
-    let templatesStr = localStorage.getItem("templates");
-    let templatesmap = JSON.parse(templatesStr);
-    let names = [];
-    if(templatesmap === undefined || templatesmap === null) {
-        return;
-    }
-    Object.keys(templatesmap).map((key) => {
-        templates[key] ={...templatesmap[key]};
-        let name = templatesmap[key]["name"];
-        let id = templatesmap[key]["id"];
-        let order = templatesmap[key]["order"]
-        names.push({"name":name, "id": id, "order":order})
-    });
-    templateNamesList.value = names;
+    GetDataFromAPi("_templates").then((myscreens) => {
+      console.log("my templates:", myscreens);
 
+      if (!myscreens || myscreens.length === 0) {
+          console.log("my screens is null:", myscreens);
+          templates = {};
+          return;
+      }
+      let tempnames = [];
+      let screensmap = {};
+
+      for (let i = 0; i < myscreens.length; i++) {
+          let curScreen = myscreens[i];
+          screensmap[curScreen["id"]] = { ...curScreen["configs"],"id": curScreen["id"] };
+          tempnames.push({ "name": curScreen["screen_name"],"id": curScreen["id"], "order": curScreen["configs"]["order"]});
+      }
+
+      templateNamesList.value = [...tempnames];
+
+      templates = screensmap;
+  }).catch(error => {
+      console.error("Error loading screens:", error);
+  });
 }
 
 function SetTemplateActiveElements() {
@@ -144,15 +151,9 @@ function HandleTemplateDrop(data, parentId = null) {
   isTemplateChanged.value = "";
   isTemplateChanged.value = activeTemp;
   localStorage.setItem("templates", JSON.stringify(templates));
-//   let screenData = {
-//     "configs":JSON.stringify(screenElements)
-//   };
-  // SetScreenToAPI(screenData,1);
 }
-LoadTemplates();
 export {
-    templates,  CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements,
-    templateNamesList, templatesPagesSignal, templateRightPanelActiveTab,
-    activeTamplate, templateDesignView, activeTemplateElements, 
-    isTemplateChanged, activeTemplateElement
+    templates,templateNamesList, templatesPagesSignal, templateRightPanelActiveTab,
+    activeTamplate, templateDesignView, activeTemplateElements, isTemplateChanged, 
+    activeTemplateElement, LoadTemplates,CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements,
 };

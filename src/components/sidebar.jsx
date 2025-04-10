@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
-import { Home, Settings, Database, User, BookText, Frame, Workflow } from 'lucide-react';
+import { Home, Settings, Database, User, BookText, Frame, Workflow, Braces } from 'lucide-react';
 const Sidebar = () => {
   const [expanded, setExpanded] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -23,17 +23,18 @@ const Sidebar = () => {
     setExpanded(false);
   };
 
-  let options = ["Home", "Containers", "Forms", "Screens", "Workflows","Users", "Settings"];
+  let options = ["Home", "Containers", "Queries","Forms", "Screens", "Workflows","Users", "Settings"];
   let icons = [
       <Home className="h-6 w-6" />,
       <Database className="h-6 w-6"/>, 
+      <Braces className="h-6 w-6"  />,
       <BookText className="h-6 w-6"/>,
       <Frame className="h-6 w-6"/>,
       <Workflow className="h-6 w-6"/>,
       <User className="h-6 w-6" />, 
-      <Settings className="h-6 w-6" />
+      <Settings className="h-6 w-6" />,
   ];
-  let values = ["home", "containers", "forms", "screens", "workflows", "users", "settings"];
+  let values = ["home", "containers", "queries","forms", "screens", "workflows", "users", "settings"];
 
   return (
     <div className="flex min-h-screen h-full">
