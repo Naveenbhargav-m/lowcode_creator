@@ -9,7 +9,7 @@ const currentThemes = [signal(""), signal("")];
 function AddTheme(data) {
     let name = data["name"];
     let id = generateUID();
-    let newTheme = {"id":id, "_change_type": "add","name": name, "light": {}, "dark":{}};
+    let newTheme = {"id":id, "_change_type": "add","theme_name": name, "light": {}, "dark":{}};
     themes[id] = newTheme;
     ActiveTheme.value  = id;
     localStorage.setItem("themes", JSON.stringify(themes));

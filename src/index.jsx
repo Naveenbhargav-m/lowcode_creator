@@ -17,6 +17,8 @@ import { ThemeCreator } from "./theme_creator/theme_config_area";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import {TestRV} from "./components/general/recordset_list";
 import { AppHomeScreen } from "./home/app_home";
+import QueryCreator from "./query_builder/query_builder";
+import { QueryBuilderPage } from "./query_builder/query_builder_page";
 
 export function App() {
   return (
@@ -40,7 +42,8 @@ export function App() {
       <Route path="/users" component={UsersPage}/>
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
-      <Route path="/test_comp" component={TestRV} />
+      <Route path="/test_comp" component={QueryCreator} />
+      <Route path="/queries" component={QueryBuilderPage} />
       {/* <Route path="/preview" component={PreviewArea} /> */}
       <Route path="/test" component={ThemeCreator} />
       <Route default component={() => <div>Not Found</div>} />

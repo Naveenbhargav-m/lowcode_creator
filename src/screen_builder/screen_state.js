@@ -71,7 +71,6 @@ let screenViewKey = "mobile_children";
 
 
 function LoadScreens() {
-  console.log("called LoadScreens");
 
   GetDataFromAPi("_screens").then((myscreens) => {
       console.log("my screens:", myscreens);

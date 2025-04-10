@@ -1,7 +1,8 @@
 
 import DynamicIcon from '../components/custom/dynamic_icon';
 import { activeTab} from './screen_state';
-import { variableKeys , newVariableKey , addVariable } from '../states/global_state';
+import { variableKeys , newVariableKey , addVariable, LoadSignals } from '../states/global_state';
+import { useEffect } from 'preact/hooks';
 
 const TabComponent = () => {
 
@@ -87,6 +88,10 @@ const VariableCreator = () => {
     borderBottom: '1px solid #ddd',
     color:"#000000"
   };
+
+  useEffect(()=> {
+    LoadSignals();
+  },[]);
 
   return (
     <div style={containerStyle}>
