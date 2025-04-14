@@ -1,13 +1,7 @@
-import { fieldsGlobalSignals, formsGlobalSignals, screensGlobalSignals, tablesGlobalSignals, userGlobalData } from "../states/common_repo";
+import { fieldsGlobalSignals } from "../states/common_repo";
 import { Plus, Check } from 'lucide-react';
 import { useState } from "preact/hooks";
-export function GlobalSignalsPopup({ isOpen, onChangeCallback, closeCallback }) {
-  let tables = tablesGlobalSignals.value;
-  let fields = fieldsGlobalSignals.value;
-  let userData = userGlobalData.value;
-  let forms = formsGlobalSignals.value;
-  let screens = screensGlobalSignals.value;
-  
+export function GlobalSignalsPopup({ isOpen, fields , closeCallback }) {
   const [pickedItems, setPickedItems] = useState([]);
   
   const togglePickItem = (path) => {
@@ -26,14 +20,7 @@ export function GlobalSignalsPopup({ isOpen, onChangeCallback, closeCallback }) 
     <dialog open={isOpen}>
       <div className="bg-white flex flex-col justify-between items-center" style={{height:"60vh", width:"80vw"}}>
         <div className="scrollable-div flex flex-col items-center">
-          <div className="p-5 flex flex-col items-center">
-            <PickableAccordion 
-              title="tables" 
-              data={tables}
-              pickedItems={pickedItems} 
-              togglePickItem={togglePickItem}
-            />
-            
+          <div className="p-5 flex flex-col items-center"> 
             {Object.keys(fields).map((key, ind) => {
               let innerfields = fields[key];
               let fieldList = [];
