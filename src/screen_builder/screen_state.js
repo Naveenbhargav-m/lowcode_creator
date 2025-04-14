@@ -217,6 +217,10 @@ function DeleteScreenElement(id) {
       currentElement["children"] = newChildren;
       screenElements[keys[i]].value = currentElement;
     } 
+    if(children.length > 0) {
+      currentElement["children"] = newChildren;
+      screenElements[keys[i]].value = currentElement;
+    }
   }
   screens[activeScreen.value][screenViewKey] = JSON.parse(JSON.stringify(screenElements));
   screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";

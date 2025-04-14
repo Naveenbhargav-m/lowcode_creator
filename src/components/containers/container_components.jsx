@@ -25,7 +25,7 @@ const ContainerTemplate = ({ config, value, action, children }) => {
   return (
     <div
       style={containerConfig.value.style}
-      onClick={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onClick"); }}
+      onClick={(e) => { ActionExecutor(containerConfig.value.id, "onClick"); }}
       onDblClick={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onDoubleClick"); }}
       onMouseEnter={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onHoverEnter"); }}
       onMouseLeave={(e) => { e.stopPropagation(); ActionExecutor(containerConfig.value.id, "onHoverLeave"); }}
