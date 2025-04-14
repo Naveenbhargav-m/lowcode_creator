@@ -102,9 +102,9 @@ function HandleTemplateDrop(data, parentId = null) {
   let type = data.data.type;
   let title = data.data.value;
   if(type === "primitive") {
-    styleObj = PrimitivesStylesMap[title];
+    styleObj = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
   } else if(type === "container") {
-    styleObj = ContainersStylesMap[title];
+    styleObj = JSON.parse(JSON.stringify(ContainersStylesMap[title]));
   }
     const newItem = {
     id: i,
@@ -152,8 +152,34 @@ function HandleTemplateDrop(data, parentId = null) {
   isTemplateChanged.value = activeTemp;
   localStorage.setItem("templates", JSON.stringify(templates));
 }
+
+
+function DeleteTemplateElements(id) {
+  console.log("existing:",activeTemplateElements[id]);
+  delete activeTemplateElements[id];
+  let keys = Object.keys(activeTemplateElements);
+  for(var i=0;i<keys.length;i++) {
+    let currentElement = activeTemplateElements[keys[i]].value;
+    let children = currentElement["children"];
+    let newChildren = [];
+    for(var j=0;j<children.length;j++) {
+      if(children[j] === id) {
+        continue
+      }
+      newChildren.push(children[j]);
+    }
+    if(newChildren.length > 0) {
+      currentElement["children"] = newChildren;
+      activeTemplateElements[keys[i]].value = currentElement;
+    } 
+  }
+  templates[activeTamplate.value][templateDesignView.value] = JSON.parse(JSON.stringify(activeTemplateElements));
+  templates[activeTamplate.value]["_change_type"] = templates[activeTamplate.value]["_change_type"] || "update";
+  isTemplateChanged.value = generateUID();
+  isTemplateChanged.value = generateUID();
+}
 export {
     templates,templateNamesList, templatesPagesSignal, templateRightPanelActiveTab,
     activeTamplate, templateDesignView, activeTemplateElements, isTemplateChanged, 
-    activeTemplateElement, LoadTemplates,CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements,
+    activeTemplateElement, LoadTemplates,CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements, DeleteTemplateElements
 };

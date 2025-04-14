@@ -30,14 +30,7 @@ export function CreateQueryBar() {
 }
 
 
-export function QueriesList() {
-    return (
-        <div>
-        <CreateQueryBar />
-        <ScreensList elementsList={QueryNames.value} signal={ActiveQuery} callBack={(newquery) => { console.log("new query:",newquery);}}/>
-        </div>
-    );
-}
+
 
 
 export function TablesView({prefilData}) {
@@ -549,6 +542,7 @@ function SelectBlock() {
               <select 
                 className="bg-gray-800 text-white text-xs rounded px-1 mr-1"
                 value={item.aggregation}
+                // @ts-ignore
                 onChange={(e) => changeAggregation(item.fieldName, e.target.value)}
               >
                 {aggregationOptions.map(agg => (

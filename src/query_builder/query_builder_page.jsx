@@ -1,4 +1,5 @@
-import { QueriesList, TablesView } from "./components";
+import { TablesView } from "./components";
+import { QueriesList } from "./queries_left_list";
 import { CreateQueryBlock } from "./query_functions";
 
 function QueryBuilderPage() {

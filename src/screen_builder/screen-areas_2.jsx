@@ -17,13 +17,13 @@ import { generateUID } from "../utils/helpers";
 
 
 
-function RenderElement(item , dropCallBack, activeSignal) {
+function RenderElement(item , dropCallBack, activeSignal, viewType) {
   // let style = {"padding": "10px","margin": "10px" ,"backgroundColor": "blue", height:"50px", width:"100px"};
   // return <div style={{...style}}> </div>;
   if (item.type === "container" || item.type === "modal") {
     return (
       <Drop onDrop={(data) => dropCallBack(data, item.id)} dropElementData={{ element: item.id }}>
-        {renderContainer(item, dropCallBack)}
+        {renderContainer(item, dropCallBack,viewType)}
       </Drop>
     );
   } else if (item.type === "template") {
@@ -154,7 +154,7 @@ function MobileView() {
                           id={item.value["id"]}
                           isSelected={activeElement.value === item.value.id}
                           >
-                      {RenderElement(item.peek(), handleDrop, activeElement)}
+                      {RenderElement(item.peek(), handleDrop, activeElement, "screen")}
                       </SelectableComponent>
                       </div>);
                   }
@@ -199,7 +199,7 @@ function DesktopView() {
         <div style={{...style}}>
         {screenElementAdded.value.length > 0 && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
-                return <div>{RenderElement(item.peek(),handleDrop, activeElement)}</div>;
+                return <div>{RenderElement(item.peek(),handleDrop, activeElement, "screen")}</div>;
               }
         })}
         </div>
