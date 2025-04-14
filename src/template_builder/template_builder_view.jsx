@@ -1,10 +1,14 @@
-import { useState } from "preact/hooks";
-import { activeTemplateElement, activeTemplateElements, CreateTemplate, HandleTemplateDrop, isTemplateChanged, SetTemplateActiveElements, templateDesignView } from "./templates_state";
+import { useEffect, useState } from "preact/hooks";
+import { activeTamplate, activeTemplateElement, activeTemplateElements, CreateTemplate, DeleteTemplateElements, HandleTemplateDrop, isTemplateChanged, SetTemplateActiveElements, templateDesignView, templates } from "./templates_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { IconGroup } from "../components/primitives/general_components";
 import { DesktopMockup } from "../screen_builder/screen_components";
 import { RenderElement } from "../screen_builder/screen-areas_2";
 import { Drop } from "../components/custom/Drop";
+import { useComputed, useSignal } from "@preact/signals";
+import { generateUID } from "../utils/helpers";
+import { ReactSortable } from "react-sortablejs";
+import { SelectableComponent } from "../components/custom/selectAble";
 
 
 export function TemplateView() {
@@ -238,32 +242,115 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
 
 
 function TemplateMobileView() {
-  return (
-    <MobileMockup>
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#f9f9f9",
-          border: "1px solid #e0e0e0",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-        className="scrollbar-hide"
-      >
-        <Drop
-          onDrop={(data) => HandleTemplateDrop(data)}
-          dropElementData={{ element: "screen" }}
-          wrapParent={true}
-        >
-          {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
-                let myitem = activeTemplateElements[key];
-                return RenderElement(myitem.peek(), HandleTemplateDrop , activeTemplateElement);
-              })}
-        </Drop>
-      </div>
-    </MobileMockup>
-  );
+    let curScreen = activeTamplate.value;
+    let style = {};
+    let outerDivStyle = {
+      position: "relative",
+      width: "100%",
+      height: "100%",
+      backgroundColor: "#f9f9f9",
+      border: "1px solid #e0e0e0",
+      overflow: "auto",
+      padding: "10px",
+      scrollbarWidth: "none", // For Firefox
+      msOverflowStyle: "none", // For Internet Explorer and Edge
+    };
+  
+    if (curScreen) {
+      console.log("screen styles:", curScreen);
+      style = templates[curScreen]["mobile_style"];
+    }
+  
+   // Reactive: Compute items from `screenElements`
+   const items = useSignal([]);
+   useEffect(() => {
+      console.log("rerendering:");
+      const elementsArray = Object.values(activeTemplateElements);
+      const filteredItems = elementsArray.filter((item) => !item.value.parent);
+      const sortedItems = filteredItems.sort((a, b) => {
+                            const orderA = a.value.order ?? Infinity;
+                            const orderB = b.value.order ?? Infinity;
+                            return orderA - orderB;});
+      console.log("sorted Items before rendering:",sortedItems);
+      items.value = sortedItems;
+      isTemplateChanged.value = generateUID();
+   }, [activeTemplateElements, isTemplateChanged.value]);
+  
+  
+   let sortableItems = useComputed(() => items.value.map((item) => ({
+    id: item.value.id,
+    name: item.value.title,
+    style: item.value.style || {},
+  })));
+  
+  
+    function SortItems(items, newItems) {
+      const itemMap = new Map(items.map((item) => [item.value.id, item]));
+      let sortedItems = newItems.map(({ id }) => itemMap.get(id)).filter(Boolean);
+      console.log("sorted Items after first sort:",sortedItems);
+      return sortedItems;
+    }
+  
+    function SetSortedItems(sortedItems) {
+      console.log("set sorted Items:", sortedItems);
+      let updatedItems = [];
+      for(var i=0;i<sortedItems.length;i++) {
+        let cur = sortedItems[i];
+        let id = cur.value["id"]
+        cur.value["order"] = i;
+        activeTemplateElements[id].value = {...cur.value};
+        templates[curScreen][templateDesignView.value] = activeTemplateElements;
+        templates[curScreen]["_change_type"] = templates[curScreen]["_change_type"] || "update";;
+        updatedItems.push(cur);
+      }
+      console.log("set sorted items before updation:", updatedItems);
+      items.value = [...updatedItems];
+      
+    }
+  
+    return (
+      <MobileMockup>
+        <div style={{ ...outerDivStyle }} className="scrollbar-hide">
+          <Drop
+            onDrop={(data) => {
+              HandleTemplateDrop(data);
+            }}
+            dropElementData={{ element: "screen" }}
+            wrapParent={true}
+          >
+            <div style={{ ...style }} onClick={() => (activeTemplateElement.value = "screen")}>
+              <ReactSortable
+                list={sortableItems.value}
+                setList={(newList) => {
+                  let temp = [...SortItems(items.value, newList)];
+                  SetSortedItems(temp);
+                }}
+                group="elements"
+                animation={150}
+                ghostClass="element-ghost"
+              >
+                {isTemplateChanged.value.length > 0 &&
+                  items.value.map((item) => {
+                    if (!item.value.parent) {
+                     console.log("rendering after removal:",isTemplateChanged.value); 
+                      return (<div>
+                        <SelectableComponent 
+                            onChick={(e,id) => {console.log("chicked me:", id);}}
+                            onRemove={(e,id) => {DeleteTemplateElements(id)}}
+                            id={item.value["id"]}
+                            isSelected={activeTemplateElement.value === item.value.id}
+                            >
+                        {RenderElement(item.peek(), HandleTemplateDrop, activeTemplateElement, "template")}
+                        </SelectableComponent>
+                        </div>);
+                    }
+                  })}
+              </ReactSortable>
+            </div>
+          </Drop>
+        </div>
+      </MobileMockup>
+    );
 }
 
 
@@ -288,7 +375,7 @@ function TemplateMobileView() {
               >
               {isTemplateChanged.value && Object.keys(activeTemplateElements).map((key) => {
                 let myitem = activeTemplateElements[key];
-                return RenderElement(myitem.peek(), HandleTemplateDrop , activeTemplateElement);
+                return RenderElement(myitem.peek(), HandleTemplateDrop , activeTemplateElement, "template");
               })}
                 </Drop>
                 </div>

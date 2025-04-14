@@ -18,7 +18,9 @@ let tablesGlobalSignals = signal({
       { name: "content", type: "text" },
       { name: "author_id", type: "uuid", foreignKey: "users.id" },
       { name: "created_at", type: "timestamp", default: "now()" }
-    ]
+    ],
+    "others": [],
+    "new": [],
   });
   
   let screensGlobalSignals = signal([

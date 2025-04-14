@@ -2,15 +2,17 @@ import { useSignal } from "@preact/signals";
 import { ScreensList } from "../screen_builder/screen_page";
 import { GlobalSignalsPopup } from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import QueryCreator from "./query_builder";
 import { CreateQueryBlock } from "./query_functions";
 import { ActiveQuery, QueryNames } from "./query_signal";
 import { Pipette } from "lucide-react";
 import { useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
+import { fieldsGlobalSignals } from "../states/common_repo";
 
 let headerStyle = { display:"flex", "flexDirection":"row", "justifyContent":"flex-start", "padding":"10px" };
 let iconStyle  = {"padding":"8px",backgroundColor:"black", "color":"white", borderRadius:"10px"};
+
+let fields = fieldsGlobalSignals.value;  
 
 export function CreateQueryBar() {
 
@@ -28,14 +30,7 @@ export function CreateQueryBar() {
 }
 
 
-export function QueriesList() {
-    return (
-        <div>
-        <CreateQueryBar />
-        <ScreensList elementsList={QueryNames.value} signal={ActiveQuery} callBack={(newquery) => { console.log("new query:",newquery);}}/>
-        </div>
-    );
-}
+
 
 
 export function TablesView({prefilData}) {
@@ -54,31 +49,31 @@ export function TablesView({prefilData}) {
 
 
 
-function SelectBlock() {
-    let isOpen = useSignal(false);
-    const [selectedItems, setSelectedItems] = useState([]);
+// function SelectBlock() {
+//     let isOpen = useSignal(false);
+//     const [selectedItems, setSelectedItems] = useState([]);
     
-    // Handle removing a specific tag
-    const removeTag = (itemToRemove) => {
-        setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
-    };
+//     // Handle removing a specific tag
+//     const removeTag = (itemToRemove) => {
+//         setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
+//     };
     
-    return (
-        <div className="section">
-            <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
-            <SelecList selectedItems={selectedItems} removeTag={removeTag}/>
-            <GlobalSignalsPopup 
-                isOpen={isOpen} 
-                onChangeCallback={(e) => {}}
-                closeCallback={(e, data) => {
-                    console.log("closed :", data);
-                    setSelectedItems(data);
-                    isOpen.value = false;
-                }}
-            />
-        </div>
-    );
-}
+//     return (
+//         <div className="section">
+//             <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
+//             <SelecList selectedItems={selectedItems} removeTag={removeTag}/>
+//             <GlobalSignalsPopup 
+//                 isOpen={isOpen} 
+//                 fields={fields}
+//                 closeCallback={(e, data) => {
+//                     console.log("closed :", data);
+//                     setSelectedItems(data);
+//                     isOpen.value = false;
+//                 }}
+//             />
+//         </div>
+//     );
+// }
 
 function JoinBlock() {
     let isOpen = useSignal(false);
@@ -141,7 +136,7 @@ function JoinBlock() {
             >Add Join</button>
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
-                onChangeCallback={(e) => {}}
+                fields={fields}
                 closeCallback={handlePopupClose}
             />
         </div>
@@ -380,7 +375,7 @@ function WhereBlock() {
             
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
-                onChangeCallback={(e) => {}}
+                fields={fields}
                 closeCallback={handlePopupClose}
             />
         </div>
@@ -402,7 +397,7 @@ function GroupByBlock() {
             <SelecList selectedItems={selectedItems} removeTag={removeTag}/>
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
-                onChangeCallback={(e) => {}}
+                fields={fields}
                 closeCallback={(e, data) => {
                     console.log("closed :", data);
                     setSelectedItems(data);
@@ -427,7 +422,7 @@ function OrderByBlock() {
             <SelecList selectedItems={selectedItems} removeTag={removeTag}/>
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
-                onChangeCallback={(e) => {}}
+                fields={fields}
                 closeCallback={(e, data) => {
                     console.log("closed :", data);
                     setSelectedItems(data);
@@ -475,3 +470,127 @@ function SelecList({selectedItems, removeTag}) {
     </div>            
     );
 }
+
+
+function SelectBlock() {
+    let isOpen = useSignal(false);
+    const [selectedItems, setSelectedItems] = useState([]);
+    
+    // Remove a selected item
+    const removeTag = (itemToRemove) => {
+      setSelectedItems(prev => prev.filter(item => item.fieldName !== itemToRemove.fieldName));
+    };
+    
+    // Handle changing the aggregation function
+    const changeAggregation = (fieldName, newAggregation) => {
+      setSelectedItems(prev => prev.map(item => 
+        item.fieldName === fieldName ? {...item, aggregation: newAggregation} : item
+      ));
+    };
+    
+    // Handle changing the alias
+    const changeAlias = (fieldName, newAlias) => {
+      setSelectedItems(prev => prev.map(item => 
+        item.fieldName === fieldName ? {...item, alias: newAlias} : item
+      ));
+    };
+    
+    return (
+      <div className="section">
+        <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
+        <SelectList 
+          selectedItems={selectedItems} 
+          removeTag={removeTag}
+          changeAggregation={changeAggregation}
+          changeAlias={changeAlias}
+        />
+        <GlobalSignalsPopup 
+          isOpen={isOpen} 
+          fields={fields}
+          closeCallback={(e, data) => {
+            console.log("closed :", data);
+            
+            // Convert raw field selections to objects with default aggregation and alias
+            const itemsWithAggregationAndAlias = data.map(field => ({
+              fieldName: field,
+              aggregation: "none", // Default aggregation
+              alias: field
+            }));
+            
+            setSelectedItems(itemsWithAggregationAndAlias);
+            isOpen.value = false;
+          }}
+        />
+      </div>
+    );
+  }
+  
+  function SelectList({selectedItems, removeTag, changeAggregation, changeAlias}) {
+    // Available aggregation functions
+    const aggregationOptions = ["none", "sum", "avg", "count", "min", "max"];
+    
+    return (
+      <div className="p-3 border rounded min-h-12 flex flex-wrap gap-2">
+        {selectedItems.length === 0 ? (
+          <div className="text-gray-400">Click to select columns (e.g., id, name, email)</div>
+        ) : (
+          selectedItems.map((item, index) => (
+            <div key={index} className="px-2 py-1 rounded-md flex items-center text-sm bg-black text-white" 
+              style={{borderRadius: "10px", fontSize: "0.6em"}}
+            >
+              <span className="mr-1">{item.fieldName}</span>
+              <select 
+                className="bg-gray-800 text-white text-xs rounded px-1 mr-1"
+                value={item.aggregation}
+                // @ts-ignore
+                onChange={(e) => changeAggregation(item.fieldName, e.target.value)}
+              >
+                {aggregationOptions.map(agg => (
+                  <option key={agg} value={agg}>{agg}</option>
+                ))}
+              </select>
+              {/* <input
+                type="text"
+                className="bg-gray-800 text-white text-xs rounded px-1 w-16 mr-1"
+                style={{height:"10px"}}
+                placeholder="Alias"
+                value={item.alias}
+                onChange={(e) => changeAlias(item.fieldName, e.target.value)}
+              /> */}
+              <button 
+                className="bg-black px-2"
+                onClick={() => removeTag(item)}
+              >
+                ×
+              </button>
+            </div>
+          ))
+        )}
+      </div>            
+    );
+  }
+  
+  // Example usage component that shows the results with aliases
+  function ResultsPreview({selectedItems}) {
+    return (
+      <div className="mt-4">
+        <h3 className="font-medium text-sm mb-2">Preview:</h3>
+        <div className="p-2 bg-gray-100 rounded text-sm">
+          {selectedItems.map((item, index) => {
+            const displayName = item.aggregation !== "none" 
+              ? `${item.aggregation}(${item.fieldName})` 
+              : item.fieldName;
+              
+            return (
+              <div key={index} className="mb-1">
+                <span className="font-mono">{displayName}</span>
+                {item.alias !== item.fieldName && item.alias.trim() !== "" && (
+                  <span className="text-gray-500 ml-2">AS "{item.alias}"</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
