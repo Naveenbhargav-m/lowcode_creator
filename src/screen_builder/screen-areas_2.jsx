@@ -17,13 +17,14 @@ import { generateUID } from "../utils/helpers";
 
 
 
-function RenderElement(item , dropCallBack, activeSignal, viewType) {
+function RenderElement(item , dropCallBack, activeSignal, viewType, ElementsMap) {
   // let style = {"padding": "10px","margin": "10px" ,"backgroundColor": "blue", height:"50px", width:"100px"};
   // return <div style={{...style}}> </div>;
+  console.log("element map", ElementsMap);
   if (item.type === "container" || item.type === "modal") {
     return (
       <Drop onDrop={(data) => dropCallBack(data, item.id)} dropElementData={{ element: item.id }}>
-        {renderContainer(item, dropCallBack,viewType)}
+        {renderContainer(item, dropCallBack,activeSignal,viewType, ElementsMap)}
       </Drop>
     );
   } else if (item.type === "template") {
@@ -149,12 +150,13 @@ function MobileView() {
                    console.log("rendering after removal:",screenElementAdded.value); 
                     return (<div>
                       <SelectableComponent 
-                          onChick={(e,id) => {console.log("chicked me:", id);}}
+                          onChick={(e,id) => {
+                          console.log("chicked me:", id);}}
                           onRemove={(e,id) => {DeleteScreenElement(id)}}
                           id={item.value["id"]}
                           isSelected={activeElement.value === item.value.id}
                           >
-                      {RenderElement(item.peek(), handleDrop, activeElement, "screen")}
+                      {RenderElement(item.peek(), handleDrop, activeElement, "screen", screenElements)}
                       </SelectableComponent>
                       </div>);
                   }
@@ -199,7 +201,7 @@ function DesktopView() {
         <div style={{...style}}>
         {screenElementAdded.value.length > 0 && Object.values(screenElements).map((item, ind) => {
               if (!item.value.parent) {
-                return <div>{RenderElement(item.peek(),handleDrop, activeElement, "screen")}</div>;
+                return <div>{RenderElement(item.peek(),handleDrop, activeElement, "screen", screenElements)}</div>;
               }
         })}
         </div>

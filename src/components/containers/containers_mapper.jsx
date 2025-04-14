@@ -1,6 +1,6 @@
 import { renderPrimitiveElement } from "../primitives/primitiveMapper";
 import { Card, GridView, Row, Column, Container, ListView, ScrollArea, Carousel } from "./container_components";
-import { activeElement, activeScreen, DeleteScreenElement, screenElements, screens, screenViewKey } from "../../screen_builder/screen_state";
+import { activeScreen, DeleteScreenElement, screenElements, screens, screenViewKey } from "../../screen_builder/screen_state";
 import { Drop } from "../custom/Drop";
 import { Drawer, HoverModal, PopupModal } from "../model_containers/model_components";
 import { variableKeys, variableMap } from '../../states/global_state';
@@ -73,7 +73,7 @@ function UpdateTemplateElementChildren(newchildren , elementID) {
   templates[curScreen]["_change_type"] = "update";
 }
 
-function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementID, viewType }) {
+function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementID, viewType , ElementsMap}) {
   
   return (
     <ReactSortable
@@ -85,17 +85,18 @@ function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementI
     >
      {
       childrenElements.map((child, ind) => {
+        console.log("child:",child);
         return(
           <SelectableComponent
             id={child.id}
             onRemove={(id)=> {viewType === "template" ? DeleteTemplateElements(child["id"]) : DeleteScreenElement(child["id"])}}
-            onChick={(e,id)=> {}}
-            isSelected={activeElement.value === child.id}
+            onChick={(e,id)=> {e.stopPropagation();activeSignal.value = child.id;}}
+            isSelected={activeSignal.value === child.id}
           >
-          <div onClick={() => { activeElement.value = child.id  }}>
+          <div onClick={() => { activeSignal.value = child.id  }}>
           {(child.type === "container" || child.type === "modal") ? (
             <Drop onDrop={(data) => dropCallBack(data, child.id)} dropElementData={{ element: child.id }}>
-              {renderContainer(child,dropCallBack, activeSignal, viewType)}
+              {renderContainer(child,dropCallBack, activeSignal, viewType, ElementsMap)}
             </Drop>
           ) : child.type === "template"  ? (renderTemplate(child, dropCallBack, activeSignal)) : 
           renderPrimitiveElement(child, activeSignal)}
@@ -110,7 +111,7 @@ function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementI
 
 
 
-export function renderContainer(layoutItem , dropCallBack , activeSignal, viewType) {
+export function renderContainer(layoutItem , dropCallBack , activeSignal, viewType, ElementsMap) {
   layoutItem.configs["id"] = layoutItem.id;
   const { title, children } = layoutItem;
   let childrenSignal = signal(children);
@@ -130,7 +131,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
       childrenSignal.value = newValue.children;
     }
   });
-  let childElements = childrenSignal.value.map(childId => screenElements[childId]?.value);
+  let childElements = childrenSignal.value.map(childId => ElementsMap[childId]?.value);
   switch (title) {
     case "card":
       return <Card {...layoutItem}>
@@ -140,6 +141,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
             </Card>;
     case "grid_view":
@@ -150,6 +152,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
                     childrenElements={childElements}
                     elementID={layoutItem["id"]}
                     viewType={viewType}
+                    ElementsMap={ElementsMap}
                     />
             </GridView>;
     case "container":
@@ -160,6 +163,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
           </Container>;
     case "list_view":
@@ -170,6 +174,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </ListView>;
     case "row":
@@ -180,6 +185,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </Row>;
     case "column":
@@ -190,6 +196,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </Column>;
     case "scroll_area":
@@ -200,6 +207,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </ScrollArea>;
     case "carousel":
@@ -210,6 +218,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </Carousel>;
     case "model":
@@ -220,6 +229,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </PopupModal>;
     case "hover_card":
@@ -230,6 +240,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </HoverModal>;
     case "side_drawer":
@@ -240,6 +251,7 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               childrenElements={childElements}
               elementID={layoutItem["id"]}
               viewType={viewType}
+              ElementsMap={ElementsMap}
               />
       </Drawer>
     default:

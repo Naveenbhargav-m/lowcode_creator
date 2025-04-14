@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { activeTamplate, activeTemplateElement, activeTemplateElements, CreateTemplate, DeleteTemplateElements, HandleTemplateDrop, isTemplateChanged, SetTemplateActiveElements, templateDesignView, templates } from "./templates_state";
+import { activeTamplate, activeTemplateElement, activeTemplateElements, CreateTemplate, DeleteTemplateElements, HandleTemplateDrop, isTemplateChanged, SetTemplateActiveElements, templateDesignView, templates, TemplateSorted } from "./templates_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { IconGroup } from "../components/primitives/general_components";
 import { DesktopMockup } from "../screen_builder/screen_components";
@@ -273,8 +273,8 @@ function TemplateMobileView() {
                             return orderA - orderB;});
       console.log("sorted Items before rendering:",sortedItems);
       items.value = sortedItems;
-      isTemplateChanged.value = generateUID();
-   }, [activeTemplateElements, isTemplateChanged.value]);
+      TemplateSorted.value = generateUID();
+   }, [isTemplateChanged.value, activeTemplateElements]);
   
   
    let sortableItems = useComputed(() => items.value.map((item) => ({
@@ -329,18 +329,21 @@ function TemplateMobileView() {
                 animation={150}
                 ghostClass="element-ghost"
               >
-                {isTemplateChanged.value.length > 0 &&
+                {TemplateSorted.value.length > 0 &&
                   items.value.map((item) => {
                     if (!item.value.parent) {
                      console.log("rendering after removal:",isTemplateChanged.value); 
                       return (<div>
                         <SelectableComponent 
-                            onChick={(e,id) => {console.log("chicked me:", id);}}
+                            onChick={(e,id) => {
+                              e.stopPropagation();
+                              console.log("--------------------- Clicked on me -------------:",item.value.id);
+                              activeTemplateElement.value = item.value["id"];}}
                             onRemove={(e,id) => {DeleteTemplateElements(id)}}
                             id={item.value["id"]}
                             isSelected={activeTemplateElement.value === item.value.id}
                             >
-                        {RenderElement(item.peek(), HandleTemplateDrop, activeTemplateElement, "template")}
+                        {RenderElement(item.peek(), HandleTemplateDrop, activeTemplateElement, "template", activeTemplateElements)}
                         </SelectableComponent>
                         </div>);
                     }

@@ -3,6 +3,7 @@ import { generateUID } from "../utils/helpers";
 import { PrimitivesStylesMap } from "../components/primitives/primitives_base_styles";
 import { ContainersStylesMap } from "../components/containers/containers_bse_styles";
 import { GetDataFromAPi } from "../api/api_syncer";
+const containerBounds = {"height":0, "width":0};
 let templates = {};
 let templateNamesList = signal([]);
 let templatesPagesSignal = signal("components");
@@ -12,6 +13,9 @@ let activeTemplateElements = {};
 let activeTemplateElement = signal("");
 let templateRightPanelActiveTab = signal("Basic");
 let isTemplateChanged = signal("");
+let TemplateSorted = signal("");
+let templateViewKey = "mobile_children";
+
 function LoadTemplates( ) {
     GetDataFromAPi("_templates").then((myscreens) => {
       console.log("my templates:", myscreens);
@@ -69,6 +73,7 @@ function SetTemplateActiveElements() {
       activeTemplateElements[key] = signal({ ...value });
   });
     isTemplateChanged.value = templateID;
+    TemplateSorted.value = generateUID();
 }
 
 function CreateTemplate(formdata) {
@@ -80,6 +85,7 @@ function CreateTemplate(formdata) {
     let existingList = templateNamesList.peek();
     templateNamesList.value = [...existingList, { "name": name, "id": uID }];
     localStorage.setItem("templates", JSON.stringify(templates));
+    isTemplateChanged.value = generateUID();
 }
 
 
@@ -97,36 +103,28 @@ function IsObjectEmpty(object) {
 
 function HandleTemplateDrop(data, parentId = null) {
 
+  console.log("called handle drop:",data, parentId);
   let i = generateUID();
-  let styleObj = {};
+  let myconfig = {};
   let type = data.data.type;
   let title = data.data.value;
   if(type === "primitive") {
-    styleObj = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
+    myconfig = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
   } else if(type === "container") {
-    styleObj = JSON.parse(JSON.stringify(ContainersStylesMap[title]));
+    myconfig = JSON.parse(JSON.stringify(ContainersStylesMap[title]));
   }
     const newItem = {
     id: i,
     type: type,
     template: "element",
     title: title,
+    "parent_container":{...containerBounds},
     parent: parentId,
     children: [],
-    value:"",
-    configs: {
-      style: styleObj,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};",
-    },
+    ...myconfig,
   };
 
-  if (parentId != null) {
+  if (parentId !== null) {
       let parentElement = activeTemplateElements[parentId];
         parentElement.value.children.push(newItem.id);
         newItem.parent = parentId;
@@ -134,22 +132,27 @@ function HandleTemplateDrop(data, parentId = null) {
         activeTemplateElements[newItem.id].value = {...newItem}; 
         activeTemplateElements[parentId].value = {...parentElement.value};
   } else {
+    let curLength = Object.keys(activeTemplateElements).length + 1;
+    newItem["order"] = curLength;
     activeTemplateElements[newItem.id] = signal(newItem);
+    activeTemplateElements[newItem.id].value = {...newItem}; 
+    isTemplateChanged.value = newItem.id;
   }
-  let activeTemp = activeTamplate.peek();
-  let temp = templates[activeTemp];
+  let temp = templates[activeTamplate.value];
+  console.log("temp screens after drop:",temp);
   if(temp !== undefined) {
-    let view = templateDesignView.peek();
     let key = "mobile_children";
-    if(view !== "smartphone" ) {
-        key = "desktop_children";
+    if(templateDesignView.peek() !== "smartphone") {
+      key = "desktop_children";
     }
     temp[key] = JSON.parse(JSON.stringify(activeTemplateElements));
-    temp["_change_type"] = temp["_change_type"] || "update";
-    templates[activeTemp] = temp;
+    templateViewKey = key;
+    templates[activeTamplate.value] = temp;
+    templates[activeTamplate.value]["_change_type"] = templates[activeTamplate.value]["_change_type"] || "update";
   }
-  isTemplateChanged.value = "";
-  isTemplateChanged.value = activeTemp;
+  isTemplateChanged.value = i;
+  TemplateSorted.value = i;
+  console.log("new screens after drop:",templates);
   localStorage.setItem("templates", JSON.stringify(templates));
 }
 
@@ -171,15 +174,20 @@ function DeleteTemplateElements(id) {
     if(newChildren.length > 0) {
       currentElement["children"] = newChildren;
       activeTemplateElements[keys[i]].value = currentElement;
-    } 
+    }
+    if(children.length > 0) {
+      currentElement["children"] = newChildren;
+      activeTemplateElements[keys[i]].value = currentElement;
+    }
   }
   templates[activeTamplate.value][templateDesignView.value] = JSON.parse(JSON.stringify(activeTemplateElements));
   templates[activeTamplate.value]["_change_type"] = templates[activeTamplate.value]["_change_type"] || "update";
   isTemplateChanged.value = generateUID();
-  isTemplateChanged.value = generateUID();
+  TemplateSorted.value = generateUID();
 }
 export {
     templates,templateNamesList, templatesPagesSignal, templateRightPanelActiveTab,
     activeTamplate, templateDesignView, activeTemplateElements, isTemplateChanged, 
-    activeTemplateElement, LoadTemplates,CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements, DeleteTemplateElements
+    activeTemplateElement, LoadTemplates,CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements, DeleteTemplateElements,
+    TemplateSorted
 };
