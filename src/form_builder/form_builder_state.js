@@ -35,8 +35,10 @@ function AddtoElements(data) {
     if(formName !== "screen") {
       elementData["parent"] = formName;
       let parent = existing[formName];
-      parent["children"].push(newid);
-      existing = setElementByID(existing, formName, parent);
+      console.log("existing parent:",parent);
+      console.log("existing elements:",existing);
+      parent.value["children"].push(newid);
+      existing[formName] = parent;
     }
     let curLength = existing.length + 1;
     elementData["order"] = curLength;
@@ -203,7 +205,7 @@ function DeleteFormElement(id) {
             if(children[j] === id) {
                 continue;
             }
-            newchildren.push(id);
+            newchildren.push(children[j]);
         }
         ele.value["children"] = newchildren;
         currentFormElements[keys[i]] = ele;
