@@ -6,6 +6,16 @@ const baseStyle = {
     color: "#333",
     backgroundColor: "#fff",
     width: "100%",};
+
+const baseContainerStyle = {
+  border: "1px solid #ccc",
+    padding: "8px",
+    borderRadius: "4px",
+    fontSize: "14px",
+    backgroundColor: "green",
+    width: "100%",
+    height:"40%"
+};
 const textFieldConfig = {
     fieldStyle: {...baseStyle},
     "panelStyle": {},
@@ -151,7 +161,16 @@ const datePickerConfig = {
     "labelStyle": {},
     "label": "pick a date",
   };
-  
+
+const columnConfig = {
+  "style": {...baseContainerStyle},
+  "label": "Am Column"
+};
+
+const rowConfig = {
+  "style": {...baseContainerStyle},
+  "label": "Am Column"
+};
 
   const fieldsConfigs = {
     textfield: textFieldConfig,
@@ -167,6 +186,8 @@ const datePickerConfig = {
     file_upload: fileUploadConfig,
     rating: ratingConfig,
     date: datePickerConfig,
+    "column": columnConfig,
+    "row": rowConfig
   };
 
 

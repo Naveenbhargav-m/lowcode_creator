@@ -31,6 +31,7 @@ export function RenderRoworColumnChildren(children,values = {},
       <div
       style={{ display: "contents" }}
       onClick={(e) => {
+        e.stopPropagation();
         formActiveElement.value = id;
       }}
     >
