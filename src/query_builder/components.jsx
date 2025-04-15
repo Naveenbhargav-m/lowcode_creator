@@ -5,9 +5,10 @@ import { CreateFormButton } from "../template_builder/template_builder_view";
 import { CreateQueryBlock } from "./query_functions";
 import { ActiveQuery, QueryNames } from "./query_signal";
 import { Pipette } from "lucide-react";
-import { useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
 import { fieldsGlobalSignals } from "../states/common_repo";
+import React from "preact/compat";
 
 let headerStyle = { display:"flex", "flexDirection":"row", "justifyContent":"flex-start", "padding":"10px" };
 let iconStyle  = {"padding":"8px",backgroundColor:"black", "color":"white", borderRadius:"10px"};
@@ -49,31 +50,6 @@ export function TablesView({prefilData}) {
 
 
 
-// function SelectBlock() {
-//     let isOpen = useSignal(false);
-//     const [selectedItems, setSelectedItems] = useState([]);
-    
-//     // Handle removing a specific tag
-//     const removeTag = (itemToRemove) => {
-//         setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
-//     };
-    
-//     return (
-//         <div className="section">
-//             <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
-//             <SelecList selectedItems={selectedItems} removeTag={removeTag}/>
-//             <GlobalSignalsPopup 
-//                 isOpen={isOpen} 
-//                 fields={fields}
-//                 closeCallback={(e, data) => {
-//                     console.log("closed :", data);
-//                     setSelectedItems(data);
-//                     isOpen.value = false;
-//                 }}
-//             />
-//         </div>
-//     );
-// }
 
 function JoinBlock() {
     let isOpen = useSignal(false);
@@ -385,16 +361,18 @@ function WhereBlock() {
 function GroupByBlock() {
     let isOpen = useSignal(false);
     const [selectedItems, setSelectedItems] = useState([]);
+    const [aggregations, setAggregations] = useState([]);
     
     // Handle removing a specific tag
     const removeTag = (itemToRemove) => {
         setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
+        // Also remove any aggregation settings for this item
+        setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
     };
-    
     return (
         <div className="section">
             <BlocksHeader isOpen={isOpen} title={"Group By"}/>
-            <SelecList selectedItems={selectedItems} removeTag={removeTag}/>
+            <SelectList selectedItems={selectedItems} removeTag={removeTag} aggregations={aggregations} setAggregations={setAggregations}/>
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
                 fields={fields}
@@ -410,16 +388,19 @@ function GroupByBlock() {
 function OrderByBlock() {
     let isOpen = useSignal(false);
     const [selectedItems, setSelectedItems] = useState([]);
+    const [aggregations, setAggregations] = useState([]);
     
     // Handle removing a specific tag
     const removeTag = (itemToRemove) => {
         setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
+        // Also remove any aggregation settings for this item
+        setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
     };
     
     return (
         <div className="section">
             <BlocksHeader isOpen={isOpen} title={"Order By"}/>
-            <SelecList selectedItems={selectedItems} removeTag={removeTag}/>
+            <SelectList selectedItems={selectedItems} removeTag={removeTag} aggregations={aggregations} setAggregations={setAggregations}/>
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
                 fields={fields}
@@ -446,151 +427,314 @@ function BlocksHeader({isOpen, title}) {
 }
 
 
-function SelecList({selectedItems, removeTag}) {
-    return (
-        <div className="p-3 border rounded min-h-12 flex flex-wrap gap-2">
-        {selectedItems.length === 0 ? (
-            <div className="text-gray-400">Click to select columns (e.g., id, name, email)</div>
-        ) : (
-            selectedItems.map((item, index) => (
-                <div key={index} className="px-2 py-1 rounded-md flex items-center text-sm" 
-                style={{backgroundColor:"black", "color":"white","padding":"4px", borderRadius:"10px", "fontSize":"0.6em"}}
-                >
-                    <span >{item}</span>
-                    <button 
-                        className=""
-                        style={{"backgroundColor": "black" , "padding":"4px 8px"}} 
-                        onClick={() => removeTag(item)}
-                    >
-                        ×
-                    </button>
-                </div>
-            ))
-        )}
-    </div>            
-    );
-}
-
-
 function SelectBlock() {
     let isOpen = useSignal(false);
     const [selectedItems, setSelectedItems] = useState([]);
+    // Store aggregation settings in an array of objects
+    const [aggregations, setAggregations] = useState([]);
     
-    // Remove a selected item
+    // Handle removing a specific tag
     const removeTag = (itemToRemove) => {
-      setSelectedItems(prev => prev.filter(item => item.fieldName !== itemToRemove.fieldName));
-    };
-    
-    // Handle changing the aggregation function
-    const changeAggregation = (fieldName, newAggregation) => {
-      setSelectedItems(prev => prev.map(item => 
-        item.fieldName === fieldName ? {...item, aggregation: newAggregation} : item
-      ));
-    };
-    
-    // Handle changing the alias
-    const changeAlias = (fieldName, newAlias) => {
-      setSelectedItems(prev => prev.map(item => 
-        item.fieldName === fieldName ? {...item, alias: newAlias} : item
-      ));
+        setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
+        // Also remove any aggregation settings for this item
+        setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
     };
     
     return (
-      <div className="section">
-        <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
-        <SelectList 
-          selectedItems={selectedItems} 
-          removeTag={removeTag}
-          changeAggregation={changeAggregation}
-          changeAlias={changeAlias}
-        />
-        <GlobalSignalsPopup 
-          isOpen={isOpen} 
-          fields={fields}
-          closeCallback={(e, data) => {
-            console.log("closed :", data);
-            
-            // Convert raw field selections to objects with default aggregation and alias
-            const itemsWithAggregationAndAlias = data.map(field => ({
-              fieldName: field,
-              aggregation: "none", // Default aggregation
-              alias: field
-            }));
-            
-            setSelectedItems(itemsWithAggregationAndAlias);
-            isOpen.value = false;
-          }}
-        />
-      </div>
-    );
-  }
-  
-  function SelectList({selectedItems, removeTag, changeAggregation, changeAlias}) {
-    // Available aggregation functions
-    const aggregationOptions = ["none", "sum", "avg", "count", "min", "max"];
-    
-    return (
-      <div className="p-3 border rounded min-h-12 flex flex-wrap gap-2">
-        {selectedItems.length === 0 ? (
-          <div className="text-gray-400">Click to select columns (e.g., id, name, email)</div>
-        ) : (
-          selectedItems.map((item, index) => (
-            <div key={index} className="px-2 py-1 rounded-md flex items-center text-sm bg-black text-white" 
-              style={{borderRadius: "10px", fontSize: "0.6em"}}
-            >
-              <span className="mr-1">{item.fieldName}</span>
-              <select 
-                className="bg-gray-800 text-white text-xs rounded px-1 mr-1"
-                value={item.aggregation}
-                // @ts-ignore
-                onChange={(e) => changeAggregation(item.fieldName, e.target.value)}
-              >
-                {aggregationOptions.map(agg => (
-                  <option key={agg} value={agg}>{agg}</option>
-                ))}
-              </select>
-              {/* <input
-                type="text"
-                className="bg-gray-800 text-white text-xs rounded px-1 w-16 mr-1"
-                style={{height:"10px"}}
-                placeholder="Alias"
-                value={item.alias}
-                onChange={(e) => changeAlias(item.fieldName, e.target.value)}
-              /> */}
-              <button 
-                className="bg-black px-2"
-                onClick={() => removeTag(item)}
-              >
-                ×
-              </button>
-            </div>
-          ))
-        )}
-      </div>            
-    );
-  }
-  
-  // Example usage component that shows the results with aliases
-  function ResultsPreview({selectedItems}) {
-    return (
-      <div className="mt-4">
-        <h3 className="font-medium text-sm mb-2">Preview:</h3>
-        <div className="p-2 bg-gray-100 rounded text-sm">
-          {selectedItems.map((item, index) => {
-            const displayName = item.aggregation !== "none" 
-              ? `${item.aggregation}(${item.fieldName})` 
-              : item.fieldName;
-              
-            return (
-              <div key={index} className="mb-1">
-                <span className="font-mono">{displayName}</span>
-                {item.alias !== item.fieldName && item.alias.trim() !== "" && (
-                  <span className="text-gray-500 ml-2">AS "{item.alias}"</span>
-                )}
-              </div>
-            );
-          })}
+        <div className="section">
+            <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
+            <SelectList 
+                selectedItems={selectedItems} 
+                removeTag={removeTag}
+                aggregations={aggregations}
+                setAggregations={setAggregations}
+            />
+            <GlobalSignalsPopup 
+                isOpen={isOpen} 
+                fields={fields}
+                closeCallback={(e, data) => {
+                    console.log("closed :", data);
+                    setSelectedItems(data);
+                    isOpen.value = false;
+                }}
+            />
         </div>
-      </div>
     );
-  }
+}
+
+// SelectList component - main container
+function SelectList({ selectedItems, removeTag, aggregations, setAggregations }) {
+    const [popupState, setPopupState] = useState({
+        isOpen: false,
+        item: null,
+        position: { top: 0, left: 0 }
+    });
+    
+    // Handler for closing the popup when clicking outside
+    useClickOutside(() => {
+        if (popupState.isOpen) {
+            setPopupState(prev => ({ ...prev, isOpen: false }));
+        }
+    }, 'aggregation-popup');
+    
+    const handleItemClick = (item, event) => {
+        // Get position of the clicked element
+        const rect = event.currentTarget.getBoundingClientRect();
+        
+        setPopupState({
+            isOpen: true,
+            item: item,
+            position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX }
+        });
+    };
+    
+    return (
+        <div className="p-3 border rounded min-h-12 flex flex-wrap gap-2">
+            {selectedItems.length === 0 ? (
+                <EmptyState />
+            ) : (
+                <>
+                    <TagList 
+                        selectedItems={selectedItems}
+                        removeTag={removeTag}
+                        aggregations={aggregations}
+                        handleItemClick={handleItemClick}
+                    />
+                    
+                    {popupState.isOpen && (
+                        <AggregationPopup 
+                            position={popupState.position}
+                            item={popupState.item}
+                            aggregations={aggregations} 
+                            setAggregations={setAggregations}
+                            onClose={() => setPopupState(prev => ({ ...prev, isOpen: false }))}
+                        />
+                    )}
+                </>
+            )}
+        </div>            
+    );
+}
+
+// Empty state component
+function EmptyState() {
+    return (
+        <div className="text-gray-400">Click to select columns (e.g., id, name, email)</div>
+    );
+}
+
+// Tags list component
+function TagList({ selectedItems, removeTag, aggregations, handleItemClick }) {
+    return selectedItems.map((item, index) => (
+        <TagItem 
+            key={index}
+            item={item}
+            aggregation={getAggregationForItem(item, aggregations)}
+            removeTag={removeTag}
+            onClick={handleItemClick}
+        />
+    ));
+}
+
+// Single tag item component
+function TagItem({ item, aggregation, removeTag, onClick }) {
+    const displayText = formatDisplayText(item, aggregation);
+    
+    return (
+        <div 
+            className="px-2 py-1 rounded-md flex items-center text-sm cursor-pointer" 
+            style={{
+                backgroundColor: "black", 
+                color: "white",
+                padding: "4px", 
+                borderRadius: "10px", 
+                fontSize: "0.6em"
+            }}
+            onClick={(e) => onClick(item, e)}
+        >
+            <span>{displayText}</span>
+            <RemoveButton onClick={(e) => {
+                e.stopPropagation();
+                removeTag(item);
+            }} />
+        </div>
+    );
+}
+
+// Remove button component
+function RemoveButton({ onClick }) {
+    return (
+        <button 
+            className="ml-1"
+            style={{ backgroundColor: "black", padding: "4px 8px" }} 
+            onClick={onClick}
+        >
+            ×
+        </button>
+    );
+}
+
+// The popup component
+function AggregationPopup({ position, item, aggregations, setAggregations, onClose }) {
+    const existingAgg = getAggregationForItem(item, aggregations);
+    
+    const [aggFunction, setAggFunction] = useState(existingAgg.function);
+    const [alias, setAlias] = useState(existingAgg.alias);
+    
+    const aggregationFunctions = ['COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'DISTINCT'];
+    
+    const handleSave = () => {
+        saveAggregation(item, aggFunction, alias, aggregations, setAggregations);
+        onClose();
+    };
+    
+    const handleClear = () => {
+        clearAggregation(item, aggregations, setAggregations);
+        onClose();
+    };
+    
+    return (
+        <div 
+            id="aggregation-popup"
+            className="absolute bg-white border shadow-lg rounded p-3 w-64 z-50"
+            style={{
+                top: `${position.top}px`,
+                left: `${position.left}px`
+            }}
+        >
+            <PopupHeader item={item} />
+            <FunctionSelector 
+                value={aggFunction}
+                onChange={setAggFunction}
+                options={aggregationFunctions}
+            />
+            <AliasInput 
+                value={alias}
+                onChange={setAlias}
+            />
+            <PopupFooter 
+                onClear={handleClear}
+                onSave={handleSave}
+            />
+        </div>
+    );
+}
+
+// Popup header component
+function PopupHeader({ item }) {
+    return <div className="font-medium mb-2">Configure {item}</div>;
+}
+
+// Function selector component
+function FunctionSelector({ value, onChange, options }) {
+    return (
+        <div className="mb-2">
+            <label className="block text-sm text-gray-600 mb-1">Aggregation Function</label>
+            <select 
+                className="w-full border rounded p-1 text-sm"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            >
+                <option value="">None</option>
+                {options.map(func => (
+                    <option key={func} value={func}>{func}</option>
+                ))}
+            </select>
+        </div>
+    );
+}
+
+// Alias input component
+function AliasInput({ value, onChange }) {
+    return (
+        <div className="mb-3">
+            <label className="block text-sm text-gray-600 mb-1">Alias</label>
+            <input 
+                type="text" 
+                className="w-full border rounded p-1 text-sm"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Custom name (optional)"
+            />
+        </div>
+    );
+}
+
+// Popup footer with action buttons
+function PopupFooter({ onClear, onSave }) {
+    return (
+        <div className="flex justify-between">
+            <button 
+                className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm"
+                onClick={onClear}
+            >
+                Clear
+            </button>
+            <button 
+                className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                onClick={onSave}
+            >
+                Apply
+            </button>
+        </div>
+    );
+}
+
+// Utility functions
+function useClickOutside(callback, excludeId) {
+    useEffect(() => {
+        function handleClickOutside(event) {
+            // Skip if clicked element is our exclude target
+            if (excludeId && (
+                event.target.id === excludeId || 
+                event.target.closest(`#${excludeId}`)
+            )) {
+                return;
+            }
+            callback(event);
+        }
+        
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [callback, excludeId]);
+}
+
+function getAggregationForItem(item, aggregations) {
+    return aggregations.find(agg => agg.original_name === item) || {
+        function: '',
+        original_name: item,
+        alias: ''
+    };
+}
+
+function formatDisplayText(item, aggregation) {
+    return aggregation.function ? 
+        `${aggregation.function}(${item})${aggregation.alias ? ` AS ${aggregation.alias}` : ''}` : 
+        item;
+}
+
+function saveAggregation(item, aggFunction, alias, aggregations, setAggregations) {
+    const index = aggregations.findIndex(agg => agg.original_name === item);
+    
+    if (index >= 0) {
+        // Update existing entry
+        const updatedAggregations = [...aggregations];
+        updatedAggregations[index] = {
+            function: aggFunction,
+            original_name: item,
+            alias: alias
+        };
+        setAggregations(updatedAggregations);
+    } else {
+        // Add new entry
+        setAggregations([...aggregations, {
+            function: aggFunction,
+            original_name: item,
+            alias: alias
+        }]);
+    }
+}
+
+function clearAggregation(item, aggregations, setAggregations) {
+    setAggregations(aggregations.filter(agg => agg.original_name !== item));
+}
