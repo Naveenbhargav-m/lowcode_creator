@@ -1,14 +1,15 @@
 import { useSignal } from "@preact/signals";
-import { ScreensList } from "../screen_builder/screen_page";
+// @ts-ignore
 import { GlobalSignalsPopup } from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import { CreateQueryBlock } from "./query_functions";
-import { ActiveQuery, QueryNames } from "./query_signal";
+import { ActiveQueryData, CreateQueryBlock, UpdateQueryPart } from "./query_signal";
 import { Pipette } from "lucide-react";
-import { useEffect, useRef, useState } from "preact/hooks";
+// @ts-ignore
+import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
 import { fieldsGlobalSignals } from "../states/common_repo";
-import React from "preact/compat";
+// @ts-ignore
+
 
 let headerStyle = { display:"flex", "flexDirection":"row", "justifyContent":"flex-start", "padding":"10px" };
 let iconStyle  = {"padding":"8px",backgroundColor:"black", "color":"white", borderRadius:"10px"};
@@ -34,11 +35,22 @@ export function CreateQueryBar() {
 
 
 
+// @ts-ignore
 export function TablesView({prefilData}) {
+
+    let activeQuery = ActiveQueryData.value;
+
+    if(activeQuery["id"] === undefined) {
+        return <div> Select a Query</div>
+    }
+    console.log("active Query:",activeQuery);
     return (
         <div style={{height:"100vh", width:"80vw", display:"flex", "flexDirection":"column", "justifyContent":"center", }}>
             <div className="scrollable-div" style={{backgroundColor:"white", width:"80%", height:"80%",borderRadius:"20px",boxShadow: "0 0 15px rgba(0, 0, 0, 0.1)"}}>
-                <SelectBlock />
+                <SelectBlock select={activeQuery["select_fields"]}
+                 Aggregations={activeQuery["select_aggregate_fields"]}
+                 updateCallBack={UpdateQueryPart}
+                  />
                 <JoinBlock />
                 <WhereBlock />
                 <GroupByBlock />
@@ -55,6 +67,7 @@ function JoinBlock() {
     let isOpen = useSignal(false);
     let popupField = useSignal("");
     let popupInd = useSignal(-1);
+    // @ts-ignore
     const handlePopupClose = (e, data) => {
         if(data === undefined) {
             isOpen.value = false;
@@ -86,21 +99,25 @@ function JoinBlock() {
                             <div style={{"display":"flex", "flexDirection":"row", "justifyContent": "flex-start", "marginBottom":"8px"}}>
                             <SelectComponent 
                             options={["left join", "right join", "join", "inner join", "cross join"]}
+                            // @ts-ignore
                             onChange={(e,data) => {UpdateJoinData({"join": data["value"]}, index);}}
                             selected={value["join"] || "left join"}
                             style={{"width": "120px", "marginRight":"10px"}}
                             />
                             <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
+                            // @ts-ignore
                             onClick={(e) => {popupField.value = "first_field"; popupInd.value = index; isOpen.value = true}}
                             >
                                 {value["first_field"] || "first_field"}</button>
                             <SelectComponent 
                             options={["equals", "less_than", "greater_than", "less_eq", "greater_eq"]}
+                            // @ts-ignore
                             onChange={(e,data) => {UpdateJoinData({"operator": data["value"]}, index);}}
                             selected={value["operator"] || "equals"}
                             style={{"width": "120px", "marginRight":"10px"}}
                             />
                              <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
+                             // @ts-ignore
                              onClick={(e) => {popupField.value = "second_field"; popupInd.value = index; isOpen.value = true}}
                              >{value["second_field"] || "Second_field"}</button>
                              </div>
@@ -108,6 +125,7 @@ function JoinBlock() {
                     })
                 }
             <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
+            // @ts-ignore
             onClick={(e)=> {let cur = joinsData.value; cur.push({}); joinsData.value = [...cur];}}
             >Add Join</button>
             <GlobalSignalsPopup 
@@ -142,6 +160,7 @@ function WhereBlock() {
     let popupGroupId = useSignal(null);
     let buttonStyle = {backgroundColor:"black", "color": "white"};
     
+    // @ts-ignore
     const handlePopupClose = (e, data) => {
         if(data === undefined) {
             isOpen.value = false;
@@ -232,6 +251,7 @@ function WhereBlock() {
                 {index > 0 && (
                     <SelectComponent 
                         options={["AND", "OR"]}
+                        // @ts-ignore
                         onChange={(e,data) => {
                             if (groupId !== null) {
                                 updateGroupCondition({"logical": data["value"]}, index, groupId);
@@ -245,6 +265,7 @@ function WhereBlock() {
                 )}
                 
                 <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
+                        // @ts-ignore
                         onClick={(e) => {
                             popupField.value = "field";
                             popupInd.value = index;
@@ -256,6 +277,7 @@ function WhereBlock() {
                 
                 <SelectComponent 
                     options={["equals", "not_equals", "less_than", "greater_than", "less_eq", "greater_eq", "like", "in", "not_in"]}
+                    // @ts-ignore
                     onChange={(e,data) => {
                         if (groupId !== null) {
                             updateGroupCondition({"operator": data["value"]}, index, groupId);
@@ -268,6 +290,7 @@ function WhereBlock() {
                 />
                 
                 <button style={{...buttonStyle, "padding": "8px 10px"}}
+                        // @ts-ignore
                         onClick={(e) => {
                             popupField.value = "value";
                             popupInd.value = index;
@@ -290,6 +313,7 @@ function WhereBlock() {
                     <span style={{"fontWeight": "bold"}}>Condition Group</span>
                     <SelectComponent 
                         options={["AND", "OR"]}
+                        // @ts-ignore
                         onChange={(e,data) => {
                             let currentGroups = [...groups.value];
                             const groupIndex = currentGroups.findIndex(g => g.id === group.id);
@@ -376,6 +400,7 @@ function GroupByBlock() {
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
                 fields={fields}
+                // @ts-ignore
                 closeCallback={(e, data) => {
                     console.log("closed :", data);
                     setSelectedItems(data);
@@ -404,6 +429,7 @@ function OrderByBlock() {
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
                 fields={fields}
+                // @ts-ignore
                 closeCallback={(e, data) => {
                     console.log("closed :", data);
                     setSelectedItems(data);
@@ -418,7 +444,9 @@ function BlocksHeader({isOpen, title}) {
     return (
         <div style={headerStyle}>
         <p style={{width:"200px",marginRight:"50px"}}>{title}</p>
-        <Pipette onClick={(e) => {isOpen.value = true}} 
+        <Pipette onClick={(
+// @ts-ignore
+        e) => {isOpen.value = true}} 
         height={14} width={14} 
         style={iconStyle}
         />
@@ -427,19 +455,26 @@ function BlocksHeader({isOpen, title}) {
 }
 
 
-function SelectBlock() {
+function SelectBlock({select, Aggregations, updateCallBack}) {
+    let keys = ["select_fields", "select_aggregate_fields"];
     let isOpen = useSignal(false);
-    const [selectedItems, setSelectedItems] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([...select]);
     // Store aggregation settings in an array of objects
-    const [aggregations, setAggregations] = useState([]);
-    
+    const [aggregations, setAggregations] = useState([...Aggregations]);
+    console.log("select and aggrs:",selectedItems, aggregations);
     // Handle removing a specific tag
     const removeTag = (itemToRemove) => {
         setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
         // Also remove any aggregation settings for this item
         setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
+        updateCallBack(keys[0], selectedItems);
+        updateCallBack(keys[1], aggregations);
     };
     
+    function setAggrs(updatedAggrs) {
+        setAggregations(updatedAggrs);
+        updateCallBack(keys[1], updatedAggrs);
+    }
     return (
         <div className="section">
             <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
@@ -447,14 +482,16 @@ function SelectBlock() {
                 selectedItems={selectedItems} 
                 removeTag={removeTag}
                 aggregations={aggregations}
-                setAggregations={setAggregations}
+                setAggregations={setAggrs}
             />
             <GlobalSignalsPopup 
                 isOpen={isOpen} 
                 fields={fields}
+                // @ts-ignore
                 closeCallback={(e, data) => {
                     console.log("closed :", data);
                     setSelectedItems(data);
+                    updateCallBack(keys[0], data);
                     isOpen.value = false;
                 }}
             />
@@ -633,6 +670,7 @@ function FunctionSelector({ value, onChange, options }) {
             <select 
                 className="w-full border rounded p-1 text-sm"
                 value={value}
+                // @ts-ignore
                 onChange={(e) => onChange(e.target.value)}
             >
                 <option value="">None</option>
@@ -653,6 +691,7 @@ function AliasInput({ value, onChange }) {
                 type="text" 
                 className="w-full border rounded p-1 text-sm"
                 value={value}
+                // @ts-ignore
                 onChange={(e) => onChange(e.target.value)}
                 placeholder="Custom name (optional)"
             />
