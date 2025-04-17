@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { Code, Database, Palette, Play, X, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import StyleConfig from './config_form_components/styleConfig';
 
 // Main Config Form Component
 export default function ConfigUpdater() {
@@ -19,7 +20,7 @@ export default function ConfigUpdater() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+    <div className="flex flex-col h-full w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
       <div className="bg-gray-50 border-b border-gray-200 p-4">
         <h2 className="text-xl font-semibold text-gray-800">Element Configuration</h2>
         <p className="text-sm text-gray-500">Configure styles, data, and interactions</p>
@@ -36,7 +37,7 @@ export default function ConfigUpdater() {
           active={activeTab === 'data'} 
           onClick={() => handleTabChange('data')}
           icon={<Database size={16} />}
-          label="Data Query"
+          label="Data"
         />
         <TabButton 
           active={activeTab === 'events'} 
@@ -78,99 +79,13 @@ function TabButton({ active, onClick, icon, label }) {
 }
 
 // Style Configuration Component
-function StyleConfig() {
-  return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-medium text-gray-800">Style Properties</h3>
-      
-      <div className="space-y-4">
-        <FormGroup label="Background">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Color</label>
-              <div className="flex">
-                <input 
-                  type="text" 
-                  value="#f3f4f6" 
-                  className="flex-1 rounded-l-md border border-gray-300 px-3 py-2 text-sm"
-                />
-                <div className="w-10 rounded-r-md border border-l-0 border-gray-300 flex items-center justify-center">
-                  <div className="w-6 h-6 rounded bg-gray-100 border border-gray-300"></div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Opacity</label>
-              <input 
-                type="number" 
-                value="100" 
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-        </FormGroup>
-        
-        <FormGroup label="Dimensions">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Width</label>
-              <div className="flex">
-                <input 
-                  type="text" 
-                  value="100%" 
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Height</label>
-              <input 
-                type="text" 
-                value="auto" 
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-        </FormGroup>
-        
-        <FormGroup label="Typography">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Font Family</label>
-              <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                <option>Inter</option>
-                <option>Roboto</option>
-                <option>Open Sans</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Font Size</label>
-              <input 
-                type="text" 
-                value="14px" 
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-        </FormGroup>
-      </div>
-      
-      <div className="flex justify-end pt-2">
-        <button className="flex items-center gap-1 text-sm text-blue-600 font-medium">
-          <Code size={16} />
-          Advanced Editor
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // Data Query Configuration Component
 function DataQueryConfig() {
   const [queryMode, setQueryMode] = useState('visual');
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-hidden">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-gray-800">Data Query</h3>
         <div className="flex border rounded-md overflow-hidden">

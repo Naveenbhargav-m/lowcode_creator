@@ -16,6 +16,11 @@ let config = {
   views_path: ["primitives", "containers", "templates", "tab"],
 };
 
+let viewstyle = {
+  "height": "95vh",
+  "width": "95vw",
+};
+
 function ScreenPage() {
 
 
@@ -67,7 +72,7 @@ function VariableView() {
 function ScreenView() {
 
   useEffect(()=> {LoadScreens()}, []);
-  return ( <div className="min-h-screen h-screen w-full bg-white flex">
+  return ( <div className="min-h-screen h-screen w-screen bg-white flex" style={{...viewstyle}}>
     <div className="w-2/12 bg-white p-4 h-screen">
     <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
             <TemplateOptionTabs tabs={["screens", "components"]} onChange={(tab) => { screenLeftTabSignal.value = tab; console.log("templates list value:",screenLeftTabSignal.value); } }/>
@@ -81,14 +86,14 @@ function ScreenView() {
             }
     </div>
 
-    <div className="w-10/12 h-screen bg-background scrollable-div">
+    <div className="w-7/12 h-screen bg-background scrollable-div">
     <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
     <TabComponent />
     <SyncButton title={"sync"} onClick={(e) => {SyncData("_screens", screens);}} style={{marginRight:"40px"}}/>
     </div>
     <ScreenBuilderArea />
     </div>
-    <div className="w-2/12 bg-white h-screen scrollable-div">
+    <div className="w-3/12 bg-white h-screen scrollable-div">
       <ScreenRightPanel />
     </div>
   </div>);
