@@ -1,6 +1,8 @@
 import { useState } from 'preact/hooks';
 import { Code, Database, Palette, Play, X, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import StyleConfig from './config_form_components/styleConfig';
+import DataQueryConfig from './config_form_components/dataConfig';
+import { EventsConfigWrapper } from './config_form_components/event_panel2';
 
 // Main Config Form Component
 export default function ConfigUpdater() {
@@ -51,9 +53,9 @@ export default function ConfigUpdater() {
         {activeTab === 'style' && <StyleConfig />}
         {activeTab === 'data' && <DataQueryConfig />}
         {activeTab === 'events' && (
-          <EventsConfig 
-            expandedEvent={expandedEvent} 
-            toggleEventExpansion={toggleEventExpansion} 
+          <EventsConfigWrapper 
+            // expandedEvent={expandedEvent} 
+            // toggleEventExpansion={toggleEventExpansion} 
           />
         )}
       </div>
@@ -80,102 +82,6 @@ function TabButton({ active, onClick, icon, label }) {
 
 // Style Configuration Component
 
-// Data Query Configuration Component
-function DataQueryConfig() {
-  const [queryMode, setQueryMode] = useState('visual');
-  
-  return (
-    <div className="space-y-6 overflow-hidden">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-800">Data Query</h3>
-        <div className="flex border rounded-md overflow-hidden">
-          <button 
-            className={`px-3 py-1.5 text-xs font-medium ${queryMode === 'visual' ? 'bg-blue-100 text-blue-600' : 'bg-white text-gray-600'}`}
-            onClick={() => setQueryMode('visual')}
-          >
-            Visual
-          </button>
-          <button 
-            className={`px-3 py-1.5 text-xs font-medium ${queryMode === 'code' ? 'bg-blue-100 text-blue-600' : 'bg-white text-gray-600'}`}
-            onClick={() => setQueryMode('code')}
-          >
-            Code
-          </button>
-        </div>
-      </div>
-      
-      {queryMode === 'visual' ? (
-        <div className="space-y-4">
-          <FormGroup label="Data Source">
-            <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-              <option>API Endpoint</option>
-              <option>Database</option>
-              <option>Local State</option>
-              <option>Global State</option>
-            </select>
-          </FormGroup>
-          
-          <FormGroup label="Endpoint URL">
-            <input 
-              type="text" 
-              placeholder="https://api.example.com/data" 
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-          </FormGroup>
-          
-          <FormGroup label="Request Method">
-            <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-              <option>GET</option>
-              <option>POST</option>
-              <option>PUT</option>
-              <option>DELETE</option>
-            </select>
-          </FormGroup>
-          
-          <FormGroup label="Request Headers">
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Key" 
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
-                <input 
-                  type="text" 
-                  placeholder="Value" 
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
-                <button className="p-2 text-gray-500 hover:text-gray-700">
-                  <X size={16} />
-                </button>
-              </div>
-              <button className="flex items-center gap-1 text-sm text-blue-600 font-medium">
-                <Plus size={16} />
-                Add Header
-              </button>
-            </div>
-          </FormGroup>
-        </div>
-      ) : (
-        <div className="bg-gray-50 rounded-md border border-gray-200 p-4 h-64">
-          <pre className="text-sm text-gray-800">
-{`// Define your data query
-async function fetchData() {
-  const response = await fetch('https://api.example.com/data', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-  
-  return await response.json();
-}`}
-          </pre>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // Events Configuration Component
 function EventsConfig({ expandedEvent, toggleEventExpansion }) {
@@ -374,16 +280,6 @@ function ${eventName}Handler(event) {
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-// Form Group Component
-function FormGroup({ label, children }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
-      {children}
     </div>
   );
 }
