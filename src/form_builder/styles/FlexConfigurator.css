@@ -48,15 +48,7 @@
   }
 
   
-  .flex-configurator button {
-    padding: 8px; /* Smaller padding for buttons */
-    font-size: 0.8rem; /* Scale down button text */
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+
   
   .flex-configurator button:hover {
     background-color: #0056b3;
@@ -111,11 +103,6 @@
   overflow: hidden;
 }
 
-.tab-header {
-  display: flex;
-  border-bottom: 1px solid #ddd;
-  background-color: #f8f9fa;
-}
 
 .tab-button {
   flex: 1;
@@ -129,12 +116,3 @@
   transition: background-color 0.3s ease;
 }
 
-.tab-button.active {
-  background-color: #343a40;
-  color: white;
-}
-
-.tab-button:hover {
-  background-color: #343a40;
-  color: white;
-}

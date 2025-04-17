@@ -4,6 +4,8 @@ import {AdvnacedForm} from "../form_builder/configs_view/advanced_form";
 import { FlexConfigTab } from "../form_builder/form_right_elements";
 import FlexConfigurator from "../form_builder/configs_view/flex_config";
 import { generateUID } from "../utils/helpers";
+import ConfigurableForm from "../components/generic/form";
+import ConfigUpdater from "../components/generic/config_form";
 const myconfig = signal({});
 const basicConfig = signal({});
 
@@ -111,12 +113,13 @@ function ScreenRightPanel() {
         localStorage.setItem("screen_config", JSON.stringify(screens));
     }
     return (
-        <div>
-            <FlexConfigTab tablSignal={activeConfigTab} />
-            {activeConfigTab.value === "Basic" ? 
-            <FlexConfigurator onChange={updateStyleback} onSubmit={updateStyleback} existingConfig={basicConfig.value} />
-            : <AdvnacedForm configsInp={myconfig.value} onSubmit={updateDataback} />}
-        </div>
+        // <div>
+        //     <FlexConfigTab tablSignal={activeConfigTab} />
+        //     {activeConfigTab.value === "Basic" ? 
+        //     <FlexConfigurator onChange={updateStyleback} onSubmit={updateStyleback} existingConfig={basicConfig.value} />
+        //     : <AdvnacedForm configsInp={myconfig.value} onSubmit={updateDataback} />}
+        // </div>
+        <ConfigUpdater />
     );
 }
 

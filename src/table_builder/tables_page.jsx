@@ -26,6 +26,7 @@ import DynamicIcon from "../components/custom/dynamic_icon";
 import { generateUID } from "../utils/helpers";
 import { ViewArea } from "../view_creator/view_page";
 import { AdvancedView } from "../view_creator/advnaced_views";
+import { globalStyle } from "../styles/globalStyle";
 
 
 const ResizableTableNode = ({ id, selected, onDeleteField }) => {
@@ -324,9 +325,9 @@ function TableBuilderView() {
 
 function TablesButtonsBar({AddCallBack, SaveCallback}) {
   return (
-    <div className="flex bg-white justify-end p-4" style={{fontSize:"0.8em"}}>
+    <div className="flex bg-white justify-end p-4" style={{fontSize:"0.8em", ...globalStyle}}>
     <button
-    style={{fontSize:"0.9em"}}
+    style={{fontSize:"0.9em",...globalStyle, "color":"white","backgroundColor":"black"}}
     onClick={AddCallBack}
     className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary"
   >
@@ -334,7 +335,7 @@ function TablesButtonsBar({AddCallBack, SaveCallback}) {
   </button>
 
   <button
-  style={{fontSize:"0.9em"}}
+  style={{fontSize:"0.9em",...globalStyle, "color":"white","backgroundColor":"black"}}
     onClick={(e) => SaveCallback()}
     className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary ml-4"
   >
