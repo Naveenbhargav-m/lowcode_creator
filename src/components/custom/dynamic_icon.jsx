@@ -85,9 +85,10 @@ import {
   Pipette,
   Network,
   CircleDot,
+  DiamondPlus,
 } from "lucide-react";
 
-export default function DynamicIcon({ name, size }) {
+export default function DynamicIcon({ name, size , color = "black" }) {
   const icon_map = {
     instagram: <Instagram size={size} />,
     store: <Store size={size} />,
@@ -175,7 +176,8 @@ export default function DynamicIcon({ name, size }) {
     "workflow": <Workflow size={size}/>,
     "pipette": <Pipette size={size}/>,
     "network": <Network size={size}/>,
-    "circle-dot": <CircleDot size={size}/>
+    "circle-dot": <CircleDot size={size}/>,
+    "diamond-plus": <DiamondPlus size={size}/>
   };
 
   return icon_map[name] || null;
