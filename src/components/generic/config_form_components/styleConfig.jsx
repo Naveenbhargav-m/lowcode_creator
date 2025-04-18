@@ -445,29 +445,6 @@ export default function StyleConfig() {
           </div>
         </AccordionSection>
       ))}
-
-      {/* Preview area for the stylesheet */}
-      <div className="border border-gray-200 rounded-md p-4">
-        <h4 className="font-medium text-sm mb-2 text-gray-700">Style Preview</h4>
-        <div className="bg-gray-50 p-3 rounded-md">
-          <pre className="font-mono text-xs overflow-auto max-h-32 text-gray-700">
-            {cssText}
-          </pre>
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-2 pt-3">
-        <button 
-          className="px-4 py-2 text-sm border border-gray-300 rounded-md text-gray-700"
-          onClick={() => setStyleData(initStyleData())}
-        >
-          Reset
-        </button>
-        <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md">
-          Apply Changes
-        </button>
-      </div>
-
       {/* Advanced Editor Modal */}
       <AdvancedEditorModal 
         isOpen={isEditorOpen}

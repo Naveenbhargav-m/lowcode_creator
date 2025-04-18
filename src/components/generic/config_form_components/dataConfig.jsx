@@ -373,20 +373,6 @@ function fetchData() {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-gray-800">Data Query</h3>
         <div className="flex items-center gap-2">
-          <div className="flex border rounded-md overflow-hidden">
-            <button 
-              className={`px-3 py-1.5 text-xs font-medium ${queryMode === 'visual' ? 'bg-blue-100 text-blue-600' : 'bg-white text-gray-600'}`}
-              onClick={() => setQueryMode('visual')}
-            >
-              Visual
-            </button>
-            <button 
-              className={`px-3 py-1.5 text-xs font-medium ${queryMode === 'code' ? 'bg-blue-100 text-blue-600' : 'bg-white text-gray-600'}`}
-              onClick={() => setQueryMode('code')}
-            >
-              Code
-            </button>
-          </div>
           {queryMode === 'visual' && (
             <button 
               className="flex items-center gap-1 text-sm text-blue-600 font-medium"
