@@ -16,6 +16,7 @@ const TextField = ({ value, onChange, placeholder }) => (
     onChange={(e) => onChange(e.target.value)}
     placeholder={placeholder}
     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+    style={{"color": "black"}}
   />
 );
 
@@ -24,6 +25,7 @@ const SelectField = ({ value, onChange, options }) => (
     value={value} 
     onChange={(e) => onChange(e.target.value)}
     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+    style={{"color": "black"}}
   >
     {options.map(option => (
       <option key={option.value} value={option.value}>{option.label}</option>
@@ -94,6 +96,7 @@ const DynamicField = ({ field, value, onChange }) => {
           value={value} 
           onChange={onChange}
           options={field.options}
+
         />
       );
     case 'key-value-list':
@@ -120,6 +123,12 @@ const KeyValueListField = ({ value = [], onChange }) => {
     onChange([...value, { key: '', value: '' }]);
   };
 
+  let style = {
+    "width": "150px",
+    "color": "black"
+
+  };
+
   const removeItem = (index) => {
     const newItems = [...value];
     newItems.splice(index, 1);
@@ -142,6 +151,7 @@ const KeyValueListField = ({ value = [], onChange }) => {
             onChange={(e) => updateItem(index, 'key', e.target.value)}
             placeholder="Key" 
             className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+            style={{...style}}
           />
           <input 
             type="text" 
@@ -149,6 +159,7 @@ const KeyValueListField = ({ value = [], onChange }) => {
             onChange={(e) => updateItem(index, 'value', e.target.value)}
             placeholder="Value" 
             className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+            style={{...style}}
           />
           <button 
             className="p-2 text-gray-500 hover:text-gray-700"
