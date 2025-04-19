@@ -2,7 +2,6 @@ import { activeField, activeTable, setTableField, tables } from "./table_builder
 import { containerConfigmaps } from "../components/configs/container_config_provider";
 import { tablesConfigs } from "../components/configs/tables_configs_provider";
 import DynamicForm from "../components/custom/custom_form";
-import { FormRendererStatic } from "../components/custom/formComponents";
 
 function TableBuilderRight() {
       let activetable = activeTable.value;
@@ -44,13 +43,7 @@ function TableBuilderRight() {
 
       }
       return (
-        <FormRendererStatic formConfig={formConfigs} 
-        formData={{...formData}} styles={{"submit":{"display":"none","margin":"20px 10px", "width":"90%"}}} 
-        onFormChange={(data) =>  {
-          console.log("form response:",data);
-          setTableField(activetable, activefield["id"], data)}}
-        onSubmit={(data) => setTableField(activetable, activefield, data)}
-        />
+        <div></div>
       );
 }
 

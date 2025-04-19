@@ -2,22 +2,18 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Code, X } from 'lucide-react';
 
 
-let textfieldStyle = {
-    "borderRadius": "20px",
+let styles = {
+  "text_field": {"color": "black", "width": "200px"},
+  "color_field": {"color": "black", "width": "200px"},
+  "select_field": {"color": "black", "width": "200px"},
+  "number_field": {"color": "black", "width": "200px"},
+  "label_style": {"padding": "5px 0px"}
 };
 
-let colorPickerStyle = {
-    "borderRadius": "20px",
-    "padding": "8px"
-};
-
-let iconStyle = {
-"color": "black"
-};
-// Reusable form components
+// Form components with simplified styling
 const FormField = ({ label, children }) => (
-  <div>
-    <label className="block text-xs text-gray-500 mb-1" style={{"padding": "4px", "color": "grey"}}>{label}</label>
+  <div className="">
+    <label className="block text-xs text-gray-500 mb-1" style={{...styles["label_style"]}}>{label}</label>
     {children}
   </div>
 );
@@ -26,10 +22,10 @@ const TextField = ({ value, onChange, placeholder }) => (
   <input
     type="text"
     value={value}
-    onChange={onChange}
+    onChange={(e) => onChange(e.target.value)}
     placeholder={placeholder}
-    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-    style={{ color: "black", width:"150px" }}
+    className="w-full rounded-md border border-gray-300 text-sm text-black"
+    style={{...styles["text_field"]}}
   />
 );
 
@@ -37,20 +33,20 @@ const NumberField = ({ value, onChange, min, max }) => (
   <input
     type="number"
     value={value}
-    onChange={onChange}
+    onChange={(e) => onChange(e.target.value)}
     min={min}
     max={max}
-    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-    style={{ color: "black" }}
+    className="w-full rounded-md border border-gray-300 px-3 text-sm text-black"
+    style={{...styles["number_field"]}}
   />
 );
 
 const SelectField = ({ value, onChange, options }) => (
   <select 
     value={value} 
-    onChange={onChange}
-    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-    style={{ color: "black" }}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full rounded-md border border-gray-300 text-sm text-black"
+    style={{...styles["select_field"]}}
   >
     {options.map(option => (
       <option key={option.value} value={option.value}>{option.label}</option>
@@ -58,24 +54,24 @@ const SelectField = ({ value, onChange, options }) => (
   </select>
 );
 
-const ColorField = ({ color, onChange }) => (
-  <div className="flex w-full">
+const ColorField = ({ value, onChange }) => (
+  <div className="flex w-full"
+  style={{...styles["color_field"]}}
+  >
     <input
       type="text"
-      value={color}
+      value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-l-md border border-gray-300 px-3 py-2 text-sm flex-1"
-      style={{ color: "black", width:"150px",...colorPickerStyle }}
+      className="rounded-l-md border border-gray-300 text-sm flex-1 text-black"
+      style={{...styles["text_field"]}}
     />
-    <div className="flex items-center">
-      <input
-        type="color"
-        value={color}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-8 h-8 rounded-r-md border border-l-0 border-gray-300 cursor-pointer"
-        style={{...colorPickerStyle, padding:"0px", "backgroundColor":color, "border": "none"}}
-      />
-    </div>
+    <input
+      type="color"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-12 h-10 rounded-r-md border border-gray-300 cursor-pointer"
+      style={{ backgroundColor: value, padding: "15px"}}
+    />
   </div>
 );
 
@@ -87,7 +83,7 @@ const AccordionSection = ({ title, children, isOpen, toggle }) => (
       onClick={toggle}
     >
       <span className="font-medium text-gray-700">{title}</span>
-      {isOpen ? <ChevronUp size={20} style={{...iconStyle}} /> : <ChevronDown size={20} style={{...iconStyle}} />}
+      {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
     </button>
     {isOpen && <div className="p-4 space-y-4">{children}</div>}
   </div>
@@ -114,8 +110,7 @@ const AdvancedEditorModal = ({ isOpen, onClose, cssText, onChange, onApply }) =>
           <textarea
             value={cssText}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full h-96 font-mono text-sm p-4 border border-gray-300 rounded-md"
-            style={{ color: "black" }}
+            className="w-full h-96 font-mono text-sm p-4 border border-gray-300 rounded-md text-black"
             placeholder="Enter your CSS here..."
           />
         </div>
@@ -146,7 +141,7 @@ const DynamicField = ({ field, value, onChange }) => {
       return (
         <TextField 
           value={value} 
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           placeholder={field.placeholder}
         />
       );
@@ -154,7 +149,7 @@ const DynamicField = ({ field, value, onChange }) => {
       return (
         <NumberField 
           value={value} 
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           min={field.min}
           max={field.max}
         />
@@ -163,14 +158,14 @@ const DynamicField = ({ field, value, onChange }) => {
       return (
         <SelectField 
           value={value} 
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           options={field.options}
         />
       );
     case 'color':
       return (
         <ColorField 
-          color={value} 
+          value={value} 
           onChange={onChange}
         />
       );
@@ -178,47 +173,16 @@ const DynamicField = ({ field, value, onChange }) => {
       return (
         <TextField 
           value={value} 
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={"NA"}
+          onChange={onChange}
+          placeholder="Enter value"
         />
       );
   }
 };
 
-// CSS parser helper
-const parseCssText = (cssText) => {
-  // Simple CSS parser for demonstration
-  const styleData = {};
-  
-  // Extract property-value pairs
-  const propertyRegex = /([a-zA-Z-]+)\s*:\s*([^;]+);/g;
-  let match;
-  
-  while ((match = propertyRegex.exec(cssText)) !== null) {
-    const property = match[1].trim();
-    const value = match[2].trim();
-    
-    // Map CSS properties to our styleData structure
-    // This is a simplified implementation - in a real app, you'd need more robust mapping
-    if (property === 'background-color') {
-      if (!styleData.background) styleData.background = {};
-      styleData.background.color = value;
-    } else if (property === 'color') {
-      if (!styleData.typography) styleData.typography = {};
-      styleData.typography.color = value;
-    } else if (property === 'border-radius') {
-      if (!styleData.borders) styleData.borders = {};
-      styleData.borders.borderRadius = value;
-    }
-    // Add more mappings as needed
-  }
-  
-  return styleData;
-};
-
 // Main component
 export default function StyleConfig() {
-  // Define configuration for sections and fields
+  // Simplified configuration - separated from state values
   const styleConfig = {
     sections: [
       {
@@ -229,22 +193,19 @@ export default function StyleConfig() {
             id: 'color', 
             label: 'Color', 
             type: 'color',
-            cssProperty: 'color',
-            defaultValue: '#000000'
+            cssProperty: 'color'
           },
           { 
             id: 'backgroundColor', 
             label: 'Background Color', 
             type: 'color',
-            cssProperty: 'background-color',
-            defaultValue: '#ffffff'
+            cssProperty: 'background-color'
           },
           { 
             id: 'borderRadius', 
             label: 'Border Radius', 
             type: 'text',
-            cssProperty: 'border-radius',
-            defaultValue: '0'
+            cssProperty: 'border-radius'
           }
         ]
       },
@@ -257,7 +218,6 @@ export default function StyleConfig() {
             label: 'Font Family', 
             type: 'select',
             cssProperty: 'font-family',
-            defaultValue: 'Inter',
             options: [
               { value: 'Inter', label: 'Inter' },
               { value: 'Roboto', label: 'Roboto' },
@@ -268,15 +228,13 @@ export default function StyleConfig() {
             id: 'fontSize', 
             label: 'Font Size', 
             type: 'text',
-            cssProperty: 'font-size',
-            defaultValue: '14px'
+            cssProperty: 'font-size'
           },
           { 
             id: 'fontWeight', 
             label: 'Font Weight', 
             type: 'select',
             cssProperty: 'font-weight',
-            defaultValue: '400',
             options: [
               { value: '300', label: 'Light (300)' },
               { value: '400', label: 'Regular (400)' },
@@ -293,22 +251,32 @@ export default function StyleConfig() {
             id: 'padding', 
             label: 'Padding', 
             type: 'text',
-            cssProperty: 'padding',
-            defaultValue: '0'
+            cssProperty: 'padding'
           },
           { 
             id: 'margin', 
             label: 'Margin', 
             type: 'text',
-            cssProperty: 'margin',
-            defaultValue: '0'
+            cssProperty: 'margin'
           }
         ]
       }
     ]
   };
 
-  // Initialize state for open sections
+  // Default values - separated from configuration
+  const defaultValues = {
+      color: '#000000',
+      backgroundColor: '#ffffff',
+      borderRadius: '0px',
+      fontFamily: 'Inter',
+      fontSize: '14px',
+      fontWeight: '400',
+      padding: '0px',
+      margin: '0px'
+  };
+
+  // State for open sections
   const [openSections, setOpenSections] = useState(() => {
     const initialState = {};
     styleConfig.sections.forEach((section, index) => {
@@ -317,68 +285,31 @@ export default function StyleConfig() {
     return initialState;
   });
 
-  // Initialize styleData from config
-  const initStyleData = () => {
-    const data = {};
-    styleConfig.sections.forEach(section => {
-      data[section.id] = {};
-      section.fields.forEach(field => {
-        data[section.id][field.id] = field.defaultValue;
-      });
-    });
-    return data;
-  };
-
-  // State for style data
-  const [styleData, setStyleData] = useState(initStyleData);
-
+  // State for style values - separate from config
+  const [styleValues, setStyleValues] = useState(defaultValues);
   // State for CSS text
   const [cssText, setCssText] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-  // Generate CSS text from styleData
-  const generateCssText = () => {
-    let css = '';
-    
-    styleConfig.sections.forEach(section => {
-      css += `/* ${section.title} */\n`;
-      section.fields.forEach(field => {
-        const value = styleData[section.id][field.id];
-        css += `${field.cssProperty}: ${value};\n`;
-      });
-      css += '\n';
-    });
-    
-    return css;
-  };
-
-  // Update styleData when CSS text changes
-  const updateStyleFromCss = (newCssText) => {
-    const parsedStyles = parseCssText(newCssText);
-    
-    // Merge parsed styles into styleData
-    // This is a simplified implementation - in a real app, you'd need more robust merging
-    setStyleData(prevData => {
-      const newData = { ...prevData };
+  // Function to update style values and notify parent component
+  function updateStyleValues(sectionId, fieldId, value) {
+    setStyleValues(prev => {
+      const newValues = {
+        ...prev,
+        [fieldId]: value
+      };
       
-      // Merge parsed styles into newData
-      Object.keys(parsedStyles).forEach(sectionId => {
-        if (newData[sectionId]) {
-          newData[sectionId] = {
-            ...newData[sectionId],
-            ...parsedStyles[sectionId]
-          };
-        }
-      });
-      
-      return newData;
+      // Notify parent about the update
+      notifyParentOfUpdate(newValues);
+      return newValues;
     });
-  };
+  }
 
-  // Update CSS text when styleData changes
-  useEffect(() => {
-    setCssText(generateCssText());
-  }, [styleData]);
+  // Function to notify parent component of style updates
+  function notifyParentOfUpdate(styles) {
+    console.log("Updated styles:", styles);
+    // Here you can call any parent function to update styles
+  }
 
   // Toggle function for accordion sections
   const toggleSection = (sectionId) => {
@@ -388,16 +319,51 @@ export default function StyleConfig() {
     }));
   };
 
-  // Helper function to update style data
-  const updateStyle = (sectionId, fieldId, value) => {
-    setStyleData(prev => ({
-      ...prev,
-      [sectionId]: {
-        ...prev[sectionId],
-        [fieldId]: value
-      }
-    }));
+  // Generate CSS text from styleValues
+  const generateCssText = () => {
+    let css = '';
+    
+    styleConfig.sections.forEach(section => {
+      css += `/* ${section.title} */\n`;
+      section.fields.forEach(field => {
+        const value = styleValues[field.id];
+        css += `${field.cssProperty}: ${value};\n`;
+      });
+      css += '\n';
+    });
+    
+    return css;
   };
+
+  // Parse CSS text and update styleValues
+  const parseCssText = (cssText) => {
+    const newValues = { ...styleValues };
+    
+    // Simple regex to extract property-value pairs
+    const propertyRegex = /([a-zA-Z-]+)\s*:\s*([^;]+);/g;
+    let match;
+    
+    while ((match = propertyRegex.exec(cssText)) !== null) {
+      const property = match[1].trim();
+      const value = match[2].trim();
+      
+      // Find the section and field for this CSS property
+      styleConfig.sections.forEach(section => {
+        section.fields.forEach(field => {
+          if (field.cssProperty === property) {
+            newValues[field.id] = value;
+          }
+        });
+      });
+    }
+    
+    return newValues;
+  };
+
+  // Update CSS text when styleValues changes
+  useEffect(() => {
+    setCssText(generateCssText());
+  }, [styleValues]);
 
   // Open advanced editor
   const openAdvancedEditor = () => {
@@ -407,7 +373,9 @@ export default function StyleConfig() {
 
   // Apply changes from advanced editor
   const applyAdvancedChanges = () => {
-    updateStyleFromCss(cssText);
+    const newValues = parseCssText(cssText);
+    setStyleValues(newValues);
+    notifyParentOfUpdate(newValues);
     setIsEditorOpen(false);
   };
 
@@ -432,19 +400,20 @@ export default function StyleConfig() {
           isOpen={openSections[section.id]} 
           toggle={() => toggleSection(section.id)}
         >
-          <div className="">
+          <div className="grid grid-cols-1 gap-4">
             {section.fields.map(field => (
               <FormField key={field.id} label={field.label}>
                 <DynamicField 
                   field={field}
-                  value={styleData[section.id][field.id]} 
-                  onChange={(value) => updateStyle(section.id, field.id, value)}
+                  value={styleValues[field.id]} 
+                  onChange={(value) => updateStyleValues(section.id, field.id, value)}
                 />
               </FormField>
             ))}
           </div>
         </AccordionSection>
       ))}
+
       {/* Advanced Editor Modal */}
       <AdvancedEditorModal 
         isOpen={isEditorOpen}
