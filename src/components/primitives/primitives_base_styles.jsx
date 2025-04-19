@@ -10,6 +10,7 @@ const text_base_style = {
     "margin": "0px",
     border: "1px solid #ccc",
     borderRadius: "4px",
+    "flexDirection": "column"
 };
 
 const number_base_style = {

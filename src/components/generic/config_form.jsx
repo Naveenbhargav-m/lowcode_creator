@@ -5,8 +5,55 @@ import DataQueryConfig from './config_form_components/dataConfig';
 import { EventsConfigWrapper } from './config_form_components/event_panel2';
 
   // Simplified configuration - separated from state values
+  let flexOptions = [
+    { value: 'row', label: 'row' },
+    { value: 'column', label: 'column' },
+    { value: 'row-reverse', label: 'row-reverse' },
+    { value: 'column-reverse', label: 'column-reverse' }
+  ];
+
+  let justify = [
+    { value: 'center', label: 'center' },
+    { value: 'flex-start', label: 'start' },
+    { value: 'flex-end', label: 'end' },
+    { value: 'space-between', label: 'space-between' },
+    { value: 'space-around', label: 'space-between' },
+  ];
   const styleConfig = {
     sections: [
+      {
+        "id": "Flex",
+        "title": "layout",
+        fields: [
+          { 
+            id: 'display', 
+            label: 'Display', 
+            type: 'text',
+            cssProperty: 'display'
+          },
+          { 
+            id: 'flexDirection', 
+            label: 'flex Direction', 
+            type: 'select',
+            cssProperty: 'flexDirection',
+            options: flexOptions,
+          },
+          { 
+            id: 'justifyContent', 
+            label: 'justify', 
+            type: 'select',
+            cssProperty: 'justifyContent',
+            options: justify,
+          },
+          { 
+            id: 'alignItems', 
+            label: 'AlighItems', 
+            type: 'select',
+            cssProperty: 'alignItems',
+            options: justify,
+          },
+        ],
+      },
       {
         id: 'basics',
         title: 'Basic Properties',

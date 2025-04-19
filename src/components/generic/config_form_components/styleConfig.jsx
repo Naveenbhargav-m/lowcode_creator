@@ -191,23 +191,12 @@ export default function StyleConfig({styleConfig, defaultValues, updateCallback}
     });
     return initialState;
   });
-
-
-
-  // State for style values - separate from config
   const [styleValues, setStyleValues] = useState({...defaultValues});
-  console.log("called with style values:",styleValues, defaultValues);
-  // Add this useEffect to update styleValues when defaultValues changes
 useEffect(() => {
   setStyleValues(prevValues => {
-    // If you want to completely replace values with defaultValues
     return {...defaultValues};
-    
-    // Or if you want to merge, but prioritize defaultValues
-    // return {...prevValues, ...defaultValues};
   });
 }, [defaultValues]);
-  // State for CSS text
   const [cssText, setCssText] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
@@ -240,42 +229,25 @@ useEffect(() => {
 
   // Generate CSS text from styleValues
   const generateCssText = () => {
-    let css = '';
-    
-    styleConfig.sections.forEach(section => {
-      css += `/* ${section.title} */\n`;
-      section.fields.forEach(field => {
-        const value = styleValues[field.id];
-        css += `${field.cssProperty}: ${value};\n`;
-      });
-      css += '\n';
-    });
-    
+    let css = '{\n';
+         Object.keys(styleValues).forEach((key, index) => {
+          const value = styleValues[key];
+          css += `${key}: ${value};\n`;
+         });
+      css += '\n}';    
     return css;
   };
 
   // Parse CSS text and update styleValues
   const parseCssText = (cssText) => {
     const newValues = { ...styleValues };
-    
-    // Simple regex to extract property-value pairs
     const propertyRegex = /([a-zA-Z-]+)\s*:\s*([^;]+);/g;
     let match;
-    
     while ((match = propertyRegex.exec(cssText)) !== null) {
       const property = match[1].trim();
       const value = match[2].trim();
-      
-      // Find the section and field for this CSS property
-      styleConfig.sections.forEach(section => {
-        section.fields.forEach(field => {
-          if (field.cssProperty === property) {
-            newValues[field.id] = value;
-          }
-        });
-      });
+      newValues[property] = value;
     }
-    
     return newValues;
   };
 
