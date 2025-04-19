@@ -6,6 +6,10 @@ const text_base_style = {
     fontSize: "0.8em",
     color: "#333",
     lineHeight: "1.4",
+    padding: "8px",
+    "margin": "0px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
 };
 
 const number_base_style = {
@@ -20,6 +24,7 @@ const text_area_base_style = {
     width: "100%",
     height: "100px",
     padding: "8px",
+    "margin": "0px",
     fontSize: "0.9em",
     color: "#333",
     border: "1px solid #ccc",
@@ -116,13 +121,14 @@ const Text_base_config = {
     value:"This is the sample Text Value",
     configs: {
       style: text_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};",
+      data_source: {},
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
     },
 };
 

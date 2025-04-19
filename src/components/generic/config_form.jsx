@@ -4,11 +4,94 @@ import StyleConfig from './config_form_components/styleConfig';
 import DataQueryConfig from './config_form_components/dataConfig';
 import { EventsConfigWrapper } from './config_form_components/event_panel2';
 
+  // Simplified configuration - separated from state values
+  const styleConfig = {
+    sections: [
+      {
+        id: 'basics',
+        title: 'Basic Properties',
+        fields: [
+          { 
+            id: 'color', 
+            label: 'Color', 
+            type: 'color',
+            cssProperty: 'color'
+          },
+          { 
+            id: 'backgroundColor', 
+            label: 'Background Color', 
+            type: 'color',
+            cssProperty: 'background-color'
+          },
+          { 
+            id: 'borderRadius', 
+            label: 'Border Radius', 
+            type: 'text',
+            cssProperty: 'border-radius'
+          }
+        ]
+      },
+      {
+        id: 'typography',
+        title: 'Typography',
+        fields: [
+          { 
+            id: 'fontFamily', 
+            label: 'Font Family', 
+            type: 'select',
+            cssProperty: 'font-family',
+            options: [
+              { value: 'Inter', label: 'Inter' },
+              { value: 'Roboto', label: 'Roboto' },
+              { value: 'Open Sans', label: 'Open Sans' }
+            ]
+          },
+          { 
+            id: 'fontSize', 
+            label: 'Font Size', 
+            type: 'text',
+            cssProperty: 'font-size'
+          },
+          { 
+            id: 'fontWeight', 
+            label: 'Font Weight', 
+            type: 'select',
+            cssProperty: 'font-weight',
+            options: [
+              { value: '300', label: 'Light (300)' },
+              { value: '400', label: 'Regular (400)' },
+              { value: '700', label: 'Bold (700)' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'spacing',
+        title: 'Spacing',
+        fields: [
+          { 
+            id: 'padding', 
+            label: 'Padding', 
+            type: 'text',
+            cssProperty: 'padding'
+          },
+          { 
+            id: 'margin', 
+            label: 'Margin', 
+            type: 'text',
+            cssProperty: 'margin'
+          }
+        ]
+      }
+    ]
+  };
+
 // Main Config Form Component
-export default function ConfigUpdater() {
+export default function ConfigUpdater({initalData , updateCallBack}) {
   const [activeTab, setActiveTab] = useState('style');
   const [expandedEvent, setExpandedEvent] = useState(null);
   
+  console.log("called config updator with inital data:",initalData);
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
@@ -50,7 +133,8 @@ export default function ConfigUpdater() {
       </div>
       
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'style' && <StyleConfig />}
+        {activeTab === 'style' && <StyleConfig styleConfig={styleConfig} 
+        defaultValues={initalData} updateCallback={updateCallBack} />}
         {activeTab === 'data' && <DataQueryConfig />}
         {activeTab === 'events' && (
           <EventsConfigWrapper />

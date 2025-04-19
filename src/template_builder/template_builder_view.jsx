@@ -56,6 +56,7 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
             left: "50%",
             transform: "translate(-50%, -50%)",
             backgroundColor: "white",
+            "color": "black",
             padding: "20px",
             borderRadius: "8px",
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",

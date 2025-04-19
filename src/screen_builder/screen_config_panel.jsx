@@ -9,6 +9,16 @@ import ConfigUpdater from "../components/generic/config_form";
 const myconfig = signal({});
 const basicConfig = signal({});
 
+const defaultValues = {
+    color: '#000000',
+    backgroundColor: '#ffffff',
+    borderRadius: '0px',
+    fontFamily: 'Inter',
+    fontSize: '14px',
+    fontWeight: '400',
+    padding: '0px',
+    margin: '0px'
+};
 function ScreenRightPanel() {
     let actElem = activeElement.value;
     console.log("activity element:",actElem);
@@ -113,13 +123,7 @@ function ScreenRightPanel() {
         localStorage.setItem("screen_config", JSON.stringify(screens));
     }
     return (
-        // <div>
-        //     <FlexConfigTab tablSignal={activeConfigTab} />
-        //     {activeConfigTab.value === "Basic" ? 
-        //     <FlexConfigurator onChange={updateStyleback} onSubmit={updateStyleback} existingConfig={basicConfig.value} />
-        //     : <AdvnacedForm configsInp={myconfig.value} onSubmit={updateDataback} />}
-        // </div>
-        <ConfigUpdater />
+        <ConfigUpdater initalData={basicConfig.value} updateCallBack={() => {}}/>
     );
 }
 

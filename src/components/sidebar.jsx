@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from 'preact/hooks';
-import { Home, Settings, Database, User, BookText, Frame, Workflow, Braces } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Home, Database, Braces, BookText, Frame, Workflow, User, Settings } from 'lucide-react';
+import { AppLogo } from '../branding/logo';
+
 const Sidebar = () => {
   const [expanded, setExpanded] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState('home');
   const sidebarRef = useRef(null);
 
   // Handle outside clicks to collapse sidebar
@@ -23,54 +25,149 @@ const Sidebar = () => {
     setExpanded(false);
   };
 
-  let options = ["Home", "Containers", "Queries","Forms", "Screens", "Workflows","Users", "Settings"];
-  let icons = [
-      <Home className="h-6 w-6" />,
-      <Database className="h-6 w-6"/>, 
-      <Braces className="h-6 w-6"  />,
-      <BookText className="h-6 w-6"/>,
-      <Frame className="h-6 w-6"/>,
-      <Workflow className="h-6 w-6"/>,
-      <User className="h-6 w-6" />, 
-      <Settings className="h-6 w-6" />,
+  // Menu items configuration
+  const menuItems = [
+    { name: "Home", value: "home", icon: <Home size={20} /> },
+    { name: "Containers", value: "containers", icon: <Database size={20} /> },
+    { name: "Queries", value: "queries", icon: <Braces size={20} /> },
+    { name: "Forms", value: "forms", icon: <BookText size={20} /> },
+    { name: "Screens", value: "screens", icon: <Frame size={20} /> },
+    { name: "Workflows", value: "workflows", icon: <Workflow size={20} /> },
+    { name: "Users", value: "users", icon: <User size={20} /> },
+    { name: "Settings", value: "settings", icon: <Settings size={20} /> }
   ];
-  let values = ["home", "containers", "queries","forms", "screens", "workflows", "users", "settings"];
+
+  // CSS styles as objects
+  const styles = {
+    container: {
+      display: 'flex',
+      minHeight: '100vh',
+      height: '100%'
+    },
+    sidebar: {
+      backgroundColor: 'white',
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: '16px 8px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      width: expanded ? '200px' : '64px',
+      transition: 'width 0.3s ease-in-out',
+      overflow: 'hidden'
+    },
+    logoContainer: {
+      marginTop: '24px',
+      marginBottom: '32px',
+      display: 'flex',
+      justifyContent: 'center'
+    },
+    logo: {
+      height: '32px',
+      width: '32px',
+      backgroundColor: '#10b981', // Green color
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    menuList: {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      paddingTop: "100px",
+      gap: '8px'
+    },
+    menuItem: (isSelected) => ({
+      cursor: 'pointer',
+      borderRadius: '6px',
+      backgroundColor: isSelected ? '#10b981' : 'transparent',
+      transition: 'background-color 0.2s ease',
+      ':hover': {
+        backgroundColor: isSelected ? '#10b981' : '#e6f7f1' // Light green on hover
+      }
+    }),
+    menuLink: (isSelected, isExpanded) => ({
+      display: 'flex',
+      alignItems: 'center',
+      padding: '10px',
+      textDecoration: 'none',
+      justifyContent: isExpanded ? 'flex-start' : 'center',
+      height: '40px'
+    }),
+    iconContainer: (isSelected) => ({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: isSelected ? 'white' : '#374151'
+    }),
+    menuText: (isSelected) => ({
+      marginLeft: '12px',
+      transition: 'opacity 0.2s ease',
+      fontWeight: 500,
+      color: isSelected ? 'white' : '#374151',
+      whiteSpace: 'nowrap'
+    })
+  };
 
   return (
-    <div className="flex min-h-screen h-full">
+    <div style={styles.container}>
       <div
         ref={sidebarRef}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
-        className={`bg-white text-black h-screen flex flex-col items-center p-2 relative 
-        ${expanded ? 'w-48' : 'w-14'}
-        transition-width duration-500 ease-in-out`}
+        style={styles.sidebar}
       >
-        <ul className="mt-10 space-y-4 w-full">
-          {options.map((value, index) => (
-            <li
-              key={index}
-              className={`cursor-pointer p-2 rounded-md flex items-center 
-              hover:bg-highlight transition-colors duration-300 ease-in-out ${
-                selected === values[index] ? 'bg-highlight' : ''
-              }`}
-            >
-              <a
-                href={`/${values[index]}`}
-                onClick={() => handleItemClick(values[index])}
-                className="flex items-center w-full no-underline text-white"
-                style={{ textDecoration: 'none', color: 'inherit' }} // Prevent blue and underline
+        <div style={styles.logoContainer}>
+          <div style={styles.logo}>
+            <AppLogo />
+           </div>
+        </div>
+        
+        <div style={styles.menuList}>
+          {menuItems.map((item) => {
+            const isSelected = selected === item.value;
+            
+            return (
+              <div
+                key={item.value}
+                style={{
+                  ...styles.menuItem(isSelected),
+                  backgroundColor: isSelected ? '#10b981' : 'transparent',
+                  ':hover': undefined // Can't use pseudo-classes in inline styles
+                }}
+                onMouseOver={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = '#e6f7f1';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
               >
-                <div style={{color:"black"}}>{icons[index]}</div>
-                {expanded && (
-                  <span style={{"color":"black"}} className="ml-4 transition-opacity duration-300 ease-in-out">
-                    {value}
-                  </span>
-                )}
-              </a>
-            </li>
-          ))}
-        </ul>
+                <a
+                  href={`/${item.value}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleItemClick(item.value);
+                  }}
+                  style={styles.menuLink(isSelected, expanded)}
+                >
+                  <div style={styles.iconContainer(isSelected)}>
+                    {item.icon}
+                  </div>
+                  {expanded && (
+                    <span style={styles.menuText(isSelected)}>
+                      {item.name}
+                    </span>
+                  )}
+                </a>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
