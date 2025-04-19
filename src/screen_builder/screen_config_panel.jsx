@@ -123,7 +123,7 @@ function ScreenRightPanel() {
         localStorage.setItem("screen_config", JSON.stringify(screens));
     }
     return (
-        <ConfigUpdater initalData={basicConfig.value} updateCallBack={(newdata) => {console.log("new data from the panel:",newdata);}}/>
+        <ConfigUpdater initalData={basicConfig.value} updateCallBack={(newdata) => {updateStyleback(newdata)}}/>
     );
 }
 
