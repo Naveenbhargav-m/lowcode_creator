@@ -1,7 +1,6 @@
 import { activeField, activeTable, setTableField, tables } from "./table_builder_state";
 import { containerConfigmaps } from "../components/configs/container_config_provider";
 import { tablesConfigs } from "../components/configs/tables_configs_provider";
-import DynamicForm from "../components/custom/custom_form";
 
 function TableBuilderRight() {
       let activetable = activeTable.value;
