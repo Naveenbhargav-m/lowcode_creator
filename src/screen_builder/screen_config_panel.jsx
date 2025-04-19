@@ -1,24 +1,61 @@
 import { signal } from "@preact/signals"; // Assuming you have this import in your file
-import { activeConfigTab, activeElement, activeScreen, screenElementAdded, screenElements, screens, screenView } from "./screen_state";
-import {AdvnacedForm} from "../form_builder/configs_view/advanced_form";
-import { FlexConfigTab } from "../form_builder/form_right_elements";
-import FlexConfigurator from "../form_builder/configs_view/flex_config";
+import {activeElement, activeScreen, screenElementAdded, screenElements, screens, screenView } from "./screen_state";
 import { generateUID } from "../utils/helpers";
-import ConfigurableForm from "../components/generic/form";
 import ConfigUpdater from "../components/generic/config_form";
 const myconfig = signal({});
 const basicConfig = signal({});
 
-const defaultValues = {
-    color: '#000000',
-    backgroundColor: '#ffffff',
-    borderRadius: '0px',
-    fontFamily: 'Inter',
-    fontSize: '14px',
-    fontWeight: '400',
-    padding: '0px',
-    margin: '0px'
-};
+const DEFAULT_VALUES = {
+    dataSource: 'api',
+    endpoint: 'https://api.example.com/data',
+    method: 'GET',
+    headers: [{ key: 'Content-Type', value: 'application/json' }]
+  };
+
+
+  const QUERY_CONFIG = {
+    fields: [
+      { 
+        id: 'dataSource', 
+        label: 'Data Source', 
+        type: 'select',
+        options: [
+          { value: 'api', label: 'API Endpoint' },
+          { value: 'query', label: 'Query' },
+          { value: 'localStorage', label: 'Local State' },
+          { value: 'globalState', label: 'Global State' }
+        ],
+        dependsOn: null
+      },
+      { 
+        id: 'endpoint', 
+        label: 'Endpoint URL', 
+        type: 'text',
+        placeholder: 'https://api.example.com/data',
+        dependsOn: { field: 'dataSource', value: 'api' }
+      },
+      { 
+        id: 'method', 
+        label: 'Request Method', 
+        type: 'select',
+        options: [
+          { value: 'GET', label: 'GET' },
+          { value: 'POST', label: 'POST' },
+          { value: 'PUT', label: 'PUT' },
+          { value: 'DELETE', label: 'DELETE' }
+        ],
+        dependsOn: { field: 'dataSource', value: 'api' }
+      },
+      { 
+        id: 'headers', 
+        label: 'Request Headers', 
+        type: 'key-value-list',
+        dependsOn: { field: 'dataSource', value: 'api' }
+      }
+    ]
+  };
+  
+
 function ScreenRightPanel() {
     let actElem = activeElement.value;
     console.log("activity element:",actElem);
@@ -123,9 +160,13 @@ function ScreenRightPanel() {
         localStorage.setItem("screen_config", JSON.stringify(screens));
     }
     return (
-        <ConfigUpdater initalData={basicConfig.value} updateCallBack={(newdata) => {updateStyleback(newdata)}}/>
+        <ConfigUpdater 
+        initalData={basicConfig.value} 
+        updateCallBack={(newdata) => {updateStyleback(newdata)}}
+        dataSourceConfig={QUERY_CONFIG}
+        dataSources={DEFAULT_VALUES}
+        onDataSourceUpdate={(newdata) => {console.log("updated Data source:",newdata)}}
+        />
     );
 }
-
-
 export { ScreenRightPanel };

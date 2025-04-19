@@ -1,57 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Plus, Code, ChevronDown, ChevronUp } from 'lucide-react';
-
-// Default values separated from field configuration
-const DEFAULT_VALUES = {
-  dataSource: 'api',
-  endpoint: 'https://api.example.com/data',
-  method: 'GET',
-  headers: [{ key: 'Content-Type', value: 'application/json' }]
-};
-
-// Query configuration schema - describes structure only
-const QUERY_CONFIG = {
-  fields: [
-    { 
-      id: 'dataSource', 
-      label: 'Data Source', 
-      type: 'select',
-      options: [
-        { value: 'api', label: 'API Endpoint' },
-        { value: 'database', label: 'Database' },
-        { value: 'localStorage', label: 'Local State' },
-        { value: 'globalState', label: 'Global State' }
-      ],
-      dependsOn: null
-    },
-    { 
-      id: 'endpoint', 
-      label: 'Endpoint URL', 
-      type: 'text',
-      placeholder: 'https://api.example.com/data',
-      dependsOn: { field: 'dataSource', value: 'api' }
-    },
-    { 
-      id: 'method', 
-      label: 'Request Method', 
-      type: 'select',
-      options: [
-        { value: 'GET', label: 'GET' },
-        { value: 'POST', label: 'POST' },
-        { value: 'PUT', label: 'PUT' },
-        { value: 'DELETE', label: 'DELETE' }
-      ],
-      dependsOn: { field: 'dataSource', value: 'api' }
-    },
-    { 
-      id: 'headers', 
-      label: 'Request Headers', 
-      type: 'key-value-list',
-      dependsOn: { field: 'dataSource', value: 'api' }
-    }
-  ]
-};
-
 // Reusable form components
 const FormGroup = ({ label, children }) => (
   <div className="mb-4">
@@ -295,7 +243,7 @@ const parseCodeToData = (code) => {
   if (code.includes('localStorage')) {
     dataSource = 'localStorage';
   } else if (code.includes('db.collection')) {
-    dataSource = 'database';
+    dataSource = 'query';
   } else if (code.includes('store.getState')) {
     dataSource = 'globalState';
   }
@@ -309,9 +257,9 @@ const parseCodeToData = (code) => {
 };
 
 // Main component
-export default function DataQueryConfig({ onUpdate = (data) => {console.log("updated data source", data);} }) {
+export default function DataQueryConfig({ config,initalData ,onUpdate }) {
   // Initialize query data with default values
-  const [queryData, setQueryData] = useState({ ...DEFAULT_VALUES });
+  const [queryData, setQueryData] = useState({ ...initalData });
   const [queryMode, setQueryMode] = useState('visual');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [codeText, setCodeText] = useState('');
@@ -337,7 +285,7 @@ export default function DataQueryConfig({ onUpdate = (data) => {console.log("upd
   
   // Reset query data to defaults
   const resetQueryData = useCallback(() => {
-    setQueryData({ ...DEFAULT_VALUES });
+    setQueryData({ ...initalData });
   }, []);
   
   // Open code editor
@@ -384,7 +332,7 @@ export default function DataQueryConfig({ onUpdate = (data) => {console.log("upd
       
       {queryMode === 'visual' ? (
         <div className="space-y-4">
-          {QUERY_CONFIG.fields.map(field => 
+          {config.fields.map(field => 
             shouldShowField(field) && (
               <FormGroup key={field.id} label={field.label}>
                 <DynamicField 

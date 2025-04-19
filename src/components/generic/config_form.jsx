@@ -4,7 +4,6 @@ import StyleConfig from './config_form_components/styleConfig';
 import DataQueryConfig from './config_form_components/dataConfig';
 import { EventsConfigWrapper } from './config_form_components/event_panel2';
 
-  // Simplified configuration - separated from state values
   let flexOptions = [
     { value: 'row', label: 'row' },
     { value: 'column', label: 'column' },
@@ -134,21 +133,10 @@ import { EventsConfigWrapper } from './config_form_components/event_panel2';
   };
 
 // Main Config Form Component
-export default function ConfigUpdater({initalData , updateCallBack}) {
-  const [activeTab, setActiveTab] = useState('style');
-  const [expandedEvent, setExpandedEvent] = useState(null);
-  
-  console.log("called config updator with inital data:",initalData);
+export default function ConfigUpdater({initalData , updateCallBack, dataSourceConfig, dataSources, onDataSourceUpdate}) {
+  const [activeTab, setActiveTab] = useState('style');  
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-  };
-  
-  const toggleEventExpansion = (eventName) => {
-    if (expandedEvent === eventName) {
-      setExpandedEvent(null);
-    } else {
-      setExpandedEvent(eventName);
-    }
   };
 
   return (
@@ -182,7 +170,7 @@ export default function ConfigUpdater({initalData , updateCallBack}) {
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === 'style' && <StyleConfig styleConfig={styleConfig} 
         defaultValues={initalData} updateCallback={updateCallBack} />}
-        {activeTab === 'data' && <DataQueryConfig />}
+        {activeTab === 'data' && <DataQueryConfig initalData={dataSources} config={dataSourceConfig} onUpdate={dataSourceConfig} />}
         {activeTab === 'events' && (
           <EventsConfigWrapper />
         )}
