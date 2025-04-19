@@ -1,5 +1,56 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Plus, Code, ChevronDown, ChevronUp } from 'lucide-react';
+
+// Default values separated from field configuration
+const DEFAULT_VALUES = {
+  dataSource: 'api',
+  endpoint: 'https://api.example.com/data',
+  method: 'GET',
+  headers: [{ key: 'Content-Type', value: 'application/json' }]
+};
+
+// Query configuration schema - describes structure only
+const QUERY_CONFIG = {
+  fields: [
+    { 
+      id: 'dataSource', 
+      label: 'Data Source', 
+      type: 'select',
+      options: [
+        { value: 'api', label: 'API Endpoint' },
+        { value: 'database', label: 'Database' },
+        { value: 'localStorage', label: 'Local State' },
+        { value: 'globalState', label: 'Global State' }
+      ],
+      dependsOn: null
+    },
+    { 
+      id: 'endpoint', 
+      label: 'Endpoint URL', 
+      type: 'text',
+      placeholder: 'https://api.example.com/data',
+      dependsOn: { field: 'dataSource', value: 'api' }
+    },
+    { 
+      id: 'method', 
+      label: 'Request Method', 
+      type: 'select',
+      options: [
+        { value: 'GET', label: 'GET' },
+        { value: 'POST', label: 'POST' },
+        { value: 'PUT', label: 'PUT' },
+        { value: 'DELETE', label: 'DELETE' }
+      ],
+      dependsOn: { field: 'dataSource', value: 'api' }
+    },
+    { 
+      id: 'headers', 
+      label: 'Request Headers', 
+      type: 'key-value-list',
+      dependsOn: { field: 'dataSource', value: 'api' }
+    }
+  ]
+};
 
 // Reusable form components
 const FormGroup = ({ label, children }) => (
@@ -16,7 +67,7 @@ const TextField = ({ value, onChange, placeholder }) => (
     onChange={(e) => onChange(e.target.value)}
     placeholder={placeholder}
     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-    style={{"color": "black"}}
+    style={{ color: "black" }}
   />
 );
 
@@ -25,13 +76,107 @@ const SelectField = ({ value, onChange, options }) => (
     value={value} 
     onChange={(e) => onChange(e.target.value)}
     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-    style={{"color": "black"}}
+    style={{ color: "black" }}
   >
     {options.map(option => (
       <option key={option.value} value={option.value}>{option.label}</option>
     ))}
   </select>
 );
+
+// Key-Value List Field Component
+const KeyValueListField = ({ value = [], onChange }) => {
+  const addItem = () => {
+    onChange([...value, { key: '', value: '' }]);
+  };
+
+  const removeItem = (index) => {
+    const newItems = [...value];
+    newItems.splice(index, 1);
+    onChange(newItems);
+  };
+
+  const updateItem = (index, field, newValue) => {
+    const newItems = [...value];
+    newItems[index] = { ...newItems[index], [field]: newValue };
+    onChange(newItems);
+  };
+
+  return (
+    <div className="space-y-2">
+      {value.map((item, index) => (
+        <div key={index} className="flex gap-2">
+          <input 
+            type="text" 
+            value={item.key} 
+            onChange={(e) => updateItem(index, 'key', e.target.value)}
+            placeholder="Key" 
+            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+            style={{ color: "black", width: "150px" }}
+          />
+          <input 
+            type="text" 
+            value={item.value} 
+            onChange={(e) => updateItem(index, 'value', e.target.value)}
+            placeholder="Value" 
+            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+            style={{ color: "black", width: "150px" }}
+          />
+          <button 
+            className="p-2 text-gray-500 hover:text-gray-700"
+            onClick={() => removeItem(index)}
+          >
+            <X size={16} />
+          </button>
+        </div>
+      ))}
+      <button 
+        className="flex items-center gap-1 text-sm text-blue-600 font-medium"
+        onClick={addItem}
+      >
+        <Plus size={16} />
+        Add Item
+      </button>
+    </div>
+  );
+};
+
+// Dynamic field renderer based on field type
+const DynamicField = ({ field, value, onChange }) => {
+  switch (field.type) {
+    case 'text':
+      return (
+        <TextField 
+          value={value} 
+          onChange={onChange}
+          placeholder={field.placeholder}
+        />
+      );
+    case 'select':
+      return (
+        <SelectField 
+          value={value} 
+          onChange={onChange}
+          options={field.options}
+        />
+      );
+    case 'key-value-list':
+      return (
+        <KeyValueListField 
+          value={value} 
+          onChange={onChange}
+        />
+      );
+    default:
+      return (
+        <TextField 
+          value={value} 
+          onChange={onChange}
+          placeholder="NA"
+        />
+      );
+  }
+};
 
 // Advanced Code Editor Modal Component
 const CodeEditorModal = ({ isOpen, onClose, code, onChange, onApply }) => {
@@ -79,294 +224,146 @@ const CodeEditorModal = ({ isOpen, onClose, code, onChange, onApply }) => {
   );
 };
 
-// Dynamic field renderer based on field type
-const DynamicField = ({ field, value, onChange }) => {
-  switch (field.type) {
-    case 'text':
-      return (
-        <TextField 
-          value={value} 
-          onChange={onChange}
-          placeholder={field.placeholder}
-        />
-      );
-    case 'select':
-      return (
-        <SelectField 
-          value={value} 
-          onChange={onChange}
-          options={field.options}
-
-        />
-      );
-    case 'key-value-list':
-      return (
-        <KeyValueListField 
-          value={value} 
-          onChange={onChange}
-        />
-      );
-    default:
-      return (
-        <TextField 
-          value={value} 
-          onChange={onChange}
-          placeholder={"NA"}
-        />
-      );
-  }
-};
-
-// Key-Value List Field Component
-const KeyValueListField = ({ value = [], onChange }) => {
-  const addItem = () => {
-    onChange([...value, { key: '', value: '' }]);
-  };
-
-  let style = {
-    "width": "150px",
-    "color": "black"
-
-  };
-
-  const removeItem = (index) => {
-    const newItems = [...value];
-    newItems.splice(index, 1);
-    onChange(newItems);
-  };
-
-  const updateItem = (index, field, newValue) => {
-    const newItems = [...value];
-    newItems[index] = { ...newItems[index], [field]: newValue };
-    onChange(newItems);
-  };
-
-  return (
-    <div className="space-y-2">
-      {value.map((item, index) => (
-        <div key={index} className="flex gap-2">
-          <input 
-            type="text" 
-            value={item.key} 
-            onChange={(e) => updateItem(index, 'key', e.target.value)}
-            placeholder="Key" 
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
-            style={{...style}}
-          />
-          <input 
-            type="text" 
-            value={item.value} 
-            onChange={(e) => updateItem(index, 'value', e.target.value)}
-            placeholder="Value" 
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
-            style={{...style}}
-          />
-          <button 
-            className="p-2 text-gray-500 hover:text-gray-700"
-            onClick={() => removeItem(index)}
-          >
-            <X size={16} />
-          </button>
-        </div>
-      ))}
-      <button 
-        className="flex items-center gap-1 text-sm text-blue-600 font-medium"
-        onClick={addItem}
-      >
-        <Plus size={16} />
-        Add Item
-      </button>
-    </div>
-  );
-};
-
-export default function DataQueryConfig() {
-  // Query mode toggle
-  const [queryMode, setQueryMode] = useState('visual');
-  
-  // Config for query builder
-  const queryConfig = {
-    fields: [
-      { 
-        id: 'dataSource', 
-        label: 'Data Source', 
-        type: 'select',
-        options: [
-          { value: 'api', label: 'API Endpoint' },
-          { value: 'database', label: 'Database' },
-          { value: 'localStorage', label: 'Local State' },
-          { value: 'globalState', label: 'Global State' }
-        ],
-        defaultValue: 'api'
-      },
-      { 
-        id: 'endpoint', 
-        label: 'Endpoint URL', 
-        type: 'text',
-        placeholder: 'https://api.example.com/data',
-        defaultValue: 'https://api.example.com/data',
-        dependsOn: { field: 'dataSource', value: 'api' }
-      },
-      { 
-        id: 'method', 
-        label: 'Request Method', 
-        type: 'select',
-        options: [
-          { value: 'GET', label: 'GET' },
-          { value: 'POST', label: 'POST' },
-          { value: 'PUT', label: 'PUT' },
-          { value: 'DELETE', label: 'DELETE' }
-        ],
-        defaultValue: 'GET',
-        dependsOn: { field: 'dataSource', value: 'api' }
-      },
-      { 
-        id: 'headers', 
-        label: 'Request Headers', 
-        type: 'key-value-list',
-        defaultValue: [{ key: 'Content-Type', value: 'application/json' }],
-        dependsOn: { field: 'dataSource', value: 'api' }
-      }
-    ]
-  };
-
-  // Initialize query data from config
-  const initQueryData = () => {
-    const data = {};
-    queryConfig.fields.forEach(field => {
-      data[field.id] = field.defaultValue;
-    });
-    return data;
-  };
-
-  // State for query data
-  const [queryData, setQueryData] = useState(initQueryData);
-  
-  // State for code editor
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [codeText, setCodeText] = useState('');
-  
-  // Generate code from queryData
-  const generateCode = () => {
-    if (queryData.dataSource === 'api') {
-      const headersStr = queryData.headers && queryData.headers.length > 0
-        ? `\n    headers: {\n${queryData.headers
-            .filter(h => h.key.trim())
-            .map(h => `      '${h.key}': '${h.value}'`)
-            .join(',\n')}\n    }`
-        : '';
-        
-      return `// Define your data query
+// Code generation utility
+const codeGenerators = {
+  api: (data) => {
+    const headersStr = data.headers && data.headers.length > 0
+      ? `\n    headers: {\n${data.headers
+          .filter(h => h.key.trim())
+          .map(h => `      '${h.key}': '${h.value}'`)
+          .join(',\n')}\n    }`
+      : '';
+      
+    return `// Define your data query
 async function fetchData() {
-  const response = await fetch('${queryData.endpoint}', {
-    method: '${queryData.method}',${headersStr}
+  const response = await fetch('${data.endpoint}', {
+    method: '${data.method}',${headersStr}
   });
   
   return await response.json();
 }`;
-    } else if (queryData.dataSource === 'database') {
-      return `// Database query example
+  },
+  database: () => `// Database query example
 async function fetchData() {
   // Connect to database and execute query
   // Replace with actual database interaction
   return db.collection('items').findAll();
-}`;
-    } else if (queryData.dataSource === 'localStorage') {
-      return `// Get data from local storage
+}`,
+  localStorage: () => `// Get data from local storage
 function fetchData() {
   const data = localStorage.getItem('appData');
   return data ? JSON.parse(data) : null;
-}`;
-    } else {
-      return `// Get data from global state
+}`,
+  globalState: () => `// Get data from global state
 function fetchData() {
   // Example using Redux or similar state management
   return store.getState().data;
-}`;
+}`
+};
+
+// Code parser utility
+const parseCodeToData = (code) => {
+  // Extract endpoint URL
+  const endpointMatch = code.match(/fetch\(['"]([^'"]+)['"]/);
+  const endpoint = endpointMatch ? endpointMatch[1] : '';
+  
+  // Extract method
+  const methodMatch = code.match(/method:\s*['"]([^'"]+)['"]/);
+  const method = methodMatch ? methodMatch[1] : 'GET';
+  
+  // Extract headers
+  const headersRegex = /headers:\s*{([^}]*)}/s;
+  const headersMatch = code.match(headersRegex);
+  const headers = [];
+  
+  if (headersMatch) {
+    const headersPart = headersMatch[1];
+    const headerEntries = headersPart.match(/'([^']+)':\s*'([^']+)'/g);
+    
+    if (headerEntries) {
+      headerEntries.forEach(entry => {
+        const parts = entry.match(/'([^']+)':\s*'([^']+)'/);
+        if (parts && parts.length >= 3) {
+          headers.push({ key: parts[1], value: parts[2] });
+        }
+      });
     }
+  }
+  
+  // Determine data source
+  let dataSource = 'api';
+  if (code.includes('localStorage')) {
+    dataSource = 'localStorage';
+  } else if (code.includes('db.collection')) {
+    dataSource = 'database';
+  } else if (code.includes('store.getState')) {
+    dataSource = 'globalState';
+  }
+  
+  return {
+    dataSource,
+    endpoint,
+    method,
+    headers: headers.length > 0 ? headers : [{ key: '', value: '' }]
   };
+};
+
+// Main component
+export default function DataQueryConfig({ onUpdate = (data) => {console.log("updated data source", data);} }) {
+  // Initialize query data with default values
+  const [queryData, setQueryData] = useState({ ...DEFAULT_VALUES });
+  const [queryMode, setQueryMode] = useState('visual');
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [codeText, setCodeText] = useState('');
+  
+  // Generate code based on current query data
+  const generateCode = useCallback(() => {
+    const generator = codeGenerators[queryData.dataSource] || codeGenerators.api;
+    return generator(queryData);
+  }, [queryData]);
   
   // Update code when queryData changes
   useEffect(() => {
     setCodeText(generateCode());
-  }, [queryData]);
+  }, [queryData, generateCode]);
   
-  // Update queryData based on code changes
-  const parseCodeToData = (code) => {
-    // This is a simplified parser - in a real app you'd need more robust parsing
-    // Extract endpoint URL
-    const endpointMatch = code.match(/fetch\(['"]([^'"]+)['"]/);
-    const endpoint = endpointMatch ? endpointMatch[1] : '';
-    
-    // Extract method
-    const methodMatch = code.match(/method:\s*['"]([^'"]+)['"]/);
-    const method = methodMatch ? methodMatch[1] : 'GET';
-    
-    // Extract headers
-    const headersRegex = /headers:\s*{([^}]*)}/s;
-    const headersMatch = code.match(headersRegex);
-    const headers = [];
-    
-    if (headersMatch) {
-      const headersPart = headersMatch[1];
-      const headerEntries = headersPart.match(/'([^']+)':\s*'([^']+)'/g);
-      
-      if (headerEntries) {
-        headerEntries.forEach(entry => {
-          const parts = entry.match(/'([^']+)':\s*'([^']+)'/);
-          if (parts && parts.length >= 3) {
-            headers.push({ key: parts[1], value: parts[2] });
-          }
-        });
-      }
-    }
-    
-    // Determine data source
-    let dataSource = 'api';
-    if (code.includes('localStorage')) {
-      dataSource = 'localStorage';
-    } else if (code.includes('db.collection')) {
-      dataSource = 'database';
-    } else if (code.includes('store.getState')) {
-      dataSource = 'globalState';
-    }
-    
-    return {
-      dataSource,
-      endpoint,
-      method,
-      headers: headers.length > 0 ? headers : [{ key: '', value: '' }]
-    };
-  };
+  // Handle field updates and notify parent component
+  const updateField = useCallback((fieldId, value) => {
+    setQueryData(prev => {
+      const newData = { ...prev, [fieldId]: value };
+      return newData;
+    });
+  }, []);
   
-  // Apply code changes
-  const applyCodeChanges = () => {
-    const newData = parseCodeToData(codeText);
-    setQueryData({...queryData, ...newData});
-    setIsEditorOpen(false);
-  };
+  // Reset query data to defaults
+  const resetQueryData = useCallback(() => {
+    setQueryData({ ...DEFAULT_VALUES });
+  }, []);
   
-  // Handle field updates
-  const updateField = (fieldId, value) => {
-    setQueryData(prev => ({
-      ...prev,
-      [fieldId]: value
-    }));
-  };
-
   // Open code editor
-  const openCodeEditor = () => {
+  const openCodeEditor = useCallback(() => {
     setCodeText(generateCode());
     setIsEditorOpen(true);
-  };
+  }, [generateCode]);
   
-  // Should field be shown based on dependencies
-  const shouldShowField = (field) => {
+  // Apply code changes
+  const applyCodeChanges = useCallback(() => {
+    const newData = parseCodeToData(codeText);
+    setQueryData(prev => ({ ...prev, ...newData }));
+    setIsEditorOpen(false);
+  }, [codeText]);
+  
+  // Save changes and notify parent
+  const saveChanges = useCallback(() => {
+    onUpdate(queryData);
+  }, [queryData, onUpdate]);
+  
+  // Check if field should be displayed based on dependencies
+  const shouldShowField = useCallback((field) => {
     if (!field.dependsOn) return true;
-    
     const { field: depField, value: depValue } = field.dependsOn;
     return queryData[depField] === depValue;
-  };
+  }, [queryData]);
 
   return (
     <div className="space-y-6 overflow-hidden max-w-2xl">
@@ -387,7 +384,7 @@ function fetchData() {
       
       {queryMode === 'visual' ? (
         <div className="space-y-4">
-          {queryConfig.fields.map(field => 
+          {QUERY_CONFIG.fields.map(field => 
             shouldShowField(field) && (
               <FormGroup key={field.id} label={field.label}>
                 <DynamicField 
@@ -410,11 +407,14 @@ function fetchData() {
       <div className="flex justify-end gap-2 pt-3">
         <button 
           className="px-4 py-2 text-sm border border-gray-300 rounded-md text-gray-700"
-          onClick={() => setQueryData(initQueryData())}
+          onClick={resetQueryData}
         >
           Reset
         </button>
-        <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md">
+        <button 
+          className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md"
+          onClick={saveChanges}
+        >
           Apply Query
         </button>
       </div>

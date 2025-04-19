@@ -23,30 +23,32 @@ function FlowNode({ data, name, icon, color, children }) {
     height: "inherit",
     width: "inherit",
     alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
+    justifyContent: "space-around",
+    flexDirection: "row",
     backgroundColor: "white", // Zinc-900
     color: "black", // Slate-50
     fontSize: "0.9em",
     margin: "10px 0px",
     padding: "12px 16px",
     borderRadius: "12px",
-    border: `10px solid ${color}`,
+    border: `4px solid ${color}`,
     boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`,
     transition: "all 0.2s ease-in-out",
     cursor: "pointer",
     position: "relative",
   };
-
   const iconContainerStyle = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: color,
-    padding: "8px",
-    borderRadius: "50%",
-    marginBottom: "8px",
+    flexShrink: 0
   };
+
+  const contentStyle = {
+    display: "flex",
+    flexDirection: "column"
+  };
+
 
   const labelStyle = {
     fontWeight: "500",
@@ -56,7 +58,7 @@ function FlowNode({ data, name, icon, color, children }) {
 
   return (
     <div onClick={handleNodeClick}>
-      <NodeResizer isVisible={true} minWidth={120} minHeight={80} />
+      <NodeResizer isVisible={false} minWidth={120} minHeight={80} />
       {data.handles?.map((handle) => (
         <Handle
           key={handle.id}
@@ -67,18 +69,19 @@ function FlowNode({ data, name, icon, color, children }) {
             background: color,
             width: "12px",
             height: "12px",
-            border: `2px solid #18181b`,
           }}
           isConnectable={true}
         />
       ))}
       <div style={baseStyle}>
-        <div style={iconContainerStyle}>
-          <DynamicIcon name={icon} size={22} color="#ffffff" />
-        </div>
+      <div style={iconContainerStyle}>
+        <DynamicIcon name={icon} size={46} style={{"color": color}} />
+      </div>
+      <div style={contentStyle}>
         <div style={labelStyle}>{name}</div>
         {children}
       </div>
+    </div>
     </div>
   );
 }
@@ -100,7 +103,7 @@ export function UpdateRow({ data }) {
     <FlowNode
       data={data}
       name="Update Row"
-      icon="database-edit"
+      icon="diamond-plus"
       color={COLORS.update}
     >This is update Row</FlowNode>
   );

@@ -181,100 +181,7 @@ const DynamicField = ({ field, value, onChange }) => {
 };
 
 // Main component
-export default function StyleConfig() {
-  // Simplified configuration - separated from state values
-  const styleConfig = {
-    sections: [
-      {
-        id: 'basics',
-        title: 'Basic Properties',
-        fields: [
-          { 
-            id: 'color', 
-            label: 'Color', 
-            type: 'color',
-            cssProperty: 'color'
-          },
-          { 
-            id: 'backgroundColor', 
-            label: 'Background Color', 
-            type: 'color',
-            cssProperty: 'background-color'
-          },
-          { 
-            id: 'borderRadius', 
-            label: 'Border Radius', 
-            type: 'text',
-            cssProperty: 'border-radius'
-          }
-        ]
-      },
-      {
-        id: 'typography',
-        title: 'Typography',
-        fields: [
-          { 
-            id: 'fontFamily', 
-            label: 'Font Family', 
-            type: 'select',
-            cssProperty: 'font-family',
-            options: [
-              { value: 'Inter', label: 'Inter' },
-              { value: 'Roboto', label: 'Roboto' },
-              { value: 'Open Sans', label: 'Open Sans' }
-            ]
-          },
-          { 
-            id: 'fontSize', 
-            label: 'Font Size', 
-            type: 'text',
-            cssProperty: 'font-size'
-          },
-          { 
-            id: 'fontWeight', 
-            label: 'Font Weight', 
-            type: 'select',
-            cssProperty: 'font-weight',
-            options: [
-              { value: '300', label: 'Light (300)' },
-              { value: '400', label: 'Regular (400)' },
-              { value: '700', label: 'Bold (700)' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'spacing',
-        title: 'Spacing',
-        fields: [
-          { 
-            id: 'padding', 
-            label: 'Padding', 
-            type: 'text',
-            cssProperty: 'padding'
-          },
-          { 
-            id: 'margin', 
-            label: 'Margin', 
-            type: 'text',
-            cssProperty: 'margin'
-          }
-        ]
-      }
-    ]
-  };
-
-  // Default values - separated from configuration
-  const defaultValues = {
-      color: '#000000',
-      backgroundColor: '#ffffff',
-      borderRadius: '0px',
-      fontFamily: 'Inter',
-      fontSize: '14px',
-      fontWeight: '400',
-      padding: '0px',
-      margin: '0px'
-  };
+export default function StyleConfig({styleConfig, defaultValues, updateCallback}) {
 
   // State for open sections
   const [openSections, setOpenSections] = useState(() => {
@@ -284,10 +191,12 @@ export default function StyleConfig() {
     });
     return initialState;
   });
-
-  // State for style values - separate from config
-  const [styleValues, setStyleValues] = useState(defaultValues);
-  // State for CSS text
+  const [styleValues, setStyleValues] = useState({...defaultValues});
+useEffect(() => {
+  setStyleValues(prevValues => {
+    return {...defaultValues};
+  });
+}, [defaultValues]);
   const [cssText, setCssText] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
@@ -307,8 +216,7 @@ export default function StyleConfig() {
 
   // Function to notify parent component of style updates
   function notifyParentOfUpdate(styles) {
-    console.log("Updated styles:", styles);
-    // Here you can call any parent function to update styles
+    updateCallback(styles);
   }
 
   // Toggle function for accordion sections
@@ -321,42 +229,25 @@ export default function StyleConfig() {
 
   // Generate CSS text from styleValues
   const generateCssText = () => {
-    let css = '';
-    
-    styleConfig.sections.forEach(section => {
-      css += `/* ${section.title} */\n`;
-      section.fields.forEach(field => {
-        const value = styleValues[field.id];
-        css += `${field.cssProperty}: ${value};\n`;
-      });
-      css += '\n';
-    });
-    
+    let css = '{\n';
+         Object.keys(styleValues).forEach((key, index) => {
+          const value = styleValues[key];
+          css += `${key}: ${value};\n`;
+         });
+      css += '\n}';    
     return css;
   };
 
   // Parse CSS text and update styleValues
   const parseCssText = (cssText) => {
     const newValues = { ...styleValues };
-    
-    // Simple regex to extract property-value pairs
     const propertyRegex = /([a-zA-Z-]+)\s*:\s*([^;]+);/g;
     let match;
-    
     while ((match = propertyRegex.exec(cssText)) !== null) {
       const property = match[1].trim();
       const value = match[2].trim();
-      
-      // Find the section and field for this CSS property
-      styleConfig.sections.forEach(section => {
-        section.fields.forEach(field => {
-          if (field.cssProperty === property) {
-            newValues[field.id] = value;
-          }
-        });
-      });
+      newValues[property] = value;
     }
-    
     return newValues;
   };
 

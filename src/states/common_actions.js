@@ -2,6 +2,9 @@ import { activeElement, screenElements } from "../screen_builder/screen_state";
 import { variableKeys, variableMap } from "./global_state";
 
 function FunctionExecutor(signals, functionStr) {
+    if(typeof functionStr !== "string") {
+        return undefined;
+    }
     // Get keys and values from the signals object
     const keys = Object.keys(signals);
     const values = Object.values(signals);
