@@ -198,8 +198,8 @@ const codeGenerators = {
       
     return `// Define your data query
 async function fetchData() {
-  const response = await fetch('${data.endpoint}', {
-    method: '${data.method}',${headersStr}
+  const response = await fetch('${data.endpoint || ''}', {
+    method: '${data.method || 'GET'}',${headersStr}
   });
   
   return await response.json();
@@ -257,7 +257,7 @@ const parseCodeToData = (code) => {
   if (code.includes('localStorage')) {
     dataSource = 'localStorage';
   } else if (code.includes('db.collection')) {
-    dataSource = 'query';
+    dataSource = 'database';
   } else if (code.includes('store.getState')) {
     dataSource = 'globalState';
   }
@@ -271,13 +271,19 @@ const parseCodeToData = (code) => {
 };
 
 // Main component
-export default function DataQueryConfig({ config,initalData ,onUpdate }) {
-  // Initialize query data with default values
-  const [queryData, setQueryData] = useState({ ...initalData });
+export default function DataQueryConfig({ config, initialData, onUpdate }) {
+  // Initialize query data with default values or initialData if provided
+  const [queryData, setQueryData] = useState({ ...initialData });
   const [queryMode, setQueryMode] = useState('visual');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [codeText, setCodeText] = useState('');
   
+  console.log("function DataQueryConfig data:", config, initialData, queryData);
+  useEffect(() => {
+    if (initialData) {
+      setQueryData({...initialData});
+    }
+  }, [initialData]);
   // Generate code based on current query data
   const generateCode = useCallback(() => {
     const generator = codeGenerators[queryData.dataSource] || codeGenerators.api;
@@ -299,8 +305,8 @@ export default function DataQueryConfig({ config,initalData ,onUpdate }) {
   
   // Reset query data to defaults
   const resetQueryData = useCallback(() => {
-    setQueryData({ ...initalData });
-  }, []);
+    setQueryData({ ...initialData });
+  }, [initialData]);
   
   // Open code editor
   const openCodeEditor = useCallback(() => {

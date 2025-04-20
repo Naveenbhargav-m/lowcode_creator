@@ -14,8 +14,9 @@ function TablesDataSetterFromAPI() {
       } else {
         tables_id.value = data[0]["id"];
       }
-      let tablesdata = data[0]["tables"];
-      let edgesdata = data[0]["edges"];
+      let innerdata = data[0]["tables_data"];
+      let tablesdata = innerdata["tables"];
+      let edgesdata = innerdata["edges"];
       console.log("tables:",tablesdata);
       console.log("edges data:",edgesdata);
       let originalTablesdataString = JSON.stringify(tablesdata);
@@ -46,10 +47,11 @@ function SaveTablesData() {
   console.log("called Save Tables Data");
   let alltables = tables;
   let alledges = table_edges;
-  let tablesJson = JSON.stringify(alltables);
-  let edgesJson = JSON.stringify(alledges);
-  let data = {"edges":edgesJson,"tables":tablesJson};
-  let baseurl = `${AppID}/public/tables`;
+  // let tablesJson = JSON.stringify(alltables);
+  // let edgesJson = JSON.stringify(alledges);
+  let data = {"tables_data":{"edges":alledges,"tables":alltables}};
+  let baseurl = `${AppID}/public/_tables`;
+  console.log("before patching prest data:",baseurl, data);
   PrestClient.patch(baseurl, {"query": {"id": 1}, "body": data});
 }
 

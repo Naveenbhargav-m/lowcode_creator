@@ -72,7 +72,7 @@ function addField(data) {
       currentTableConfigs[tableId] = {
         "label":tableSignal.value["label"],
         "id":tableId,
-        "fields": {FieldID:{"operation":"add",...fieldData}}
+        "fields": {[FieldID]:{"operation":"add",...fieldData}}
       };
     } else {
       let existingfields = currentTableConfigs[tableId]["fields"] || {};
@@ -117,6 +117,7 @@ function addContainer(data) {
   });
   deepCopiedData["fields"][fieldID] = {"operation":"add", ...deepCopiedData["fields"][uid]}; 
   currentTableConfigs[uid] = {...deepCopiedData};
+  // tables[uid] = signal({...deepCopiedData});
   tableNames[uid] = data.label;
   tablesFlag.value = uid;
   activeTable.value = uid;
@@ -141,10 +142,12 @@ function Deletefield(tableID , fieldID) {
 }
 
 function updateCurrentEditCopyoffield(tableID , fieldID , config , tableLabel) {
-  console.log("update current Edit copyOff field data:",tableID, fieldID, config, tableLabel, originalTablesdata.value);
+  console.log("update current Edit copyOff field data:",tableID, fieldID, config, tableLabel, 
+    originalTablesdata.value);
   let curtable = currentTableConfigs[tableID];
 
   let oldtable = originalTablesdata.value[tableID];
+  console.log("current table, original table:",curtable, oldtable);
   if(curtable === undefined) {
     if(fieldID === undefined) {
       let oldLabel = oldtable["label"];
@@ -154,7 +157,7 @@ function updateCurrentEditCopyoffield(tableID , fieldID , config , tableLabel) {
       config = ApplyEditOperations(config, orignalField);
       currentTableConfigs[tableID] = {
         "label": tableLabel,
-        "fields":[{...config}]
+        "fields":{[fieldID]: {...config}}
       };
     }
       return;
@@ -172,8 +175,10 @@ function updateCurrentEditCopyoffield(tableID , fieldID , config , tableLabel) {
     }
   } else {
     let existingField = curtable["fields"][fieldID];
+    console.log("existing field:",existingField, fieldID);
     if(existingField === undefined) {
       let orignalField = oldtable["fields"][fieldID];
+      console.log("old field:",orignalField, fieldID);
       config = ApplyEditOperations(config, orignalField);
       curtable["fields"][fieldID] = {"operation":"edit",...config};
     } else {

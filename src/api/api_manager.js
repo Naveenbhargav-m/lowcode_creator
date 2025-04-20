@@ -7,8 +7,9 @@ class APIManager {
     }
   
     async request(method, endpoint, { query, body, headers, formData, file } = {}) {
-      let url = `${this.baseURL}${endpoint}`;
-      // Handle query parameters
+      let url = `${this.baseURL}/${endpoint}`;
+      // Handle query parameters 
+      console.log("in the request:",this.baseURL, body,query, method);
       if (query && typeof query === "object") {
         const queryString = new URLSearchParams(query).toString();
         url += `?${queryString}`;

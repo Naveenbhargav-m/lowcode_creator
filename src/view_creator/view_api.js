@@ -27,7 +27,7 @@ async function SyncView(data) {
         let out = await prestApi.put(`/${AppID.value}/public/db_views?view_name=${data["view_name"]}`, {"body":body});
         console.log("out:",out);
         return data;
-    }
+    }containers
         let body = {"view_name": data["view_name"], "view_columns": JSON.stringify(data["columns"])};
         let out = await prestApi.post(`/${AppID.value}/public/db_views`, {"body":body});
         console.log("out :",out);
@@ -42,5 +42,4 @@ async function InitViews() {
     }
 }
 
-InitViews();
-export {RunViewCode, SyncView};
+export {RunViewCode, SyncView, InitViews};

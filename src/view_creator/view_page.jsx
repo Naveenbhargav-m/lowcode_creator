@@ -3,8 +3,9 @@ import { Popup } from "../form_builder/configs_view/advanced_form";
 import { dbViewSignal } from "../table_builder/table_builder_state";
 import { TablesTab } from "../table_builder/tables_page";
 import { TablesButtonsBar } from "./buttonBar";
-import { RunViewCode } from "./view_api";
+import { InitViews, RunViewCode } from "./view_api";
 import { views } from "./views_state";
+import { useEffect } from "preact/hooks";
 
 const popupOpen = signal(false);
 function handleViewCreate() {
@@ -13,6 +14,10 @@ function handleViewCreate() {
 }
 
 function ViewArea() {
+
+    useEffect((()=> {
+        InitViews();
+    }), []);
     return (
     <div className="w-4/6 h-screen bg-background min-h-screen mx-4"
      style={{"display":"flex", "flexDirection":"column", "alignItems":"center"}}>

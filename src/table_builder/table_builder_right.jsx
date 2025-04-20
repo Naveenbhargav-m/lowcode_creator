@@ -49,9 +49,8 @@ function TableBuilderRight() {
       let activetable = activeTable.value;
       let activefield = activeField.value;
       let formData = {};
-      let formConfigs = [...tablesConfigs.tables_field];
+      let formConfigs = {...tableConfig};
       if(activefield["type"] !== "Relation") {
-        formConfigs.pop();
       } else {
         let tableids = Object.keys(tables);
         let labelsmap = tableids.map((id, ind) => {
@@ -69,7 +68,7 @@ function TableBuilderRight() {
           formData["label"] = tableLabel;
         }
 
-        formConfigs = [...tablesConfigs.table_config];
+        formConfigs = tableConfig;
       } else {
           let fieldID = activeField.value["id"];
           let tableData = tables[activeTable.value];
@@ -80,16 +79,18 @@ function TableBuilderRight() {
             formData["name"] = fieldData["name"];
             formData["required"] = fieldData["required"];
             formData["default"] = fieldData["default"];
+            formConfigs = fieldConfig;
           }
 
       }
 
       function UpdateConfigBack(data) {
-          setTableField(activeTable, activeField, data);
+          setTableField(activetable, activefield["id"], data);
       }
+      console.log("calling the Data Query Config with following data:",formConfigs, formData);
       return (
         <div>
-          <DataQueryConfig config={fieldConfig} initalData={{}} onUpdate={(data) => {UpdateConfigBack(data);}}/>
+          <DataQueryConfig config={formConfigs} initialData={{...formData}} onUpdate={(data) => {UpdateConfigBack(data);}}/>
         </div>
       );
 }
