@@ -8,6 +8,18 @@ const FormGroup = ({ label, children }) => (
   </div>
 );
 
+const CheckBox = ({ value, onChange, placeholder }) => (
+  <label className="flex items-center space-x-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={value || false}
+      onChange={(e) => onChange(e.target.checked)}
+      className="h-4 w-4 rounded border border-gray-300 text-blue-600 focus:ring-blue-500"
+    />
+    {placeholder && <span className="text-sm">{placeholder}</span>}
+  </label>
+);
+
 const TextField = ({ value, onChange, placeholder }) => (
   <input
     type="text"
@@ -115,6 +127,8 @@ const DynamicField = ({ field, value, onChange }) => {
           onChange={onChange}
         />
       );
+    case 'check': 
+      return (<CheckBox value={value} onChange={onChange} placeholder={field.placeholder}/>);
     default:
       return (
         <TextField 

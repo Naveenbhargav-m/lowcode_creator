@@ -1,11 +1,53 @@
 import { activeField, activeTable, setTableField, tables } from "./table_builder_state";
 import { containerConfigmaps } from "../components/configs/container_config_provider";
 import { tablesConfigs } from "../components/configs/tables_configs_provider";
+import DataQueryConfig from "../components/generic/config_form_components/dataConfig";
+
+let tableConfig = {
+  fields: [
+    {
+        id: 'label', 
+        label: 'Table Name', 
+        type: 'text',
+        placeholder: 'select a table',
+        dependsOn: null,
+      },
+  ],
+};
+
+
+let fieldConfig = {
+  fields: [
+    {
+        id: 'name', 
+        label: 'Field Name', 
+        type: 'text',
+        placeholder: 'Give a name',
+        dependsOn: null,
+      },
+      {
+        id: 'required', 
+        label: 'Is Required', 
+        type: 'check',
+        placeholder: '',
+        dependsOn: null,
+      },
+      {
+        id: 'default', 
+        label: 'Default Value', 
+        type: 'text',
+        placeholder: 'give a default value',
+        dependsOn: null,
+      },
+  ],
+};
+
+
+
 
 function TableBuilderRight() {
       let activetable = activeTable.value;
       let activefield = activeField.value;
-      console.log("in right panel",activetable, activefield);
       let formData = {};
       let formConfigs = [...tablesConfigs.tables_field];
       if(activefield["type"] !== "Relation") {
@@ -41,8 +83,14 @@ function TableBuilderRight() {
           }
 
       }
+
+      function UpdateConfigBack(data) {
+          setTableField(activeTable, activeField, data);
+      }
       return (
-        <div></div>
+        <div>
+          <DataQueryConfig config={fieldConfig} initalData={{}} onUpdate={(data) => {UpdateConfigBack(data);}}/>
+        </div>
       );
 }
 
