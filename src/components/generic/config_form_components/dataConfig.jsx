@@ -1,63 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Plus, Code, ChevronDown, ChevronUp } from 'lucide-react';
-
-// Default values separated from field configuration
-const DEFAULT_VALUES = {
-  dataSource: 'api',
-  endpoint: 'https://api.example.com/data',
-  method: 'GET',
-  headers: [{ key: 'Content-Type', value: 'application/json' }]
-};
-
-// Query configuration schema - describes structure only
-const QUERY_CONFIG = {
-  fields: [
-    { 
-      id: 'dataSource', 
-      label: 'Data Source', 
-      type: 'select',
-      options: [
-        { value: 'api', label: 'API Endpoint' },
-        { value: 'database', label: 'Database' },
-        { value: 'localStorage', label: 'Local State' },
-        { value: 'globalState', label: 'Global State' }
-      ],
-      dependsOn: null
-    },
-    { 
-      id: 'endpoint', 
-      label: 'Endpoint URL', 
-      type: 'text',
-      placeholder: 'https://api.example.com/data',
-      dependsOn: { field: 'dataSource', value: 'api' }
-    },
-    { 
-      id: 'method', 
-      label: 'Request Method', 
-      type: 'select',
-      options: [
-        { value: 'GET', label: 'GET' },
-        { value: 'POST', label: 'POST' },
-        { value: 'PUT', label: 'PUT' },
-        { value: 'DELETE', label: 'DELETE' }
-      ],
-      dependsOn: { field: 'dataSource', value: 'api' }
-    },
-    { 
-      id: 'headers', 
-      label: 'Request Headers', 
-      type: 'key-value-list',
-      dependsOn: { field: 'dataSource', value: 'api' }
-    }
-  ]
-};
-
 // Reusable form components
 const FormGroup = ({ label, children }) => (
   <div className="mb-4">
     <label className="block text-xs text-gray-500 mb-1">{label}</label>
     {children}
   </div>
+);
+
+const CheckBox = ({ value, onChange, placeholder }) => (
+  <label className="flex items-center space-x-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={value || false}
+      onChange={(e) => onChange(e.target.checked)}
+      className="h-4 w-4 rounded border border-gray-300 text-blue-600 focus:ring-blue-500"
+    />
+    {placeholder && <span className="text-sm">{placeholder}</span>}
+  </label>
 );
 
 const TextField = ({ value, onChange, placeholder }) => (
@@ -167,6 +127,8 @@ const DynamicField = ({ field, value, onChange }) => {
           onChange={onChange}
         />
       );
+    case 'check': 
+      return (<CheckBox value={value} onChange={onChange} placeholder={field.placeholder}/>);
     default:
       return (
         <TextField 
@@ -236,8 +198,8 @@ const codeGenerators = {
       
     return `// Define your data query
 async function fetchData() {
-  const response = await fetch('${data.endpoint}', {
-    method: '${data.method}',${headersStr}
+  const response = await fetch('${data.endpoint || ''}', {
+    method: '${data.method || 'GET'}',${headersStr}
   });
   
   return await response.json();
@@ -309,13 +271,19 @@ const parseCodeToData = (code) => {
 };
 
 // Main component
-export default function DataQueryConfig({ onUpdate = (data) => {console.log("updated data source", data);} }) {
-  // Initialize query data with default values
-  const [queryData, setQueryData] = useState({ ...DEFAULT_VALUES });
+export default function DataQueryConfig({ config, initialData, onUpdate }) {
+  // Initialize query data with default values or initialData if provided
+  const [queryData, setQueryData] = useState({ ...initialData });
   const [queryMode, setQueryMode] = useState('visual');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [codeText, setCodeText] = useState('');
   
+  console.log("function DataQueryConfig data:", config, initialData, queryData);
+  useEffect(() => {
+    if (initialData) {
+      setQueryData({...initialData});
+    }
+  }, [initialData]);
   // Generate code based on current query data
   const generateCode = useCallback(() => {
     const generator = codeGenerators[queryData.dataSource] || codeGenerators.api;
@@ -337,8 +305,8 @@ export default function DataQueryConfig({ onUpdate = (data) => {console.log("upd
   
   // Reset query data to defaults
   const resetQueryData = useCallback(() => {
-    setQueryData({ ...DEFAULT_VALUES });
-  }, []);
+    setQueryData({ ...initialData });
+  }, [initialData]);
   
   // Open code editor
   const openCodeEditor = useCallback(() => {
@@ -384,7 +352,7 @@ export default function DataQueryConfig({ onUpdate = (data) => {console.log("upd
       
       {queryMode === 'visual' ? (
         <div className="space-y-4">
-          {QUERY_CONFIG.fields.map(field => 
+          {config.fields.map(field => 
             shouldShowField(field) && (
               <FormGroup key={field.id} label={field.label}>
                 <DynamicField 

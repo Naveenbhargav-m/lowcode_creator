@@ -11,7 +11,7 @@ const Urlmap = {
 let dbname = localStorage.getItem("db_name") || "";
 console.log("dbname",dbname);
 if(dbname.length === 0) {
-    dbname = "nokodo_creator/"
+    dbname = "nokodo_creator"
 }  
 
 export const databaseSignal = signal(dbname);
@@ -23,7 +23,7 @@ console.log("database signal reloaded:",databaseSignal.peek());
  */
 async function apiCall(endpoint, method = "GET", data = null, id = null, headers = {}, dbname = "") {
     // Construct the final URL
-    let finalUrl = baseurl + databaseSignal.peek().toLowerCase() + schema + endpoint;
+    let finalUrl = baseurl + databaseSignal.peek().toLowerCase() + "/" + schema + endpoint;
 
     // If `id` is provided, append it as a query parameter or resource ID
     if (id) {
@@ -131,16 +131,16 @@ export function SetFormToAPI(data, id = null) {
 }
 
 export function GetTableDataFromAPI(id) {
-    return apiCall("tables_data", "GET", null, id);
+    return apiCall("_tables", "GET", null, id);
 }
 
 export function GetAllTableDataFromAPI() {
-    return apiCall("tables_data", "GET");
+    return apiCall("_tables", "GET");
 }
 
 export function SetTableDataToAPI(data, id = null) {
     const method = id ? "PUT" : "POST";
-    return apiCall("tables_data", method, data, id);
+    return apiCall("_tables", method, data, id);
 }
 
 // Global States
@@ -174,7 +174,7 @@ export function SetUserToAPI(data, id = null) {
 
 
 export function GetAppsfromAPI() {
-    databaseSignal.value = "nokodo_creator/";
+    databaseSignal.value = "nokodo_creator";
     return apiCall("apps");
 }
 

@@ -16,6 +16,8 @@ import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
 import { FormExample } from "./components/generic/form";
 import ConfigUpdater from "./components/generic/config_form";
+import TableBuilder from "./tests/table_creator2";
+import TableBuilderV2 from "./tests/table_creator3";
 
 export function App() {
   return (
@@ -40,7 +42,7 @@ export function App() {
       <Route path="/" component={AppCreatorPage} />
       <Route path="/queries" component={QueryBuilderPage} />
       {/* <Route path="/preview" component={PreviewArea} /> */}
-      <Route path="/test" component={ConfigUpdater} />
+      <Route path="/test" component={TableBuilderV2} />
 
       <Route default component={() => <div>Not Found</div>} />
     </Router>

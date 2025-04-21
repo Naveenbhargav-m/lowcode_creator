@@ -22,6 +22,7 @@ function AppList({ apps }) {
                 let newappname = app["gen_name"];
                 localStorage.setItem("db_name",newappname);
                 AppID.value = newappname;
+                databaseSignal.value = newappname;
                 sideBarEnable.value = true;
                 router.route("/home");
                }}
@@ -41,7 +42,10 @@ function AppList({ apps }) {
   
   const AppForm = ({ apps, onClose }) => {
     const [appName, setAppName] = useState("");
-  
+    
+    let textstyle = {
+      "color": "black"
+    };
     const handleSubmit = (e) => {
       e.preventDefault(); 
       if (appName.trim()) {
@@ -69,6 +73,7 @@ function AppList({ apps }) {
               value={appName}
               // @ts-ignore
               onInput={(e) => setAppName(e.target.value)}
+              style={{...textstyle}}
             />
             <div class="form-actions">
               <button type="submit" class="submit-button">
