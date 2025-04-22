@@ -97,7 +97,7 @@ export default function TableBuilderV5() {
         };
         
         // New tables are automatically considered modified
-        markAsModified('tables', newId);
+        markAsModified('tables', myid);
         
         setTables([...tables, newTable]);
         setActiveTable(newId);
@@ -401,9 +401,6 @@ const generateTransactions = () => {
           });
         }
       }
-      
-      // Sort field renames to handle dependencies
-      // This is a simplified topological sort to handle rename chains
       const processedRenames = new Set();
       const fieldRenameTransactions = [];
       
@@ -419,7 +416,6 @@ const generateTransactions = () => {
             !processedRenames.has(otherRename) && 
             otherRename.oldName === rename.newName
           );
-          
           if (!hasConflict) {
             // No conflict, can process this rename
             fieldRenameTransactions.push({
@@ -431,10 +427,10 @@ const generateTransactions = () => {
             });
             
             // Update tracking maps
-            const originalField = originalFieldsById[rename.fieldId];
-            delete originalFieldsByName[originalField.name];
-            originalFieldsByName[rename.newName] = originalField;
-            originalField.name = rename.newName;
+            // const originalField = originalFieldsById[rename.fieldId];
+            // delete originalFieldsByName[originalField.name];
+            // originalFieldsByName[rename.newName] = originalField;
+            // originalField.name = rename.newName;
             
             processedRenames.add(rename);
             fieldRenames.splice(i, 1);
@@ -562,7 +558,6 @@ const generateTransactions = () => {
         
         const originalField = originalFieldsById[fieldId];
         const currentField = currentFieldsById[fieldId];
-        
         // Skip if only the name changed (already handled in renames)
         if (originalField.name !== currentField.name && 
             !hasFieldPropertiesChanged(originalField, currentField)) {
@@ -571,7 +566,6 @@ const generateTransactions = () => {
         
         // Check for modifications to field properties
         const modifications = getFieldModifications(originalField, currentField);
-        
         // Handle primary key changes separately
         if ('primaryKey' in modifications) {
           const pkTransaction = handlePrimaryKeyChange(tableId, originalField, currentField, tableName);
