@@ -226,15 +226,17 @@ const generateTransactions = () => {
     
     // Create maps for faster lookups
     const originalTablesById = {};
+    let originalTablesDeepCopy = JSON.parse(JSON.stringify(originalTables));
     const originalTablesByName = {};
-    originalTables.forEach(table => {
+    originalTablesDeepCopy.forEach(table => {
       originalTablesById[table.fid] = table;
       originalTablesByName[table.name] = table;
     });
     
     const currentTablesById = {};
     const currentTablesByName = {};
-    tables.forEach(table => {
+    let tablesDeepCopy = JSON.parse(JSON.stringify(tables));
+    tablesDeepCopy.forEach(table => {
       currentTablesById[table.fid] = table;
       currentTablesByName[table.name] = table;
     });
@@ -427,10 +429,10 @@ const generateTransactions = () => {
             });
             
             // Update tracking maps
-            // const originalField = originalFieldsById[rename.fieldId];
-            // delete originalFieldsByName[originalField.name];
-            // originalFieldsByName[rename.newName] = originalField;
-            // originalField.name = rename.newName;
+            const originalField = originalFieldsById[rename.fieldId];
+            delete originalFieldsByName[originalField.name];
+            originalFieldsByName[rename.newName] = originalField;
+            originalField.name = rename.newName;
             
             processedRenames.add(rename);
             fieldRenames.splice(i, 1);
