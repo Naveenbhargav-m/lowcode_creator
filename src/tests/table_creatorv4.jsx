@@ -5,375 +5,400 @@ import { ArrowRight, ChevronDown, ChevronUp, Database } from 'lucide-react';
 import { Plus, X, Save, Trash2, Table as TableIcon } from 'lucide-react';
 
 let fieldStyle = {"color": "black"};
-export default function TableBuilderV2() {
-  const [tables, setTables] = useState([
-    {
-      id: 1,
-      name: 'users',
-      isNew: false,
-      fields: [
-        { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null, isNew: false },
-        { id: 2, name: 'username', type: 'VARCHAR', length: 100, nullable: false, defaultValue: null, isNew: false },
-        { id: 3, name: 'email', type: 'VARCHAR', length: 255, nullable: false, defaultValue: null, isNew: false },
-        { id: 4, name: 'created_at', type: 'TIMESTAMP', nullable: false, defaultValue: 'NOW()', isNew: false },
-      ]
-    },
-    {
-      id: 2,
-      name: 'posts',
-      isNew: false,
-      fields: [
-        { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null, isNew: false },
-        { id: 2, name: 'title', type: 'VARCHAR', length: 200, nullable: false, defaultValue: null, isNew: false },
-        { id: 3, name: 'content', type: 'TEXT', nullable: true, defaultValue: null, isNew: false },
-        { id: 4, name: 'user_id', type: 'INTEGER', nullable: false, defaultValue: null, isNew: false },
-        { id: 5, name: 'created_at', type: 'TIMESTAMP', nullable: false, defaultValue: 'NOW()', isNew: false },
-      ]
-    }
-  ]);
-  
-  const [relations, setRelations] = useState([
-    { id: 1, fromTable: 'posts', fromField: 'user_id', toTable: 'users', toField: 'id', isNew: false }
-  ]);
-  
-  const [activeTable, setActiveTable] = useState(null);
-  const [showSql, setShowSql] = useState(false);
-  const [jsonOutput, setJsonOutput] = useState('');
-  // Track changed/deleted items for transactions
-  const [deletedTables, setDeletedTables] = useState([]);
-  const [deletedFields, setDeletedFields] = useState([]);
-  const [deletedRelations, setDeletedRelations] = useState([]);
-  
-  // Set the first table as active by default
-  useEffect(() => {
-    if (tables.length > 0 && activeTable === null) {
-      setActiveTable(tables[0].id);
-    }
-  }, [tables, activeTable]);
-  
-  // Find active table
-  const currentTable = tables.find(t => t.id === activeTable);
-  
-  // Create a new table
-  const handleCreateTable = (tableName) => {
-    if (!tableName.trim()) return;
-    
-    const newId = Math.max(0, ...tables.map(t => t.id)) + 1;
-    const newTable = {
-      id: newId,
-      name: tableName.trim().toLowerCase(),
-      isNew: true,
-      fields: [
-        { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null, isNew: true }
-      ]
-    };
-    
-    setTables([...tables, newTable]);
-    setActiveTable(newId);
-    return newTable;
-  };
-  
-  // Delete a table
-  const handleDeleteTable = (tableId) => {
-    const tableToDelete = tables.find(t => t.id === tableId);
-    
-    if (tableToDelete && !tableToDelete.isNew) {
-      setDeletedTables([...deletedTables, tableToDelete]);
-    }
-    
-    setTables(tables.filter(t => t.id !== tableId));
-    
-    // Delete relations involving this table
-    if (tableToDelete) {
-      const relationsToDelete = relations.filter(r => 
-        r.fromTable === tableToDelete.name || r.toTable === tableToDelete.name
-      );
-      
-      relationsToDelete.forEach(relation => {
-        if (!relation.isNew) {
-          setDeletedRelations([...deletedRelations, relation]);
+export default function TableBuilderV3() {
+    const [tables, setTables] = useState([
+        {
+          id: 1,
+          name: 'users',
+          fields: [
+            { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null },
+            { id: 2, name: 'username', type: 'VARCHAR', length: 100, nullable: false, defaultValue: null },
+            { id: 3, name: 'email', type: 'VARCHAR', length: 255, nullable: false, defaultValue: null },
+            { id: 4, name: 'created_at', type: 'TIMESTAMP', nullable: false, defaultValue: 'NOW()' },
+          ]
+        },
+        {
+          id: 2,
+          name: 'posts',
+          fields: [
+            { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null },
+            { id: 2, name: 'title', type: 'VARCHAR', length: 200, nullable: false, defaultValue: null },
+            { id: 3, name: 'content', type: 'TEXT', nullable: true, defaultValue: null },
+            { id: 4, name: 'user_id', type: 'INTEGER', nullable: false, defaultValue: null },
+            { id: 5, name: 'created_at', type: 'TIMESTAMP', nullable: false, defaultValue: 'NOW()' },
+          ]
         }
+      ]);
+      
+      const [relations, setRelations] = useState([
+        { id: 1, fromTable: 'posts', fromField: 'user_id', toTable: 'users', toField: 'id' }
+      ]);
+      
+      const [activeTable, setActiveTable] = useState(null);
+      const [showSql, setShowSql] = useState(false);
+      const [jsonOutput, setJsonOutput] = useState('');
+      
+      // Store original state for comparison when generating transactions
+      const [originalTables, setOriginalTables] = useState([]);
+      const [originalRelations, setOriginalRelations] = useState([]);
+      
+      // Track modified items
+      const [modifiedItems, setModifiedItems] = useState({
+        tables: new Set(), // table ids
+        fields: new Set(), // "tableId_fieldId" strings
+        relations: new Set() // relation ids
       });
       
-      setRelations(relations.filter(r => 
-        r.fromTable !== tableToDelete.name && r.toTable !== tableToDelete.name
-      ));
-    }
-    
-    // Set active table to another one if the active one is deleted
-    if (activeTable === tableId) {
-      const remainingTables = tables.filter(t => t.id !== tableId);
-      setActiveTable(remainingTables.length > 0 ? remainingTables[0].id : null);
-    }
-  };
-  
-  // Add a new field to a table
-  const handleAddField = (tableId) => {
-    setTables(tables.map(table => {
-      if (table.id === tableId) {
-        const newFieldId = Math.max(0, ...table.fields.map(f => f.id)) + 1;
-        return {
-          ...table,
+      // Initialize original state from initial tables/relations
+      useEffect(() => {
+        if (originalTables.length === 0 && tables.length > 0) {
+          setOriginalTables(JSON.parse(JSON.stringify(tables)));
+        }
+        if (originalRelations.length === 0 && relations.length > 0) {
+          setOriginalRelations(JSON.parse(JSON.stringify(relations)));
+        }
+      }, [tables, relations]);
+      
+      // Set the first table as active by default
+      useEffect(() => {
+        if (tables.length > 0 && activeTable === null) {
+          setActiveTable(tables[0].id);
+        }
+      }, [tables, activeTable]);
+      
+      // Find active table
+      const currentTable = tables.find(t => t.id === activeTable);
+      
+      // Helper function to mark items as modified
+      const markAsModified = (type, id) => {
+        setModifiedItems(prev => {
+          const newState = {...prev};
+          newState[type].add(id);
+          return newState;
+        });
+      };
+      
+      // Create a new table
+      const handleCreateTable = (tableName) => {
+        if (!tableName.trim()) return;
+        
+        const newId = Math.max(0, ...tables.map(t => t.id)) + 1;
+        const newTable = {
+          id: newId,
+          name: tableName.trim().toLowerCase(),
           fields: [
-            ...table.fields,
-            { id: newFieldId, name: 'new_field', type: 'VARCHAR', length: 255, nullable: true, defaultValue: null, isNew: true }
+            { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null }
           ]
         };
-      }
-      return table;
-    }));
-  };
-  
-  // Delete a field
-  const handleDeleteField = (tableId, fieldId) => {
-    const tableToUpdate = tables.find(t => t.id === tableId);
-    if (tableToUpdate) {
-      const fieldToDelete = tableToUpdate.fields.find(f => f.id === fieldId);
-      
-      if (fieldToDelete && !fieldToDelete.isNew) {
-        setDeletedFields([...deletedFields, { 
-          tableName: tableToUpdate.name, 
-          fieldName: fieldToDelete.name 
-        }]);
-      }
-      
-      setTables(tables.map(table => {
-        if (table.id === tableId) {
-          return {
-            ...table,
-            fields: table.fields.filter(field => field.id !== fieldId)
-          };
-        }
-        return table;
-      }));
-    }
-  };
-  
-  // Add a new relation
-  const handleAddRelation = (fromTable, fromField, toTable, toField) => {
-    const newId = Math.max(0, ...relations.map(r => r.id)) + 1;
-    const newRelation = {
-      id: newId,
-      fromTable,
-      fromField,
-      toTable,
-      toField,
-      isNew: true
-    };
-    
-    setRelations([...relations, newRelation]);
-    return newRelation;
-  };
-  
-  // Delete a relation
-  const handleDeleteRelation = (relationId) => {
-    const relationToDelete = relations.find(r => r.id === relationId);
-    
-    if (relationToDelete && !relationToDelete.isNew) {
-      setDeletedRelations([...deletedRelations, relationToDelete]);
-    }
-    
-    setRelations(relations.filter(r => r.id !== relationId));
-  };
-  
-const [fieldChanges, setFieldChanges] = useState({});
-
-// Modified update handler that only tracks what changed
-const handleUpdateField = (tableId, fieldId, property, value) => {
-    const table = tables.find(t => t.id === tableId);
-    const field = table?.fields.find(f => f.id === fieldId);
-    
-    if (field && !field.isNew) {
-      const fieldKey = `${tableId}_${fieldId}`;
-      
-      // Track original value only once per property
-      setFieldChanges(prev => {
-        const existingChanges = prev[fieldKey] || {};
         
-            let originalName = "";
-            if("fieldName" in existingChanges) {
-                originalName = existingChanges["fieldName"];
-            } else {
-                originalName = field["name"];
-            }
-        console.log("original name:",originalName);
-          return {
-            ...prev,
-            [fieldKey]: {
-              ...existingChanges,
-              tableName: table.name, // Store table name for convenience
-              fieldName: originalName, // Store original field name for renames
-              [property]: field[property] // Store only the original value of the changed property
-            }
-          };
-      });
-    }
-  
-    // Update the field as before
-    setTables(tables.map(table => {
-      if (table.id === tableId) {
-        return {
-          ...table,
-          fields: table.fields.map(field => {
-            if (field.id === fieldId) {
-              return { ...field, [property]: value };
-            }
-            return field;
-          })
+        // New tables are automatically considered modified
+        markAsModified('tables', newId);
+        
+        setTables([...tables, newTable]);
+        setActiveTable(newId);
+        return newTable;
+      };
+      
+      // Delete a table
+      const handleDeleteTable = (tableId) => {
+        // Mark as modified before deleting
+        markAsModified('tables', tableId);
+        
+        const tableToDelete = tables.find(t => t.id === tableId);
+        
+        // Delete relations involving this table
+        if (tableToDelete) {
+          const relationsToModify = relations.filter(r => 
+            r.fromTable === tableToDelete.name || r.toTable === tableToDelete.name
+          );
+          
+          relationsToModify.forEach(relation => {
+            markAsModified('relations', relation.id);
+          });
+          
+          setRelations(relations.filter(r => 
+            r.fromTable !== tableToDelete.name && r.toTable !== tableToDelete.name
+          ));
+        }
+        
+        setTables(tables.filter(t => t.id !== tableId));
+        
+        // Set active table to another one if the active one is deleted
+        if (activeTable === tableId) {
+          const remainingTables = tables.filter(t => t.id !== tableId);
+          setActiveTable(remainingTables.length > 0 ? remainingTables[0].id : null);
+        }
+      };
+      
+      // Add a new field to a table
+      const handleAddField = (tableId) => {
+        const table = tables.find(t => t.id === tableId);
+        if (!table) return;
+        
+        markAsModified('tables', tableId);
+        
+        const newFieldId = Math.max(0, ...table.fields.map(f => f.id)) + 1;
+        
+        setTables(tables.map(table => {
+          if (table.id === tableId) {
+            return {
+              ...table,
+              fields: [
+                ...table.fields,
+                { id: newFieldId, name: 'new_field', type: 'VARCHAR', length: 255, nullable: true, defaultValue: null }
+              ]
+            };
+          }
+          return table;
+        }));
+      };
+      
+      // Delete a field
+      const handleDeleteField = (tableId, fieldId) => {
+        markAsModified('tables', tableId);
+        markAsModified('fields', `${tableId}_${fieldId}`);
+        
+        setTables(tables.map(table => {
+          if (table.id === tableId) {
+            return {
+              ...table,
+              fields: table.fields.filter(field => field.id !== fieldId)
+            };
+          }
+          return table;
+        }));
+      };
+      
+      // Update field properties
+      const handleUpdateField = (tableId, fieldId, property, value) => {
+        markAsModified('tables', tableId);
+        markAsModified('fields', `${tableId}_${fieldId}`);
+        
+        setTables(tables.map(table => {
+          if (table.id === tableId) {
+            return {
+              ...table,
+              fields: table.fields.map(field => {
+                if (field.id === fieldId) {
+                  return { ...field, [property]: value };
+                }
+                return field;
+              })
+            };
+          }
+          return table;
+        }));
+      };
+      
+      // Add a new relation
+      const handleAddRelation = (fromTable, fromField, toTable, toField) => {
+        const newId = Math.max(0, ...relations.map(r => r.id)) + 1;
+        const newRelation = {
+          id: newId,
+          fromTable,
+          fromField,
+          toTable,
+          toField
         };
-      }
-      return table;
-    }));
-  };
-  
-  // Generate transactions for the current state
-  const generateTransactions = () => {
-    let transactions = [];
-    
-    // Add transactions for new tables
-    tables.filter(table => table.isNew).forEach(table => {
-      transactions.push({
-        id: `create_table_${table.id}`,
-        type: 'create_table',
-        table: table.name,
-        fields: table.fields.map(field => ({
-          name: field.name,
-          dataType: field.type,
-          length: field.length || null,
-          primaryKey: !!field.primaryKey,
-          nullable: !!field.nullable,
-          defaultValue: field.defaultValue || null
-        }))
-      });
-    });
-    
-    // Add transactions for new fields in existing tables
-    tables.filter(table => !table.isNew).forEach(table => {
-      table.fields.filter(field => field.isNew).forEach(field => {
-        transactions.push({
-          id: `add_field_${table.id}_${field.id}`,
-          type: 'add_field',
-          table: table.name,
-          field: {
-            name: field.name,
-            dataType: field.type,
-            length: field.length || null,
-            primaryKey: !!field.primaryKey,
-            nullable: !!field.nullable,
-            defaultValue: field.defaultValue || null
+        
+        markAsModified('relations', newId);
+        
+        setRelations([...relations, newRelation]);
+        return newRelation;
+      };
+      
+      // Delete a relation
+      const handleDeleteRelation = (relationId) => {
+        markAsModified('relations', relationId);
+        
+        setRelations(relations.filter(r => r.id !== relationId));
+      };
+      // Generate transactions for the current state by comparing with original state
+      const generateTransactions = () => {
+        let transactions = [];
+        
+        // Process deleted tables (exist in original but not in current)
+        originalTables.forEach(originalTable => {
+          if (!tables.some(t => t.id === originalTable.id)) {
+            transactions.push({
+              id: `drop_table_${originalTable.id}`,
+              type: 'drop_table',
+              table: originalTable.name
+            });
           }
         });
-      });
-    });
-    
-    // Add transactions for updated fields
-    // For simplicity, we'll only include modified fields that existed before (not new)
-    // You would need to track original field values to implement this properly
-    
-    // Add transactions for deleted fields
-    deletedFields.forEach(field => {
-      transactions.push({
-        id: `drop_field_${field.tableName}_${field.fieldName}`,
-        type: 'drop_field',
-        table: field.tableName,
-        field: field.fieldName
-      });
-    });
-    
-    // Add transactions for deleted tables
-    deletedTables.forEach(table => {
-      transactions.push({
-        id: `drop_table_${table.id}`,
-        type: 'drop_table',
-        table: table.name
-      });
-    });
-    
-    // Add transactions for new relations
-    relations.filter(relation => relation.isNew).forEach(relation => {
-      transactions.push({
-        id: `create_relation_${relation.id}`,
-        type: 'create_foreign_key',
-        constraintName: `fk_${relation.fromTable}_${relation.toTable}`,
-        sourceTable: relation.fromTable,
-        sourceColumn: relation.fromField,
-        targetTable: relation.toTable,
-        targetColumn: relation.toField
-      });
-    });
-    
-    // Add transactions for deleted relations
-    deletedRelations.forEach(relation => {
-      transactions.push({
-        id: `drop_relation_${relation.id}`,
-        type: 'drop_foreign_key',
-        constraintName: `fk_${relation.fromTable}_${relation.toTable}`,
-        sourceTable: relation.fromTable
-      });
-    });
-
-    // Process field updates efficiently
-    console.log("field changes:",fieldChanges);
-Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
-    const [tableIdStr, fieldIdStr] = fieldKey.split('_');
-    // Convert string IDs to integers
-    const tableId = parseInt(tableIdStr, 10);
-    const fieldId = parseInt(fieldIdStr, 10);
-    const table = tables.find(t => t.id === tableId);
-    const field = table?.fields.find(f => f.id === fieldId);
-    if (!table || !field) return;
-  
-    // Original field name from changes object
-    const originalFieldName = changes.fieldName;
-    
-    // Handle rename separately (must come before other alterations)
-
-    if ('name' in changes && field.name !== originalFieldName) {
-      transactions.push({
-        id: `rename_field_${tableId}_${fieldId}`,
-        type: 'rename_field',
-        table: table.name,
-        oldName: originalFieldName,
-        newName: field.name
-      });
-    }
-    
-    // Collect other changes - IMPORTANT: use originalFieldName for field reference
-    // This ensures that changes reference the field by its name before any rename
-    const modifications = {};
-    for (const prop of ['type', 'length', 'defaultValue', 'nullable', 'primaryKey']) {
-      if (prop in changes && field[prop] !== changes[prop]) {
-        // Map property names as needed
-        const transactionProp = 
-          prop === 'type' ? 'dataType' : prop;
         
-        // Handle value formatting
-        const value = 
-          (prop === 'primaryKey' || prop === 'nullable') ? !!field[prop] : 
-          (prop === 'length' || prop === 'defaultValue') ? (field[prop] || null) : 
-          field[prop];
+        // Process new and modified tables
+        tables.forEach(currentTable => {
+          const originalTable = originalTables.find(t => t.id === currentTable.id);
+          
+          // New table
+          if (!originalTable) {
+            transactions.push({
+              id: `create_table_${currentTable.id}`,
+              type: 'create_table',
+              table: currentTable.name,
+              fields: currentTable.fields.map(field => ({
+                name: field.name,
+                dataType: field.type,
+                length: field.length || null,
+                primaryKey: !!field.primaryKey,
+                nullable: !!field.nullable,
+                defaultValue: field.defaultValue || null
+              }))
+            });
+            return;
+          }
+          
+          // Table name changed
+          if (currentTable.name !== originalTable.name) {
+            transactions.push({
+              id: `rename_table_${currentTable.id}`,
+              type: 'rename_table',
+              oldName: originalTable.name,
+              newName: currentTable.name
+            });
+          }
+          
+          // Process deleted fields
+          originalTable.fields.forEach(originalField => {
+            if (!currentTable.fields.some(f => f.id === originalField.id)) {
+              transactions.push({
+                id: `drop_field_${currentTable.id}_${originalField.id}`,
+                type: 'drop_field',
+                table: originalTable.name, // Use original table name in case it was renamed
+                field: originalField.name
+              });
+            }
+          });
+          
+          // Process new and modified fields
+          currentTable.fields.forEach(currentField => {
+            const originalField = originalTable.fields.find(f => f.id === currentField.id);
+            
+            // New field
+            if (!originalField) {
+              transactions.push({
+                id: `add_field_${currentTable.id}_${currentField.id}`,
+                type: 'add_field',
+                table: currentTable.name,
+                field: {
+                  name: currentField.name,
+                  dataType: currentField.type,
+                  length: currentField.length || null,
+                  primaryKey: !!currentField.primaryKey,
+                  nullable: !!currentField.nullable,
+                  defaultValue: currentField.defaultValue || null
+                }
+              });
+              return;
+            }
+            
+            // Check if this field was modified
+            const fieldKey = `${currentTable.id}_${currentField.id}`;
+            if (modifiedItems.fields.has(fieldKey)) {
+              // Field name changed
+              if (currentField.name !== originalField.name) {
+                transactions.push({
+                  id: `rename_field_${currentTable.id}_${currentField.id}`,
+                  type: 'rename_field',
+                  table: currentTable.name,
+                  oldName: originalField.name,
+                  newName: currentField.name
+                });
+              }
+              
+              // Other field properties changed
+              const modifications = {};
+              for (const prop of ['type', 'length', 'defaultValue', 'nullable', 'primaryKey']) {
+                if (currentField[prop] !== originalField[prop]) {
+                  // Map property names as needed
+                  const transactionProp = prop === 'type' ? 'dataType' : prop;
+                  
+                  // Handle value formatting
+                  const value = 
+                    (prop === 'primaryKey' || prop === 'nullable') ? !!currentField[prop] : 
+                    (prop === 'length' || prop === 'defaultValue') ? (currentField[prop] || null) : 
+                    currentField[prop];
+                  
+                  modifications[transactionProp] = value;
+                }
+              }
+              
+              // Only create a transaction if there are modifications
+              if (Object.keys(modifications).length > 0) {
+                transactions.push({
+                  id: `alter_field_${currentTable.id}_${currentField.id}`,
+                  type: 'alter_field',
+                  table: currentTable.name,
+                  field: originalField.name, // Use original name to ensure correct sequencing
+                  modifications
+                });
+              }
+            }
+          });
+        });
         
-        modifications[transactionProp] = value;
-      }
-    }
-    
-    // Only create a transaction if there are modifications
-    if (Object.keys(modifications).length > 0) {
-      transactions.push({
-        id: `alter_field_${tableId}_${fieldId}`,
-        type: 'alter_field',
-        table: table.name,
-        // Use the original field name here to ensure correct sequencing with rename
-        field: 'name' in changes ? originalFieldName : field.name,
-        modifications
-      });
-    }
-  });
-  
-    
-    return transactions;
-  };
-  
+        // Process deleted relations
+        originalRelations.forEach(originalRelation => {
+          if (!relations.some(r => r.id === originalRelation.id)) {
+            transactions.push({
+              id: `drop_relation_${originalRelation.id}`,
+              type: 'drop_foreign_key',
+              constraintName: `fk_${originalRelation.fromTable}_${originalRelation.toTable}`,
+              sourceTable: originalRelation.fromTable
+            });
+          }
+        });
+        
+        // Process new and modified relations
+        relations.forEach(currentRelation => {
+          const originalRelation = originalRelations.find(r => r.id === currentRelation.id);
+          
+          // New relation
+          if (!originalRelation) {
+            transactions.push({
+              id: `create_relation_${currentRelation.id}`,
+              type: 'create_foreign_key',
+              constraintName: `fk_${currentRelation.fromTable}_${currentRelation.toTable}`,
+              sourceTable: currentRelation.fromTable,
+              sourceColumn: currentRelation.fromField,
+              targetTable: currentRelation.toTable,
+              targetColumn: currentRelation.toField
+            });
+            return;
+          }
+          
+          // Check if this relation was modified
+          if (modifiedItems.relations.has(currentRelation.id)) {
+            // If any part of the relation changed, we need to drop and recreate it
+            if (currentRelation.fromTable !== originalRelation.fromTable ||
+                currentRelation.fromField !== originalRelation.fromField ||
+                currentRelation.toTable !== originalRelation.toTable ||
+                currentRelation.toField !== originalRelation.toField) {
+              
+              transactions.push({
+                id: `drop_relation_${currentRelation.id}`,
+                type: 'drop_foreign_key',
+                constraintName: `fk_${originalRelation.fromTable}_${originalRelation.toTable}`,
+                sourceTable: originalRelation.fromTable
+              });
+              
+              transactions.push({
+                id: `create_relation_${currentRelation.id}`,
+                type: 'create_foreign_key',
+                constraintName: `fk_${currentRelation.fromTable}_${currentRelation.toTable}`,
+                sourceTable: currentRelation.fromTable,
+                sourceColumn: currentRelation.fromField,
+                targetTable: currentRelation.toTable,
+                targetColumn: currentRelation.toField
+              });
+            }
+          }
+        });
+        
+        return transactions;
+      };
   // Generate SQL output 
   const handleGenerateJson = () => {
     // Generate the configuration JSON (for reloading the state)
@@ -412,6 +437,33 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
     setJsonOutput(JSON.stringify(output, null, 2));
     setShowSql(true);
   };
+
+      // Update relation properties
+      const handleUpdateRelation = (relationId, property, value) => {
+        markAsModified('relations', relationId);
+        
+        setRelations(relations.map(relation => {
+          if (relation.id === relationId) {
+            return { ...relation, [property]: value };
+          }
+          return relation;
+        }));
+      };
+
+      // Update table name
+      const handleUpdateTableName = (tableId, newName) => {
+        if (!newName.trim()) return;
+        
+        markAsModified('tables', tableId);
+        
+        setTables(tables.map(table => {
+          if (table.id === tableId) {
+            return { ...table, name: newName.trim().toLowerCase() };
+          }
+          return table;
+        }));
+      };
+      
   
   return (
     <div className="flex flex-col h-screen bg-gray-50" style={{"color": "black"}}>

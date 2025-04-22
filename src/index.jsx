@@ -18,6 +18,9 @@ import { FormExample } from "./components/generic/form";
 import ConfigUpdater from "./components/generic/config_form";
 import TableBuilder from "./tests/table_creator2";
 import TableBuilderV2 from "./tests/table_creator3";
+import TableBuilderV3 from "./tests/table_creatorv4";
+import TableBuilderV5 from "./tests/table_creatorv5";
+import TableBuilderV6 from "./tests/table_creatorv6";
 
 export function App() {
   return (
@@ -42,7 +45,7 @@ export function App() {
       <Route path="/" component={AppCreatorPage} />
       <Route path="/queries" component={QueryBuilderPage} />
       {/* <Route path="/preview" component={PreviewArea} /> */}
-      <Route path="/test" component={TableBuilderV2} />
+      <Route path="/test" component={TableBuilderV6} />
 
       <Route default component={() => <div>Not Found</div>} />
     </Router>
