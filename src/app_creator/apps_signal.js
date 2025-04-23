@@ -1,6 +1,5 @@
 
 import { effect, signal } from "@preact/signals";
-import {  GetAppsfromAPI } from "../api/api";
 
 const APP_STORAGE_KEY = "apps";
 
@@ -18,9 +17,7 @@ const apps = signal([]);
 const showForm = signal(false);
 
 function GetAppsfromDB() {
-  GetAppsfromAPI().then((data) => {
-    apps.value = [...data];
-  });
+  
   
 }
 

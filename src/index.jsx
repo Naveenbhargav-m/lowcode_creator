@@ -13,7 +13,7 @@ import { FormBuilderTest } from "./form_builder/form_edit_area";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
-import TableBuilderV6 from "./table_builder/table_builder";
+import { ComplexFormComponentsDemo,DynamicFormDemo } from "./form_builder/fields/fieldsdemo";
 
 export function App() {
   return (
@@ -37,6 +37,8 @@ export function App() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
       <Route path="/queries" component={QueryBuilderPage} />
+      <Route path="/test" component={DynamicFormDemo} />
+      <Route path="/test2" component={ComplexFormComponentsDemo} />
       <Route default component={() => <div>Not Found</div>} />
     </Router>
   </main>
