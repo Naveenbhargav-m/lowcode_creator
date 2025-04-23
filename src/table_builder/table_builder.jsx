@@ -3,385 +3,218 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, ChevronDown, ChevronUp, Database } from 'lucide-react';
 
 import { Plus, X, Save, Trash2, Table as TableIcon } from 'lucide-react';
+import { generateUID } from '../utils/helpers';
+import { GenerateTransactionsV2 } from './utilities';
+import { TablesTab } from './tables_page';
+import { dbViewSignal, LoadTables, SaveTablesData } from './table_builder_state';
 
 let fieldStyle = {"color": "black"};
-export default function TableBuilderV2() {
-  const [tables, setTables] = useState([
-    {
-      id: 1,
-      name: 'users',
-      isNew: false,
-      fields: [
-        { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null, isNew: false },
-        { id: 2, name: 'username', type: 'VARCHAR', length: 100, nullable: false, defaultValue: null, isNew: false },
-        { id: 3, name: 'email', type: 'VARCHAR', length: 255, nullable: false, defaultValue: null, isNew: false },
-        { id: 4, name: 'created_at', type: 'TIMESTAMP', nullable: false, defaultValue: 'NOW()', isNew: false },
-      ]
-    },
-    {
-      id: 2,
-      name: 'posts',
-      isNew: false,
-      fields: [
-        { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null, isNew: false },
-        { id: 2, name: 'title', type: 'VARCHAR', length: 200, nullable: false, defaultValue: null, isNew: false },
-        { id: 3, name: 'content', type: 'TEXT', nullable: true, defaultValue: null, isNew: false },
-        { id: 4, name: 'user_id', type: 'INTEGER', nullable: false, defaultValue: null, isNew: false },
-        { id: 5, name: 'created_at', type: 'TIMESTAMP', nullable: false, defaultValue: 'NOW()', isNew: false },
-      ]
-    }
-  ]);
-  
-  const [relations, setRelations] = useState([
-    { id: 1, fromTable: 'posts', fromField: 'user_id', toTable: 'users', toField: 'id', isNew: false }
-  ]);
-  
-  const [activeTable, setActiveTable] = useState(null);
-  const [showSql, setShowSql] = useState(false);
-  const [jsonOutput, setJsonOutput] = useState('');
-  // Track changed/deleted items for transactions
-  const [deletedTables, setDeletedTables] = useState([]);
-  const [deletedFields, setDeletedFields] = useState([]);
-  const [deletedRelations, setDeletedRelations] = useState([]);
-  
-  // Set the first table as active by default
-  useEffect(() => {
-    if (tables.length > 0 && activeTable === null) {
-      setActiveTable(tables[0].id);
-    }
-  }, [tables, activeTable]);
-  
-  // Find active table
-  const currentTable = tables.find(t => t.id === activeTable);
-  
-  // Create a new table
-  const handleCreateTable = (tableName) => {
-    if (!tableName.trim()) return;
-    
-    const newId = Math.max(0, ...tables.map(t => t.id)) + 1;
-    const newTable = {
-      id: newId,
-      name: tableName.trim().toLowerCase(),
-      isNew: true,
-      fields: [
-        { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null, isNew: true }
-      ]
-    };
-    
-    setTables([...tables, newTable]);
-    setActiveTable(newId);
-    return newTable;
-  };
-  
-  // Delete a table
-  const handleDeleteTable = (tableId) => {
-    const tableToDelete = tables.find(t => t.id === tableId);
-    
-    if (tableToDelete && !tableToDelete.isNew) {
-      setDeletedTables([...deletedTables, tableToDelete]);
-    }
-    
-    setTables(tables.filter(t => t.id !== tableId));
-    
-    // Delete relations involving this table
-    if (tableToDelete) {
-      const relationsToDelete = relations.filter(r => 
-        r.fromTable === tableToDelete.name || r.toTable === tableToDelete.name
-      );
-      
-      relationsToDelete.forEach(relation => {
-        if (!relation.isNew) {
-          setDeletedRelations([...deletedRelations, relation]);
-        }
+export default function TableBuilderV6() {
+    const [tables, setTables] = useState([]);
+      const [relations, setRelations] = useState([]);
+      const [activeTable, setActiveTable] = useState(null);
+      const [showSql, setShowSql] = useState(false);
+      const [jsonOutput, setJsonOutput] = useState('');
+      // Store original state for comparison when generating transactions
+      const [originalTables, setOriginalTables] = useState([]);
+      const [originalRelations, setOriginalRelations] = useState([]);
+      // Track modified items
+      const [modifiedItems, setModifiedItems] = useState({
+        tables: new Set(), // table ids
+        fields: new Set(), // "tableId_fieldId" strings
+        relations: new Set() // relation ids
       });
+
+      useEffect((() => {
+        LoadTables().then((data) => {
+          if(data === undefined) {
+            return;
+          }
+          let tables = data["tables"] || [];
+          let relations = data["relations"] || [];
+          setTables(tables);
+          setRelations(relations);
+        });
+      }), []);
       
-      setRelations(relations.filter(r => 
-        r.fromTable !== tableToDelete.name && r.toTable !== tableToDelete.name
-      ));
-    }
-    
-    // Set active table to another one if the active one is deleted
-    if (activeTable === tableId) {
-      const remainingTables = tables.filter(t => t.id !== tableId);
-      setActiveTable(remainingTables.length > 0 ? remainingTables[0].id : null);
-    }
-  };
-  
-  // Add a new field to a table
-  const handleAddField = (tableId) => {
-    setTables(tables.map(table => {
-      if (table.id === tableId) {
-        const newFieldId = Math.max(0, ...table.fields.map(f => f.id)) + 1;
-        return {
-          ...table,
+      // Initialize original state from initial tables/relations
+      useEffect(() => {
+        if (originalTables.length === 0 && tables.length > 0) {
+          setOriginalTables(JSON.parse(JSON.stringify(tables)));
+        }
+        if (originalRelations.length === 0 && relations.length > 0) {
+          setOriginalRelations(JSON.parse(JSON.stringify(relations)));
+        }
+      }, [tables, relations]);
+      
+      // Set the first table as active by default
+      useEffect(() => {
+        if (tables.length > 0 && activeTable === null) {
+          setActiveTable(tables[0].fid);
+        }
+      }, [tables, activeTable]);
+      
+      // Find active table
+      const currentTable = tables.find(t => t.fid === activeTable);
+      
+      // Helper function to mark items as modified
+      const markAsModified = (type, id) => {
+        setModifiedItems(prev => {
+          const newState = {...prev};
+          newState[type].add(id);
+          return newState;
+        });
+      };
+      
+      // Create a new table
+      const handleCreateTable = (tableName) => {
+        if (!tableName.trim()) return;
+        
+        const newId = Math.max(0, ...tables.map(t => t.id)) + 1;
+        let myid = generateUID();
+        const newTable = {
+          id: newId,
+          fid: myid,
+          name: tableName.trim().toLowerCase(),
           fields: [
-            ...table.fields,
-            { id: newFieldId, name: 'new_field', type: 'VARCHAR', length: 255, nullable: true, defaultValue: null, isNew: true }
+            { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null }
           ]
         };
-      }
-      return table;
-    }));
-  };
-  
-  // Delete a field
-  const handleDeleteField = (tableId, fieldId) => {
-    const tableToUpdate = tables.find(t => t.id === tableId);
-    if (tableToUpdate) {
-      const fieldToDelete = tableToUpdate.fields.find(f => f.id === fieldId);
+        
+        // New tables are automatically considered modified
+        markAsModified('tables', myid);
+        
+        setTables([...tables, newTable]);
+        setActiveTable(newId);
+        return newTable;
+      };
       
-      if (fieldToDelete && !fieldToDelete.isNew) {
-        setDeletedFields([...deletedFields, { 
-          tableName: tableToUpdate.name, 
-          fieldName: fieldToDelete.name 
-        }]);
-      }
-      
-      setTables(tables.map(table => {
-        if (table.id === tableId) {
-          return {
-            ...table,
-            fields: table.fields.filter(field => field.id !== fieldId)
-          };
+      // Delete a table
+      const handleDeleteTable = (tableId) => {
+        // Mark as modified before deleting
+        markAsModified('tables', tableId);
+        
+        const tableToDelete = tables.find(t => t.fid === tableId);
+        
+        // Delete relations involving this table
+        if (tableToDelete) {
+          const relationsToModify = relations.filter(r => 
+            r.fromTable === tableToDelete.name || r.toTable === tableToDelete.name
+          );
+          
+          relationsToModify.forEach(relation => {
+            markAsModified('relations', relation.fid);
+          });
+          
+          setRelations(relations.filter(r => 
+            r.fromTable !== tableToDelete.name && r.toTable !== tableToDelete.name
+          ));
         }
-        return table;
-      }));
-    }
-  };
-  
-  // Add a new relation
-  const handleAddRelation = (fromTable, fromField, toTable, toField) => {
-    const newId = Math.max(0, ...relations.map(r => r.id)) + 1;
-    const newRelation = {
-      id: newId,
-      fromTable,
-      fromField,
-      toTable,
-      toField,
-      isNew: true
-    };
-    
-    setRelations([...relations, newRelation]);
-    return newRelation;
-  };
-  
-  // Delete a relation
-  const handleDeleteRelation = (relationId) => {
-    const relationToDelete = relations.find(r => r.id === relationId);
-    
-    if (relationToDelete && !relationToDelete.isNew) {
-      setDeletedRelations([...deletedRelations, relationToDelete]);
-    }
-    
-    setRelations(relations.filter(r => r.id !== relationId));
-  };
-  
-const [fieldChanges, setFieldChanges] = useState({});
-
-// Modified update handler that only tracks what changed
-const handleUpdateField = (tableId, fieldId, property, value) => {
-    const table = tables.find(t => t.id === tableId);
-    const field = table?.fields.find(f => f.id === fieldId);
-    
-    if (field && !field.isNew) {
-      const fieldKey = `${tableId}_${fieldId}`;
+        
+        setTables(tables.filter(t => t.fid !== tableId));
+        
+        // Set active table to another one if the active one is deleted
+        if (activeTable === tableId) {
+          const remainingTables = tables.filter(t => t.fid !== tableId);
+          setActiveTable(remainingTables.length > 0 ? remainingTables[0].fid : null);
+        }
+      };
       
-      // Track original value only once per property
-      setFieldChanges(prev => {
-        const existingChanges = prev[fieldKey] || {};
+      // Add a new field to a table
+      const handleAddField = (tableId) => {
+        const table = tables.find(t => t.fid === tableId);
+        if (!table) return;
         
-            let originalName = "";
-            if("fieldName" in existingChanges) {
-                originalName = existingChanges["fieldName"];
-            } else {
-                originalName = field["name"];
-            }
-        console.log("original name:",originalName);
-          return {
-            ...prev,
-            [fieldKey]: {
-              ...existingChanges,
-              tableName: table.name, // Store table name for convenience
-              fieldName: originalName, // Store original field name for renames
-              [property]: field[property] // Store only the original value of the changed property
-            }
-          };
-      });
-    }
-  
-    // Update the field as before
-    setTables(tables.map(table => {
-      if (table.id === tableId) {
-        return {
-          ...table,
-          fields: table.fields.map(field => {
-            if (field.id === fieldId) {
-              return { ...field, [property]: value };
-            }
-            return field;
-          })
-        };
-      }
-      return table;
-    }));
-  };
-  
-  // Generate transactions for the current state
-  const generateTransactions = () => {
-    let transactions = [];
-    
-    // Add transactions for new tables
-    tables.filter(table => table.isNew).forEach(table => {
-      transactions.push({
-        id: `create_table_${table.id}`,
-        type: 'create_table',
-        table: table.name,
-        fields: table.fields.map(field => ({
-          name: field.name,
-          dataType: field.type,
-          length: field.length || null,
-          primaryKey: !!field.primaryKey,
-          nullable: !!field.nullable,
-          defaultValue: field.defaultValue || null
-        }))
-      });
-    });
-    
-    // Add transactions for new fields in existing tables
-    tables.filter(table => !table.isNew).forEach(table => {
-      table.fields.filter(field => field.isNew).forEach(field => {
-        transactions.push({
-          id: `add_field_${table.id}_${field.id}`,
-          type: 'add_field',
-          table: table.name,
-          field: {
-            name: field.name,
-            dataType: field.type,
-            length: field.length || null,
-            primaryKey: !!field.primaryKey,
-            nullable: !!field.nullable,
-            defaultValue: field.defaultValue || null
+        markAsModified('tables', tableId);
+        
+        const newFieldId = Math.max(0, ...table.fields.map(f => f.id)) + 1;
+        let myid = generateUID();
+        setTables(tables.map(table => {
+          if (table.fid === tableId) {
+            return {
+              ...table,
+              fields: [
+                ...table.fields,
+                { id: newFieldId, fid: myid, name: 'new_field', type: 'VARCHAR', length: 255, nullable: true, defaultValue: null }
+              ]
+            };
           }
-        });
-      });
-    });
-    
-    // Add transactions for updated fields
-    // For simplicity, we'll only include modified fields that existed before (not new)
-    // You would need to track original field values to implement this properly
-    
-    // Add transactions for deleted fields
-    deletedFields.forEach(field => {
-      transactions.push({
-        id: `drop_field_${field.tableName}_${field.fieldName}`,
-        type: 'drop_field',
-        table: field.tableName,
-        field: field.fieldName
-      });
-    });
-    
-    // Add transactions for deleted tables
-    deletedTables.forEach(table => {
-      transactions.push({
-        id: `drop_table_${table.id}`,
-        type: 'drop_table',
-        table: table.name
-      });
-    });
-    
-    // Add transactions for new relations
-    relations.filter(relation => relation.isNew).forEach(relation => {
-      transactions.push({
-        id: `create_relation_${relation.id}`,
-        type: 'create_foreign_key',
-        constraintName: `fk_${relation.fromTable}_${relation.toTable}`,
-        sourceTable: relation.fromTable,
-        sourceColumn: relation.fromField,
-        targetTable: relation.toTable,
-        targetColumn: relation.toField
-      });
-    });
-    
-    // Add transactions for deleted relations
-    deletedRelations.forEach(relation => {
-      transactions.push({
-        id: `drop_relation_${relation.id}`,
-        type: 'drop_foreign_key',
-        constraintName: `fk_${relation.fromTable}_${relation.toTable}`,
-        sourceTable: relation.fromTable
-      });
-    });
-
-    // Process field updates efficiently
-    console.log("field changes:",fieldChanges);
-Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
-    const [tableIdStr, fieldIdStr] = fieldKey.split('_');
-    // Convert string IDs to integers
-    const tableId = parseInt(tableIdStr, 10);
-    const fieldId = parseInt(fieldIdStr, 10);
-    const table = tables.find(t => t.id === tableId);
-    const field = table?.fields.find(f => f.id === fieldId);
-    if (!table || !field) return;
-  
-    // Original field name from changes object
-    const originalFieldName = changes.fieldName;
-    
-    // Handle rename separately (must come before other alterations)
-
-    if ('name' in changes && field.name !== originalFieldName) {
-      transactions.push({
-        id: `rename_field_${tableId}_${fieldId}`,
-        type: 'rename_field',
-        table: table.name,
-        oldName: originalFieldName,
-        newName: field.name
-      });
-    }
-    
-    // Collect other changes - IMPORTANT: use originalFieldName for field reference
-    // This ensures that changes reference the field by its name before any rename
-    const modifications = {};
-    for (const prop of ['type', 'length', 'defaultValue', 'nullable', 'primaryKey']) {
-      if (prop in changes && field[prop] !== changes[prop]) {
-        // Map property names as needed
-        const transactionProp = 
-          prop === 'type' ? 'dataType' : prop;
+          return table;
+        }));
+      };
+      
+      // Delete a field
+      const handleDeleteField = (tableId, fieldId) => {
+        markAsModified('tables', tableId);
+        markAsModified('fields', `${tableId}_${fieldId}`);
         
-        // Handle value formatting
-        const value = 
-          (prop === 'primaryKey' || prop === 'nullable') ? !!field[prop] : 
-          (prop === 'length' || prop === 'defaultValue') ? (field[prop] || null) : 
-          field[prop];
+        setTables(tables.map(table => {
+          if (table.fid === tableId) {
+            return {
+              ...table,
+              fields: table.fields.filter(field => field.fid !== fieldId)
+            };
+          }
+          return table;
+        }));
+      };
+      
+      // Update field properties
+      const handleUpdateField = (tableId, fieldId, property, value) => {
+        markAsModified('tables', tableId);
+        markAsModified('fields', `${tableId}_${fieldId}`);
         
-        modifications[transactionProp] = value;
-      }
-    }
-    
-    // Only create a transaction if there are modifications
-    if (Object.keys(modifications).length > 0) {
-      transactions.push({
-        id: `alter_field_${tableId}_${fieldId}`,
-        type: 'alter_field',
-        table: table.name,
-        // Use the original field name here to ensure correct sequencing with rename
-        field: 'name' in changes ? originalFieldName : field.name,
-        modifications
-      });
-    }
-  });
-  
-    
-    return transactions;
-  };
-  
+        setTables(tables.map(table => {
+          if (table.fid === tableId) {
+            return {
+              ...table,
+              fields: table.fields.map(field => {
+                if (field.fid === fieldId) {
+                  return { ...field, [property]: value };
+                }
+                return field;
+              })
+            };
+          }
+          return table;
+        }));
+      };
+      
+      // Add a new relation
+      const handleAddRelation = (fromTable, fromField, toTable, toField) => {
+        const newId = Math.max(0, ...relations.map(r => r.id)) + 1;
+        let myid = generateUID();
+        const newRelation = {
+          id: newId,
+          fid: myid,
+          fromTable,
+          fromField,
+          toTable,
+          toField
+        };
+        
+        markAsModified('relations', newId);
+        
+        setRelations([...relations, newRelation]);
+        return newRelation;
+      };
+      
+      // Delete a relation
+      const handleDeleteRelation = (relationId) => {
+        markAsModified('relations', relationId);
+        
+        setRelations(relations.filter(r => r.fid !== relationId));
+      };
   // Generate SQL output 
   const handleGenerateJson = () => {
     // Generate the configuration JSON (for reloading the state)
     const configJson = {
       tables: tables.map(table => ({
         id: table.id,
+        fid: table.fid,
         name: table.name,
         fields: table.fields.map(field => ({
+          fid: field.fid,
           id: field.id,
           name: field.name,
           type: field.type,
@@ -393,6 +226,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
       })),
       relations: relations.map(relation => ({
         id: relation.id,
+        fid: relation.fid,
         fromTable: relation.fromTable,
         fromField: relation.fromField,
         toTable: relation.toTable,
@@ -401,29 +235,59 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
     };
     
     // Generate the transactions JSON
-    const transactions = generateTransactions();
+    const transactions = GenerateTransactionsV2(originalTables, tables, originalRelations, relations);
     
     // Combine both outputs
     const output = {
       config: configJson,
       transactions: transactions
     };
-    
+    SaveTablesData(output).then((newdata) => {
+      console.log("new data:",newdata);
+      setTables(newdata);
+    });
     setJsonOutput(JSON.stringify(output, null, 2));
     setShowSql(true);
   };
+
+      // Update relation properties
+      const handleUpdateRelation = (relationId, property, value) => {
+        markAsModified('relations', relationId);
+        
+        setRelations(relations.map(relation => {
+          if (relation.fid === relationId) {
+            return { ...relation, [property]: value };
+          }
+          return relation;
+        }));
+      };
+
+      // Update table name
+      const handleUpdateTableName = (tableId, newName) => {
+        if (!newName.trim()) return;
+        
+        markAsModified('tables', tableId);
+        
+        setTables(tables.map(table => {
+          if (table.fid === tableId) {
+            return { ...table, name: newName.trim().toLowerCase() };
+          }
+          return table;
+        }));
+      };
+      
   
   return (
     <div className="flex flex-col h-screen bg-gray-50" style={{"color": "black"}}>
-      <header className="bg-green text-white shadow-md" style={{backgroundColor:"#10b981"}}>
-        <div className="flex items-center justify-between p-2">
-          <div className="flex items-center center" style={{display:"flex", "flexDirection": "row", "justifyContent": "center"}}>
-            <Database className="mr-4" />
-            <h1 className="text-xl font-semibold mt-4">Database</h1>
+      <header className="bg-green text-white">
+        <div className="flex items-center justify-between">
+          <div className="w-64">
+          <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab}/>
           </div>
           <button 
             onClick={handleGenerateJson}
             className="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-indigo-50 transition-colors"
+            style={{marginRight: "30px", "backgroundColor":"black", "color": "white"}}
           >
             sync
           </button>
@@ -534,11 +398,11 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
         <ul className="space-y-1">
           {tables.map(table => (
             <li 
-              key={table.id}
+              key={table.fid}
               className={`flex items-center justify-between p-2 rounded cursor-pointer ${
-                activeTable === table.id ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-gray-100'
+                activeTable === table.fid ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-gray-100'
               }`}
-              onClick={() => setActiveTable(table.id)}
+              onClick={() => setActiveTable(table.fid)}
             >
               <div className="flex items-center">
                 <TableIcon size={16} className="mr-2" />
@@ -550,7 +414,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDeleteTable(table.id);
+                  onDeleteTable(table.fid);
                 }}
                 className="text-gray-500 hover:text-red-500 transition-colors"
               >
@@ -621,7 +485,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
         >
           <option value="">Select table</option>
           {tables.map(table => (
-            <option key={table.id} value={table.name}>{table.name}</option>
+            <option key={table.fid} value={table.name}>{table.name}</option>
           ))}
         </select>
         
@@ -635,7 +499,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
             >
               <option value="">Select field</option>
               {getTableFields(fromTable).map(field => (
-                <option key={field.id} value={field.name}>{field.name}</option>
+                <option key={field.fid} value={field.name}>{field.name}</option>
               ))}
             </select>
           </>
@@ -654,7 +518,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
         >
           <option value="">Select table</option>
           {tables.map(table => (
-            <option key={table.id} value={table.name}>{table.name}</option>
+            <option key={table.fid} value={table.name}>{table.name}</option>
           ))}
         </select>
         
@@ -668,7 +532,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
             >
               <option value="">Select field</option>
               {getTableFields(toTable).map(field => (
-                <option key={field.id} value={field.name}>{field.name}</option>
+                <option key={field.fid} value={field.name}>{field.name}</option>
               ))}
             </select>
           </>
@@ -704,7 +568,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
             <p className="text-sm text-gray-500 italic">No relations defined</p>
           ) : (
             relations.map(relation => (
-<div key={relation.id} className="bg-white border border-gray-200 rounded p-2 shadow-sm">
+<div key={relation.fid} className="bg-white border border-gray-200 rounded p-2 shadow-sm">
   <div className="flex justify-between items-center">
     <div className="flex items-center overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
       <ArrowRight size={14} className="text-indigo-600 mx-1 flex-shrink-0" />
@@ -717,7 +581,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
       </div>
     </div>
     <button
-      onClick={() => onDeleteRelation(relation.id)}
+      onClick={() => onDeleteRelation(relation.fid)}
       className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 ml-2"
     >
       <Trash2 size={14} />
@@ -750,7 +614,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
     };
     
     const handleAddField = () => {
-      const newFieldId = onAddField(table.id);
+      const newFieldId = onAddField(table.fid);
       // Automatically open the new field for editing
       setActiveFieldId(newFieldId);
     };
@@ -776,11 +640,11 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
         {/* Fields List */}
         <div className="space-y-2" style={{"display": "flex", "flexDirection": "column", "alignItems": "center"}}>
           {table.fields.map(field => (
-            <div key={field.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style={{minWidth:"400px"}}>
+            <div key={field.fid} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style={{minWidth:"400px"}}>
               {/* Field Header - Always visible */}
               <div 
-                className={`flex items-center justify-between p-3 cursor-pointer ${activeFieldId === field.id ? 'bg-indigo-50 border-b border-indigo-100' : 'hover:bg-gray-50'}`}
-                onClick={() => handleFieldClick(field.id)}
+                className={`flex items-center justify-between p-3 cursor-pointer ${activeFieldId === field.fid ? 'bg-indigo-50 border-b border-indigo-100' : 'hover:bg-gray-50'}`}
+                onClick={() => handleFieldClick(field.fid)}
               >
                 <div className="flex items-center">
                   <div className="flex flex-col">
@@ -800,11 +664,11 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleFieldClick(field.id);
+                      handleFieldClick(field.fid);
                     }}
                     className="text-gray-400 hover:text-indigo-600 p-1 rounded-full hover:bg-gray-100"
                   >
-                    {activeFieldId === field.id ? (
+                    {activeFieldId === field.fid ? (
                       <ChevronUp size={16} />
                     ) : (
                       <ChevronDown size={16} />
@@ -813,7 +677,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDeleteField(table.id, field.id);
+                      onDeleteField(table.fid, field.fid);
                     }}
                     disabled={field.primaryKey}
                     className={`ml-1 p-1 rounded-full ${
@@ -828,7 +692,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
               </div>
               
               {/* Field Details - Only visible when active */}
-              {activeFieldId === field.id && (
+              {activeFieldId === field.fid && (
                 <div className="p-4 bg-white border-t border-gray-100">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -836,7 +700,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                       <input
                         type="text"
                         value={field.name || ''}
-                        onChange={(e) => onUpdateField(table.id, field.id, 'name', e.target.value)}
+                        onChange={(e) => onUpdateField(table.fid, field.fid, 'name', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded"
                         placeholder="Field name"
                       />
@@ -845,7 +709,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                       <select
                         value={field.type}
-                        onChange={(e) => onUpdateField(table.id, field.id, 'type', e.target.value)}
+                        onChange={(e) => onUpdateField(table.fid, field.fid, 'type', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded"
                       >
                         {DATA_TYPES.map(type => (
@@ -860,7 +724,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                         <input
                           type="number"
                           value={field.length || ''}
-                          onChange={(e) => onUpdateField(table.id, field.id, 'length', e.target.value ? parseInt(e.target.value) : null)}
+                          onChange={(e) => onUpdateField(table.fid, field.fid, 'length', e.target.value ? parseInt(e.target.value) : null)}
                           className="w-full p-2 border border-gray-300 rounded"
                           placeholder="Length"
                         />
@@ -872,7 +736,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                       <input
                         type="text"
                         value={field.defaultValue || ''}
-                        onChange={(e) => onUpdateField(table.id, field.id, 'defaultValue', e.target.value || null)}
+                        onChange={(e) => onUpdateField(table.fid, field.fid, 'defaultValue', e.target.value || null)}
                         className="w-full p-2 border border-gray-300 rounded"
                         placeholder="Default value"
                       />
@@ -883,7 +747,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                         <input
                           type="checkbox"
                           checked={field.primaryKey || false}
-                          onChange={(e) => onUpdateField(table.id, field.id, 'primaryKey', e.target.checked)}
+                          onChange={(e) => onUpdateField(table.fid, field.fid, 'primaryKey', e.target.checked)}
                           className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                         />
                         <span className="ml-2 text-sm text-gray-700">Primary Key</span>
@@ -893,7 +757,7 @@ Object.entries(fieldChanges).forEach(([fieldKey, changes]) => {
                         <input
                           type="checkbox"
                           checked={!field.nullable}
-                          onChange={(e) => onUpdateField(table.id, field.id, 'nullable', !e.target.checked)}
+                          onChange={(e) => onUpdateField(table.fid, field.fid, 'nullable', !e.target.checked)}
                           className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                         />
                         <span className="ml-2 text-sm text-gray-700">Required</span>
