@@ -43,16 +43,10 @@ function TablesDataSetterFromAPI() {
 
 
 
-function SaveTablesData() {
-  console.log("called Save Tables Data");
-  let alltables = tables;
-  let alledges = table_edges;
-  // let tablesJson = JSON.stringify(alltables);
-  // let edgesJson = JSON.stringify(alledges);
-  let data = {"tables_data":{"edges":alledges,"tables":alltables}};
-  let baseurl = `${AppID}/public/_tables`;
+function SaveTablesData(data) {
+  let baseurl = `${AppID}/update-tables`;
   console.log("before patching prest data:",baseurl, data);
-  PrestClient.patch(baseurl, {"query": {"id": 1}, "body": data});
+  PrestClient.post(baseurl, { "body": data});
 }
 
 export {TablesDataSetterFromAPI, SaveTablesData};

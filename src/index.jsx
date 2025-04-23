@@ -2,7 +2,6 @@ import { render } from "preact";
 import { LocationProvider, Router, Route } from "preact-iso";
 import "./index.css";
 import "./styles/theme.css";
-import { ThemeProvider } from "./components/theme_provider";
 import SideBar from "./components/sidebar.jsx";
 import { TablesPage } from "./table_builder/tables_page";
 import {ScreenPage} from "./screen_builder/screen_page";
@@ -14,13 +13,7 @@ import { FormBuilderTest } from "./form_builder/form_edit_area";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
-import { FormExample } from "./components/generic/form";
-import ConfigUpdater from "./components/generic/config_form";
-import TableBuilder from "./tests/table_creator2";
-import TableBuilderV2 from "./tests/table_creator3";
-import TableBuilderV3 from "./tests/table_creatorv4";
-import TableBuilderV5 from "./tests/table_creatorv5";
-import TableBuilderV6 from "./tests/table_creatorv6";
+import TableBuilderV6 from "./table_builder/table_builder";
 
 export function App() {
   return (
@@ -44,9 +37,6 @@ export function App() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
       <Route path="/queries" component={QueryBuilderPage} />
-      {/* <Route path="/preview" component={PreviewArea} /> */}
-      <Route path="/test" component={TableBuilderV6} />
-
       <Route default component={() => <div>Not Found</div>} />
     </Router>
   </main>

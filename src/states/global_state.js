@@ -1,5 +1,4 @@
 import { effect, signal } from "@preact/signals";
-import { SetGlobalFieldsToAPI } from "../api/api";
 import { APIManager } from "../api/api_manager";
 import { GetDataFromAPi, SyncData } from "../api/api_syncer";
 
@@ -7,6 +6,7 @@ let sideBarEnable = signal(true);
 const PrestDBaseUrl = "http://localhost:8000";
 const CreatorBackendUrl = "http://localhost:8001";
 const AppID = signal("doctors_app1chjxp");
+const CreatorAPPID = signal("nokodo_creator");
 let showFormPopup = signal("");
 
 let globalConfigs = signal({

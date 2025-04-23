@@ -19,7 +19,6 @@ import { PageBuilderLeftGrid } from "./page_builder_left";
 import TableBuilderRight from "./table_builder_right";
 import { tables, addContainer, addField, tablesFlag, activeTable, activeField, UpdateTableEdges, table_edges, currentTableConfigs, currentEdges, tables_id, Deletefield, UpdateRelation, dbViewSignal } from "./table_builder_state";
 import { Drop } from "../components/custom/Drop";
-import { SyncTablesData } from "../api/api";
 import { SaveTablesData, TablesDataSetterFromAPI } from "./table_builder_helpers";
 import { useSignal } from "@preact/signals";
 import DynamicIcon from "../components/custom/dynamic_icon";
@@ -27,6 +26,7 @@ import { generateUID } from "../utils/helpers";
 import { ViewArea } from "../view_creator/view_page";
 import { AdvancedView } from "../view_creator/advnaced_views";
 import { globalStyle } from "../styles/globalStyle";
+import TableBuilderV6 from "./table_builder";
 
 
 const ResizableTableNode = ({ id, selected, onDeleteField }) => {
@@ -271,7 +271,6 @@ const onReconnectEnd = useCallback((_, edge) => {
       <TablesButtonsBar AddCallBack={addNode} 
       SaveCallback={() => {
         console.log("save call Back is executing:");
-        SyncTablesData(currentTableConfigs, currentEdges, tables_id.peek());
         SaveTablesData();}}/>
       </div>
       
@@ -361,7 +360,7 @@ function TablesTab({ onTableSelect }) {
         {tables.map((table) => (
           <div
             key={table}
-            className={`p-2 cursor-pointer rounded-md ${selectedTable === table ? "bg-black text-white" : "bg-white"}`}
+            className={`p-2 cursor-pointer rounded-md ${selectedTable === table ? "bg-black text-white" : "bg-white text-black"}`}
             onClick={() => handleTableClick(table)}
           >
             {table}
@@ -376,7 +375,7 @@ function TablesPage() {
   return (
     <>
       {
-      dbViewSignal.value == "Tables" ? <TableBuilderView /> : 
+      dbViewSignal.value == "Tables" ? <TableBuilderV6 /> : 
       dbViewSignal.value == "Views" ? <ViewArea /> :
       dbViewSignal.value == "Triggers" ? <ViewArea/> :
       <AdvancedView />
