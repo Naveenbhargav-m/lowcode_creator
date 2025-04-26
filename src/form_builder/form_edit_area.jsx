@@ -117,7 +117,7 @@ function EditArea() {
   export function FormBuilderTest() {
     return (
     <div className="min-h-screen h-screen w-full flex">
-    <div className="w-1/6 bg-white p-4 min-h-screen scrollable-div">
+    <div className="bg-white p-4 min-h-screen scrollable-div" style={{height:"100vh", width:"14vw"}}>
     <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
             <TemplateOptionTabs tabs={["forms", "components"]} onChange={(tab) => { 
               formActiveLeftTab.value = tab;
@@ -130,11 +130,11 @@ function EditArea() {
             }
     </div>
   
-    <div className="bg-background scrollable-div" style={{height:"100vh", width:"90%", padding:"20px"}}>
+    <div className="bg-background w-3/6 scrollable-div" style={{height:"100vh", width:"58vw"}}>
         <EditArea />
     </div>
   
-    <div className="w-1/6 bg-white h-screen scrollable-div">
+    <div className="w-2/6 bg-white h-screen scrollable-div" style={{height:"100vh", width:"24vw"}}>
      <FlexRightPanel />
     </div>
   </div>);

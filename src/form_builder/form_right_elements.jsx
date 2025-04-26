@@ -4,6 +4,7 @@ import FlexConfigurator from "./configs_view/flex_config";
 import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
 import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms, setCurrentElements } from "./form_builder_state";
 import { generateUID } from "../utils/helpers";
+import ConfigUpdater from "../components/generic/config_form";
 
 
 
@@ -219,8 +220,8 @@ export function FlexRightPanel() {
           localStorage.setItem("forms",JSON.stringify(forms));
         }
       }
-      return (<div>
-      <FlexConfigTab tablSignal={activeTab} />
+      return (<div style={{height:"100%"}}>
+      {/* <FlexConfigTab tablSignal={activeTab} />
       {activeTab.value === "Basic" ? (
         type === "column" || type === "row" ? (
           <FlexConfigurator onChange={handleFlexChange} onSubmit={handleFlexSubmit} existingConfig={configs} />
@@ -229,7 +230,14 @@ export function FlexRightPanel() {
         )
       ) : (
         <AdvnacedForm configsInp={advancedConfig} onSubmit={onAdvancedFlexSubmit} />
-      )}
+      )} */}
+        <ConfigUpdater
+        initalData={configs} 
+        updateCallBack={(newdata) => {console.log("new data came:", newdata);}}
+        dataSourceConfig={{}}
+        dataSources={{}}
+        onDataSourceUpdate={(newdata) => {console.log("updated Data source:",newdata)}}
+        />
     </div>);
   }
   
