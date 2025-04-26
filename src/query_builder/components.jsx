@@ -64,7 +64,7 @@ let style = {
       {/* Vertical Tab Navigation */}
       <div 
         className="w-48 flex-shrink-0 bg-gray-50 border-r border-gray-200"
-        style={{ boxShadow: "2px 0 5px rgba(0,0,0,0.05)" }}
+        style={{ boxShadow: "2px 0 5px rgba(0,0,0,0.05)",borderRadius:"20px" }}
       >
         <QueryTabs activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
@@ -118,7 +118,7 @@ function QueryTabs({ activeTab, onTabChange }) {
   ];
   
   return (
-    <div className="py-4">
+    <div className="py-4" style={{borderRadius:"20px"}}>
       {tabs.map(tab => (
         <button
           key={tab.id}
