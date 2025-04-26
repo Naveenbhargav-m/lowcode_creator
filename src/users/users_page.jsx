@@ -1,8 +1,9 @@
+import { UserGroupsManager } from "../groups/groups_page";
 
 function UsersPage() {
     return (
         <div className="p-10 bg-white text-black h-screen">
-            <div>This is Users page</div>
+            <div><UserGroupsManager /></div>
         </div>
     );
 }

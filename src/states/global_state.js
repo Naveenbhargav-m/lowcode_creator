@@ -94,7 +94,7 @@ export {
     addVariable, variableMap, variableKeys, newVariableKey, showFormPopup,
     DefaultMode, DefaultTheme, DefaultThemeID,
     PrestDBaseUrl, CreatorBackendUrl, AppID, globalConfigs,
-    PrestClient, ApiClient, LoadSignals
+    PrestClient, ApiClient, LoadSignals, CreatorAPPID
 };
 
 
