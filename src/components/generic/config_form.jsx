@@ -170,7 +170,7 @@ export default function ConfigUpdater({initalData , updateCallBack, dataSourceCo
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === 'style' && <StyleConfig styleConfig={styleConfig} 
         defaultValues={initalData} updateCallback={updateCallBack} />}
-        {activeTab === 'data' && <DataQueryConfig initalData={dataSources} config={dataSourceConfig} onUpdate={dataSourceConfig} />}
+        {activeTab === 'data' && <DataQueryConfig initialData={dataSources} config={dataSourceConfig} onUpdate={dataSourceConfig} />}
         {activeTab === 'events' && (
           <EventsConfigWrapper />
         )}

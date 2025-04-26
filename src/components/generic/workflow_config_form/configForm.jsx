@@ -1,144 +1,179 @@
-import React, { useState, useEffect } from 'react';
-import ConfigSection from './components/configSection';
-import TabNav from './components/tabNav';
-import { processFormValues, validateConfig } from './utils/formHelpers';
-import { globalStyle } from '../../../styles/globalStyle';
+// ConfigForm.jsx
+import { useState } from "preact/hooks";
+import TabView, { TextField, KeyValueMapper, ArrayField, Accordion, SelectField } from "./components/fields";
 
 const ConfigForm = ({ 
   config, 
-  initialValues = {}, 
-  onSave, 
-  onCancel,
-  onChange,
-  readOnly = false
+  initialValues, 
+  onChange, 
+  onSubmit 
 }) => {
-  const [values, setValues] = useState(initialValues);
-  const [errors, setErrors] = useState({});
-  const [activeTab, setActiveTab] = useState(0);
+  const [values, setValues] = useState(initialValues || {});
+  const [activeTab, setActiveTab] = useState(config.sections[0]?.id || '');
   
-  // Extract tabs from config
-  const tabs = config.tabs || [{ title: 'Configuration', sections: config.sections || [] }];
+  // Create tabs array for TabView component
+  const tabs = config.sections.map(section => ({
+    id: section.id,
+    label: section.title
+  }));
   
-  useEffect(() => {
-    // Initialize form with default values if not provided in initialValues
-    const defaultValues = {};
-    
-    tabs.forEach(tab => {
-      tab.sections.forEach(section => {
-        section.fields.forEach(field => {
-          if (field.defaultValue !== undefined && values[field.id] === undefined) {
-            defaultValues[field.id] = field.defaultValue;
-          }
-        });
-      });
-    });
-    
-    if (Object.keys(defaultValues).length > 0) {
-      setValues(prev => ({ ...prev, ...defaultValues }));
-    }
-  }, [config]);
-  
+  // Handle field change
   const handleChange = (fieldId, value) => {
-    setValues(prev => {
-      const newValues = { ...prev, [fieldId]: value };
-      
-      // Run any field-specific validation
-      const fieldConfig = findFieldConfig(fieldId);
-      if (fieldConfig && fieldConfig.validate) {
-        const error = fieldConfig.validate(value, newValues);
-        setErrors(prev => ({
-          ...prev,
-          [fieldId]: error
-        }));
-      }
-      
-      // Call onChange callback if provided
-      if (onChange) {
-        onChange(newValues);
-      }
-      
-      return newValues;
-    });
+    const newValues = { ...values, [fieldId]: value };
+    setValues(newValues);
+    if (onChange) {
+      onChange(newValues);
+    }
   };
   
-  const findFieldConfig = (fieldId) => {
-    let foundField = null;
-    tabs.some(tab => {
-      return tab.sections.some(section => {
-        const field = section.fields.find(f => f.id === fieldId);
-        if (field) {
-          foundField = field;
-          return true;
-        }
-        return false;
-      });
-    });
-    return foundField;
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (onSubmit) {
+      onSubmit(values);
+    }
   };
   
-  const handleSave = () => {
-    // Validate all fields
-    const validationErrors = validateConfig(values, tabs);
+  // Determine if a field should be visible based on dependencies
+  const isFieldVisible = (field) => {
+    if (!field.dependencies) return true;
     
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
+    for (const dependency of field.dependencies) {
+      const { field: dependentField, value, operator = '==', show } = dependency;
+      const currentValue = values[dependentField];
+      
+      let conditionMet = false;
+      
+      switch (operator) {
+        case '==':
+          conditionMet = currentValue === value;
+          break;
+        case '!=':
+          conditionMet = currentValue !== value;
+          break;
+        case '>':
+          conditionMet = currentValue > value;
+          break;
+        case '<':
+          conditionMet = currentValue < value;
+          break;
+        case 'includes':
+          conditionMet = Array.isArray(currentValue) && currentValue.includes(value);
+          break;
+        case 'empty':
+          conditionMet = currentValue === undefined || currentValue === '' || 
+                       (Array.isArray(currentValue) && currentValue.length === 0);
+          break;
+        case 'notEmpty':
+          conditionMet = currentValue !== undefined && currentValue !== '' && 
+                       (!Array.isArray(currentValue) || currentValue.length > 0);
+          break;
+        default:
+          conditionMet = currentValue === value;
+      }
+      
+      if (show === false && conditionMet) return false;
+      if (show === true && !conditionMet) return false;
     }
     
-    // Process values before saving (e.g., format dates, etc.)
-    const processedValues = processFormValues(values, tabs);
+    return true;
+  };
+  
+  // Render a field based on its type
+  const renderField = (field) => {
+    const { id, type, label, description, ...props } = field;
     
-    if (onSave) {
-      onSave(processedValues);
+    if (!isFieldVisible(field)) return null;
+    
+    switch (type) {
+      case 'text':
+        return (
+          <TextField
+            key={id}
+            id={id}
+            label={label}
+            description={description}
+            value={values[id] || ''}
+            onChange={(value) => handleChange(id, value)}
+            {...props}
+          />
+        );
+      case 'select':
+        return (
+          <SelectField
+            key={id}
+            id={id}
+            label={label}
+            description={description}
+            value={values[id] || ''}
+            onChange={(value) => handleChange(id, value)}
+            {...props}
+          />
+        );
+      case 'keyValue':
+        return (
+          <KeyValueMapper
+            key={id}
+            id={id}
+            label={label}
+            description={description}
+            value={values[id] || {}}
+            onChange={(value) => handleChange(id, value)}
+            {...props}
+          />
+        );
+      case 'array':
+        return (
+          <ArrayField
+            key={id}
+            id={id}
+            label={label}
+            description={description}
+            value={values[id] || []}
+            onChange={(value) => handleChange(id, value)}
+            {...props}
+          />
+        );
+      default:
+        return null;
     }
+  };
+  
+  // Render the content for the active tab
+  const renderActiveTabContent = () => {
+    const activeSection = config.sections.find(section => section.id === activeTab);
+    if (!activeSection) return null;
+    
+    return (
+      <div className="mt-4">
+        {activeSection.groups.map((group) => (
+          <Accordion key={group.id} title={group.title}>
+            <div className="p-4 space-y-4">
+              {group.fields.map(field => renderField(field))}
+            </div>
+          </Accordion>
+        ))}
+      </div>
+    );
   };
   
   return (
-    <div className="config-form" style={{...globalStyle}}>
-      {tabs.length > 1 && (
-        <TabNav 
-          tabs={tabs.map(tab => tab.title)} 
-          defaultActiveTab={activeTab}
-          onChange={setActiveTab} 
-        />
-      )}
+    <form onSubmit={handleSubmit} className="w-full max-w-4xl">
+      <TabView 
+        tabs={tabs} 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab} 
+        className={""}
+      />
       
-      <div className="config-form-content">
-        {tabs[activeTab].sections.map((section, index) => (
-          <ConfigSection
-            key={`section-${index}`}
-            section={section}
-            values={values}
-            errors={errors}
-            onChange={handleChange}
-            readOnly={readOnly}
-          />
-        ))}
-      </div>
+      {renderActiveTabContent()}
       
-      <div className="config-form-actions">
-        {onCancel && (
-          <button 
-            type="button" 
-            className="btn btn-secondary" 
-            onClick={onCancel}
-            disabled={readOnly}
-          >
-            Cancel
-          </button>
-        )}
-        {onSave && (
-          <button 
-            type="button" 
-            className="btn btn-primary ml-2" 
-            onClick={handleSave}
-            disabled={readOnly}
-          >
-            Save
-          </button>
-        )}
+      <div className="mt-6 flex justify-end">
+        <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          Save Configuration
+        </button>
       </div>
-    </div>
+    </form>
   );
 };
 

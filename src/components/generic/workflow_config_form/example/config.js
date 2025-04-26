@@ -354,7 +354,7 @@ const workflowBlockConfig = {
               },
               {
                 id: "outputFileSettings",
-                type: "object",
+                type: "mapping",
                 label: "File Output Settings",
                 visible: (values) => values.outputType === "file",
                 fields: [
@@ -390,13 +390,13 @@ const workflowBlockConfig = {
               },
               {
                 id: "emailSettings",
-                type: "object",
+                type: "mapping",
                 label: "Email Settings",
                 visible: (values) => values.outputType === "email",
                 fields: [
                   {
                     id: "recipients",
-                    type: "array",
+                    type: "mapping",
                     label: "Recipients",
                     description: "Add email addresses to send the output to",
                     itemType: "text",

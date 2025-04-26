@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ToggleField, TextField, ScheduleField, ArrayField, ButtonGroupField, DateField, TimeField, SelectField } from './fields';
+import { KeyValueListField } from '../../config_form_components/dataConfig';
 
 const FieldRenderer = ({ field, value, error, onChange, readOnly }) => {
+    const [fieldValue, setFieldValue] = useState(value);
   // Common field props
   const commonProps = {
     id: field.id,
@@ -51,7 +53,8 @@ const FieldRenderer = ({ field, value, error, onChange, readOnly }) => {
           itemConfig={field.itemConfig}
           addLabel={field.addLabel || "Add Item"} 
         />;
-        
+      case 'mapping':
+        return <KeyValueListField value={[...value]} onChange={(newdata) => {setFieldValue(newdata);}}/>
       case 'buttonGroup':
         return <ButtonGroupField {...commonProps} options={field.options} />;
         

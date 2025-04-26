@@ -1,6 +1,6 @@
 import { FlowBuilder } from "./flow_builder";
 import { WorkflowsList } from "./flow_left_panel";
-import { WorkflowConfigForm } from "./flow_right";
+import { WorkflowConfigFormPanel } from "./flow_right";
 
 
 
@@ -16,7 +16,7 @@ import { WorkflowConfigForm } from "./flow_right";
                             <FlowBuilder />
                     </div>
                     <div className="w-3/12 bg-white h-screen scrollable-div" style={{ zIndex: 10, position: "relative" }}>
-                        <WorkflowConfigForm />
+                        <WorkflowConfigFormPanel />
                         {/* <DynamicConfigForm blockConfig={blocksRequirements.insert_row} globalData={["table1", "table2"]} blockData={{}}/> */}
                     </div>
             </div>
