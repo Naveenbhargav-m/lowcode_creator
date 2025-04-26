@@ -1,3 +1,4 @@
+import { ArrayList, DatePicker, GridField, TimePicker } from "./fields_v2";
 
 // Form Component
 function TextField({ config = {}, onAction}) {
@@ -206,7 +207,10 @@ const Field = ({ type, config , Action}) => {
     textarea: TextAreaElement,
     file_upload: FileUploadElement,
     rating: RatingElement,
-    date: DatePickerElement,
+    date: DatePicker,
+    "time": TimePicker,
+    "grid": GridField,
+    "list": ArrayList
   };
 
   const handleEvent = (event, key , value) => {

@@ -113,7 +113,8 @@ function CreateWorkflow(data) {
     let obj = {"name": name, 
          "id": id,
          "nodes": [
-          {"label":"start", "type":"start", "id": startID, "data": {"type":"start", "id": startID,"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }},
+          {"label":"start", "type":"start", "id": startID, 
+            "data": {"type":"start", "id": startID,"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }},
           {"label":"end", "type":"end","id": endID, "data" :{ "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
          "edges": [],
          "_change_type": "create"
@@ -124,6 +125,7 @@ function CreateWorkflow(data) {
     let namesexists = workflownames.peek();
     namesexists.push(obj);
     workflownames.value = [...namesexists];
+    SetWorkFlowActive(id);
     localStorage.setItem("workflows", JSON.stringify(workflows));
 }
 
@@ -147,7 +149,7 @@ function HandleWorkFlowBlockDrop(data) {
     let isChanged = curFlow["_change_type"] || "update";
     activeWorkFlow.value = {...curFlow, "_change_type": isChanged};
     console.log("current flow:",curFlow);
-    activeFloweUpdated.value = operation; 
+    activeFloweUpdated.value = generateUID(); 
     UpdateWorkflowsWithLatest(curFlow);
 }
 
@@ -160,7 +162,7 @@ function SetWorkFlowActive(id) {
             activeWorkFlow.value = {...value};
         }
     });
-    activeFloweUpdated.value = id;
+    activeFloweUpdated.value = generateUID();
     console.log("setting active workflow:",activeWorkFlow);
 }
 LoadWorkflows();

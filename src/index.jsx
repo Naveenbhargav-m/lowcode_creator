@@ -14,6 +14,7 @@ import { WorkFlowPage } from "./workflows/workflow_page";
 import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
 import { ComplexFormComponentsDemo,DynamicFormDemo } from "./form_builder/fields/fieldsdemo";
+import WorkflowBuilder from "./tests/reactflow1";
 
 export function App() {
   return (
@@ -37,7 +38,7 @@ export function App() {
       <Route path="/settings" component={SettingsPage} />
       <Route path="/" component={AppCreatorPage} />
       <Route path="/queries" component={QueryBuilderPage} />
-      <Route path="/test" component={DynamicFormDemo} />
+      <Route path="/test" component={WorkflowBuilder} />
       <Route path="/test2" component={ComplexFormComponentsDemo} />
       <Route default component={() => <div>Not Found</div>} />
     </Router>

@@ -1,4 +1,4 @@
-import { addEdge, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
+import { addEdge, ConnectionLineType, ConnectionMode, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import { activeFloweUpdated, activeWorkFlow, HandleWorkFlowBlockDrop, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflow_datas, workflows } from "./workflow_state";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { Condition, End, InsertRow, Start, UpdateRow } from "./block_ components";
@@ -19,15 +19,14 @@ let nodeTypes = {
 function FlowBuilder() {
   
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [nodes, setNodes , onNodesChange] = useNodesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
 
   useEffect(() => {
     const activeFlow = activeWorkFlow.value || { nodes: [], edges: [] };
-    console.log("active flow:",activeFlow);
+    console.log("active flow:", activeFlow);
     setNodes(activeFlow["nodes"]);
     setEdges(activeFlow["edges"]);
   }, [activeFloweUpdated.value]);
-
 
   useEffect(() => {
     UpdateActiveWorkflowNodes(nodes);
@@ -37,35 +36,57 @@ function FlowBuilder() {
     UpdateActiveWorkflowEdges(edges);
   }, [edges]);
 
-
   const onConnect = useCallback(
-        (params) => {
-          console.log("Connection params:", params); // Debugging log
-          setEdges((eds) => addEdge(params, eds));
-        },
-        [],
+    (params) => {
+      console.log("Connection params:", params); // Debugging log
+      setEdges((eds) => addEdge(params, eds));
+    },
+    [],
   );
+
+  // Default React Flow props for better connection behavior
+  const defaultEdgeOptions = {
+    animated: true,
+    style: {
+      stroke: '#555',
+      strokeWidth: 2,
+    },
+  };
 
   console.log("rendering the flow builder", nodes);
   return (
     <>
-     <div style={{display:"flex", "flexDirection": "row-reverse", "justifyContent": "space-between", alignItems:"center"}}>
-        <SyncButton title={"sync"} onClick={(e) => {SyncWorkflowData(workflows.value, workflow_datas.value);}} style={{marginRight:"40px", "marginTop":"10px"}}/>
+      <div style={{display:"flex", "flexDirection": "row-reverse", "justifyContent": "space-between", alignItems:"center"}}>
+        <SyncButton 
+          title={"sync"} 
+          onClick={(e) => {SyncWorkflowData(workflows.value, workflow_datas.value);}} 
+          style={{marginRight:"40px", "marginTop":"10px"}}
+        />
       </div>
-    <Drop onDrop={(data) => {HandleWorkFlowBlockDrop(data)}} dropElementData={{"element":"screen"}} wrapParent={true}>
-    <div style={{height:"90vh", width:"70vw"}}>
-      <ReactFlow 
-      style={{"--pico-primary-background":"black", "--pico-primary-hover-background": "black"}}
-        nodes={nodes} 
-        edges={edges} 
-        onNodesChange={onNodesChange} 
-        onEdgesChange={onEdgesChange} 
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        fitView 
-      />
-    </div>
-    </Drop>
+      <Drop onDrop={(data) => {HandleWorkFlowBlockDrop(data)}} dropElementData={{"element":"screen"}} wrapParent={true}>
+        <div style={{height:"90vh", width:"70vw"}}>
+          <ReactFlow 
+            style={{
+              "--pico-primary-background": "black", 
+              "--pico-primary-hover-background": "black"
+            }}
+            nodes={nodes} 
+            edges={edges} 
+            onNodesChange={onNodesChange} 
+            onEdgesChange={onEdgesChange} 
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            defaultEdgeOptions={defaultEdgeOptions}
+            connectionMode={ConnectionMode.Loose}
+            fitView 
+            connectionLineStyle={{ stroke: '#aaa', strokeWidth: 2 }}
+            connectionLineType={ConnectionLineType.SmoothStep}
+            selectNodesOnDrag={false}
+            // panOnDrag={[1, 2]} // Only pan when middle or right mouse button is used for dragging
+            zoomOnDoubleClick={false} // Disable zoom on double click
+          />
+        </div>
+      </Drop>
     </>
   );
 }

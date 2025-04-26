@@ -41,8 +41,6 @@ function FormBuilderLeftPanel() {
       ["upload","file_upload"],
       ["star","rating"],
       ["calendar","date"],
-
-
       ["link-2","url"],
       ["phone","phone"],
       ["calendar-clock","date_time"],
@@ -55,6 +53,7 @@ function FormBuilderLeftPanel() {
       ["columns-3","column"],
       ["rows-3","row"],
       ["sliders-horizantal","two_slider"],
+      
      
     ];
     return (

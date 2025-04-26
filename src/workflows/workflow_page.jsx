@@ -12,7 +12,7 @@ function WorkFlowPage() {
                 <div className="w-2/12 bg-white p-4 h-screen">
                 <WorkflowsList />
                 </div>
-                <div className="w-7/12 h-screen bg-background scrollable-div">
+                <div className="w-7/12 h-screen bg-background">
                         <FlowBuilder />
                 </div>
                 <div className="w-3/12 bg-white h-screen scrollable-div">
