@@ -18,7 +18,20 @@ export function GlobalSignalsPopup({ isOpen, fields , closeCallback }) {
   
   return (
     <dialog open={isOpen}>
-      <div className="bg-white flex flex-col justify-between items-center" style={{height:"60vh", width:"80vw"}}>
+          <div className="bg-white flex flex-col justify-between items-center" style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80vw',
+            height: '60vh',
+            maxHeight: '80vh',
+            backgroundColor: 'white',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            borderRadius: '8px',
+            zIndex: 1000,
+            overflow: 'auto'
+          }}>
         <div className="scrollable-div flex flex-col items-center">
           <div className="p-5 flex flex-col items-center"> 
             {Object.keys(fields).map((key, ind) => {

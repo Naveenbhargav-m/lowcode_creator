@@ -1,779 +1,1119 @@
 import { useSignal } from "@preact/signals";
-// @ts-ignore
 import { GlobalSignalsPopup } from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
 import { ActiveQueryData, CreateQueryBlock, UpdateQueryPart } from "./query_signal";
-import { Pipette } from "lucide-react";
-// @ts-ignore
+import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye } from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
 import { fieldsGlobalSignals } from "../states/common_repo";
-// @ts-ignore
 
-
-let headerStyle = { display:"flex", "flexDirection":"row", "justifyContent":"flex-start", "padding":"10px" };
-let iconStyle  = {"padding":"8px",backgroundColor:"black", "color":"white", borderRadius:"10px"};
-
-let fields = fieldsGlobalSignals.value;  
+// Theme colors
+const THEME = {
+  primary: "#3B82F6", // Blue
+  secondary: "#10B981", // Green
+  dark: "black",
+  light: "white",
+  gray: "#6B7280",
+  lightGray: "#E5E7EB",
+  danger: "#EF4444",
+  warning: "#F59E0B",
+  white: "#ffffff",
+  shadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+};
 
 export function CreateQueryBar() {
+  return (
+    <div className="mb-4">
+      <CreateFormButton
+        formLabel={"New Query"} 
+        placeHolder={"Query Name:"} 
+        buttonLabel={"Create Query"} 
+        callback={(data) => { CreateQueryBlock(data) }}
+      />
+    </div>
+  );
+}
 
+export function TablesView({ prefilData }) {
+let style = {
+    "paddingTop": "50px"
+};
+  const activeQuery = ActiveQueryData.value;
+  const [activeTab, setActiveTab] = useState("select");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   
+  if (activeQuery["id"] === undefined) {
     return (
-        <div
+      <div className="flex items-center justify-center h-96 text-lg text-gray-500">
+        <Database className="mr-2" /> Select a Query to Begin
+      </div>
+    );
+  }
+  
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+  };
+  
+  const toggleAdvanced = () => {
+    setShowAdvanced(!showAdvanced);
+  };
+  
+  return (
+    <div className="flex h-screen max-h-[calc(100vh-100px)] overflow-hidden" 
+    style={{ maxWidth: "95vw", ...style }}>
+      {/* Vertical Tab Navigation */}
+      <div 
+        className="w-48 flex-shrink-0 bg-gray-50 border-r border-gray-200"
+        style={{ boxShadow: "2px 0 5px rgba(0,0,0,0.05)" }}
+      >
+        <QueryTabs activeTab={activeTab} onTabChange={handleTabChange} />
+      </div>
+      
+      {/* Content Area */}
+      <div className="flex-1 overflow-auto p-6 bg-white">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-800">
+            {activeQuery.name || "Untitled Query"}
+          </h2>
+          <div className="flex items-center">
+            <button 
+              className={`flex items-center text-sm px-3 py-1 rounded ${showAdvanced ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}
+              onClick={toggleAdvanced}
+            >
+              <Code size={14} className="mr-1" />
+              {showAdvanced ? "Hide JSON" : "Advanced JSON"}
+            </button>
+          </div>
+        </div>
+        
+        {showAdvanced && <AdvancedJsonView queryData={activeQuery} />}
+        
+        <div className="mt-4">
+          {activeTab === "select" && (
+            <SelectBlock 
+              select={activeQuery["select_fields"] || []} 
+              Aggregations={activeQuery["select_aggregate_fields"] || []}
+              updateCallBack={UpdateQueryPart}
+            />
+          )}
+          {activeTab === "join" && <JoinBlock />}
+          {activeTab === "where" && <WhereBlock />}
+          {activeTab === "groupby" && <GroupByBlock />}
+          {activeTab === "orderby" && <OrderByBlock />}
+          {activeTab === "preview" && <PreviewBlock queryData={activeQuery} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QueryTabs({ activeTab, onTabChange }) {
+  const tabs = [
+    { id: "select", label: "Select", icon: <Eye size={16} /> },
+    { id: "join", label: "Join", icon: <Table size={16} /> },
+    { id: "where", label: "Where", icon: <Filter size={16} /> },
+    { id: "groupby", label: "Group By", icon: <Group size={16} /> },
+    { id: "orderby", label: "Order By", icon: <SortDesc size={16} /> },
+    { id: "preview", label: "Preview", icon: <Database size={16} /> }
+  ];
+  
+  return (
+    <div className="py-4">
+      {tabs.map(tab => (
+        <button
+          key={tab.id}
+          onClick={() => onTabChange(tab.id)}
+          className={`w-full text-left flex items-center px-4 py-3 mb-1 text-sm ${
+            activeTab === tab.id 
+              ? `bg-${THEME.dark} bg-opacity-10 text-${THEME.white} border-l-4 border-${THEME.dark}` 
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
         >
-              <CreateFormButton
-             formLabel={"New Query"} 
-             placeHolder={"Query Name:"} 
-             buttonLabel={"New +"} 
-             callback={(data) => { CreateQueryBlock(data)}}/>
-        </div>
-    );
+          <span className="mr-3">{tab.icon}</span>
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
-
-
-
-
-// @ts-ignore
-export function TablesView({prefilData}) {
-
-    let activeQuery = ActiveQueryData.value;
-
-    if(activeQuery["id"] === undefined) {
-        return <div> Select a Query</div>
-    }
-    console.log("active Query:",activeQuery);
-    return (
-        <div style={{height:"100vh", width:"80vw", display:"flex", "flexDirection":"column", "justifyContent":"center", }}>
-            <div className="scrollable-div" style={{backgroundColor:"white", width:"80%", height:"80%",borderRadius:"20px",boxShadow: "0 0 15px rgba(0, 0, 0, 0.1)"}}>
-                <SelectBlock select={activeQuery["select_fields"]}
-                 Aggregations={activeQuery["select_aggregate_fields"]}
-                 updateCallBack={UpdateQueryPart}
-                  />
-                <JoinBlock />
-                <WhereBlock />
-                <GroupByBlock />
-                <OrderByBlock />
-            </div>
-        </div>
-    );
+function AdvancedJsonView({ queryData }) {
+  return (
+    <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-auto max-h-60">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-sm font-medium text-gray-700">Query JSON</h3>
+        <span className="text-xs text-gray-500">Advanced Mode</span>
+      </div>
+      <pre className="text-xs text-gray-800 overflow-auto">
+        {JSON.stringify(queryData, null, 2)}
+      </pre>
+    </div>
+  );
 }
-
-
-
 
 function JoinBlock() {
-    let isOpen = useSignal(false);
-    let popupField = useSignal("");
-    let popupInd = useSignal(-1);
-    // @ts-ignore
-    const handlePopupClose = (e, data) => {
-        if(data === undefined) {
-            isOpen.value = false;
-            return;
-        }
-        let last = data.pop();
-        let key = popupField.value;
-        let obj = {};
-        obj[key] = last;
-        UpdateJoinData(obj, popupInd.value);
-        isOpen.value = false;
-    };
-    let buttonStyle = {backgroundColor:"black", "color": "white"};  
-    function UpdateJoinData(obj, index) {
-        console.log("object:",obj, index);
-        var exisitng = joinsData.value;
-        let cur = exisitng[index];
-        cur = {...cur, ...obj};
-        exisitng[index] = cur;
-        joinsData.value = [...exisitng];
+  let isOpen = useSignal(false);
+  let popupField = useSignal("");
+  let popupInd = useSignal(-1);
+  let joinsData = useSignal([]);
+  
+  // Handle popup close
+  const handlePopupClose = (e, data) => {
+    if(data === undefined) {
+      isOpen.value = false;
+      return;
     }
-    let joinsData = useSignal([]);
-    return (
-        <div className="section">
-            <BlocksHeader isOpen={isOpen} title={"From-join Block"}/>
-                {
-                    joinsData.value.map((value, index) => {
-                        return (
-                            <div style={{"display":"flex", "flexDirection":"row", "justifyContent": "flex-start", "marginBottom":"8px"}}>
-                            <SelectComponent 
-                            options={["left join", "right join", "join", "inner join", "cross join"]}
-                            // @ts-ignore
-                            onChange={(e,data) => {UpdateJoinData({"join": data["value"]}, index);}}
-                            selected={value["join"] || "left join"}
-                            style={{"width": "120px", "marginRight":"10px"}}
-                            />
-                            <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
-                            // @ts-ignore
-                            onClick={(e) => {popupField.value = "first_field"; popupInd.value = index; isOpen.value = true}}
-                            >
-                                {value["first_field"] || "first_field"}</button>
-                            <SelectComponent 
-                            options={["equals", "less_than", "greater_than", "less_eq", "greater_eq"]}
-                            // @ts-ignore
-                            onChange={(e,data) => {UpdateJoinData({"operator": data["value"]}, index);}}
-                            selected={value["operator"] || "equals"}
-                            style={{"width": "120px", "marginRight":"10px"}}
-                            />
-                             <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
-                             // @ts-ignore
-                             onClick={(e) => {popupField.value = "second_field"; popupInd.value = index; isOpen.value = true}}
-                             >{value["second_field"] || "Second_field"}</button>
-                             </div>
-                        );
-                    })
-                }
-            <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
-            // @ts-ignore
-            onClick={(e)=> {let cur = joinsData.value; cur.push({}); joinsData.value = [...cur];}}
-            >Add Join</button>
-            <GlobalSignalsPopup 
-                isOpen={isOpen} 
-                fields={fields}
-                closeCallback={handlePopupClose}
+    let last = data.pop();
+    let key = popupField.value;
+    let obj = {};
+    obj[key] = last;
+    updateJoinData(obj, popupInd.value);
+    isOpen.value = false;
+  };
+  
+  // Update join data
+  function updateJoinData(obj, index) {
+    var existing = joinsData.value;
+    let cur = existing[index];
+    cur = {...cur, ...obj};
+    existing[index] = cur;
+    joinsData.value = [...existing];
+  }
+  
+  return (
+    <div className="join-block">
+      <SectionHeader title="Table Joins" />
+      
+      <div className="join-list space-y-3 mt-4">
+        {joinsData.value.length === 0 ? (
+          <EmptyState message="No joins configured. Add a join to start building your query's table relationships." />
+        ) : (
+          joinsData.value.map((join, index) => (
+            <JoinTile 
+              key={index} 
+              join={join} 
+              index={index} 
+              updateData={updateJoinData}
+              onFieldSelect={(field) => {
+                popupField.value = field;
+                popupInd.value = index;
+                isOpen.value = true;
+              }}
             />
-        </div>
-    );
+          ))
+        )}
+      </div>
+      
+      <button 
+        className="mt-4 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        onClick={() => {
+          let cur = joinsData.value;
+          cur.push({join: "left join"});
+          joinsData.value = [...cur];
+        }}
+      >
+        <Table size={16} className="mr-2" />
+        Add Join
+      </button>
+      
+      <GlobalSignalsPopup 
+        isOpen={isOpen}
+        fields={fieldsGlobalSignals.value}
+        closeCallback={handlePopupClose}
+      />
+    </div>
+  );
 }
 
-// function WhereBlock() {
-//     let isOpen = useSignal(false);
-
-//     return (
-//         <div class="section">
-//         <BlocksHeader isOpen={isOpen} title={"Where Block"}/>
-//         <textarea placeholder="Enter filter conditions (e.g., status = 'active' AND created_at > '2023-01-01')"></textarea>
-//         <GlobalSignalsPopup isOpen={isOpen} 
-//               onChangeCallback={(e) => {}}
-//              closeCallback={(e,data) => {console.log("closed :",data); isOpen.value = false}}/>
-//         </div>
-//     );
-// }
-
-
+function JoinTile({ join, index, updateData, onFieldSelect }) {
+  return (
+    <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex flex-wrap items-center gap-3">
+        <SelectComponent 
+          options={["left join", "right join", "join", "inner join", "cross join"]}
+          onChange={(e, data) => {updateData({"join": data["value"]}, index)}}
+          selected={join["join"] || "left join"}
+          style={{width: "140px"}}
+        />
+        
+        <FieldButton 
+          label={join["first_field"] || "Select Field"} 
+          onClick={() => onFieldSelect("first_field")}
+        />
+        
+        <SelectComponent 
+          options={["equals", "less_than", "greater_than", "less_eq", "greater_eq"]}
+          onChange={(e, data) => {updateData({"operator": data["value"]}, index)}}
+          selected={join["operator"] || "equals"}
+          style={{width: "120px"}}
+        />
+        
+        <FieldButton 
+          label={join["second_field"] || "Select Field"} 
+          onClick={() => onFieldSelect("second_field")}
+        />
+        
+        <button 
+          className="ml-auto text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+          onClick={() => {
+            const updated = join.value.filter((_, i) => i !== index);
+            join.value = [...updated];
+          }}
+        >
+          <X size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function WhereBlock() {
-    let isOpen = useSignal(false);
-    let popupField = useSignal("");
-    let popupInd = useSignal(-1);
-    let popupGroupId = useSignal(null);
-    let buttonStyle = {backgroundColor:"black", "color": "white"};
+  let isOpen = useSignal(false);
+  let popupField = useSignal("");
+  let popupInd = useSignal(-1);
+  let popupGroupId = useSignal(null);
+  let whereData = useSignal([]);
+  let groups = useSignal([]);
+  let nextGroupId = useSignal(0);
+  
+  // Handle popup close
+  const handlePopupClose = (e, data) => {
+    if(data === undefined) {
+      isOpen.value = false;
+      return;
+    }
+    let last = data.pop();
+    let key = popupField.value;
+    let obj = {};
+    obj[key] = last;
     
-    // @ts-ignore
-    const handlePopupClose = (e, data) => {
-        if(data === undefined) {
-            isOpen.value = false;
-            return;
-        }
-        let last = data.pop();
-        let key = popupField.value;
-        let obj = {};
-        obj[key] = last;
-        
-        if (popupGroupId.value !== null) {
-            // Update within a group
-            updateGroupCondition(obj, popupInd.value, popupGroupId.value);
-        } else {
-            // Update main conditions
-            updateWhereData(obj, popupInd.value);
-        }
-        
-        isOpen.value = false;
-    };
-    
-    function updateWhereData(obj, index) {
-        console.log("object:", obj, index);
-        var existing = whereData.value;
-        let cur = existing[index];
-        cur = {...cur, ...obj};
-        existing[index] = cur;
-        whereData.value = [...existing];
+    if (popupGroupId.value !== null) {
+      updateGroupCondition(obj, popupInd.value, popupGroupId.value);
+    } else {
+      updateWhereData(obj, popupInd.value);
     }
     
-    function updateGroupCondition(obj, conditionIndex, groupId) {
-        console.log("updating group condition:", obj, conditionIndex, groupId);
-        let currentGroups = groups.value;
-        const groupIndex = currentGroups.findIndex(g => g.id === groupId);
-        
-        if (groupIndex !== -1) {
-            let groupConditions = currentGroups[groupIndex].conditions;
-            groupConditions[conditionIndex] = {...groupConditions[conditionIndex], ...obj};
-            currentGroups[groupIndex].conditions = [...groupConditions];
-            groups.value = [...currentGroups];
-        }
-    }
+    isOpen.value = false;
+  };
+  
+  // Update where condition data
+  function updateWhereData(obj, index) {
+    var existing = whereData.value;
+    let cur = existing[index];
+    cur = {...cur, ...obj};
+    existing[index] = cur;
+    whereData.value = [...existing];
+  }
+  
+  // Update group condition data
+  function updateGroupCondition(obj, conditionIndex, groupId) {
+    let currentGroups = groups.value;
+    const groupIndex = currentGroups.findIndex(g => g.id === groupId);
     
-    let whereData = useSignal([]);
-    let groups = useSignal([]);
-    let nextGroupId = useSignal(0);
-    
-    // Creates a new group of conditions
-    function addGroup() {
-        let currentGroups = groups.value;
-        const groupId = nextGroupId.value;
-        nextGroupId.value += 1;
-        
-        currentGroups.push({
-            id: groupId,
-            logical: "AND", // Default logical operator for the group
-            conditions: [{}] // Start with one empty condition
-        });
-        
-        groups.value = [...currentGroups];
+    if (groupIndex !== -1) {
+      let groupConditions = currentGroups[groupIndex].conditions;
+      groupConditions[conditionIndex] = {...groupConditions[conditionIndex], ...obj};
+      currentGroups[groupIndex].conditions = [...groupConditions];
+      groups.value = [...currentGroups];
     }
+  }
+  
+  // Add a new condition group
+  function addGroup() {
+    let currentGroups = groups.value;
+    const groupId = nextGroupId.value;
+    nextGroupId.value += 1;
     
-    // Adds a condition to a specific group or to the main conditions
-    function addCondition(groupId = null) {
-        if (groupId !== null) {
-            // Add to a specific group
-            let currentGroups = [...groups.value];
-            const groupIndex = currentGroups.findIndex(g => g.id === groupId);
-            
-            if (groupIndex !== -1) {
-                currentGroups[groupIndex].conditions.push({});
-                groups.value = currentGroups;
-            }
-        } else {
-            // Add to main conditions
-            let current = whereData.value;
-            current.push({});
-            whereData.value = [...current];
-        }
-    }
+    currentGroups.push({
+      id: groupId,
+      logical: "AND",
+      conditions: [{}]
+    });
     
-    // Renders a condition with field, operator, and value inputs
-    function renderCondition(condition, index, groupId = null) {
-        return (
-            <div key={groupId ? `group-${groupId}-condition-${index}` : `condition-${index}`} 
-                 style={{"display":"flex", "flexDirection":"row", "justifyContent": "flex-start", "marginBottom":"8px", "alignItems": "center"}}>
-                
-                {index > 0 && (
-                    <SelectComponent 
-                        options={["AND", "OR"]}
-                        // @ts-ignore
-                        onChange={(e,data) => {
-                            if (groupId !== null) {
-                                updateGroupCondition({"logical": data["value"]}, index, groupId);
-                            } else {
-                                updateWhereData({"logical": data["value"]}, index);
-                            }
-                        }}
-                        selected={condition["logical"] || "AND"}
-                        style={{"width": "80px", "marginRight":"10px"}}
-                    />
-                )}
-                
-                <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
-                        // @ts-ignore
-                        onClick={(e) => {
-                            popupField.value = "field";
-                            popupInd.value = index;
-                            popupGroupId.value = groupId;
-                            isOpen.value = true;
-                        }}>
-                    {condition["field"] || "field"}
-                </button>
-                
-                <SelectComponent 
-                    options={["equals", "not_equals", "less_than", "greater_than", "less_eq", "greater_eq", "like", "in", "not_in"]}
-                    // @ts-ignore
-                    onChange={(e,data) => {
-                        if (groupId !== null) {
-                            updateGroupCondition({"operator": data["value"]}, index, groupId);
-                        } else {
-                            updateWhereData({"operator": data["value"]}, index);
-                        }
-                    }}
-                    selected={condition["operator"] || "equals"}
-                    style={{"width": "120px", "marginRight":"10px"}}
-                />
-                
-                <button style={{...buttonStyle, "padding": "8px 10px"}}
-                        // @ts-ignore
-                        onClick={(e) => {
-                            popupField.value = "value";
-                            popupInd.value = index;
-                            popupGroupId.value = groupId;
-                            isOpen.value = true;
-                        }}>
-                    {condition["value"] || "value"}
-                </button>
-            </div>
-        );
+    groups.value = [...currentGroups];
+  }
+  
+// Fix for addCondition function
+function addCondition(groupId = null) {
+    if (groupId !== null) {
+      let currentGroups = [...groups.value];
+      const groupIndex = currentGroups.findIndex(g => g.id === groupId);
+      
+      if (groupIndex !== -1) {
+        // Only modify the specific group's conditions
+        currentGroups[groupIndex].conditions.push({});
+        groups.value = currentGroups;
+      }
+    } else {
+      let current = whereData.value;
+      current.push({});
+      whereData.value = [...current];
     }
-    
-    // Renders a group of conditions
-    function renderGroup(group) {
-        return (
-            <div key={`group-${group.id}`} 
-                 style={{"border": "1px solid #ccc", "padding": "10px", "marginBottom": "10px", "borderRadius": "5px"}}>
-                
-                <div style={{"display":"flex", "justifyContent": "space-between", "marginBottom": "10px", "alignItems": "center"}}>
-                    <span style={{"fontWeight": "bold"}}>Condition Group</span>
-                    <SelectComponent 
-                        options={["AND", "OR"]}
-                        // @ts-ignore
-                        onChange={(e,data) => {
-                            let currentGroups = [...groups.value];
-                            const groupIndex = currentGroups.findIndex(g => g.id === group.id);
-                            if (groupIndex !== -1) {
-                                currentGroups[groupIndex].logical = data["value"];
-                                groups.value = currentGroups;
-                            }
-                        }}
-                        selected={group.logical || "AND"}
-                        style={{"width": "80px"}}
-                    />
-                </div>
-                
-                {group.conditions.map((condition, index) => 
-                    renderCondition(condition, index, group.id)
-                )}
-                
-                <button style={{...buttonStyle, "padding": "8px 10px", "marginTop": "10px"}}
-                        onClick={() => addCondition(group.id)}>
-                    Add Condition to Group
-                </button>
-            </div>
-        );
-    }
-
-    return (
-        <div className="section">
-            <BlocksHeader isOpen={isOpen} title={"Where Block"}/>
-            
-            {/* Main conditions */}
-            {whereData.value.length > 0 && whereData.value.map((condition, index) => 
-                renderCondition(condition, index)
-            )}
-            
-            {/* Condition groups */}
-            {groups.value.length > 0 && groups.value.map(group => 
-                renderGroup(group)
-            )}
-            
-            <div style={{"display":"flex", "marginTop": "10px"}}>
-                <button style={{...buttonStyle, "padding": "8px 10px", "marginRight":"10px"}}
-                        onClick={() => {
-                            if (whereData.value.length === 0) {
-                                // If no conditions yet, add an empty one
-                                whereData.value = [{}];
-                            } else {
-                                // Otherwise add another one
-                                addCondition();
-                            }
-                        }}>
-                    Add Condition
-                </button>
-                
-                <button style={{...buttonStyle, "padding": "8px 10px"}}
-                        onClick={addGroup}>
-                    Add Group
-                </button>
-            </div>
-            
-            <GlobalSignalsPopup 
-                isOpen={isOpen} 
-                fields={fields}
-                closeCallback={handlePopupClose}
+  }
+  
+  return (
+    <div className="where-block">
+      <SectionHeader title="Filter Conditions" />
+      
+      {/* Main Conditions */}
+      <div className="mt-4 space-y-3">
+        {whereData.value.length === 0 ? (
+          <EmptyState message="No conditions defined. Add conditions to filter your query results." />
+        ) : (
+          whereData.value.map((condition, index) => (
+            <ConditionTile 
+              key={`condition-${index}`}
+              condition={condition}
+              index={index}
+              isFirst={index === 0}
+              onFieldSelect={(field) => {
+                popupField.value = field;
+                popupInd.value = index;
+                popupGroupId.value = null;
+                isOpen.value = true;
+              }}
+              updateData={(obj) => updateWhereData(obj, index)}
+              onRemove={() => {
+                const updated = whereData.value.filter((_, i) => i !== index);
+                whereData.value = [...updated];
+              }}
             />
+          ))
+        )}
+      </div>
+      
+      {/* Condition Groups */}
+      {groups.value.length > 0 && (
+        <div className="mt-6 space-y-4">
+          <h3 className="text-sm font-medium text-gray-700">Condition Groups</h3>
+          
+          {groups.value.map((group) => (
+            <ConditionGroupTile 
+              key={`group-${group.id}`}
+              group={group}
+              onFieldSelect={(field, condIndex) => {
+                popupField.value = field;
+                popupInd.value = condIndex;
+                popupGroupId.value = group.id;
+                isOpen.value = true;
+              }}
+              updateGroupLogical={(logical) => {
+                const updatedGroups = [...groups.value];
+                const index = updatedGroups.findIndex(g => g.id === group.id);
+                if (index !== -1) {
+                  updatedGroups[index].logical = logical;
+                  groups.value = updatedGroups;
+                }
+              }}
+              updateCondition={(obj, condIndex) => {
+                updateGroupCondition(obj, condIndex, group.id);
+              }}
+              addCondition={() => addCondition(group.id)}
+              removeGroup={() => {
+                const updated = groups.value.filter(g => g.id !== group.id);
+                groups.value = [...updated];
+              }}
+              removeCondition={(condIndex) => {
+                const updatedGroups = [...groups.value];
+                const index = updatedGroups.findIndex(g => g.id === group.id);
+                if (index !== -1) {
+                  updatedGroups[index].conditions = updatedGroups[index].conditions.filter((_, i) => i !== condIndex);
+                  groups.value = updatedGroups;
+                }
+              }}
+            />
+          ))}
         </div>
-    );
+      )}
+      
+      <div className="mt-4 flex space-x-3">
+        <button 
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          onClick={() => {
+            if (whereData.value.length === 0) {
+              whereData.value = [{}];
+            } else {
+              addCondition();
+            }
+          }}
+        >
+          <Filter size={16} className="mr-2" />
+          Add Condition
+        </button>
+        
+        <button 
+          className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          onClick={addGroup}
+        >
+          <Group size={16} className="mr-2" />
+          Add Group
+        </button>
+      </div>
+      
+      <GlobalSignalsPopup 
+        isOpen={isOpen}
+        fields={fieldsGlobalSignals.value}
+        closeCallback={handlePopupClose}
+      />
+    </div>
+  );
+}
+
+function ConditionTile({ condition, index, isFirst, onFieldSelect, updateData, onRemove }) {
+  return (
+    <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex flex-wrap items-center gap-3">
+        {!isFirst && (
+          <SelectComponent 
+            options={["AND", "OR"]}
+            onChange={(e, data) => updateData({"logical": data["value"]})}
+            selected={condition["logical"] || "AND"}
+            style={{width: "80px"}}
+          />
+        )}
+        
+        <FieldButton 
+          label={condition["field"] || "Select Field"} 
+          onClick={() => onFieldSelect("field")}
+        />
+        
+        <SelectComponent 
+          options={["equals", "not_equals", "less_than", "greater_than", "less_eq", "greater_eq", "like", "in", "not_in"]}
+          onChange={(e, data) => updateData({"operator": data["value"]})}
+          selected={condition["operator"] || "equals"}
+          style={{width: "120px"}}
+        />
+        
+        <FieldButton 
+          label={condition["value"] || "Select Value"} 
+          onClick={() => onFieldSelect("value")}
+        />
+        
+        <button 
+          className="ml-auto text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+          onClick={onRemove}
+        >
+          <X size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ConditionGroupTile({ 
+  group, 
+  onFieldSelect, 
+  updateGroupLogical, 
+  updateCondition, 
+  addCondition, 
+  removeGroup,
+  removeCondition
+}) {
+  return (
+    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center">
+          <span className="text-sm font-medium text-gray-700 mr-2">Group Logic:</span>
+          <SelectComponent 
+            options={["AND", "OR"]}
+            onChange={(e, data) => updateGroupLogical(data["value"])}
+            selected={group.logical || "AND"}
+            style={{width: "80px"}}
+          />
+        </div>
+        
+        <button 
+          className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+          onClick={removeGroup}
+        >
+          <X size={16} />
+        </button>
+      </div>
+      
+      <div className="space-y-2 pl-3 border-l-2 border-blue-200">
+        {group.conditions.map((condition, index) => (
+          <div key={`group-${group.id}-cond-${index}`} className="flex flex-wrap items-center gap-2 py-2">
+            {index > 0 && (
+              <SelectComponent 
+                options={["AND", "OR"]}
+                onChange={(e, data) => updateCondition({"logical": data["value"]}, index)}
+                selected={condition["logical"] || "AND"}
+                style={{width: "80px"}}
+              />
+            )}
+            
+            <FieldButton 
+              label={condition["field"] || "Select Field"} 
+              onClick={() => onFieldSelect("field", index)}
+              small
+            />
+            
+            <SelectComponent 
+              options={["equals", "not_equals", "less_than", "greater_than", "less_eq", "greater_eq", "like", "in", "not_in"]}
+              onChange={(e, data) => updateCondition({"operator": data["value"]}, index)}
+              selected={condition["operator"] || "equals"}
+              style={{width: "110px"}}
+            />
+            
+            <FieldButton 
+              label={condition["value"] || "Select Value"} 
+              onClick={() => onFieldSelect("value", index)}
+              small
+            />
+            
+            {group.conditions.length > 1 && (
+              <button 
+                className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+                onClick={() => removeCondition(index)}
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      <button 
+        className="mt-3 flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+        onClick={addCondition}
+      >
+        <span className="mr-1">+</span> Add Condition
+      </button>
+    </div>
+  );
 }
 
 function GroupByBlock() {
-    let isOpen = useSignal(false);
-    const [selectedItems, setSelectedItems] = useState([]);
-    const [aggregations, setAggregations] = useState([]);
-    
-    // Handle removing a specific tag
-    const removeTag = (itemToRemove) => {
-        setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
-        // Also remove any aggregation settings for this item
-        setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
-    };
-    return (
-        <div className="section">
-            <BlocksHeader isOpen={isOpen} title={"Group By"}/>
-            <SelectList selectedItems={selectedItems} removeTag={removeTag} aggregations={aggregations} setAggregations={setAggregations}/>
-            <GlobalSignalsPopup 
-                isOpen={isOpen} 
-                fields={fields}
-                // @ts-ignore
-                closeCallback={(e, data) => {
-                    console.log("closed :", data);
-                    setSelectedItems(data);
-                    isOpen.value = false;
-                }}
-            />
-        </div>
-    );
-}
-function OrderByBlock() {
-    let isOpen = useSignal(false);
-    const [selectedItems, setSelectedItems] = useState([]);
-    const [aggregations, setAggregations] = useState([]);
-    
-    // Handle removing a specific tag
-    const removeTag = (itemToRemove) => {
-        setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
-        // Also remove any aggregation settings for this item
-        setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
-    };
-    
-    return (
-        <div className="section">
-            <BlocksHeader isOpen={isOpen} title={"Order By"}/>
-            <SelectList selectedItems={selectedItems} removeTag={removeTag} aggregations={aggregations} setAggregations={setAggregations}/>
-            <GlobalSignalsPopup 
-                isOpen={isOpen} 
-                fields={fields}
-                // @ts-ignore
-                closeCallback={(e, data) => {
-                    console.log("closed :", data);
-                    setSelectedItems(data);
-                    isOpen.value = false;
-                }}
-            />
-        </div>
-    );
-}
-
-function BlocksHeader({isOpen, title}) {
-    return (
-        <div style={headerStyle}>
-        <p style={{width:"200px",marginRight:"50px"}}>{title}</p>
-        <Pipette onClick={(
-// @ts-ignore
-        e) => {isOpen.value = true}} 
-        height={14} width={14} 
-        style={iconStyle}
+  let isOpen = useSignal(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [aggregations, setAggregations] = useState([]);
+  
+  const removeTag = (itemToRemove) => {
+    setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
+    setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
+  };
+  
+  return (
+    <div className="group-by-block">
+      <SectionHeader title="Group By Fields" />
+      
+      <div className="mt-4">
+        <FieldTileList 
+          selectedItems={selectedItems} 
+          aggregations={aggregations}
+          removeTag={removeTag}
+          setAggregations={setAggregations}
         />
+        
+        <button 
+          className="mt-4 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          onClick={() => isOpen.value = true}
+        >
+          <Group size={16} className="mr-2" />
+          Select Group By Fields
+        </button>
+      </div>
+      
+      <GlobalSignalsPopup 
+        isOpen={isOpen}
+        fields={fieldsGlobalSignals.value}
+        closeCallback={(e, data) => {
+          console.log("Group By selection:", data);
+          if (data) setSelectedItems(data);
+          isOpen.value = false;
+        }}
+      />
     </div>
-    );
+  );
 }
 
+function OrderByBlock() {
+  let isOpen = useSignal(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [aggregations, setAggregations] = useState([]);
+  
+  const removeTag = (itemToRemove) => {
+    setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
+    setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
+  };
+  
+  return (
+    <div className="order-by-block">
+      <SectionHeader title="Order By Fields" />
+      
+      <div className="mt-4">
+        <FieldTileList 
+          selectedItems={selectedItems} 
+          aggregations={aggregations}
+          removeTag={removeTag}
+          setAggregations={setAggregations}
+        />
+        
+        <button 
+          className="mt-4 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          onClick={() => isOpen.value = true}
+        >
+          <SortDesc size={16} className="mr-2" />
+          Select Order By Fields
+        </button>
+      </div>
+      
+      <GlobalSignalsPopup 
+        isOpen={isOpen}
+        fields={fieldsGlobalSignals.value}
+        closeCallback={(e, data) => {
+          console.log("Order By selection:", data);
+          if (data) setSelectedItems(data);
+          isOpen.value = false;
+        }}
+      />
+    </div>
+  );
+}
 
-function SelectBlock({select, Aggregations, updateCallBack}) {
-    let keys = ["select_fields", "select_aggregate_fields"];
-    let isOpen = useSignal(false);
-    const [selectedItems, setSelectedItems] = useState([...select]);
-    // Store aggregation settings in an array of objects
-    const [aggregations, setAggregations] = useState([...Aggregations]);
-    console.log("select and aggrs:",selectedItems, aggregations);
-    // Handle removing a specific tag
-    const removeTag = (itemToRemove) => {
-        setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
-        // Also remove any aggregation settings for this item
-        setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
-        updateCallBack(keys[0], selectedItems);
-        updateCallBack(keys[1], aggregations);
-    };
+function SelectBlock({ select, Aggregations, updateCallBack }) {
+  let keys = ["select_fields", "select_aggregate_fields"];
+  let isOpen = useSignal(false);
+  const [selectedItems, setSelectedItems] = useState([...select]);
+  const [aggregations, setAggregations] = useState([...Aggregations]);
+  
+  const removeTag = (itemToRemove) => {
+    const updatedItems = selectedItems.filter(item => item !== itemToRemove);
+    setSelectedItems(updatedItems);
     
-    function setAggrs(updatedAggrs) {
-        setAggregations(updatedAggrs);
-        updateCallBack(keys[1], updatedAggrs);
-    }
-    return (
-        <div className="section">
-            <BlocksHeader isOpen={isOpen} title={"Select Block"}/>
-            <SelectList 
-                selectedItems={selectedItems} 
-                removeTag={removeTag}
-                aggregations={aggregations}
-                setAggregations={setAggrs}
-            />
-            <GlobalSignalsPopup 
-                isOpen={isOpen} 
-                fields={fields}
-                // @ts-ignore
-                closeCallback={(e, data) => {
-                    console.log("closed :", data);
-                    setSelectedItems(data);
-                    updateCallBack(keys[0], data);
-                    isOpen.value = false;
-                }}
-            />
-        </div>
-    );
+    const updatedAggregations = aggregations.filter(agg => agg.original_name !== itemToRemove);
+    setAggregations(updatedAggregations);
+    
+    updateCallBack(keys[0], updatedItems);
+    updateCallBack(keys[1], updatedAggregations);
+  };
+  
+  function updateAggregations(updatedAggrs) {
+    setAggregations(updatedAggrs);
+    updateCallBack(keys[1], updatedAggrs);
+  }
+  
+  return (
+    <div className="select-block">
+      <SectionHeader title="Select Fields" />
+      
+      <div className="mt-4">
+        <FieldTileList 
+          selectedItems={selectedItems} 
+          aggregations={aggregations}
+          removeTag={removeTag}
+          setAggregations={updateAggregations}
+        />
+        
+        <button 
+          className="mt-4 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          onClick={() => isOpen.value = true}
+        >
+          <Eye size={16} className="mr-2" />
+          Select Fields
+        </button>
+      </div>
+      
+      <GlobalSignalsPopup 
+        isOpen={isOpen}
+        fields={fieldsGlobalSignals.value}
+        closeCallback={(e, data) => {
+          console.log("Selected fields:", data);
+          if (data) {
+            setSelectedItems(data);
+            updateCallBack(keys[0], data);
+          }
+          isOpen.value = false;
+        }}
+      />
+    </div>
+  );
 }
 
-// SelectList component - main container
-function SelectList({ selectedItems, removeTag, aggregations, setAggregations }) {
+function PreviewBlock({ queryData }) {
+  return (
+    <div className="preview-block">
+      <SectionHeader title="Query Preview" />
+      
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Generated SQL Query</h3>
+          <pre className="p-3 bg-gray-900 text-gray-100 rounded-md overflow-x-auto text-sm">
+            {generateSqlPreview(queryData)}
+          </pre>
+        </div>
+        
+        <div className="flex justify-end mt-2">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Run Query
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function generateSqlPreview(queryData) {
+  // This is a placeholder function that would generate SQL based on the query structure
+  // In a real implementation, this would create actual SQL based on all the selected fields, joins, conditions, etc.
+  
+  const select = (queryData.select_fields || []).map(field => {
+    const agg = (queryData.select_aggregate_fields || [])
+      .find(a => a.original_name === field);
+      
+    if (agg && agg.function) {
+      return `${agg.function}(${field})${agg.alias ? ` AS ${agg.alias}` : ''}`;
+    }
+    return field;
+  }).join(', ') || '*';
+  
+  return `SELECT ${select}\nFROM table_name\n-- Query preview would show full SQL here`;
+}
+
+// Reusable Components
+
+function SectionHeader({ title }) {
+  return (
+    <div className="flex items-center border-b pb-2">
+      <h3 className="text-lg font-medium text-gray-800">{title}</h3>
+    </div>
+  );
+}
+
+function EmptyState({ message }) {
+  return (
+    <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-center">
+      <p className="text-gray-500">{message}</p>
+    </div>
+  );
+}
+
+function FieldButton({ label, onClick, small = false }) {
+  return (
+    <button 
+      className={`px-3 ${small ? 'py-1 text-xs' : 'py-2 text-sm'} bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100 flex items-center`}
+      onClick={onClick}
+    >
+      <Database size={small ? 12 : 14} className={small ? "mr-1" : "mr-2"} />
+      {label}
+    </button>
+  );
+}
+
+function FieldTileList({ selectedItems, aggregations, removeTag, setAggregations }) {
     const [popupState, setPopupState] = useState({
-        isOpen: false,
-        item: null,
-        position: { top: 0, left: 0 }
+      isOpen: false,
+      item: null,
+      position: { top: 0, left: 0 }
     });
     
-    // Handler for closing the popup when clicking outside
+    // Handle click outside the popup
     useClickOutside(() => {
-        if (popupState.isOpen) {
-            setPopupState(prev => ({ ...prev, isOpen: false }));
-        }
+      if (popupState.isOpen) {
+        setPopupState(prev => ({ ...prev, isOpen: false }));
+      }
     }, 'aggregation-popup');
     
+    // Handle field click to open aggregation popup
     const handleItemClick = (item, event) => {
-        // Get position of the clicked element
-        const rect = event.currentTarget.getBoundingClientRect();
-        
-        setPopupState({
-            isOpen: true,
-            item: item,
-            position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX }
-        });
+      const rect = event.currentTarget.getBoundingClientRect();
+      
+      setPopupState({
+        isOpen: true,
+        item: item,
+        position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX }
+      });
     };
     
-    return (
-        <div className="p-3 border rounded min-h-12 flex flex-wrap gap-2">
-            {selectedItems.length === 0 ? (
-                <EmptyState />
-            ) : (
-                <>
-                    <TagList 
-                        selectedItems={selectedItems}
-                        removeTag={removeTag}
-                        aggregations={aggregations}
-                        handleItemClick={handleItemClick}
-                    />
-                    
-                    {popupState.isOpen && (
-                        <AggregationPopup 
-                            position={popupState.position}
-                            item={popupState.item}
-                            aggregations={aggregations} 
-                            setAggregations={setAggregations}
-                            onClose={() => setPopupState(prev => ({ ...prev, isOpen: false }))}
-                        />
-                    )}
-                </>
-            )}
-        </div>            
-    );
-}
-
-// Empty state component
-function EmptyState() {
-    return (
-        <div className="text-gray-400">Click to select columns (e.g., id, name, email)</div>
-    );
-}
-
-// Tags list component
-function TagList({ selectedItems, removeTag, aggregations, handleItemClick }) {
-    return selectedItems.map((item, index) => (
-        <TagItem 
-            key={index}
-            item={item}
-            aggregation={getAggregationForItem(item, aggregations)}
-            removeTag={removeTag}
-            onClick={handleItemClick}
-        />
-    ));
-}
-
-// Single tag item component
-function TagItem({ item, aggregation, removeTag, onClick }) {
-    const displayText = formatDisplayText(item, aggregation);
+    if (selectedItems.length === 0) {
+      return (
+        <EmptyState message="No fields selected. Click the button below to select fields." />
+      );
+    }
     
     return (
-        <div 
-            className="px-2 py-1 rounded-md flex items-center text-sm cursor-pointer" 
-            style={{
-                backgroundColor: "black", 
-                color: "white",
-                padding: "4px", 
-                borderRadius: "10px", 
-                fontSize: "0.6em"
-            }}
-            onClick={(e) => onClick(item, e)}
-        >
-            <span>{displayText}</span>
-            <RemoveButton onClick={(e) => {
-                e.stopPropagation();
-                removeTag(item);
-            }} />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {selectedItems.map((item, index) => {
+          const aggregation = getAggregationForItem(item, aggregations);
+          return (
+            <FieldTile 
+              key={index}
+              field={item}
+              aggregation={aggregation}
+              onClick={(e) => handleItemClick(item, e)}
+              onRemove={() => removeTag(item)}
+            />
+          );
+        })}
+        
+        {popupState.isOpen && (
+          <AggregationPopup 
+            position={popupState.position}
+            item={popupState.item}
+            aggregations={aggregations}
+            setAggregations={setAggregations}
+            onClose={() => setPopupState(prev => ({ ...prev, isOpen: false }))}
+          />
+        )}
+      </div>
     );
-}
-
-// Remove button component
-function RemoveButton({ onClick }) {
+  }
+  
+  function FieldTile({ field, aggregation, onClick, onRemove }) {
+    // Format display text based on aggregation status
+    const hasAggregation = aggregation.function && aggregation.function !== '';
+    const displayText = hasAggregation 
+      ? `${aggregation.function}(${field})${aggregation.alias ? ` AS ${aggregation.alias}` : ''}` 
+      : field;
+      
+    // Add special styling for aggregated fields
+    const bgColor = hasAggregation ? 'bg-blue-50' : 'bg-white';
+    const borderColor = hasAggregation ? 'border-blue-200' : 'border-gray-200';
+    
     return (
-        <button 
-            className="ml-1"
-            style={{ backgroundColor: "black", padding: "4px 8px" }} 
-            onClick={onClick}
-        >
-            ×
-        </button>
+      <div 
+        className={`${bgColor} ${borderColor} rounded-lg border shadow-sm hover:shadow transition-shadow p-3 cursor-pointer`}
+        onClick={onClick}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Database size={16} className="text-gray-500 mr-2" />
+            <div>
+              <div className="font-medium text-sm">{field}</div>
+              {hasAggregation && (
+                <div className="text-xs text-blue-600 mt-1">
+                  {aggregation.function}{aggregation.alias ? ` → ${aggregation.alias}` : ''}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <button 
+            className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+        
+        {hasAggregation && (
+          <div className="mt-2 pt-2 border-t border-blue-100 text-xs text-gray-500 flex items-center">
+            <Settings size={12} className="mr-1" /> Aggregation configured
+          </div>
+        )}
+      </div>
     );
-}
-
-// The popup component
+  }
+  
+ // Updated AggregationPopup function with better positioning
 function AggregationPopup({ position, item, aggregations, setAggregations, onClose }) {
     const existingAgg = getAggregationForItem(item, aggregations);
     
-    const [aggFunction, setAggFunction] = useState(existingAgg.function);
-    const [alias, setAlias] = useState(existingAgg.alias);
+    const [aggFunction, setAggFunction] = useState(existingAgg.function || '');
+    const [alias, setAlias] = useState(existingAgg.alias || '');
+    
+    // Calculate better positioning to avoid going off-screen
+    const adjustedPosition = {
+      top: position.top,
+      left: position.left
+    };
+    
+    // Check if popup would go off the right edge of the screen
+    const rightEdgeDistance = window.innerWidth - position.left;
+    if (rightEdgeDistance < 300) { // popup width + some padding
+      adjustedPosition.left = window.innerWidth - 300;
+    }
+    
+    // Ensure popup doesn't go below viewport
+    const bottomDistance = window.innerHeight - position.top;
+    if (bottomDistance < 250) { // approximate popup height
+      adjustedPosition.top = position.top - 250;
+    }
     
     const aggregationFunctions = ['COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'DISTINCT'];
     
     const handleSave = () => {
-        saveAggregation(item, aggFunction, alias, aggregations, setAggregations);
-        onClose();
+      saveAggregation(item, aggFunction, alias, aggregations, setAggregations);
+      onClose();
     };
     
     const handleClear = () => {
-        clearAggregation(item, aggregations, setAggregations);
-        onClose();
+      clearAggregation(item, aggregations, setAggregations);
+      onClose();
     };
     
     return (
-        <div 
-            id="aggregation-popup"
-            className="absolute bg-white border shadow-lg rounded p-3 w-64 z-50"
-            style={{
-                top: `${position.top}px`,
-                left: `${position.left}px`
-            }}
-        >
-            <PopupHeader item={item} />
-            <FunctionSelector 
-                value={aggFunction}
-                onChange={setAggFunction}
-                options={aggregationFunctions}
-            />
-            <AliasInput 
-                value={alias}
-                onChange={setAlias}
-            />
-            <PopupFooter 
-                onClear={handleClear}
-                onSave={handleSave}
-            />
+      <div 
+        id="aggregation-popup"
+        className="fixed bg-white border border-gray-200 shadow-lg rounded-md p-4 w-64 z-50"
+        style={{
+          top: `${adjustedPosition.top}px`,
+          left: `${adjustedPosition.left}px`
+        }}
+      >
+        <div className="font-medium text-gray-700 mb-3 pb-2 border-b">
+          Configure {item}
         </div>
-    );
-}
-
-// Popup header component
-function PopupHeader({ item }) {
-    return <div className="font-medium mb-2">Configure {item}</div>;
-}
-
-// Function selector component
-function FunctionSelector({ value, onChange, options }) {
-    return (
-        <div className="mb-2">
-            <label className="block text-sm text-gray-600 mb-1">Aggregation Function</label>
-            <select 
-                className="w-full border rounded p-1 text-sm"
-                value={value}
-                // @ts-ignore
-                onChange={(e) => onChange(e.target.value)}
-            >
-                <option value="">None</option>
-                {options.map(func => (
-                    <option key={func} value={func}>{func}</option>
-                ))}
-            </select>
-        </div>
-    );
-}
-
-// Alias input component
-function AliasInput({ value, onChange }) {
-    return (
         <div className="mb-3">
-            <label className="block text-sm text-gray-600 mb-1">Alias</label>
-            <input 
-                type="text" 
-                className="w-full border rounded p-1 text-sm"
-                value={value}
-                // @ts-ignore
-                onChange={(e) => onChange(e.target.value)}
-                placeholder="Custom name (optional)"
-            />
+          <label className="block text-sm text-gray-600 mb-1">Aggregation Function</label>
+          <select 
+            className="w-full border border-gray-300 rounded p-2 text-sm"
+            value={aggFunction}
+            onChange={(e) => setAggFunction(e.target.value)}
+          >
+            <option value="">None</option>
+            {aggregationFunctions.map(func => (
+              <option key={func} value={func}>{func}</option>
+            ))}
+          </select>
         </div>
-    );
-}
-
-// Popup footer with action buttons
-function PopupFooter({ onClear, onSave }) {
-    return (
-        <div className="flex justify-between">
-            <button 
-                className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm"
-                onClick={onClear}
-            >
-                Clear
-            </button>
-            <button 
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
-                onClick={onSave}
-            >
-                Apply
-            </button>
-        </div>
-    );
-}
-
-// Utility functions
-function useClickOutside(callback, excludeId) {
-    useEffect(() => {
-        function handleClickOutside(event) {
-            // Skip if clicked element is our exclude target
-            if (excludeId && (
-                event.target.id === excludeId || 
-                event.target.closest(`#${excludeId}`)
-            )) {
-                return;
-            }
-            callback(event);
-        }
         
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        <div className="mb-4">
+          <label className="block text-sm text-gray-600 mb-1">Alias (Optional)</label>
+          <input 
+            type="text" 
+            className="w-full border border-gray-300 rounded p-2 text-sm"
+            value={alias}
+            onChange={(e) => setAlias(e.target.value)}
+            placeholder="Custom field name"
+          />
+        </div>
+        
+        <div className="flex justify-between">
+          <button 
+            className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+            onClick={handleClear}
+          >
+            Clear
+          </button>
+          <button 
+            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+            onClick={handleSave}
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Utility Functions
+  
+  function useClickOutside(callback, excludeId) {
+    useEffect(() => {
+      function handleClickOutside(event) {
+        // Skip if clicked element is our excluded target
+        if (excludeId && (
+          event.target.id === excludeId || 
+          event.target.closest(`#${excludeId}`)
+        )) {
+          return;
+        }
+        callback(event);
+      }
+      
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [callback, excludeId]);
-}
-
-function getAggregationForItem(item, aggregations) {
+  }
+  
+  function getAggregationForItem(item, aggregations) {
     return aggregations.find(agg => agg.original_name === item) || {
-        function: '',
-        original_name: item,
-        alias: ''
+      function: '',
+      original_name: item,
+      alias: ''
     };
-}
-
-function formatDisplayText(item, aggregation) {
-    return aggregation.function ? 
-        `${aggregation.function}(${item})${aggregation.alias ? ` AS ${aggregation.alias}` : ''}` : 
-        item;
-}
-
-function saveAggregation(item, aggFunction, alias, aggregations, setAggregations) {
+  }
+  
+  function saveAggregation(item, aggFunction, alias, aggregations, setAggregations) {
     const index = aggregations.findIndex(agg => agg.original_name === item);
     
     if (index >= 0) {
-        // Update existing entry
-        const updatedAggregations = [...aggregations];
-        updatedAggregations[index] = {
-            function: aggFunction,
-            original_name: item,
-            alias: alias
-        };
-        setAggregations(updatedAggregations);
-    } else {
-        // Add new entry
-        setAggregations([...aggregations, {
-            function: aggFunction,
-            original_name: item,
-            alias: alias
-        }]);
+      // Update existing aggregation
+      const updatedAggregations = [...aggregations];
+      updatedAggregations[index] = {
+        function: aggFunction,
+        original_name: item,
+        alias: alias
+      };
+      setAggregations(updatedAggregations);
+    } else if (aggFunction || alias) {
+      // Only add new entry if there's a function or alias
+      setAggregations([...aggregations, {
+        function: aggFunction,
+        original_name: item,
+        alias: alias
+      }]);
     }
-}
-
-function clearAggregation(item, aggregations, setAggregations) {
+  }
+  
+  function clearAggregation(item, aggregations, setAggregations) {
     setAggregations(aggregations.filter(agg => agg.original_name !== item));
-}
+  }
+  
+  // Add this for better styling of components
+  const styles = {
+    sectionContainer: {
+      padding: '16px',
+      marginBottom: '24px',
+      backgroundColor: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+    },
+    actionButton: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '8px 16px',
+      backgroundColor: THEME.primary,
+      color: 'white',
+      borderRadius: '6px',
+      fontSize: '14px',
+      cursor: 'pointer',
+      border: 'none',
+      transition: 'background-color 0.2s ease',
+      marginRight: '8px'
+    }
+  };
+  
+  // Add CSS for better UX
+  const css = `
+    .section {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+    
+    .scrollable-div {
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    /* Custom scrollbars for modern browsers */
+    .scrollable-div::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .scrollable-div::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    .scrollable-div::-webkit-scrollbar-thumb {
+      background: #ddd;
+      border-radius: 4px;
+    }
+    
+    .scrollable-div::-webkit-scrollbar-thumb:hover {
+      background: #ccc;
+    }
+  `;
+  
+  // Create a style element and append the CSS
+  (() => {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+  })();

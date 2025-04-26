@@ -45,7 +45,7 @@ const SelectField = ({ value, onChange, options }) => (
 );
 
 // Key-Value List Field Component
-const KeyValueListField = ({ value = [], onChange }) => {
+export const KeyValueListField = ({ value = [], onChange }) => {
   const addItem = () => {
     onChange([...value, { key: '', value: '' }]);
   };

@@ -3,7 +3,6 @@ import "./app_style.css";
 import { useEffect, useState } from "preact/hooks";
 import { apps, GetAppsfromDB, saveAppToStorage, showForm } from "./apps_signal";
 import { generateRandomName } from "../utils/helpers";
-import { CreateDatabase, databaseSignal, InsertAppToAPI } from "../api/api";
 import { AppID, sideBarEnable } from "../states/global_state";
 import { useLocation } from "preact-iso";
 function AppList({ apps }) {
@@ -22,7 +21,6 @@ function AppList({ apps }) {
                 let newappname = app["gen_name"];
                 localStorage.setItem("db_name",newappname);
                 AppID.value = newappname;
-                databaseSignal.value = newappname;
                 sideBarEnable.value = true;
                 router.route("/home");
                }}
