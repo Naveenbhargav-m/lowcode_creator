@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 
 import { dbViewSignal } from "./table_builder_state";
-import { ViewArea } from "../view_creator/view_page";
+import { DatabaseViewManager} from "../view_creator/view_page";
 import { AdvancedView } from "../view_creator/advnaced_views";
 import { globalStyle } from "../styles/globalStyle";
 import TableBuilderV6 from "./table_builder";
+import { TriggerManagementUI } from "../triggers/triggers_page";
 
 
 function TablesButtonsBar({AddCallBack, SaveCallback}) {
@@ -61,8 +62,8 @@ function TablesPage() {
     <>
       {
       dbViewSignal.value == "Tables" ? <TableBuilderV6 /> : 
-      dbViewSignal.value == "Views" ? <ViewArea /> :
-      dbViewSignal.value == "Triggers" ? <ViewArea/> :
+      dbViewSignal.value == "Views" ? <DatabaseViewManager /> :
+      dbViewSignal.value == "Triggers" ? <TriggerManagementUI/> :
       <AdvancedView />
       }
     </>
