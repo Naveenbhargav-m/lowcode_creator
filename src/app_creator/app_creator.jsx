@@ -1,7 +1,7 @@
 
 import "./app_style.css";
 import { useEffect, useState } from "preact/hooks";
-import { apps, GetAppsfromDB, saveAppToStorage, showForm } from "./apps_signal";
+import { apps, GetAppsfromDB, InsertNewApp, saveAppToStorage, showForm } from "./apps_signal";
 import { generateRandomName } from "../utils/helpers";
 import { AppID, sideBarEnable } from "../states/global_state";
 import { useLocation } from "preact-iso";
@@ -50,8 +50,7 @@ function AppList({ apps }) {
         let lowerName = appName.toLowerCase();
         let genname = generateRandomName(lowerName).toLowerCase();
         const newApp = { created_at: new Date().toISOString(), name: lowerName , "gen_name": genname};
-        InsertAppToAPI(newApp);
-        CreateDatabase(newApp["gen_name"]);
+        InsertNewApp(newApp);
         const updatedApps = [...apps.value, newApp];
         apps.value = updatedApps;
         saveAppToStorage(updatedApps);
