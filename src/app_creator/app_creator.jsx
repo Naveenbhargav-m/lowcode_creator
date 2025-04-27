@@ -51,9 +51,6 @@ function AppList({ apps }) {
         let genname = generateRandomName(lowerName).toLowerCase();
         const newApp = { created_at: new Date().toISOString(), name: lowerName , "gen_name": genname};
         InsertNewApp(newApp);
-        const updatedApps = [...apps.value, newApp];
-        apps.value = updatedApps;
-        saveAppToStorage(updatedApps);
         setAppName("");
         onClose();
       }
