@@ -5,7 +5,7 @@ import { GetDataFromAPi, SyncData } from "../api/api_syncer";
 let sideBarEnable = signal(true);
 const PrestDBaseUrl = "http://localhost:8000";
 const CreatorBackendUrl = "http://localhost:8001";
-const AppID = signal("doctors_app1chjxp");
+const AppID = signal("");
 const CreatorAPPID = signal("nokodo_creator");
 let showFormPopup = signal("");
 

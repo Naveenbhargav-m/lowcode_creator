@@ -1,3 +1,4 @@
+import { useAuthCheck } from "../hooks/hooks";
 import { FlowBuilder } from "./flow_builder";
 import { WorkflowsList } from "./flow_left_panel";
 import { WorkflowConfigFormPanel } from "./flow_right";
@@ -7,6 +8,7 @@ import { WorkflowConfigFormPanel } from "./flow_right";
 
 
     function WorkFlowPage() {
+        useAuthCheck();
         return (
             <div style={{display:"flex", "flexDirection":"row", width:"95vw"}}>
                     <div className="w-2/12 bg-white p-4 h-screen">

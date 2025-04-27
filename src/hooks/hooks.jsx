@@ -29,4 +29,26 @@ const useElementDimensions = (ref) => {
   return { width, height };
 };
 
-export default useElementDimensions;
+
+// useAuthCheck.js
+import { useLocation } from "preact-iso";
+import { AppID } from "../states/global_state"; // Adjust the import path as needed
+
+export function useAuthCheck(options = {}) {
+  const {
+    redirectPath = "/",
+    replace = true,
+    dependencies = []
+  } = options;
+  
+  const location = useLocation();
+  
+  useEffect(() => {
+    if (AppID.value.length === 0) {
+      console.log("No AppID found, redirecting to", redirectPath);
+      location.route(redirectPath, replace);
+    }
+  }, [AppID.value, redirectPath, replace, ...dependencies]);
+}
+
+export {useElementDimensions};

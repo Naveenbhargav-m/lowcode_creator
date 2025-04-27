@@ -1,6 +1,6 @@
 
 import { effect, signal } from "@preact/signals";
-import { CreatorAPPID, PrestClient } from "../states/global_state";
+import { ApiClient, CreatorAPPID, PrestClient } from "../states/global_state";
 
 const APP_STORAGE_KEY = "apps";
 
@@ -27,7 +27,19 @@ async function GetAppsfromDB() {
 
 
 function InsertNewApp(appData) {
-
+  let baseurl = `api/create-database`;
+  let dbname = appData["gen_name"];
+  let firstbody = {"name": dbname};
+  ApiClient.post(baseurl, {body:firstbody}).then((resp) => {
+    if(resp === undefined) {
+      return;
+    }
+    if(resp["status"] !== "success") {
+      return;
+    }
+    let creatorBase = `${CreatorAPPID}/public/apps`;
+    PrestClient.post(creatorBase, {body:appData});
+  });
 }
 
 

@@ -12,6 +12,7 @@ import { useEffect } from "preact/hooks";
 import { RenderElements } from "./form_renderer";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
+import { useAuthCheck } from "../hooks/hooks";
 
 function EditArea() {
     useEffect((
@@ -115,6 +116,7 @@ function EditArea() {
   }
   
   export function FormBuilderTest() {
+    useAuthCheck();
     return (
     <div className="min-h-screen h-screen w-full flex">
     <div className="bg-white p-4 min-h-screen scrollable-div" style={{height:"100vh", width:"14vw"}}>

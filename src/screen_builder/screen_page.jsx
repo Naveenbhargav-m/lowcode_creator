@@ -10,6 +10,7 @@ import { ThemePage } from "../theme_creator/theme_config_area";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
 import { variableMap } from "../states/global_state";
+import { useAuthCheck } from "../hooks/hooks";
 
 let config = {
   paths: ["id", "tabs", "tab"],
@@ -23,7 +24,7 @@ let viewstyle = {
 
 function ScreenPage() {
 
-
+  useAuthCheck();
   // useEffect(() => {
   //   LoadForms();
   // },[]);
