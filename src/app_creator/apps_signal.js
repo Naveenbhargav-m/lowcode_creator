@@ -39,6 +39,10 @@ function InsertNewApp(appData) {
     }
     let creatorBase = `${CreatorAPPID}/public/apps`;
     PrestClient.post(creatorBase, {body:appData});
+    let existing = apps.value;
+    existing.push(appData);
+    apps.value = [...existing];
+
   });
 }
 
