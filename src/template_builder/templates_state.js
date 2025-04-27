@@ -185,9 +185,18 @@ function DeleteTemplateElements(id) {
   isTemplateChanged.value = generateUID();
   TemplateSorted.value = generateUID();
 }
+
+
+function GetScreenTamplateByID(templateID) {
+  let curtemplate = JSON.parse(JSON.stringify(templates[templateID]));
+  curtemplate["is_template"] = true;
+  return curtemplate;
+
+}
 export {
     templates,templateNamesList, templatesPagesSignal, templateRightPanelActiveTab,
     activeTamplate, templateDesignView, activeTemplateElements, isTemplateChanged, 
     activeTemplateElement, LoadTemplates,CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements, DeleteTemplateElements,
-    TemplateSorted
+    TemplateSorted,
+    GetScreenTamplateByID,
 };
