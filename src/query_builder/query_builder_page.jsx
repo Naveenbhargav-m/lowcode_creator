@@ -3,8 +3,10 @@ import { TablesView } from "./components";
 import { QueriesList } from "./queries_left_list";
 import { CreateQueryBlock, LoadQueries } from "./query_signal";
 import { globalStyle } from "../styles/globalStyle";
+import { useAuthCheck } from "../hooks/hooks";
 
 function QueryBuilderPage() {
+    useAuthCheck();
     useEffect((() => {
         LoadQueries();
     }),[]);

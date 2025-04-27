@@ -6,6 +6,7 @@ import { DatabaseQueryRunner } from "../view_creator/advnaced_views";
 import { globalStyle } from "../styles/globalStyle";
 import TableBuilderV6 from "./table_builder";
 import { TriggerManagementUI } from "../triggers/triggers_page";
+import { useAuthCheck } from "../hooks/hooks";
 
 
 function TablesButtonsBar({AddCallBack, SaveCallback}) {
@@ -58,6 +59,7 @@ function TablesTab({ onTableSelect }) {
 
 
 function TablesPage() {
+  useAuthCheck();
   return (
     <>
       {
