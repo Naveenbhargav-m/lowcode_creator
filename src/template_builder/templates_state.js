@@ -31,7 +31,7 @@ function LoadTemplates( ) {
       for (let i = 0; i < myscreens.length; i++) {
           let curScreen = myscreens[i];
           screensmap[curScreen["id"]] = { ...curScreen["configs"],"id": curScreen["id"] };
-          tempnames.push({ "name": curScreen["screen_name"],"id": curScreen["id"], "order": curScreen["configs"]["order"]});
+          tempnames.push({ "name": curScreen["template_name"],"id": curScreen["id"], "order": curScreen["configs"]["order"]});
       }
 
       templateNamesList.value = [...tempnames];
@@ -185,9 +185,18 @@ function DeleteTemplateElements(id) {
   isTemplateChanged.value = generateUID();
   TemplateSorted.value = generateUID();
 }
+
+
+function GetScreenTamplateByID(templateID) {
+  let curtemplate = JSON.parse(JSON.stringify(templates[templateID]));
+  curtemplate["is_template"] = true;
+  return curtemplate;
+
+}
 export {
     templates,templateNamesList, templatesPagesSignal, templateRightPanelActiveTab,
     activeTamplate, templateDesignView, activeTemplateElements, isTemplateChanged, 
     activeTemplateElement, LoadTemplates,CreateTemplate, HandleTemplateDrop,SetTemplateActiveElements, DeleteTemplateElements,
-    TemplateSorted
+    TemplateSorted,
+    GetScreenTamplateByID,
 };

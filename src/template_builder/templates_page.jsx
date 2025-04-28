@@ -1,3 +1,4 @@
+import { useEffect } from "preact/hooks";
 import { SyncData } from "../api/api_syncer";
 import { SyncButton } from "../components/generic/sync_button";
 import { TabComponent } from "../screen_builder/screen_components";
@@ -7,7 +8,7 @@ import { themes } from "../theme_creator/theme_state";
 import { TemplateBuilderRightView } from "./template_builder_right";
 import { TemplateView } from "./template_builder_view";
 import { TemplatesListPanel } from "./template_left_panel";
-import { templateNamesList, templates, templatesPagesSignal } from "./templates_state";
+import { LoadTemplates, templateNamesList, templates, templatesPagesSignal } from "./templates_state";
 
 
 let config = {
@@ -16,6 +17,9 @@ let config = {
   };
 
 function TemplatePage() {
+    useEffect((() => {
+        LoadTemplates();
+    }), []);
     return (
         <div style={{display:"contents"}}>
             <div className="min-h-screen h-screen w-full bg-white flex">
@@ -37,7 +41,7 @@ function TemplatePage() {
             <div className="w-10/12 h-screen bg-background scrollable-div">
             <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
                 <TabComponent />
-                <SyncButton title={"sync"} onClick={(e) => {SyncData("_themes", themes);}} style={{marginRight:"40px"}}/>
+                <SyncButton title={"sync"} onClick={(e) => {SyncData("_templates", templates);}} style={{marginRight:"40px"}}/>
             </div>
             <TemplateView />
 
