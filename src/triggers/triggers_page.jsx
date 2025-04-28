@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Code, Edit, Eye, List, Plus, Save, ChevronRight } from 'lucide-react';
+import { TablesTab } from '../table_builder/tables_page';
+import { dbViewSignal } from '../table_builder/table_builder_state';
 
 // Main component for Trigger Management UI
 export function TriggerManagementUI() {
@@ -77,6 +79,7 @@ export function TriggerManagementUI() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Left Panel - Trigger List */}
+      <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab}/>
       <TriggerList 
         triggers={triggers} 
         selectedTriggerId={selectedTrigger?.id}

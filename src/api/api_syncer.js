@@ -48,7 +48,7 @@ function UpdateBatchData(key,forms) {
     if(forms.length === 0) {
         return;
     }
-    let endpoint = `/${AppID}/public/${key}`
+    let endpoint = `${AppID}/public/${key}`
     for(let i=0;i<forms.length;i++) {
         let formID = forms[i]["id"];
         delete forms[i]["id"];
@@ -65,7 +65,7 @@ function InsertBatchData(key,forms) {
     if(forms.length === 0) {
         return;
     }
-    let endPoint = `/batch/${AppID}/public/${key}`;
+    let endPoint = `batch/${AppID}/public/${key}`;
     let temp = [];
     for(let i=0;i<forms.length;i++) {
         let temp1 = forms[i];
@@ -77,7 +77,7 @@ function InsertBatchData(key,forms) {
 }
 
 async function GetDataFromAPi(key) {
-    let endpoint = `/${AppID}/public/${key}`;
+    let endpoint = `${AppID}/public/${key}`;
     try {
         let response = await PrestClient.get(endpoint);
         return response || [];  // Always return an array

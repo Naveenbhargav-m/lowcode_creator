@@ -40,7 +40,7 @@ function ProcessTemplatesDataTOWrite(screens) {
     for(let i=0;i<screens.length;i++) {
         let temp = {};
         let cur = screens[i];
-        temp["template_name"] = cur["template_name"];
+        temp["template_name"] = cur["name"];
         temp["id"] = cur["id"];
         delete cur["template_name"];
         let json = JSON.stringify(cur);

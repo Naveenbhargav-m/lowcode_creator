@@ -31,7 +31,7 @@ function LoadTemplates( ) {
       for (let i = 0; i < myscreens.length; i++) {
           let curScreen = myscreens[i];
           screensmap[curScreen["id"]] = { ...curScreen["configs"],"id": curScreen["id"] };
-          tempnames.push({ "name": curScreen["screen_name"],"id": curScreen["id"], "order": curScreen["configs"]["order"]});
+          tempnames.push({ "name": curScreen["template_name"],"id": curScreen["id"], "order": curScreen["configs"]["order"]});
       }
 
       templateNamesList.value = [...tempnames];

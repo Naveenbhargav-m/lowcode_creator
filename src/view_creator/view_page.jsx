@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Code, Eye, Save, ChevronRight, X, Plus, Search, Settings } from 'lucide-react';
+import { TablesTab } from '../table_builder/tables_page';
+import { dbViewSignal } from '../table_builder/table_builder_state';
 
 // Main App Component
 export function DatabaseViewManager() {
@@ -150,6 +152,7 @@ function ViewSidebar({ views, selectedView, onSelectView, onCreateNew, searchTer
       <div className="p-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold">Database Views</h2>
         <div className="mt-2 flex items-center bg-gray-100 rounded-md px-2">
+          <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab} />
           <Search size={16} className="text-gray-500" />
           <input
             type="text"

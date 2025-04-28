@@ -16,9 +16,9 @@ async function LoadTables() {
 }
 
 async function SaveTablesData(data) {
-  let datajson = JSON.stringify(data);
-  let baseurl = `${AppID}/update-tables`
-  let resp = await ApiClient.post(baseurl, datajson);
+  let datajson = data;
+  let baseurl = `update-table/${AppID}`
+  let resp = await ApiClient.post(baseurl, {body: datajson} );
   return resp;
 }
 

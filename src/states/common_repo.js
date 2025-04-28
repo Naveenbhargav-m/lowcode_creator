@@ -18,6 +18,7 @@ let QueryBlocks = signal([]);
 let Forms = signal([]);
 let Groups = signal([]);
 
+let fieldsGlobalSignals = signal({});
 
 function LoadTheDataRepo() {
   GetFeatureData("_screens").then((screens) => {
@@ -37,4 +38,4 @@ function LoadTheDataRepo() {
 export { 
    Templates, Screens, Components, GlobalStates,
    Workflows, Themes, Tables, Relations, QueryBlocks,
-  Forms, Groups , Views, Triggers };
+  Forms, Groups , Views, Triggers, fieldsGlobalSignals };

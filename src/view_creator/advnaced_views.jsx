@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Play, History, Star, Clock, Save, Trash, Download, Copy, ChevronDown } from 'lucide-react';
+import { TablesTab } from '../table_builder/tables_page';
+import { dbViewSignal } from '../table_builder/table_builder_state';
 
 // Main Database Query Runner Component
 export function DatabaseQueryRunner() {
@@ -217,6 +219,7 @@ export function DatabaseQueryRunner() {
     <div className="flex flex-col h-screen bg-gray-100">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab}/>
         <h1 className="text-xl font-semibold text-gray-800">Database Query Runner</h1>
       </div>
 

@@ -9,28 +9,6 @@ import { TriggerManagementUI } from "../triggers/triggers_page";
 import { useAuthCheck } from "../hooks/hooks";
 
 
-function TablesButtonsBar({AddCallBack, SaveCallback}) {
-  return (
-    <div className="flex bg-white justify-end p-4" style={{fontSize:"0.8em", ...globalStyle}}>
-    <button
-    style={{fontSize:"0.9em",...globalStyle, "color":"white","backgroundColor":"black"}}
-    onClick={AddCallBack}
-    className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary"
-  >
-    <p>Add Table</p>
-  </button>
-
-  <button
-  style={{fontSize:"0.9em",...globalStyle, "color":"white","backgroundColor":"black"}}
-    onClick={(e) => SaveCallback()}
-    className="bg-secondary text-white px-4 py-2 rounded-md shadow-md hover:bg-primary ml-4"
-  >
-    Save Changes
-  </button>
-  </div>
-  );
-} 
-
 function TablesTab({ onTableSelect }) {
   const [selectedTable, setSelectedTable] = useState(dbViewSignal.value);
   const tables = ["Tables", "Views", "Triggers", "Advanced"];

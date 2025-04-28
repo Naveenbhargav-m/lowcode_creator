@@ -7,8 +7,11 @@ import { generateUID } from '../utils/helpers';
 import { GenerateTransactionsV2 } from './utilities';
 import { TablesTab } from './tables_page';
 import { dbViewSignal, LoadTables, SaveTablesData } from './table_builder_state';
+import { signal } from '@preact/signals';
 
 let fieldStyle = {"color": "black"};
+
+let makeInitCopy = signal("");
 export default function TableBuilderV6() {
     const [tables, setTables] = useState([]);
       const [relations, setRelations] = useState([]);
@@ -27,13 +30,23 @@ export default function TableBuilderV6() {
 
       useEffect((() => {
         LoadTables().then((data) => {
+          console.log("tables data from db:",data);
           if(data === undefined) {
             return;
           }
-          let tables = data["tables"] || [];
-          let relations = data["relations"] || [];
+          let firstObj = data[0];
+          if(firstObj === undefined) {
+            return;
+          }
+          var tableData = firstObj["tables_data"];
+          if(tableData === undefined) {
+            return;
+          }
+          let tables = tableData["tables"] || [];
+          let relations = tableData["relations"] || [];
           setTables(tables);
           setRelations(relations);
+          makeInitCopy.value = generateUID();
         });
       }), []);
       
@@ -45,7 +58,7 @@ export default function TableBuilderV6() {
         if (originalRelations.length === 0 && relations.length > 0) {
           setOriginalRelations(JSON.parse(JSON.stringify(relations)));
         }
-      }, [tables, relations]);
+      }, [makeInitCopy.value]);
       
       // Set the first table as active by default
       useEffect(() => {
@@ -244,7 +257,10 @@ export default function TableBuilderV6() {
     };
     SaveTablesData(output).then((newdata) => {
       console.log("new data:",newdata);
-      setTables(newdata);
+      var tables1 = newdata["tables"] || [];
+      let relations1 = newdata["relations"] || [];
+      setTables(tables1);
+      setRelations(relations1);
     });
     setJsonOutput(JSON.stringify(output, null, 2));
     setShowSql(true);
