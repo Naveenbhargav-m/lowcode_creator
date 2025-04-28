@@ -98,7 +98,6 @@ function ProcessDataToWrite(tableName, data) {
         "_components": { "component_name": "text", "configs": "json" },
         "_tables": { "tables_data": "json" },
         "_views": { "views_data": "json" },
-        "_workflows": { "nodes": "json", "edges": "json", "flow_data": "json", "name": "text" },
         "_triggers": { "triggers_data": "json" }
     };    
     let respData = [];

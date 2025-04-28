@@ -1,5 +1,5 @@
 import { addEdge, ConnectionLineType, ConnectionMode, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
-import { activeFloweUpdated, activeWorkFlow, HandleWorkFlowBlockDrop, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflow_datas, workflows } from "./workflow_state";
+import { activeFloweUpdated, activeWorkFlow, HandleWorkFlowBlockDrop, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflows, workflowsData } from "./workflow_state";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { Condition, End, InsertRow, Start, UpdateRow } from "./block_ components";
 import { Drop } from "../components/custom/Drop";
@@ -59,7 +59,7 @@ function FlowBuilder() {
       <div style={{display:"flex", "flexDirection": "row-reverse", "justifyContent": "space-between", alignItems:"center"}}>
         <SyncButton 
           title={"sync"} 
-          onClick={(e) => {SyncWorkflowData(workflows.value, workflow_datas.value);}} 
+          onClick={(e) => {SyncWorkflowData();}} 
           style={{marginRight:"40px", "marginTop":"10px"}}
         />
       </div>
