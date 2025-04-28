@@ -1,5 +1,36 @@
+import { GetDataFromAPi } from "../api/api_syncer";
 import { AppID, PrestClient } from "../states/global_state";
+import { workflownames, workflows, workflowsData } from "./workflow_state";
 
+
+function GetWorkflowDataFromAPI() {
+    GetDataFromAPi("_workflows").then((myflows) => {
+        if(myflows === undefined) {
+            return;
+        }
+        if(myflows.length === undefined) {
+            return;
+        }
+        let temp = [];
+        let namesAndIDs = [];
+        for(var i=0;i<myflows.length;i++) {
+            let  curflow = workflows[i];
+            let data = curflow["flow_data"];
+            let id = curflow["id"];
+            workflowsData[id] = data;
+            delete curflow["flow_data"];
+            temp.push(curflow);
+            let obj = {
+                "id": id,
+                "name": curflow["name"]
+            };
+            namesAndIDs.push(obj);
+        }
+        workflows.value = [...temp];
+        workflownames.value = [...namesAndIDs];
+        return;
+    })
+}
 
 
 function SyncWorkflowData(workflows, workflowsData) {
@@ -60,4 +91,4 @@ function InsertBatchWorkflows(workflows) {
 }
 
 
-export {SyncWorkflowData};
+export {SyncWorkflowData, GetWorkflowDataFromAPI};

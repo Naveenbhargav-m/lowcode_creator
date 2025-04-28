@@ -4,42 +4,13 @@ import { generateUID } from "../utils/helpers";
 
 let activeWorkFlow = signal({});
 let workflows = signal([]);
-let workflow_datas = signal({});
+let workflowsData = signal({});
 let workflownames = signal([]);
 let activeworkFlowBlock = signal({});
 let flowTab = signal("blocks");
 let activeFloweUpdated = signal("");
 
 
-function LoadDataFromKey( key ) {
-    let jsonstr = localStorage.getItem(key);
-    if(jsonstr === null || jsonstr === undefined) {
-        return [];
-    }
-    if(jsonstr.length === 0) {
-        return;
-    }
-    let workflowObj = JSON.parse(jsonstr);
-    if(workflowObj === undefined) {
-        return [];
-    }
-    return workflowObj;
-}
-
-function LoadWorkflows() {
-    let workflowObj = LoadDataFromKey("workflows");
-    let mylist = [];
-    workflowObj.map((value) => {
-        let obj = {"name": value["name"], "id": value["id"]};
-        mylist.push(obj);
-    })
-    workflownames.value = [...mylist];
-    workflows.value = [...workflowObj];
-}
-function LoadWorkFlowData() {
-    let workflowObj = LoadDataFromKey("workflow_data");
-    workflow_datas.value = {...workflowObj};
-}
 
 function UpdateActiveWorkflowNodes(updatedNodes) {
     let existingFlow = activeWorkFlow.peek(); // Avoid triggering reactivity
@@ -139,7 +110,12 @@ function HandleWorkFlowBlockDrop(data) {
         let id = generateUID();
         handles[i]["id"] = id;
     }
-    let newnode = {"label": name, "type":  operation, "id": newid , position: { x: 250, y: 250 }, data:{"type":  operation, "id": newid,"handles": [...handles]}};
+    let newnode = {
+        "label": name, 
+        "type":  operation, "id": newid , 
+        position: { x: 250, y: 250 }, 
+        data:{"type":  operation, "id": newid,"handles": [...handles]},
+    };
     let curFlow = activeWorkFlow.value;
     let nodes = curFlow["nodes"];
     let lastVal = curFlow["nodes"].pop();
@@ -165,10 +141,8 @@ function SetWorkFlowActive(id) {
     activeFloweUpdated.value = generateUID();
     console.log("setting active workflow:",activeWorkFlow);
 }
-LoadWorkflows();
-LoadWorkFlowData();
 export {activeWorkFlow, workflows, workflownames, 
     CreateWorkflow, SetWorkFlowActive, flowTab, 
     UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop,UpdateActiveWorkflowEdges,
-    activeFloweUpdated, workflow_datas, activeworkFlowBlock
+    activeFloweUpdated, activeworkFlowBlock, workflowsData
 };
