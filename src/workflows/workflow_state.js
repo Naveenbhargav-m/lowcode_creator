@@ -14,10 +14,11 @@ let activeFloweUpdated = signal("");
 
 function UpdateActiveWorkflowNodes(updatedNodes) {
     let existingFlow = activeWorkFlow.peek(); // Avoid triggering reactivity
+    console.log("UpdateActiveWorkflowNodes:",existingFlow);
     if(existingFlow === undefined || updatedNodes === undefined) {
         return;
     }
-    if(existingFlow["id"] === undefined) {
+    if(existingFlow["fid"] === undefined) {
         return;
     }
     if(existingFlow["nodes"] === undefined) {
@@ -47,10 +48,11 @@ function UpdateActiveWorkflowNodes(updatedNodes) {
 
 function UpdateActiveWorkflowEdges(updatedEdges) {
     let existingFlow = activeWorkFlow.peek(); // Use peek() to avoid triggering reactivity
+    console.log("update Active Workflow Edges:",existingFlow);
     if(existingFlow === undefined || updatedEdges === undefined) {
         return;
     }
-     if(existingFlow["id"] === undefined) {
+     if(existingFlow["fid"] === undefined) {
         return;
     }
     for(let i=0;i<updatedEdges.length;i++) {
@@ -102,7 +104,10 @@ function CreateWorkflow(data) {
     exist.push(obj);
     workflows.value = [...exist];
     let namesexists = workflownames.peek();
-    namesexists.push(obj);
+    let nameObj = {};
+    nameObj["id"] = obj["fid"];
+    nameObj["name"] = obj["name"];
+    namesexists.push(nameObj);
     workflownames.value = [...namesexists];
     SetWorkFlowActive(id);
 }
