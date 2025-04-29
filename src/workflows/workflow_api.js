@@ -28,7 +28,7 @@ function GetWorkflowDataFromAPI() {
         let temp = [];
         let namesAndIDs = [];
         for(var i=0;i<myflows.length;i++) {
-            let  curflow = workflows[i];
+            let  curflow = myflows[i];
             let data = curflow["flow_data"];
             let id = curflow["fid"];
             workflowsData[id] = data;
