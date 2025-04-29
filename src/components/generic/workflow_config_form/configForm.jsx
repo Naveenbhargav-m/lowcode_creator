@@ -1,15 +1,18 @@
-// ConfigForm.jsx
-import { useState } from "preact/hooks";
-import TabView, { TextField, KeyValueMapper, ArrayField, Accordion, SelectField } from "./components/fields";
+// ConfigForm.js
+import { useState } from "react";
+import TabView, { Accordion, ArrayField, KeyValueMapper, SelectField, TextField } from "./components/fields";
+import CodeEditorModal from "./components/code_model";
+import { Code } from "lucide-react";
 
-const ConfigForm = ({ 
-  config, 
-  initialValues, 
-  onChange, 
-  onSubmit 
+const ConfigForm = ({
+  config,
+  initialValues,
+  onChange,
+  onSubmit
 }) => {
   const [values, setValues] = useState(initialValues || {});
   const [activeTab, setActiveTab] = useState(config.sections[0]?.id || '');
+  const [showCodeEditor, setShowCodeEditor] = useState(false);
   
   // Create tabs array for TabView component
   const tabs = config.sections.map(section => ({
@@ -28,10 +31,29 @@ const ConfigForm = ({
   
   // Handle form submission
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (onSubmit) {
       onSubmit(values);
     }
+  };
+  
+  // Open code editor
+  const openCodeEditor = () => {
+    setShowCodeEditor(true);
+  };
+  
+  // Close code editor
+  const closeCodeEditor = () => {
+    setShowCodeEditor(false);
+  };
+  
+  // Apply JSON changes
+  const applyJsonChanges = (updatedValues) => {
+    setValues(updatedValues);
+    if (onChange) {
+      onChange(updatedValues);
+    }
+    setShowCodeEditor(false);
   };
   
   // Determine if a field should be visible based on dependencies
@@ -148,7 +170,7 @@ const ConfigForm = ({
       <div className="mt-4">
         {activeSection.groups.map((group) => (
           <Accordion key={group.id} title={group.title}>
-            <div className="p-4 space-y-4">
+            <div className="">
               {group.fields.map(field => renderField(field))}
             </div>
           </Accordion>
@@ -158,23 +180,47 @@ const ConfigForm = ({
   };
   
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-4xl">
-      <TabView 
-        tabs={tabs} 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-        className={""}
-      />
-      
-      {renderActiveTabContent()}
-      
-      <div className="mt-6 flex justify-end">
-        <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-          Save Configuration
-        </button>
+    <div style={{width:"100%"}}>
+      <button
+        type="button"
+        onClick={openCodeEditor}
+        className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none flex items-center gap-1"
+        title="Edit JSON"
+        style={{marginTop:"10px", marginBottom:"10px"}}
+      >
+        <Code />
+        <span className="text-sm font-medium">Code</span>
+      </button>
+      <div className="w-full relative" style={{width:"inherit"}}>
+        <TabView 
+          tabs={tabs} 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+          className=""
+        />
+        
+        {renderActiveTabContent()}
+        
+        <div className="mt-6 flex justify-end">
+          <button 
+            type="button" 
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Save Configuration
+          </button>
+        </div>
+        
+        {/* Use the separate CodeEditorModal component */}
+        <CodeEditorModal
+          isOpen={showCodeEditor}
+          initialValue={JSON.stringify(values, null, 2)}
+          onClose={closeCodeEditor}
+          onSave={applyJsonChanges}
+        />
       </div>
-    </form>
+    </div>
   );
 };
 
-export default ConfigForm;
+export { ConfigForm };

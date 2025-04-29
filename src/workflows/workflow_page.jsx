@@ -8,26 +8,44 @@ import { GetWorkflowDataFromAPI } from "./workflow_api";
 
 
 
-
-    function WorkFlowPage() {
-        useAuthCheck();
-        useEffect((() => {
-            GetWorkflowDataFromAPI();
-        }), []);
-        return (
-            <div style={{display:"flex", "flexDirection":"row", width:"95vw"}}>
-                    <div className="w-2/12 bg-white p-4 h-screen">
-                    <WorkflowsList />
-                    </div>
-                    <div className="w-7/12 h-screen bg-background">
-                            <FlowBuilder />
-                    </div>
-                    <div className="w-3/12 bg-white h-screen scrollable-div" style={{ zIndex: 10, position: "relative" }}>
-                        <WorkflowConfigFormPanel />
-                        {/* <DynamicConfigForm blockConfig={blocksRequirements.insert_row} globalData={["table1", "table2"]} blockData={{}}/> */}
-                    </div>
-            </div>
-        );
-    }
-
+function WorkFlowPage() {
+    useAuthCheck();
+    
+    useEffect(() => {
+      GetWorkflowDataFromAPI();
+    }, []);
+    
+    return (
+      <div style={{ 
+        display: "flex", 
+        flexDirection: "row", 
+        width: "100%", 
+        height: "100vh",
+        overflow: "hidden" // Prevent scrollbars at the page level
+      }}>
+        {/* Left panel - workflow list */}
+        <div style={{ width: "15vw", backgroundColor: "white", padding: "1rem", height: "100%" }}>
+          <WorkflowsList />
+        </div>
+        
+        {/* Middle panel - flow builder */}
+        <div style={{ width: "55vw", height: "100%" }} className="bg-background">
+          <FlowBuilder />
+        </div>
+        
+        {/* Right panel - configuration panel that takes remaining width */}
+        <div style={{ 
+          flex: 1, 
+          height: "100%", 
+          zIndex: 10, 
+          position: "relative", 
+          overflow: "auto",
+          maxWidth: "calc(30vw)" // Ensure it doesn't grow beyond expected width
+        }}>
+          <WorkflowConfigFormPanel />
+          {/* <DynamicConfigForm blockConfig={blocksRequirements.insert_row} globalData={["table1", "table2"]} blockData={{}}/> */}
+        </div>
+      </div>
+    );
+  }
 export {WorkFlowPage};
