@@ -4,46 +4,21 @@ import { generateUID } from "../utils/helpers";
 
 let activeWorkFlow = signal({});
 let workflows = signal([]);
-let workflow_datas = signal({});
+let workflowsData = signal({});
 let workflownames = signal([]);
 let activeworkFlowBlock = signal({});
 let flowTab = signal("blocks");
 let activeFloweUpdated = signal("");
 
 
-function LoadDataFromKey( key ) {
-    let jsonstr = localStorage.getItem(key);
-    if(jsonstr === null || jsonstr === undefined) {
-        return [];
-    }
-    if(jsonstr.length === 0) {
-        return;
-    }
-    let workflowObj = JSON.parse(jsonstr);
-    if(workflowObj === undefined) {
-        return [];
-    }
-    return workflowObj;
-}
-
-function LoadWorkflows() {
-    let workflowObj = LoadDataFromKey("workflows");
-    let mylist = [];
-    workflowObj.map((value) => {
-        let obj = {"name": value["name"], "id": value["id"]};
-        mylist.push(obj);
-    })
-    workflownames.value = [...mylist];
-    workflows.value = [...workflowObj];
-}
-function LoadWorkFlowData() {
-    let workflowObj = LoadDataFromKey("workflow_data");
-    workflow_datas.value = {...workflowObj};
-}
 
 function UpdateActiveWorkflowNodes(updatedNodes) {
     let existingFlow = activeWorkFlow.peek(); // Avoid triggering reactivity
+    console.log("UpdateActiveWorkflowNodes:",existingFlow);
     if(existingFlow === undefined || updatedNodes === undefined) {
+        return;
+    }
+    if(existingFlow["fid"] === undefined) {
         return;
     }
     if(existingFlow["nodes"] === undefined) {
@@ -66,13 +41,18 @@ function UpdateActiveWorkflowNodes(updatedNodes) {
         nodes: nodes,
         "_change_type": isChanged
     };
+    console.log("after nodes change active Flow:",activeWorkFlow.value);
     UpdateWorkflowsWithLatest(existingFlow);
 }
 
 
 function UpdateActiveWorkflowEdges(updatedEdges) {
     let existingFlow = activeWorkFlow.peek(); // Use peek() to avoid triggering reactivity
+    console.log("update Active Workflow Edges:",existingFlow);
     if(existingFlow === undefined || updatedEdges === undefined) {
+        return;
+    }
+     if(existingFlow["fid"] === undefined) {
         return;
     }
     for(let i=0;i<updatedEdges.length;i++) {
@@ -84,6 +64,7 @@ function UpdateActiveWorkflowEdges(updatedEdges) {
         edges: updatedEdges,
         "_change_type": isChanged
     };
+    console.log("after edges change active Flow:",activeWorkFlow.value);
     UpdateWorkflowsWithLatest(existingFlow);
 } 
 
@@ -98,7 +79,7 @@ function UpdateWorkflowsWithLatest(existingFlow) {
     let flows = workflows.peek().map((flow1) =>
         flow1.id === activeID ? activeWorkFlow.peek() : flow1
     );
-
+    console.log("sorted flows before updating:",flows);
     workflows.value = [...flows];
     localStorage.setItem("workflows", JSON.stringify(workflows.value));
 }
@@ -110,8 +91,8 @@ function CreateWorkflow(data) {
     let startID = generateUID();
     let StarthandleID = generateUID();
     let stopHandleID = generateUID();
-    let obj = {"name": name, 
-         "id": id,
+    let obj = {"name": name,
+         "fid": id,
          "nodes": [
           {"label":"start", "type":"start", "id": startID, 
             "data": {"type":"start", "id": startID,"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }},
@@ -123,10 +104,12 @@ function CreateWorkflow(data) {
     exist.push(obj);
     workflows.value = [...exist];
     let namesexists = workflownames.peek();
-    namesexists.push(obj);
+    let nameObj = {};
+    nameObj["id"] = obj["fid"];
+    nameObj["name"] = obj["name"];
+    namesexists.push(nameObj);
     workflownames.value = [...namesexists];
     SetWorkFlowActive(id);
-    localStorage.setItem("workflows", JSON.stringify(workflows));
 }
 
 
@@ -139,7 +122,12 @@ function HandleWorkFlowBlockDrop(data) {
         let id = generateUID();
         handles[i]["id"] = id;
     }
-    let newnode = {"label": name, "type":  operation, "id": newid , position: { x: 250, y: 250 }, data:{"type":  operation, "id": newid,"handles": [...handles]}};
+    let newnode = {
+        "label": name, 
+        "type":  operation, "id": newid , 
+        position: { x: 250, y: 250 }, 
+        data:{"type":  operation, "id": newid,"handles": [...handles]},
+    };
     let curFlow = activeWorkFlow.value;
     let nodes = curFlow["nodes"];
     let lastVal = curFlow["nodes"].pop();
@@ -158,17 +146,15 @@ function HandleWorkFlowBlockDrop(data) {
 function SetWorkFlowActive(id) {
     let flow = workflows.peek();
     flow.map((value) => {
-        if(value["id"] === id) {
+        if(value["fid"] === id) {
             activeWorkFlow.value = {...value};
         }
     });
     activeFloweUpdated.value = generateUID();
     console.log("setting active workflow:",activeWorkFlow);
 }
-LoadWorkflows();
-LoadWorkFlowData();
 export {activeWorkFlow, workflows, workflownames, 
     CreateWorkflow, SetWorkFlowActive, flowTab, 
     UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop,UpdateActiveWorkflowEdges,
-    activeFloweUpdated, workflow_datas, activeworkFlowBlock
+    activeFloweUpdated, activeworkFlowBlock, workflowsData
 };

@@ -48,8 +48,8 @@ function WorkflowsListPanel() {
 }
 
 function WorkflowNameTile({ obj }) {
-  let bgcolor = obj["id"] === activeWorkFlow.value["id"] ? "black" : "white";
-  let textColor = obj["id"] === activeWorkFlow.value["id"] ? "white" : "black"
+  let bgcolor = obj["id"] === activeWorkFlow.value["fid"] ? "black" : "white";
+  let textColor = obj["id"] === activeWorkFlow.value["fid"] ? "white" : "black"
   return (
     <div
       style={{
