@@ -110,7 +110,7 @@ const ConfigForm = ({
             {...props}
           />
         );
-      case 'keyValue':
+      case 'mapping':
         return (
           <KeyValueMapper
             key={id}
