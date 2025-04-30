@@ -96,7 +96,7 @@ function CreateWorkflow(data) {
          "nodes": [
           {"label":"start", "type":"start", "id": startID, 
             "data": {"type":"start", "id": startID,"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }},
-          {"label":"end", "type":"end","id": endID, "data" :{ "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
+          {"label":"end", "type":"end","id": endID, "data" :{ "type": "end", "id": endID, "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
          "edges": [],
          "_change_type": "create"
         };

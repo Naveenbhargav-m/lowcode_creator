@@ -37,7 +37,7 @@ export function WorkflowConfigFormPanel() {
     let blockData = data["data"];
     let formRequirements = data["form_requirements"];
     console.log("data for connfig:",data, formRequirements, blockData);
-    return <WorkflowConfigForm formConfig={formRequirements} initialValues={blockData} changeCallBack={(data) => {
+    return <WorkflowConfigForm formConfigint={formRequirements} initialValuesInp={blockData} changeCallBack={(data) => {
         console.log("change callBack:",data);  
     }} />;
 }
