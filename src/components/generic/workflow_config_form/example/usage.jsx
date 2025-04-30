@@ -1,11 +1,17 @@
 // App.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {ConfigForm} from '../configForm';
 import { globalStyle } from '../../../../styles/globalStyle';
 
-const WorkflowConfigForm = ({formConfig, initialValues, changeCallBack}) => {
-  const [formValues, setFormValues] = useState({});
-    
+const WorkflowConfigForm = ({ formConfigint, initialValuesInp, changeCallBack }) => {
+  const [initialValues, setFormValues] = useState(initialValuesInp || {});
+  const [formConfig, setFormConfig] = useState(formConfigint || {});
+
+  useEffect(() => {
+    console.log("setting the form config");
+    setFormConfig(formConfigint || {});
+    setFormValues(initialValuesInp || {});
+  }, [formConfigint, initialValuesInp]);    
   const handleFormChange = (values) => {
     setFormValues(values);
     console.log('Form values changed:', values);
@@ -17,21 +23,27 @@ const WorkflowConfigForm = ({formConfig, initialValues, changeCallBack}) => {
   };
   
   return (
-<div style={{...globalStyle, width: "100%"}}>
-  <ConfigForm
-    config={formConfig}
-    initialValues={initialValues}
-    onChange={handleFormChange}
-    onSubmit={handleFormSubmit}
-  />
-  
-  {/* <div className="mt-8">
-    <h2 className="text-xl font-semibold mb-2">Current Configuration:</h2>
-    <pre className="bg-gray-100 p-4 rounded-md overflow-auto">
-      {JSON.stringify(formValues, null, 2)}
-    </pre>
-  </div> */}
-</div>
+    <div style={{...globalStyle, width: "100%"}}>
+      {
+        formConfig !== undefined ? (
+          <ConfigForm
+            config={formConfig}
+            initialValues={initialValues}
+            onChange={handleFormChange}
+            onSubmit={handleFormSubmit}
+          />
+        ) : (
+          <div>Pick a block</div>
+        )
+      }
+      
+      {/* <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-2">Current Configuration:</h2>
+        <pre className="bg-gray-100 p-4 rounded-md overflow-auto">
+          {JSON.stringify(formValues, null, 2)}
+        </pre>
+      </div> */}
+    </div>
   );
 };
 

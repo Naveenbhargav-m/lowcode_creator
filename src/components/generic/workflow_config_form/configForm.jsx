@@ -1,9 +1,9 @@
 // ConfigForm.js
-import { useState } from "react";
 import TabView, { Accordion, ArrayField, KeyValueMapper, SelectField, TextField } from "./components/fields";
 import CodeEditorModal from "./components/code_model";
 import { Code } from "lucide-react";
 
+import { useState, useEffect } from "preact/hooks";
 const ConfigForm = ({
   config,
   initialValues,
@@ -11,14 +11,28 @@ const ConfigForm = ({
   onSubmit
 }) => {
   const [values, setValues] = useState(initialValues || {});
-  const [activeTab, setActiveTab] = useState(config.sections[0]?.id || '');
+  const [activeTab, setActiveTab] = useState('');
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   
+  // Update values when initialValues prop changes
+  useEffect(() => {
+    if (initialValues) {
+      setValues(initialValues);
+    }
+  }, [initialValues]);
+  
+  // Set activeTab whenever config changes
+  useEffect(() => {
+    if (config && config.sections && config.sections.length > 0) {
+      setActiveTab(config.sections[0]?.id || '');
+    }
+  }, [config]);
+  
   // Create tabs array for TabView component
-  const tabs = config.sections.map(section => ({
+  const tabs = config?.sections?.map(section => ({
     id: section.id,
     label: section.title
-  }));
+  })) || [];
   
   // Handle field change
   const handleChange = (fieldId, value) => {
@@ -163,21 +177,28 @@ const ConfigForm = ({
   
   // Render the content for the active tab
   const renderActiveTabContent = () => {
+    if (!config || !config.sections) return null;
+    
     const activeSection = config.sections.find(section => section.id === activeTab);
     if (!activeSection) return null;
     
     return (
       <div className="mt-4">
-        {activeSection.groups.map((group) => (
+        {activeSection.groups && activeSection.groups.map((group) => (
           <Accordion key={group.id} title={group.title}>
             <div className="">
-              {group.fields.map(field => renderField(field))}
+              {group.fields && group.fields.map(field => renderField(field))}
             </div>
           </Accordion>
         ))}
       </div>
     );
   };
+  
+  // If config is not valid, return early
+  if (!config || !config.sections || config.sections.length === 0) {
+    return <div>No configuration available</div>;
+  }
   
   return (
     <div style={{width:"100%"}}>
