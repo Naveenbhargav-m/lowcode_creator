@@ -1,6 +1,6 @@
 import WorkflowConfigForm from "../components/generic/workflow_config_form/example/usage";
 import { GetWorkflowFormConfig } from "./workflow_helpers";
-import { activeWorkFlow, activeworkFlowBlock } from "./workflow_state";
+import { activeWorkFlow, activeworkFlowBlock, SetWorkflowDataBack } from "./workflow_state";
 
 /*
 
@@ -38,6 +38,6 @@ export function WorkflowConfigFormPanel() {
     let formRequirements = data["form_requirements"];
     console.log("data for connfig:",data, formRequirements, blockData);
     return <WorkflowConfigForm formConfigint={formRequirements} initialValuesInp={blockData} changeCallBack={(data) => {
-        console.log("change callBack:",data);  
+        SetWorkflowDataBack(data, activeworkflow["id"], activeblock["id"]);  
     }} />;
 }
