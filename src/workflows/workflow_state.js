@@ -142,6 +142,18 @@ function HandleWorkFlowBlockDrop(data) {
 }
 
 
+function SetWorkflowDataBack(newData, workflowID, blockID) {
+    let existingData = workflowsData.value;
+    let currentflowData = existingData[workflowID] || {};
+    let currentBlockData = currentflowData[blockID] || {};
+    let data = currentBlockData["data"] || {};
+    let newdata = {...data, ...newData};
+    currentflowData[blockID] = newdata;
+    existingData[workflowID] = currentflowData;
+    workflowsData.value = {...existingData};
+    return;
+}
+
 
 function SetWorkFlowActive(id) {
     let flow = workflows.peek();
@@ -156,5 +168,5 @@ function SetWorkFlowActive(id) {
 export {activeWorkFlow, workflows, workflownames, 
     CreateWorkflow, SetWorkFlowActive, flowTab, 
     UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop,UpdateActiveWorkflowEdges,
-    activeFloweUpdated, activeworkFlowBlock, workflowsData
+    activeFloweUpdated, activeworkFlowBlock, workflowsData, SetWorkflowDataBack
 };
