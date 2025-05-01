@@ -1,7 +1,4 @@
 import { signal } from "@preact/signals";
-import {AdvnacedForm} from "./configs_view/advanced_form";
-import FlexConfigurator from "./configs_view/flex_config";
-import FormFieldConfigurator from "./configs_view/formFieldConfigurator";
 import { activeTab, currentForm, currentFormElements, formActiveElement, formBuilderView, formRenderSignal, forms, setCurrentElements } from "./form_builder_state";
 import { generateUID } from "../utils/helpers";
 import ConfigUpdater from "../components/generic/config_form";
