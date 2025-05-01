@@ -3,7 +3,6 @@ import { CreateFormButton } from "../template_builder/template_builder_view";
 import { ActiveTheme, AddTheme, currentThemes, SetCurrentTheme, themeNameAndIDSList, themes, UpdateDefaultTheme } from "./theme_state";
 import { TabComponent } from "../screen_builder/screen_components";
 import { ScreensList } from "../screen_builder/screen_page";
-import { TextAreaWithPopup } from "../form_builder/configs_view/advanced_form";
 import { useComputed, useSignal } from "@preact/signals";
 import { DefaultMode, DefaultThemeID } from "../states/global_state";
 import { SyncData } from "../api/api_syncer";
@@ -95,24 +94,24 @@ function ThemeEditArea() {
     return (
         <div style={devStyle}>
             <div style={fieldStyle}>
-                <TextAreaWithPopup
+                {/* <TextAreaWithPopup
                     label={"dark Theme"}
                     valueSignal={currentThemes[0]}
                     configKey={"dark"}
                     onChange={(key, value) => SetTheme(key, value)}
                     style={{"height":"100%"}}
                     wrapperStyle={{"display":"flex","flexDirection":"column","height":"500px"}}
-                />
+                /> */}
             </div>
             <div style={fieldStyle}>
-                <TextAreaWithPopup
+                {/* <TextAreaWithPopup
                     label={"light Theme"}
                     valueSignal={currentThemes[1]}
                     configKey={"light"}
                     onChange={(key, value) => SetTheme(key, value)}
                     style={{"height":"100%"}}
                     wrapperStyle={{"display":"flex","flexDirection":"column","height":"500px"}}
-                />
+                /> */}
             </div>
         </div>
     );

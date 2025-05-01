@@ -9,10 +9,10 @@ import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
 import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
-import { RenderElements } from "./form_renderer";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
 import { useAuthCheck } from "../hooks/hooks";
+import { DynamicForm } from "./form_renderer/dynamic_form";
 
 function EditArea() {
     useEffect((
@@ -54,6 +54,7 @@ function EditArea() {
       <MobileMockup>
     <div
        style={{
+        color:"black",
          width: "100%",
          height: "100%",
          backgroundColor: "#f9f9f9",
@@ -69,7 +70,7 @@ function EditArea() {
           dropElementData={{ "id":"screen" }}
        >
         <div style={style} onClick={(e) => {formActiveElement.value = "form" }}>
-          {formRenderSignal.value && RenderElements(values, false)}
+          {formRenderSignal.value && <DynamicForm formConfig={values}/>}
           </div>
       </Drop>
       </div>
@@ -92,6 +93,7 @@ function EditArea() {
       <DesktopMockup>
     <div
        style={{
+        color:"black",
          width: "100%",
          height: "100%",
          backgroundColor: "#f9f9f9",
@@ -107,7 +109,7 @@ function EditArea() {
          dropElementData={{ "id":"screen" }}
        >
         <div style={style} onClick={(e) => {formActiveElement.value = "form" }}>
-          {formRenderSignal.value && RenderElements(values, false)}
+          {formRenderSignal.value && <DynamicForm formConfig={values}/>}
           </div>
       </Drop>
       </div>

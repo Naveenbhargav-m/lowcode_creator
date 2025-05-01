@@ -1,6 +1,5 @@
 import { effect, signal } from "@preact/signals";
 import { generateUID, setElementByID } from "../utils/helpers";
-import { fieldsConfigs } from "./fields/field_styles";
 import { GetDataFromAPi } from "../api/api_syncer";
 
 const formStyle = {"display":"flex","flexDirection":"column","minHeight":"200px", "minWidth":"150px","height":"100%", "width":"100%"};
@@ -23,7 +22,8 @@ function AddtoElements(data) {
     let newid = generateUID();
     let existing = currentFormElements;
     let length = Object.keys(existing).length;
-    let commonConfig = JSON.parse(JSON.stringify(fieldsConfigs[fieldData[1]]));
+    // let commonConfig = JSON.parse(JSON.stringify(fieldsConfigs[fieldData[1]]));
+    let commonConfig = {};
     let elementData = {
       "type":fieldData[1],
       "id": newid,
