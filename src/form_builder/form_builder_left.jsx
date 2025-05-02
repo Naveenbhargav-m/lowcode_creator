@@ -29,15 +29,15 @@ function OptionsMapper({ options }) {
 function FormBuilderLeftPanel() {
     let elements = [
       ["text-cursor-input","textfield"],
+      ["vote","checkbox"],
+      ["text","textarea"],
+      ["chevron-down","dropdown"],
       ["text-cursor-input","password"],
       ["toggle-right","switch"],
-      ["vote","checkbox"],
       ["circle-check","radio"],
-      ["chevron-down","dropdown"],
       ["list-filter-plus","multi_select"],
       ["chart-no-axes-gantt","slider"],
       ["palette","color"],
-      ["text","textarea"],
       ["upload","file_upload"],
       ["star","rating"],
       ["calendar","date"],

@@ -2,12 +2,11 @@ import { Drop } from "../components/custom/Drop";
 import { DesktopMockup } from "../screen_builder/screen_components";
 import { FormBuilderLeftPanel } from "./form_builder_left";
 
-import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormElements, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm, forms, LoadForms } from "./form_builder_state";
+import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, currentFormConfig, formActiveElement, formActiveLeftTab, formBuilderView, formLeftNamesList, formRenderSignal, setCurrentForm, forms, LoadForms } from "./form_builder_state";
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { ScreensList } from "../screen_builder/screen_page";
-import { FlexRightPanel } from "./form_right_elements";
 import { useEffect } from "preact/hooks";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
@@ -43,7 +42,7 @@ function EditArea() {
 
 
   function FormEditMobileView() {
-    let temp = currentFormElements;
+    let temp = currentFormConfig.value;
    let curScreen = currentForm.value;
     let style = {"display":"content"};
     if(curScreen !== undefined && curScreen !== "") {
@@ -80,7 +79,7 @@ function EditArea() {
   
   
   function FormEditDesktopView() {
-    let temp = currentFormElements;
+    let temp = currentFormConfig.value;
     let values = temp;
     let curScreen = currentForm.value;
     let style = {"display":"content"};
@@ -139,7 +138,7 @@ function EditArea() {
     </div>
   
     <div className="w-2/6 bg-white h-screen scrollable-div" style={{height:"100vh", width:"24vw"}}>
-     <FlexRightPanel />
+     <div> yet to be implemented</div>
     </div>
   </div>);
   }  

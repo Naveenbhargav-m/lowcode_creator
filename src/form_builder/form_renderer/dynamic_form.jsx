@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { CheckboxInput, Column, FormSteps, Panel, Row, SelectInput, TextareaInput, TextInput } from './components';
 import { styles } from './styles';
+import { SelectableComponent } from '../../components/custom/selectAble';
+import { DeleteFormElement, formActiveElement } from '../form_builder_state';
 // Field type definitions with default props
 const fieldTypes = {
   text: {
@@ -74,8 +76,17 @@ function FieldRenderer({
     const childFields = (field.children || []).map(childId => 
       fieldsConfig.find(f => f.id === childId)
     ).filter(Boolean);
-    
+    console.log("field in form renderer:", field);
     return (
+      <SelectableComponent 
+      onChick={(e,id) => {
+          console.log("clicked me:", id);
+          formActiveElement.value = id;
+      }}
+      onRemove={(e,id) => {DeleteFormElement(id)}}
+      id={field["id"]}
+      isSelected={formActiveElement.value === field.id}
+      >
       <LayoutComponent 
         title={field.title} 
         style={field.style}
@@ -85,6 +96,7 @@ function FieldRenderer({
           renderField(childField, values, errors, onChange, onFocus, onBlur)
         )}
       </LayoutComponent>
+      </SelectableComponent>
     );
   }
 
@@ -103,8 +115,18 @@ function FieldRenderer({
       evaluatedProps[propName] = evaluateCondition(condition, values);
     });
   }
-  
+  console.log("field in form renderer:", field);
   return (
+    <SelectableComponent 
+    onChick={(e,id) => {
+      e.stopPropagation();
+        console.log("clicked me:", id);
+        formActiveElement.value = id;
+    }}
+    onRemove={(e,id) => {DeleteFormElement(id)}}
+    id={field["id"]}
+    isSelected={formActiveElement.value === field.id}
+    >
     <FieldComponent
       id={field.id}
       label={field.label}
@@ -121,11 +143,13 @@ function FieldRenderer({
       {...field.props}
       {...evaluatedProps}
     />
+    </SelectableComponent>
   );
 }
 
 // Main DynamicForm Component
 function DynamicForm({ formConfig }) {
+  console.log("new form config:",formConfig);
  if(formConfig.fields === undefined) {
     return <div>Empty form</div>
  }
@@ -143,7 +167,7 @@ function DynamicForm({ formConfig }) {
       }
     });
     setValues(prev => ({ ...prev, ...initialValues }));
-  }, [formConfig.fields]);
+  }, [formConfig]);
 
   // Handle field change
   const handleChange = (fieldId, value, event) => {
@@ -363,7 +387,7 @@ function DynamicForm({ formConfig }) {
     });
     
     return currentFields.filter(field => !childrenIds.has(field.id));
-  }, [formConfig.fields, formConfig.steps, currentStep]);
+  }, [formConfig, formConfig.fields,formConfig.steps, currentStep]);
 
   return (
     <div style={styles.layout.form}>
