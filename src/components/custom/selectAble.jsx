@@ -28,7 +28,8 @@ export function SelectableComponent({ onRemove, onChick, id, isSelected ,childre
               border: isSelected ? '2px solid #2563eb' : '2px solid transparent',
               borderRadius: '4px',
               padding: '2px',
-              transition: 'border-color 0.15s ease-in-out'
+              transition: 'border-color 0.15s ease-in-out',
+              "backgroundColor":"black"
             }}
           >
             {children}

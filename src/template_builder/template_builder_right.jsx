@@ -1,4 +1,3 @@
-import { FlexConfigTab } from "../form_builder/form_right_elements";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
 
