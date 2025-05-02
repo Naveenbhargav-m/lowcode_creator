@@ -149,19 +149,13 @@ export function DatabaseViewManager() {
 function ViewSidebar({ views, selectedView, onSelectView, onCreateNew, searchTerm, onSearchChange }) {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold">Database Views</h2>
-        <div className="mt-2 flex items-center bg-gray-100 rounded-md px-2">
-          <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab} />
-          <Search size={16} className="text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search views..."
-            className="bg-transparent border-none outline-none p-2 w-full"
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
+        <div className="mt-2 flex items-center rounded-md px-2">
+          <div style={{width:"20vw"}}>
+          <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab} 
+          style={{width:"260px", padding:"20px"}}
+          buttonStyle={{fontSize:"0.8em"}}
           />
-        </div>
+          </div>
       </div>
       
       <div className="flex-1 overflow-y-auto">
