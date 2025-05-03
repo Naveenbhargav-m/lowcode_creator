@@ -27,6 +27,7 @@ function CreateQueryBlock(data) {
         "output_function": "",
         "select_fields": [],
         "where_fields": [],
+        "where_groups": [],
         "join_fields": [],
         "group_fields": [],
         "order_fields": [],

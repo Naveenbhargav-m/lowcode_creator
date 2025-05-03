@@ -2,7 +2,7 @@ import { useSignal } from "@preact/signals";
 import { GlobalSignalsPopup } from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
 import { ActiveQueryData, CreateQueryBlock, UpdateQueryPart } from "./query_signal";
-import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye } from "lucide-react";
+import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye, ArrowUp, ArrowDown } from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
 import { fieldsGlobalSignals } from "../states/common_repo";
@@ -99,7 +99,8 @@ let style = {
           {activeTab === "join" && <JoinBlock initalData={activeQuery["join_fields"]} updateCallBack={(data) => {
             UpdateQueryPart("join_fields", data);
           }}  />}
-          {activeTab === "where" && <WhereBlock />}
+          {activeTab === "where" && <WhereBlock whereInp={activeQuery["where_fields"]} 
+          updateCallback={(key, data) => {UpdateQueryPart(key, data)}} />}
           {activeTab === "groupby" && <GroupByBlock 
           initalgroups={activeQuery["group_fields"]}
           updateCallBack={(data) => UpdateQueryPart("group_fields", data)}
@@ -285,219 +286,6 @@ function JoinTile({ join, index, updateData, onFieldSelect, deleteCallBack }) {
   );
 }
 
-
-function WhereBlock() {
-  let isOpen = useSignal(false);
-  let popupField = useSignal("");
-  let popupInd = useSignal(-1);
-  let popupGroupId = useSignal(null);
-  let whereData = useSignal([]);
-  let groups = useSignal([]);
-  let nextGroupId = useSignal(0);
-  
-  // Handle popup close
-  const handlePopupClose = (e, data) => {
-    if(data === undefined) {
-      isOpen.value = false;
-      return;
-    }
-    let last = data.pop();
-    let key = popupField.value;
-    let obj = {};
-    obj[key] = last;
-    
-    if (popupGroupId.value !== null) {
-      updateGroupCondition(obj, popupInd.value, popupGroupId.value);
-    } else {
-      updateWhereData(obj, popupInd.value);
-    }
-    
-    isOpen.value = false;
-  };
-  
-  // Update where condition data
-  function updateWhereData(obj, index) {
-    var existing = whereData.value;
-    let cur = existing[index];
-    cur = {...cur, ...obj};
-    existing[index] = cur;
-    whereData.value = [...existing];
-  }
-  
-  // Update group condition data
-  function updateGroupCondition(obj, conditionIndex, groupId) {
-    let currentGroups = groups.value;
-    const groupIndex = currentGroups.findIndex(g => g.id === groupId);
-    
-    if (groupIndex !== -1) {
-      let groupConditions = currentGroups[groupIndex].conditions;
-      groupConditions[conditionIndex] = {...groupConditions[conditionIndex], ...obj};
-      currentGroups[groupIndex].conditions = [...groupConditions];
-      groups.value = [...currentGroups];
-    }
-  }
-  
-  // Add a new condition group
-  function addGroup() {
-    let currentGroups = groups.value;
-    const groupId = nextGroupId.value;
-    nextGroupId.value += 1;
-    
-    currentGroups.push({
-      id: groupId,
-      logical: "AND", // Default group logical operator
-      groupLogical: whereData.value.length > 0 || currentGroups.length > 0 ? "AND" : null, // Add logical operator for group itself
-      conditions: [{}]
-    });
-    
-    groups.value = [...currentGroups];
-  }
-  
-  // Fix for addCondition function
-  function addCondition(groupId = null) {
-    if (groupId !== null) {
-      let currentGroups = [...groups.value];
-      const groupIndex = currentGroups.findIndex(g => g.id === groupId);
-      
-      if (groupIndex !== -1) {
-        // Only modify the specific group's conditions
-        currentGroups[groupIndex].conditions.push({});
-        groups.value = currentGroups;
-      }
-    } else {
-      let current = whereData.value;
-      current.push({});
-      whereData.value = [...current];
-    }
-  }
-  
-  return (
-    <div className="where-block">
-      <SectionHeader title="Filter Conditions" />
-      
-      {/* Main Conditions */}
-      <div className="mt-4 space-y-3">
-        {whereData.value.length === 0 && groups.value.length === 0 ? (
-          <EmptyState message="No conditions defined. Add conditions to filter your query results." />
-        ) : (
-          whereData.value.map((condition, index) => (
-            <ConditionTile 
-              key={`condition-${index}`}
-              condition={condition}
-              index={index}
-              isFirst={index === 0}
-              onFieldSelect={(field) => {
-                popupField.value = field;
-                popupInd.value = index;
-                popupGroupId.value = null;
-                isOpen.value = true;
-              }}
-              updateData={(obj) => updateWhereData(obj, index)}
-              onRemove={() => {
-                const updated = whereData.value.filter((_, i) => i !== index);
-                whereData.value = [...updated];
-              }}
-            />
-          ))
-        )}
-      </div>
-      
-      {/* Condition Groups */}
-      {groups.value.length > 0 && (
-        <div className="mt-6 space-y-4">
-          <h3 className="text-sm font-medium text-gray-700">Condition Groups</h3>
-          
-          {groups.value.map((group, groupIdx) => (
-            <div key={`group-${group.id}`} className="flex flex-col">
-              {/* Add group-level logical operator if not the first condition overall */}
-              {(whereData.value.length > 0 || groupIdx > 0) && (
-                <div className="mb-2 ml-2">
-                  <SelectComponent 
-                    options={["AND", "OR"]}
-                    onChange={(e, data) => {
-                      const updatedGroups = [...groups.value];
-                      const index = updatedGroups.findIndex(g => g.id === group.id);
-                      if (index !== -1) {
-                        updatedGroups[index].groupLogical = data["value"];
-                        groups.value = updatedGroups;
-                      }
-                    }}
-                    selected={group.groupLogical || "AND"}
-                    style={{width: "80px"}}
-                  />
-                </div>
-              )}
-              
-              <ConditionGroupTile 
-                group={group}
-                onFieldSelect={(field, condIndex) => {
-                  popupField.value = field;
-                  popupInd.value = condIndex;
-                  popupGroupId.value = group.id;
-                  isOpen.value = true;
-                }}
-                updateGroupLogical={(logical) => {
-                  const updatedGroups = [...groups.value];
-                  const index = updatedGroups.findIndex(g => g.id === group.id);
-                  if (index !== -1) {
-                    updatedGroups[index].logical = logical;
-                    groups.value = updatedGroups;
-                  }
-                }}
-                updateCondition={(obj, condIndex) => {
-                  updateGroupCondition(obj, condIndex, group.id);
-                }}
-                addCondition={() => addCondition(group.id)}
-                removeGroup={() => {
-                  const updated = groups.value.filter(g => g.id !== group.id);
-                  groups.value = [...updated];
-                }}
-                removeCondition={(condIndex) => {
-                  const updatedGroups = [...groups.value];
-                  const index = updatedGroups.findIndex(g => g.id === group.id);
-                  if (index !== -1) {
-                    updatedGroups[index].conditions = updatedGroups[index].conditions.filter((_, i) => i !== condIndex);
-                    groups.value = updatedGroups;
-                  }
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-      
-      <div className="mt-4 flex space-x-3">
-        <button 
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          onClick={() => {
-            if (whereData.value.length === 0) {
-              whereData.value = [{}];
-            } else {
-              addCondition();
-            }
-          }}
-        >
-          <Filter size={16} className="mr-2" />
-          Add Condition
-        </button>
-        
-        <button 
-          className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-          onClick={addGroup}
-        >
-          <Group size={16} className="mr-2" />
-          Add Group
-        </button>
-      </div>
-      
-      <GlobalSignalsPopup 
-        isOpen={isOpen}
-        fields={fieldsGlobalSignals.value}
-        closeCallback={handlePopupClose}
-      />
-    </div>
-  );
-}
 
 function ConditionTile({ condition, index, isFirst, onFieldSelect, updateData, onRemove }) {
   return (
@@ -1141,7 +929,368 @@ function AggregationPopup({ position, item, aggregations, setAggregations, onClo
   function clearAggregation(item, aggregations, setAggregations) {
     setAggregations(aggregations.filter(agg => agg.original_name !== item));
   }
-  
+
+
+  function WhereBlock({whereInp, updateCallback}) {
+    let isOpen = useSignal(false);
+    let popupField = useSignal("");
+    let popupInd = useSignal(-1);
+    let popupItemId = useSignal(null);
+    // Unified data structure for both conditions and groups
+    let items = useSignal([]);
+    let nextItemId = useSignal(0);
+    
+    // Initialize from props
+    useEffect(() => {
+      if (whereInp && whereInp.length > 0) {
+        // Make a deep copy to avoid reference issues
+        const existingItems = whereInp.map((item, index) => ({
+          ...item,
+          id: item.id !== undefined ? item.id : index,
+          type: item.type || 'condition',
+          data: item.data || {...item},
+          logical: index > 0 ? (item.logical || 'AND') : null // First item has no logical operator
+        }));
+        
+        items.value = existingItems;
+        // Find the highest ID to ensure we don't duplicate IDs
+        nextItemId.value = Math.max(...existingItems.map(item => item.id), 0) + 1;
+      } else {
+        items.value = [];
+        nextItemId.value = 0;
+      }
+    }, [whereInp]);
+    
+    // Update the parent component
+    const updateParent = () => {
+      updateCallback('where_fields', items.value);
+    };
+    
+    // Handle popup close
+    const handlePopupClose = (e, data) => {
+      if (data === undefined) {
+        isOpen.value = false;
+        return;
+      }
+      
+      let last = data.pop();
+      let key = popupField.value;
+      let obj = {};
+      obj[key] = last;
+      
+      const index = popupInd.value;
+      const itemId = popupItemId.value;
+      
+      if (itemId !== null) {
+        const itemIndex = items.value.findIndex(item => item.id === itemId);
+        
+        if (itemIndex !== -1) {
+          const item = items.value[itemIndex];
+          
+          if (item.type === 'condition') {
+            // Update regular condition
+            items.value[itemIndex].data = {...item.data, ...obj};
+          } else if (item.type === 'group') {
+            // Update group condition
+            const updatedConditions = [...item.data.conditions];
+            updatedConditions[index] = {...updatedConditions[index], ...obj};
+            items.value[itemIndex].data.conditions = updatedConditions;
+          }
+          
+          items.value = [...items.value];
+          updateParent();
+        }
+      }
+      
+      isOpen.value = false;
+    };
+    
+    // Add a new regular condition
+    const addCondition = () => {
+      const newItem = {
+        id: nextItemId.value++,
+        type: 'condition',
+        data: {},
+        logical: items.value.length > 0 ? 'AND' : null
+      };
+      
+      items.value = [...items.value, newItem];
+      updateParent();
+    };
+    
+    // Add a new condition to a group
+    const addGroupCondition = (groupItemId) => {
+      const updatedItems = [...items.value];
+      const groupIndex = updatedItems.findIndex(item => item.id === groupItemId);
+      
+      if (groupIndex !== -1 && updatedItems[groupIndex].type === 'group') {
+        updatedItems[groupIndex].data.conditions.push({});
+        items.value = updatedItems;
+        updateParent();
+      }
+    };
+    
+    // Add a new group
+    const addGroup = () => {
+      const groupId = nextItemId.value++;
+      
+      const newGroup = {
+        id: nextItemId.value++,
+        type: 'group',
+        data: {
+          id: groupId,
+          logical: 'AND',
+          conditions: [{}]
+        },
+        logical: items.value.length > 0 ? 'AND' : null
+      };
+      
+      items.value = [...items.value, newGroup];
+      updateParent();
+    };
+    
+    // Remove an item (condition or group)
+    const removeItem = (itemId) => {
+      items.value = items.value.filter(item => item.id !== itemId);
+      updateParent();
+    };
+    
+    // Remove a condition from a group
+    const removeGroupCondition = (groupItemId, condIndex) => {
+      const updatedItems = [...items.value];
+      const groupIndex = updatedItems.findIndex(item => item.id === groupItemId);
+      
+      if (groupIndex !== -1 && updatedItems[groupIndex].type === 'group') {
+        if (updatedItems[groupIndex].data.conditions.length > 1) {
+          updatedItems[groupIndex].data.conditions = updatedItems[groupIndex].data.conditions.filter((_, i) => i !== condIndex);
+          items.value = updatedItems;
+          updateParent();
+        } else {
+          // If it's the last condition, remove the entire group
+          removeItem(groupItemId);
+        }
+      }
+    };
+    
+    // Update logical operator between items
+    const updateItemLogical = (itemId, logical) => {
+      const updatedItems = [...items.value];
+      const index = updatedItems.findIndex(item => item.id === itemId);
+      
+      if (index !== -1) {
+        updatedItems[index].logical = logical;
+        items.value = updatedItems;
+        updateParent();
+      }
+    };
+    
+    // Update group's internal logical operator
+    const updateGroupLogical = (groupItemId, logical) => {
+      const updatedItems = [...items.value];
+      const index = updatedItems.findIndex(item => item.id === groupItemId);
+      
+      if (index !== -1 && updatedItems[index].type === 'group') {
+        updatedItems[index].data.logical = logical;
+        items.value = updatedItems;
+        updateParent();
+      }
+    };
+    
+    // Handle reordering items
+    const moveItem = (itemId, direction) => {
+      const currentItems = [...items.value];
+      const itemIndex = currentItems.findIndex(item => item.id === itemId);
+      
+      if (itemIndex === -1) return;
+      
+      if (direction === 'up' && itemIndex > 0) {
+        // Move up
+        const temp = currentItems[itemIndex];
+        currentItems[itemIndex] = currentItems[itemIndex - 1];
+        currentItems[itemIndex - 1] = temp;
+        
+        // Adjust logical operators
+        if (itemIndex === 1) {
+          // Item becoming first should have no logical
+          currentItems[0].logical = null;
+          if (currentItems.length > 1) {
+            currentItems[1].logical = currentItems[1].logical || 'AND';
+          }
+        }
+      } else if (direction === 'down' && itemIndex < currentItems.length - 1) {
+        // Move down
+        const temp = currentItems[itemIndex];
+        currentItems[itemIndex] = currentItems[itemIndex + 1];
+        currentItems[itemIndex + 1] = temp;
+        
+        // Adjust logical operators
+        if (itemIndex === 0) {
+          // First item losing its position should gain logical
+          currentItems[1].logical = null;
+          currentItems[0].logical = currentItems[0].logical || 'AND';
+        }
+      }
+      
+      items.value = currentItems;
+      updateParent();
+    };
+    
+    return (
+      <div className="where-block">
+        <SectionHeader title="Filter Conditions" />
+        
+        {/* Items (Conditions and Groups) */}
+        <div className="mt-4 space-y-4">
+          {items.value.length === 0 ? (
+            <EmptyState message="No conditions defined. Add conditions to filter your query results." />
+          ) : (
+            items.value.map((item, index) => (
+              <div key={`item-${item.id}`} className="flex flex-col">
+                {/* Show logical operator for items after the first one */}
+                {index > 0 && (
+                  <div className="mb-2 ml-2">
+                    <SelectComponent 
+                      options={["AND", "OR"]}
+                      onChange={(e, data) => updateItemLogical(item.id, data.value)}
+                      selected={item.logical || "AND"}
+                      style={{width: "80px"}}
+                    />
+                  </div>
+                )}
+                
+                {/* Regular Condition */}
+                {item.type === 'condition' && (
+                  <div className="flex items-center">
+                    <div className="flex-grow">
+                      <ConditionTile 
+                        condition={item.data || {}}
+                        index={0}
+                        isFirst={index === 0}
+                        onFieldSelect={(field) => {
+                          popupField.value = field;
+                          popupInd.value = 0;
+                          popupItemId.value = item.id;
+                          isOpen.value = true;
+                        }}
+                        updateData={(obj) => {
+                          const updatedItems = [...items.value];
+                          const idx = updatedItems.findIndex(i => i.id === item.id);
+                          if (idx !== -1) {
+                            updatedItems[idx].data = {...updatedItems[idx].data, ...obj};
+                            items.value = updatedItems;
+                            updateParent();
+                          }
+                        }}
+                        onRemove={() => removeItem(item.id)}
+                      />
+                    </div>
+                    
+                    {/* Reordering buttons */}
+                    <div className="flex flex-col ml-2">
+                      <button 
+                        disabled={index === 0}
+                        className={`p-1 ${index === 0 ? 'text-gray-300' : 'text-gray-600 hover:text-gray-800'}`}
+                        onClick={() => moveItem(item.id, 'up')}
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button 
+                        disabled={index === items.value.length - 1}
+                        className={`p-1 ${index === items.value.length - 1 ? 'text-gray-300' : 'text-gray-600 hover:text-gray-800'}`}
+                        onClick={() => moveItem(item.id, 'down')}
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Group */}
+                {item.type === 'group' && (
+                  <div className="flex items-center">
+                    <div className="flex-grow">
+                      <ConditionGroupTile 
+                        group={{
+                          id: item.data.id,
+                          logical: item.data.logical,
+                          conditions: item.data.conditions
+                        }}
+                        onFieldSelect={(field, condIndex) => {
+                          popupField.value = field;
+                          popupInd.value = condIndex;
+                          popupItemId.value = item.id;
+                          isOpen.value = true;
+                        }}
+                        updateGroupLogical={(logical) => updateGroupLogical(item.id, logical)}
+                        updateCondition={(obj, condIndex) => {
+                          const updatedItems = [...items.value];
+                          const idx = updatedItems.findIndex(i => i.id === item.id);
+                          if (idx !== -1) {
+                            const updatedConditions = [...updatedItems[idx].data.conditions];
+                            updatedConditions[condIndex] = {...updatedConditions[condIndex], ...obj};
+                            updatedItems[idx].data.conditions = updatedConditions;
+                            items.value = updatedItems;
+                            updateParent();
+                          }
+                        }}
+                        addCondition={() => addGroupCondition(item.id)}
+                        removeGroup={() => removeItem(item.id)}
+                        removeCondition={(condIndex) => removeGroupCondition(item.id, condIndex)}
+                      />
+                    </div>
+                    
+                    {/* Reordering buttons */}
+                    <div className="flex flex-col ml-2">
+                      <button 
+                        disabled={index === 0}
+                        className={`p-1 ${index === 0 ? 'text-gray-300' : 'text-gray-600 hover:text-gray-800'}`}
+                        onClick={() => moveItem(item.id, 'up')}
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button 
+                        disabled={index === items.value.length - 1}
+                        className={`p-1 ${index === items.value.length - 1 ? 'text-gray-300' : 'text-gray-600 hover:text-gray-800'}`}
+                        onClick={() => moveItem(item.id, 'down')}
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+        
+        <div className="mt-4 flex space-x-3">
+          <button 
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            onClick={addCondition}
+          >
+            <Filter size={16} className="mr-2" />
+            Add Condition
+          </button>
+          
+          <button 
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            onClick={addGroup}
+          >
+            <Group size={16} className="mr-2" />
+            Add Group
+          </button>
+        </div>
+        
+        <GlobalSignalsPopup 
+          isOpen={isOpen}
+          fields={fieldsGlobalSignals.value}
+          closeCallback={handlePopupClose}
+        />
+      </div>
+    );
+  }
+
+
   // Add this for better styling of components
   const styles = {
     sectionContainer: {
