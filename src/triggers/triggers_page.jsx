@@ -79,6 +79,7 @@ export function TriggerManagementUI() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Left Panel - Trigger List */}
+      <div>
       <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab}/>
       <TriggerList 
         triggers={triggers} 
@@ -86,6 +87,7 @@ export function TriggerManagementUI() {
         onSelectTrigger={handleTriggerSelect}
         onCreateTrigger={handleCreateTrigger}
       />
+      </div>
       
       {/* Right Panel - Trigger Details/Edit */}
       <div className="flex-1 p-6 bg-white overflow-auto">

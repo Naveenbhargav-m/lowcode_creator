@@ -9,6 +9,7 @@ function SetActiveQuery(activeiD) {
     ActiveQuery.value = activeiD;
     let myquery = queries[activeiD];
     ActiveQueryData.value = {...myquery};
+    ActiveQuery.value = activeiD;
 }
 function CreateQueryBlock(data) {
     let name = data["name"];
@@ -30,7 +31,6 @@ function CreateQueryBlock(data) {
         "group_fields": [],
         "order_fields": [],
         "select_aggregate_fields": [],
-        "join_aggregate_fields": [],
         "order_aggregate_fields": []
     };
     queries[id] = querymap;
@@ -43,7 +43,9 @@ function CreateQueryBlock(data) {
 }
 
 function UpdateQueryPart(part ,data) {
+    console.log("called update query data : ", part, data);
     let activeQuery = ActiveQueryData.value;
+    console.log("called update query active part : ",activeQuery);
     activeQuery[part] = data;
     let id = activeQuery["id"];
     queries[id] = activeQuery;

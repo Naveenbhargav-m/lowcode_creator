@@ -96,10 +96,19 @@ let style = {
               updateCallBack={UpdateQueryPart}
             />
           )}
-          {activeTab === "join" && <JoinBlock />}
+          {activeTab === "join" && <JoinBlock initalData={activeQuery["join_fields"]} updateCallBack={(data) => {
+            UpdateQueryPart("join_fields", data);
+          }}  />}
           {activeTab === "where" && <WhereBlock />}
-          {activeTab === "groupby" && <GroupByBlock />}
-          {activeTab === "orderby" && <OrderByBlock />}
+          {activeTab === "groupby" && <GroupByBlock 
+          initalgroups={activeQuery["group_fields"]}
+          updateCallBack={(data) => UpdateQueryPart("group_fields", data)}
+          />}
+          {activeTab === "orderby" && <OrderByBlock 
+          selectInput={activeQuery["order_fields"]}
+          aggregationInput={activeQuery["order_aggregate_fields"]}
+          updateCallback={(key,data) => {UpdateQueryPart(key,data)}}
+           />}
           {activeTab === "preview" && <PreviewBlock queryData={activeQuery} />}
         </div>
       </div>
@@ -151,12 +160,15 @@ function AdvancedJsonView({ queryData }) {
   );
 }
 
-function JoinBlock() {
+function JoinBlock( {initalData, updateCallBack}) {
   let isOpen = useSignal(false);
   let popupField = useSignal("");
   let popupInd = useSignal(-1);
   let joinsData = useSignal([]);
   
+  useEffect((() => {
+    joinsData.value = [...initalData];
+  }),[initalData]);
   // Handle popup close
   const handlePopupClose = (e, data) => {
     if(data === undefined) {
@@ -167,17 +179,23 @@ function JoinBlock() {
     let key = popupField.value;
     let obj = {};
     obj[key] = last;
-    updateJoinData(obj, popupInd.value);
+    updateJoinData(obj, popupInd.value, updateCallBack);
     isOpen.value = false;
   };
   
+  function DeleteJoinData(index) {
+    let newjoins = joinsData.value.filter((_, i) => i !== index);
+    joinsData.value = [...newjoins];
+    updateCallBack(joinsData.value);
+  }
   // Update join data
-  function updateJoinData(obj, index) {
+  function updateJoinData(obj, index, updateJoinCallback) {
     var existing = joinsData.value;
     let cur = existing[index];
     cur = {...cur, ...obj};
     existing[index] = cur;
     joinsData.value = [...existing];
+    updateCallBack(joinsData.value);
   }
   
   return (
@@ -199,6 +217,7 @@ function JoinBlock() {
                 popupInd.value = index;
                 isOpen.value = true;
               }}
+              deleteCallBack={DeleteJoinData}
             />
           ))
         )}
@@ -225,7 +244,7 @@ function JoinBlock() {
   );
 }
 
-function JoinTile({ join, index, updateData, onFieldSelect }) {
+function JoinTile({ join, index, updateData, onFieldSelect, deleteCallBack }) {
   return (
     <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-wrap items-center gap-3">
@@ -256,8 +275,7 @@ function JoinTile({ join, index, updateData, onFieldSelect }) {
         <button 
           className="ml-auto text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
           onClick={() => {
-            const updated = join.value.filter((_, i) => i !== index);
-            join.value = [...updated];
+            deleteCallBack(index);
           }}
         >
           <X size={16} />
@@ -266,6 +284,7 @@ function JoinTile({ join, index, updateData, onFieldSelect }) {
     </div>
   );
 }
+
 
 function WhereBlock() {
   let isOpen = useSignal(false);
@@ -326,15 +345,16 @@ function WhereBlock() {
     
     currentGroups.push({
       id: groupId,
-      logical: "AND",
+      logical: "AND", // Default group logical operator
+      groupLogical: whereData.value.length > 0 || currentGroups.length > 0 ? "AND" : null, // Add logical operator for group itself
       conditions: [{}]
     });
     
     groups.value = [...currentGroups];
   }
   
-// Fix for addCondition function
-function addCondition(groupId = null) {
+  // Fix for addCondition function
+  function addCondition(groupId = null) {
     if (groupId !== null) {
       let currentGroups = [...groups.value];
       const groupIndex = currentGroups.findIndex(g => g.id === groupId);
@@ -357,7 +377,7 @@ function addCondition(groupId = null) {
       
       {/* Main Conditions */}
       <div className="mt-4 space-y-3">
-        {whereData.value.length === 0 ? (
+        {whereData.value.length === 0 && groups.value.length === 0 ? (
           <EmptyState message="No conditions defined. Add conditions to filter your query results." />
         ) : (
           whereData.value.map((condition, index) => (
@@ -387,41 +407,61 @@ function addCondition(groupId = null) {
         <div className="mt-6 space-y-4">
           <h3 className="text-sm font-medium text-gray-700">Condition Groups</h3>
           
-          {groups.value.map((group) => (
-            <ConditionGroupTile 
-              key={`group-${group.id}`}
-              group={group}
-              onFieldSelect={(field, condIndex) => {
-                popupField.value = field;
-                popupInd.value = condIndex;
-                popupGroupId.value = group.id;
-                isOpen.value = true;
-              }}
-              updateGroupLogical={(logical) => {
-                const updatedGroups = [...groups.value];
-                const index = updatedGroups.findIndex(g => g.id === group.id);
-                if (index !== -1) {
-                  updatedGroups[index].logical = logical;
-                  groups.value = updatedGroups;
-                }
-              }}
-              updateCondition={(obj, condIndex) => {
-                updateGroupCondition(obj, condIndex, group.id);
-              }}
-              addCondition={() => addCondition(group.id)}
-              removeGroup={() => {
-                const updated = groups.value.filter(g => g.id !== group.id);
-                groups.value = [...updated];
-              }}
-              removeCondition={(condIndex) => {
-                const updatedGroups = [...groups.value];
-                const index = updatedGroups.findIndex(g => g.id === group.id);
-                if (index !== -1) {
-                  updatedGroups[index].conditions = updatedGroups[index].conditions.filter((_, i) => i !== condIndex);
-                  groups.value = updatedGroups;
-                }
-              }}
-            />
+          {groups.value.map((group, groupIdx) => (
+            <div key={`group-${group.id}`} className="flex flex-col">
+              {/* Add group-level logical operator if not the first condition overall */}
+              {(whereData.value.length > 0 || groupIdx > 0) && (
+                <div className="mb-2 ml-2">
+                  <SelectComponent 
+                    options={["AND", "OR"]}
+                    onChange={(e, data) => {
+                      const updatedGroups = [...groups.value];
+                      const index = updatedGroups.findIndex(g => g.id === group.id);
+                      if (index !== -1) {
+                        updatedGroups[index].groupLogical = data["value"];
+                        groups.value = updatedGroups;
+                      }
+                    }}
+                    selected={group.groupLogical || "AND"}
+                    style={{width: "80px"}}
+                  />
+                </div>
+              )}
+              
+              <ConditionGroupTile 
+                group={group}
+                onFieldSelect={(field, condIndex) => {
+                  popupField.value = field;
+                  popupInd.value = condIndex;
+                  popupGroupId.value = group.id;
+                  isOpen.value = true;
+                }}
+                updateGroupLogical={(logical) => {
+                  const updatedGroups = [...groups.value];
+                  const index = updatedGroups.findIndex(g => g.id === group.id);
+                  if (index !== -1) {
+                    updatedGroups[index].logical = logical;
+                    groups.value = updatedGroups;
+                  }
+                }}
+                updateCondition={(obj, condIndex) => {
+                  updateGroupCondition(obj, condIndex, group.id);
+                }}
+                addCondition={() => addCondition(group.id)}
+                removeGroup={() => {
+                  const updated = groups.value.filter(g => g.id !== group.id);
+                  groups.value = [...updated];
+                }}
+                removeCondition={(condIndex) => {
+                  const updatedGroups = [...groups.value];
+                  const index = updatedGroups.findIndex(g => g.id === group.id);
+                  if (index !== -1) {
+                    updatedGroups[index].conditions = updatedGroups[index].conditions.filter((_, i) => i !== condIndex);
+                    groups.value = updatedGroups;
+                  }
+                }}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -533,14 +573,7 @@ function ConditionGroupTile({
       <div className="space-y-2 pl-3 border-l-2 border-blue-200">
         {group.conditions.map((condition, index) => (
           <div key={`group-${group.id}-cond-${index}`} className="flex flex-wrap items-center gap-2 py-2">
-            {index > 0 && (
-              <SelectComponent 
-                options={["AND", "OR"]}
-                onChange={(e, data) => updateCondition({"logical": data["value"]}, index)}
-                selected={condition["logical"] || "AND"}
-                style={{width: "80px"}}
-              />
-            )}
+            {/* Removed individual logical operators for conditions after the first within a group */}
             
             <FieldButton 
               label={condition["field"] || "Select Field"} 
@@ -583,14 +616,44 @@ function ConditionGroupTile({
   );
 }
 
-function GroupByBlock() {
+// Placeholder components that would be defined elsewhere in your actual code
+// function SectionHeader({ title }) {
+//   return <h2 className="text-lg font-medium text-gray-800">{title}</h2>;
+// }
+
+// function EmptyState({ message }) {
+//   return (
+//     <div className="p-6 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+//       {message}
+//     </div>
+//   );
+// }
+
+// function FieldButton({ label, onClick, small }) {
+//   return (
+//     <button 
+//       className={`flex items-center ${small ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'} bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 border border-blue-200`}
+//       onClick={onClick}
+//     >
+//       <span className="mr-1">📋</span> {label}
+//     </button>
+//   );
+// }
+function GroupByBlock({initalgroups, updateCallBack}) {
+  let keys = [];
   let isOpen = useSignal(false);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [aggregations, setAggregations] = useState([]);
   
+  useEffect((() => {
+    setSelectedItems(initalgroups);
+  }), [initalgroups]);
   const removeTag = (itemToRemove) => {
-    setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
-    setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
+    setSelectedItems(prev => {
+      const updatedItems = prev.filter(item => item !== itemToRemove);
+      // Call updateCallBack with the new filtered array, not the old selectedItems
+      updateCallBack(updatedItems);
+      return updatedItems;
+    });
   };
   
   return (
@@ -600,9 +663,10 @@ function GroupByBlock() {
       <div className="mt-4">
         <FieldTileList 
           selectedItems={selectedItems} 
-          aggregations={aggregations}
+          aggregations={[]}
           removeTag={removeTag}
-          setAggregations={setAggregations}
+          setAggregations={() => {}}
+          isAggregationsAllowed={false}
         />
         
         <button 
@@ -621,21 +685,39 @@ function GroupByBlock() {
           console.log("Group By selection:", data);
           if (data) setSelectedItems(data);
           isOpen.value = false;
+          updateCallBack(selectedItems);
         }}
       />
     </div>
   );
 }
 
-function OrderByBlock() {
+function OrderByBlock( {selectInput, aggregationInput , updateCallback}) {
+  let keys = ["order_fields", "order_aggregate_fields"];
   let isOpen = useSignal(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [aggregations, setAggregations] = useState([]);
   
+  useEffect((() => {
+    setSelectedItems(selectInput);
+    setAggregations(aggregationInput);
+  }),[selectInput, aggregationInput]);
   const removeTag = (itemToRemove) => {
-    setSelectedItems(prev => prev.filter(item => item !== itemToRemove));
-    setAggregations(prev => prev.filter(agg => agg.original_name !== itemToRemove));
+    const updatedItems = selectedItems.filter(item => item !== itemToRemove);
+    setSelectedItems(updatedItems);
+    
+    const updatedAggregations = aggregations.filter(agg => agg.original_name !== itemToRemove);
+    setAggregations(updatedAggregations);
+    
+    updateCallback(keys[0], updatedItems);
+    updateCallback(keys[1], updatedAggregations);
   };
+  
+  function updateAggregations(updatedAggrs) {
+    setAggregations(updatedAggrs);
+    updateCallback(keys[1], updatedAggrs);
+  }
+  
   
   return (
     <div className="order-by-block">
@@ -646,7 +728,7 @@ function OrderByBlock() {
           selectedItems={selectedItems} 
           aggregations={aggregations}
           removeTag={removeTag}
-          setAggregations={setAggregations}
+          setAggregations={updateAggregations}
         />
         
         <button 
@@ -665,6 +747,7 @@ function OrderByBlock() {
           console.log("Order By selection:", data);
           if (data) setSelectedItems(data);
           isOpen.value = false;
+          updateCallback(keys[0], data);
         }}
       />
     </div>
@@ -800,113 +883,118 @@ function FieldButton({ label, onClick, small = false }) {
   );
 }
 
-function FieldTileList({ selectedItems, aggregations, removeTag, setAggregations }) {
-    const [popupState, setPopupState] = useState({
-      isOpen: false,
-      item: null,
-      position: { top: 0, left: 0 }
-    });
-    
-    // Handle click outside the popup
-    useClickOutside(() => {
-      if (popupState.isOpen) {
-        setPopupState(prev => ({ ...prev, isOpen: false }));
-      }
-    }, 'aggregation-popup');
-    
-    // Handle field click to open aggregation popup
-    const handleItemClick = (item, event) => {
-      const rect = event.currentTarget.getBoundingClientRect();
-      
-      setPopupState({
-        isOpen: true,
-        item: item,
-        position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX }
-      });
-    };
-    
-    if (selectedItems.length === 0) {
-      return (
-        <EmptyState message="No fields selected. Click the button below to select fields." />
-      );
+function FieldTileList({ selectedItems, aggregations, removeTag, setAggregations, isAggregationsAllowed = true }) {
+  const [popupState, setPopupState] = useState({
+    isOpen: false,
+    item: null,
+    position: { top: 0, left: 0 }
+  });
+  
+  // Handle click outside the popup
+  useClickOutside(() => {
+    if (popupState.isOpen) {
+      setPopupState(prev => ({ ...prev, isOpen: false }));
     }
+  }, 'aggregation-popup');
+  
+  // Handle field click to open aggregation popup - only if aggregations are allowed
+  const handleItemClick = (item, event) => {
+    // Only open the popup if aggregations are allowed
+    if (!isAggregationsAllowed) return;
     
+    const rect = event.currentTarget.getBoundingClientRect();
+    
+    setPopupState({
+      isOpen: true,
+      item: item,
+      position: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX }
+    });
+  };
+  
+  if (selectedItems.length === 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {selectedItems.map((item, index) => {
-          const aggregation = getAggregationForItem(item, aggregations);
-          return (
-            <FieldTile 
-              key={index}
-              field={item}
-              aggregation={aggregation}
-              onClick={(e) => handleItemClick(item, e)}
-              onRemove={() => removeTag(item)}
-            />
-          );
-        })}
-        
-        {popupState.isOpen && (
-          <AggregationPopup 
-            position={popupState.position}
-            item={popupState.item}
-            aggregations={aggregations}
-            setAggregations={setAggregations}
-            onClose={() => setPopupState(prev => ({ ...prev, isOpen: false }))}
-          />
-        )}
-      </div>
+      <EmptyState message="No fields selected. Click the button below to select fields." />
     );
   }
   
-  function FieldTile({ field, aggregation, onClick, onRemove }) {
-    // Format display text based on aggregation status
-    const hasAggregation = aggregation.function && aggregation.function !== '';
-    const displayText = hasAggregation 
-      ? `${aggregation.function}(${field})${aggregation.alias ? ` AS ${aggregation.alias}` : ''}` 
-      : field;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      {selectedItems.map((item, index) => {
+        // Only get aggregation if they're allowed
+        const aggregation = isAggregationsAllowed ? getAggregationForItem(item, aggregations) : { function: '', alias: '' };
+        return (
+          <FieldTile 
+            key={index}
+            field={item}
+            aggregation={aggregation}
+            onClick={(e) => handleItemClick(item, e)}
+            onRemove={() => removeTag(item)}
+            isAggregationsAllowed={isAggregationsAllowed}
+          />
+        );
+      })}
       
-    // Add special styling for aggregated fields
-    const bgColor = hasAggregation ? 'bg-blue-50' : 'bg-white';
-    const borderColor = hasAggregation ? 'border-blue-200' : 'border-gray-200';
+      {isAggregationsAllowed && popupState.isOpen && (
+        <AggregationPopup 
+          position={popupState.position}
+          item={popupState.item}
+          aggregations={aggregations}
+          setAggregations={setAggregations}
+          onClose={() => setPopupState(prev => ({ ...prev, isOpen: false }))}
+        />
+      )}
+    </div>
+  );
+}
+
+function FieldTile({ field, aggregation, onClick, onRemove, isAggregationsAllowed = true }) {
+  // Format display text based on aggregation status
+  const hasAggregation = isAggregationsAllowed && aggregation.function && aggregation.function !== '';
+  const displayText = hasAggregation 
+    ? `${aggregation.function}(${field})${aggregation.alias ? ` AS ${aggregation.alias}` : ''}` 
+    : field;
     
-    return (
-      <div 
-        className={`${bgColor} ${borderColor} rounded-lg border shadow-sm hover:shadow transition-shadow p-3 cursor-pointer`}
-        onClick={onClick}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Database size={16} className="text-gray-500 mr-2" />
-            <div>
-              <div className="font-medium text-sm">{field}</div>
-              {hasAggregation && (
-                <div className="text-xs text-blue-600 mt-1">
-                  {aggregation.function}{aggregation.alias ? ` → ${aggregation.alias}` : ''}
-                </div>
-              )}
-            </div>
+  // Add special styling for aggregated fields
+  const bgColor = hasAggregation ? 'bg-blue-50' : 'bg-white';
+  const borderColor = hasAggregation ? 'border-blue-200' : 'border-gray-200';
+  
+  return (
+    <div 
+      className={`${bgColor} ${borderColor} rounded-lg border shadow-sm hover:shadow transition-shadow p-3 ${isAggregationsAllowed ? 'cursor-pointer' : ''}`}
+      onClick={isAggregationsAllowed ? onClick : undefined}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Database size={16} className="text-gray-500 mr-2" />
+          <div>
+            <div className="font-medium text-sm">{field}</div>
+            {hasAggregation && (
+              <div className="text-xs text-blue-600 mt-1">
+                {aggregation.function}{aggregation.alias ? ` → ${aggregation.alias}` : ''}
+              </div>
+            )}
           </div>
-          
-          <button 
-            className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-          >
-            <X size={16} />
-          </button>
         </div>
         
-        {hasAggregation && (
-          <div className="mt-2 pt-2 border-t border-blue-100 text-xs text-gray-500 flex items-center">
-            <Settings size={12} className="mr-1" /> Aggregation configured
-          </div>
-        )}
+        <button 
+          className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+        >
+          <X size={16} />
+        </button>
       </div>
-    );
-  }
+      
+      {hasAggregation && (
+        <div className="mt-2 pt-2 border-t border-blue-100 text-xs text-gray-500 flex items-center">
+          <Settings size={12} className="mr-1" /> Aggregation configured
+        </div>
+      )}
+    </div>
+  );
+}
   
  // Updated AggregationPopup function with better positioning
 function AggregationPopup({ position, item, aggregations, setAggregations, onClose }) {
