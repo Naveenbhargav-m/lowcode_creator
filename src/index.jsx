@@ -15,6 +15,7 @@ import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
 import WorkflowBuilder from "./tests/reactflow1";
 import { FormBuilderDemo } from "./tests/dynamic_form";
+import { VisualQueryBuilder } from "./tests/query_builder";
 
 export function App() {
 
@@ -36,7 +37,7 @@ export function App() {
       <Route path="/" component={AppCreatorPage} />
       <Route path="/queries" component={QueryBuilderPage} />
       <Route path="/test" component={WorkflowBuilder} />
-      <Route path="/test2" component={FormBuilderDemo} />
+      <Route path="/test2" component={VisualQueryBuilder} />
       <Route default component={() => <div>Not Found</div>} />
     </Router>
   </main>

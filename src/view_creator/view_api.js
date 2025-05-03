@@ -1,9 +1,14 @@
 import { APIManager } from "../api/api_manager";
 import { AppID, CreatorBackendUrl, PrestDBaseUrl } from "../states/global_state";
-import { views } from "./views_state";
+import { originalViews, views } from "./views_state";
 
 let creatorapi = new APIManager(CreatorBackendUrl);
 let prestApi = new APIManager(PrestDBaseUrl);
+
+async function SyncViews(allviews) {
+    console.log("views to sync:",allviews);
+
+}
 
 
 async function RunViewCode(code) {
@@ -12,34 +17,18 @@ async function RunViewCode(code) {
 }
 
 async function SyncView(data) {
-    console.log("data:",data);
-    let query = {"view_name": data["view_name"]};
-    let resp = await prestApi.get(`/${AppID.value}/public/db_views`, {"query":query});
-    if(resp === undefined) {
-        let body = {"view_name": data["view_name"], "view_columns": JSON.stringify(data["columns"])};
-        let out = await prestApi.post(`/${AppID.value}/public/db_views`, {"body":body});
-        console.log("out :",out);
-        return data;
-    }
-    let parsed = resp;
-    if(parsed.length > 0) {
-        let body = {"view_columns": JSON.stringify(data["columns"])};
-        let out = await prestApi.put(`/${AppID.value}/public/db_views?view_name=${data["view_name"]}`, {"body":body});
-        console.log("out:",out);
-        return data;
-    }containers
-        let body = {"view_name": data["view_name"], "view_columns": JSON.stringify(data["columns"])};
-        let out = await prestApi.post(`/${AppID.value}/public/db_views`, {"body":body});
-        console.log("out :",out);
-        return data;
+    console.log("views to sync:",data);
 }
 
 
 async function InitViews() {
-    let resp = await prestApi.get(`/${AppID.value}/public/db_views`);
+    let resp = await prestApi.get(`/${AppID.value}/public/_views`);
     if(resp !== undefined) {
-        views.value = [...resp];
+        let innerobj = resp[0] || {};
+        originalViews.value = innerobj;
+        let viewConfig = innerobj["views_data"] || [];
+        views.value = [...viewConfig];
     }
 }
 
-export {RunViewCode, SyncView, InitViews};
+export {RunViewCode, SyncView, InitViews, SyncViews};
