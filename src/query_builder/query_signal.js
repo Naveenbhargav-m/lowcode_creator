@@ -32,7 +32,11 @@ function CreateQueryBlock(data) {
         "group_fields": [],
         "order_fields": [],
         "select_aggregate_fields": [],
-        "order_aggregate_fields": []
+        "order_aggregate_fields": [],
+        "input_params": [],
+        "input_js": [],
+        "output_js": [],
+        "output_params": [], 
     };
     queries[id] = querymap;
     let existing = QueryNames.value;
