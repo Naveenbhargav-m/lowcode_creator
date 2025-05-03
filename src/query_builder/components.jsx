@@ -2,10 +2,11 @@ import { useSignal } from "@preact/signals";
 import { GlobalSignalsPopup } from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
 import { ActiveQueryData, CreateQueryBlock, UpdateQueryPart } from "./query_signal";
-import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye, ArrowUp, ArrowDown } from "lucide-react";
+import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye, ArrowUp, ArrowDown, Code2Icon } from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
 import { fieldsGlobalSignals } from "../states/common_repo";
+import { JSEditorWithInputFields } from "./components_2";
 
 // Theme colors
 const THEME = {
@@ -111,6 +112,27 @@ let style = {
           updateCallback={(key,data) => {UpdateQueryPart(key,data)}}
            />}
           {activeTab === "preview" && <PreviewBlock queryData={activeQuery} />}
+          {activeTab === "input" && <JSEditorWithInputFields 
+          initialCode={activeQuery["input_js"]}
+          initialFields={activeQuery["input_params"]}
+          isInput={true}
+          onParamsChange={(obj) => {
+            UpdateQueryPart("input_js", obj["code"]);
+            UpdateQueryPart("input_params", obj["fields"]);
+
+          }}
+          />}
+
+          {activeTab === "output" && <JSEditorWithInputFields 
+          initialCode={activeQuery["output_js"]}
+          initialFields={activeQuery["output_params"]}
+          isInput={false}
+          onParamsChange={(obj) => {
+            UpdateQueryPart("output_js", obj["code"]);
+            UpdateQueryPart("output_params", obj["fields"]);
+
+          }}
+          />}
         </div>
       </div>
     </div>
@@ -119,12 +141,15 @@ let style = {
 
 function QueryTabs({ activeTab, onTabChange }) {
   const tabs = [
+    {id:"input", label: "Input", icon: <Code2Icon size={16}/>},
     { id: "select", label: "Select", icon: <Eye size={16} /> },
     { id: "join", label: "Join", icon: <Table size={16} /> },
     { id: "where", label: "Where", icon: <Filter size={16} /> },
     { id: "groupby", label: "Group By", icon: <Group size={16} /> },
     { id: "orderby", label: "Order By", icon: <SortDesc size={16} /> },
-    { id: "preview", label: "Preview", icon: <Database size={16} /> }
+    { id: "preview", label: "Preview", icon: <Database size={16} /> },
+    {id:"output", label: "Output", icon: <Code2Icon size={16}/>}
+
   ];
   
   return (
