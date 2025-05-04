@@ -3,7 +3,6 @@ import { formActiveElement } from "../../form_builder/form_builder_state";
 
 // The withSelectable HOC
 export function SelectableComponent({ onRemove, onChick, id, isSelected ,children }) {
-      console.log("id:",id, "is Selected", isSelected, "active form EElement:",formActiveElement.value);      
       const handleClick = (e) => {
         onChick(e, id);
       };
@@ -29,7 +28,6 @@ export function SelectableComponent({ onRemove, onChick, id, isSelected ,childre
               borderRadius: '4px',
               padding: '2px',
               transition: 'border-color 0.15s ease-in-out',
-              "backgroundColor":"black"
             }}
           >
             {children}

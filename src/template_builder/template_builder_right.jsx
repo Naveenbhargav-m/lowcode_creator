@@ -3,37 +3,6 @@ import { elementConfig } from "./configs";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
 
-function GetAdvancedConfigs(element, isField) {
-    if(element === undefined) {
-        return {
-          "style": "",
-          "onClick": "",
-          "onChange": "",
-          "onHover": "",
-          "onDoubleTap": "",
-          "onDrop": "",
-          "onDrag": "",
-          "onMount": "",
-          "onDestroy": "",
-          "value": "",
-        };
-    }
-    let blockKeys = ["onClick","onChange","style","value","onHover","onDoubleTap","onDrop","onDrag","onMount","onDestroy"];
-    let Fieldkeys = ["config","onClick","onChange","panelStyle","labelStyle","fieldStyle"];
-    let keys = isField === true ? Fieldkeys : blockKeys;
-    console.log("isField and keys:",isField, keys);
-    let configMap = {};
-    keys.map((value) => {
-      let temp = element[value];
-      if(value === "style") {
-        configMap[value] = JSON.stringify(temp);
-      } else {
-        configMap[value] = temp;
-      }
-    });
-    return configMap;
-  }
-
 
 export function TemplateBuilderRightView() {
     let activeElementID = activeTemplateElement.value;
@@ -44,18 +13,18 @@ export function TemplateBuilderRightView() {
       activeElement = activeTemplateElements[activeElementID].value;
     } 
     console.log("active template element changed:",activeElementID);
-    const handleChange = (config) => {
+    const handleChange = (styles) => {
       console.log("existing element:",activeElement);
       if(activeElement !== undefined) {
-        console.log("config:",config);
-        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...config};
+        console.log("config:",styles);
+        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...styles};
         activeTemplateElements[activeElementID].value = {...activeElement};
       }
     };
   
-    const handleSubmit = (config) => {
+    const handleSubmit = (styles) => {
       if(activeElement !== undefined) {
-        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...config};
+        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...styles};
         activeTemplateElements[activeElementID].value = {...activeElement};
         let mytemp = templates[activeTamplate.peek()];
         if(templateDesignView.value === "smartphone") {
@@ -94,19 +63,12 @@ export function TemplateBuilderRightView() {
         localStorage.setItem("templates",JSON.stringify(templates));
       }
     }
-  
-    let advancedConfig = {};
-    let configs = {};
-    if(activeElement === undefined) {
-        configs = {};
-    } else {
-        console.log("active Element:",activeElement);
-        configs = activeElement["configs"]["style"];
-        advancedConfig = GetAdvancedConfigs(activeElement,false);
-    }
+    console.log("active element:", activeElement);
+    var initalConfig = activeElement["configs"] || {};
+    var initalStyles = initalConfig["style"] || {};
     return (
     <div style={{width:"100%", "color": "black"}}>
-      <ConfigFormV3 schema={elementConfig} initialValues={{"style": {"display": "flex", "color": "black"},}} 
-      onChange={(data) => {console.log("onChange:",data);}} onSubmit={(data) => {console.log("on submit:",data);}}/>
+      <ConfigFormV3 schema={elementConfig} initialValues={{"style": {...initalStyles}}} 
+      onChange={(data) => {handleChange(data["style"] || {});}} onSubmit={(data) => {handleSubmit(data["style"] || {})}}/>
     </div>);
 }
