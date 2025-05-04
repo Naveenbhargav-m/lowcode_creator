@@ -1,125 +1,17 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Code, Eye } from 'lucide-react';
+import { Accordion, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, NumberField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
 
-// Centralized styles
-const styles = {
-  container: "w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md",
-  header: "flex justify-between items-center p-4 border-b border-gray-200",
-  title: "text-xl font-semibold text-gray-800",
-  formContainer: "p-6",
-  tabsContainer: "flex mb-6 border-b border-gray-200",
-  tab: "px-4 py-2 mr-2 font-medium cursor-pointer transition-all",
-  activeTab: "border-b-2 border-blue-500 text-blue-600",
-  inactiveTab: "text-gray-600 hover:text-gray-800",
-  accordion: "mb-4 border border-gray-200 rounded-md overflow-hidden",
-  accordionHeader: "flex justify-between items-center p-4 bg-gray-50 cursor-pointer",
-  accordionTitle: "font-medium text-gray-700",
-  accordionContent: "p-4 border-t border-gray-200 bg-white",
-  fieldGroup: "mb-4",
-  fieldLabel: "block mb-2 text-sm font-medium text-gray-700",
-  textInput: "w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-  numberInput: "w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-  selectInput: "w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-  checkboxContainer: "flex items-center",
-  checkbox: "w-4 h-4 text-blue-600 rounded focus:ring-blue-500 mr-2",
-  buttonGroup: "flex justify-end mt-6 space-x-2",
-  button: "px-4 py-2 rounded-md font-medium transition-colors",
-  primaryButton: "bg-blue-600 text-white hover:bg-blue-700",
-  secondaryButton: "bg-gray-200 text-gray-800 hover:bg-gray-300",
-  jsonEditor: "w-full h-64 p-2 font-mono text-sm border border-gray-300 rounded-md",
-  jsonEditorHeader: "flex justify-between items-center mb-2",
-  modeSwitcher: "flex items-center text-sm text-blue-600 cursor-pointer",
-  error: "mt-1 text-sm text-red-600",
-};
+// Centralized styles - same as original
 
-// Field components
-const TextField = ({ field, value, onChange }) => (
-  <input
-    type="text"
-    id={field.id}
-    value={value || ''}
-    // @ts-ignore
-    onChange={(e) => onChange(field.id, e.target.value)}
-    placeholder={field.placeholder}
-    className={styles.textInput}
-    disabled={field.disabled}
-  />
-);
-
-const NumberField = ({ field, value, onChange }) => (
-  <input
-    type="number"
-    id={field.id}
-    value={value || ''}
-    // @ts-ignore
-    onChange={(e) => onChange(field.id, e.target.value)}
-    min={field.min}
-    max={field.max}
-    step={field.step || 1}
-    placeholder={field.placeholder}
-    className={styles.numberInput}
-    disabled={field.disabled}
-  />
-);
-
-const SelectField = ({ field, value, onChange }) => (
-  <select
-    id={field.id}
-    value={value || ''}
-    // @ts-ignore
-    onChange={(e) => onChange(field.id, e.target.value)}
-    className={styles.selectInput}
-    disabled={field.disabled}
-  >
-    {field.placeholder && (
-      <option value="" disabled>
-        {field.placeholder}
-      </option>
-    )}
-    {field.options.map((option) => (
-      <option key={option.value} value={option.value}>
-        {option.label}
-      </option>
-    ))}
-  </select>
-);
-
-const CheckboxField = ({ field, value, onChange }) => (
-  <div className={styles.checkboxContainer}>
-    <input
-      type="checkbox"
-      id={field.id}
-      checked={!!value}
-      // @ts-ignore
-      onChange={(e) => onChange(field.id, e.target.checked)}
-      className={styles.checkbox}
-      disabled={field.disabled}
-    />
-    <label htmlFor={field.id} className="text-sm text-gray-700">
-      {field.checkboxLabel}
-    </label>
-  </div>
-);
-
-// Accordion component
-const Accordion = ({ title, children, isOpen, toggle }) => (
-  <div className={styles.accordion}>
-    <div className={styles.accordionHeader} onClick={toggle}>
-      <h3 className={styles.accordionTitle}>{title}</h3>
-      {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-    </div>
-    {isOpen && <div className={styles.accordionContent}>{children}</div>}
-  </div>
-);
-
-// Main form component
-const ConfigFormV3 = ({ 
+// Improved main form component
+export const ConfigFormV3 = ({ 
   schema, 
   initialValues = {}, 
   onChange, 
   onSubmit 
 }) => {
-  const [activeTab, setActiveTab] = useState(schema.tabs ? schema.tabs[0].id : null);
+  const [activeTab, setActiveTab] = useState(schema.tabs && schema.tabs.length > 0 ? schema.tabs[0].id : null);
   const [formValues, setFormValues] = useState(initialValues);
   const [openSections, setOpenSections] = useState({});
   const [isJsonMode, setIsJsonMode] = useState(false);
@@ -130,10 +22,11 @@ const ConfigFormV3 = ({
   useEffect(() => {
     // First section of each tab is open by default
     const initialOpenSections = {};
+    
     if (schema.tabs) {
       schema.tabs.forEach(tab => {
-        if (tab.sections && tab.sections.length > 0) {
-          initialOpenSections[tab.sections[0].id] = true;
+        if (tab.sectionIds && tab.sectionIds.length > 0) {
+          initialOpenSections[tab.sectionIds[0]] = true;
         }
       });
     } else if (schema.sections) {
@@ -141,6 +34,7 @@ const ConfigFormV3 = ({
         initialOpenSections[schema.sections[0].id] = true;
       }
     }
+    
     setOpenSections(initialOpenSections);
   }, [schema]);
 
@@ -194,6 +88,12 @@ const ConfigFormV3 = ({
     }
   };
 
+  // Get field definition by ID
+  const getFieldById = (fieldId) => {
+    if (!schema.fields) return null;
+    return schema.fields.find(field => field.id === fieldId);
+  };
+
   // Determine if a field should be visible based on conditions
   const isFieldVisible = (field) => {
     if (!field.condition) return true;
@@ -223,7 +123,7 @@ const ConfigFormV3 = ({
 
   // Render field based on type
   const renderField = (field) => {
-    if (!isFieldVisible(field)) return null;
+    if (!field || !isFieldVisible(field)) return null;
 
     let fieldComponent;
     switch (field.type) {
@@ -238,6 +138,24 @@ const ConfigFormV3 = ({
         break;
       case 'checkbox':
         fieldComponent = <CheckboxField field={field} value={formValues[field.id]} onChange={handleFieldChange} />;
+        break;
+      case 'array': 
+        fieldComponent = <ArrayField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        break;
+      case 'color': 
+        fieldComponent = <ColorField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        break;
+      case 'static_key_value': 
+        fieldComponent = <StaticKeyValueField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        break;
+      case 'dynamic_key_value': 
+        fieldComponent = <DynamicKeyValueField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        break;
+      case 'date': 
+        fieldComponent = <DateField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        break;
+      case 'time': 
+        fieldComponent = <TimeField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
         break;
       default:
         fieldComponent = <div>Unsupported field type: {field.type}</div>;
@@ -259,30 +177,71 @@ const ConfigFormV3 = ({
     );
   };
 
+  // Render field by ID
+  const renderFieldById = (fieldId) => {
+    const field = getFieldById(fieldId);
+    return renderField(field);
+  };
+
   // Render section fields
   const renderSectionFields = (fields) => {
-    return fields.map(field => renderField(field));
+    // If fields is an array of field objects, render them directly
+    if (fields && typeof fields[0] === 'object') {
+      return fields.map(field => renderField(field));
+    }
+    // If fields is an array of field IDs, look up fields and render them
+    return fields.map(fieldId => renderFieldById(fieldId));
+  };
+
+  // Get section by ID
+  const getSectionById = (sectionId) => {
+    if (!schema.sections) return null;
+    return schema.sections.find(section => section.id === sectionId);
   };
 
   // Render sections
   const renderSections = (sections) => {
-    return sections.map(section => (
-      <Accordion
-        key={section.id}
-        title={section.title}
-        isOpen={!!openSections[section.id]}
-        toggle={() => toggleSection(section.id)}
-      >
-        {renderSectionFields(section.fields)}
-      </Accordion>
-    ));
+    // If sections is an array of section objects, render them directly
+    if (sections && typeof sections[0] === 'object') {
+      return sections.map(section => (
+        <Accordion
+          key={section.id}
+          title={section.title}
+          isOpen={!!openSections[section.id]}
+          toggle={() => toggleSection(section.id)}
+        >
+          {section.fields && renderSectionFields(section.fields)}
+          {section.fieldIds && renderSectionFields(section.fieldIds)}
+        </Accordion>
+      ));
+    }
+    // If sections is an array of section IDs, look up sections and render them
+    return sections.map(sectionId => {
+      const section = getSectionById(sectionId);
+      if (!section) return null;
+      
+      return (
+        <Accordion
+          key={section.id}
+          title={section.title}
+          isOpen={!!openSections[section.id]}
+          toggle={() => toggleSection(section.id)}
+        >
+          {section.fields && renderSectionFields(section.fields)}
+          {section.fieldIds && renderSectionFields(section.fieldIds)}
+        </Accordion>
+      );
+    });
   };
 
   // Render a tab's content
   const renderTabContent = (tab) => {
     return (
       <div>
-        {tab.sections ? renderSections(tab.sections) : renderSectionFields(tab.fields)}
+        {tab.sections && renderSections(tab.sections)}
+        {tab.sectionIds && renderSections(tab.sectionIds)}
+        {tab.fields && renderSectionFields(tab.fields)}
+        {tab.fieldIds && renderSectionFields(tab.fieldIds)}
       </div>
     );
   };
@@ -303,6 +262,59 @@ const ConfigFormV3 = ({
         {jsonError && <div className={styles.error}>{jsonError}</div>}
       </div>
     );
+  };
+
+  // Render form content based on schema structure
+  const renderFormContent = () => {
+    if (isJsonMode) {
+      return renderJsonEditor();
+    }
+
+    if (schema.tabs) {
+      return (
+        <>
+          <div className={styles.tabsContainer}>
+            {schema.tabs.map((tab) => (
+              <div
+                key={tab.id}
+                className={`${styles.tab} ${
+                  activeTab === tab.id ? styles.activeTab : styles.inactiveTab
+                }`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.title}
+              </div>
+            ))}
+          </div>
+          {schema.tabs.map((tab) => (
+            <div
+              key={tab.id}
+              style={{ display: activeTab === tab.id ? 'block' : 'none' }}
+            >
+              {renderTabContent(tab)}
+            </div>
+          ))}
+        </>
+      );
+    }
+
+    if (schema.sections) {
+      return renderSections(schema.sections);
+    }
+
+    if (schema.sectionIds) {
+      return renderSections(schema.sectionIds);
+    }
+
+    if (schema.fields) {
+      return renderSectionFields(schema.fields);
+    }
+
+    if (schema.fieldIds) {
+      return renderSectionFields(schema.fieldIds);
+    }
+
+    return <div>No form content defined</div>;
   };
 
   return (
@@ -326,37 +338,7 @@ const ConfigFormV3 = ({
       </div>
 
       <div className={styles.formContainer}>
-        {isJsonMode ? (
-          renderJsonEditor()
-        ) : schema.tabs ? (
-          <>
-            <div className={styles.tabsContainer}>
-              {schema.tabs.map((tab) => (
-                <div
-                  key={tab.id}
-                  className={`${styles.tab} ${
-                    activeTab === tab.id ? styles.activeTab : styles.inactiveTab
-                  }`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.title}
-                </div>
-              ))}
-            </div>
-            {schema.tabs.map((tab) => (
-              <div
-                key={tab.id}
-                style={{ display: activeTab === tab.id ? 'block' : 'none' }}
-              >
-                {renderTabContent(tab)}
-              </div>
-            ))}
-          </>
-        ) : schema.sections ? (
-          renderSections(schema.sections)
-        ) : (
-          renderSectionFields(schema.fields)
-        )}
+        {renderFormContent()}
 
         <div className={styles.buttonGroup}>
           {schema.buttons?.map((button) => (
@@ -386,8 +368,8 @@ const ConfigFormV3 = ({
   );
 };
 
-// Sample usage with demo data
-export default function ConfigFormDemo() {
+// Sample usage with demo data - using the new structure
+export default function ImprovedConfigFormDemo() {
   const [values, setValues] = useState({
     name: 'Workflow 1',
     type: 'sequential',
@@ -409,95 +391,98 @@ export default function ConfigFormDemo() {
     alert('Configuration saved!');
   };
 
+  // New schema structure with centralized fields
   const schema = {
     title: 'Workflow Configuration',
+    // Centralized field definitions
+    fields: [
+      {
+        id: 'name',
+        type: 'text',
+        label: 'Workflow Name',
+        placeholder: 'Enter workflow name',
+        required: true,
+      },
+      {
+        id: 'description',
+        type: 'text',
+        label: 'Description',
+        placeholder: 'Enter description',
+      },
+      {
+        id: 'type',
+        type: 'select',
+        label: 'Workflow Type',
+        options: [
+          { value: 'sequential', label: 'Sequential' },
+          { value: 'parallel', label: 'Parallel' },
+          { value: 'conditional', label: 'Conditional' },
+        ],
+      },
+      {
+        id: 'maxRetries',
+        type: 'number',
+        label: 'Max Retries',
+        min: 0,
+        max: 10,
+      },
+      {
+        id: 'timeout',
+        type: 'number',
+        label: 'Timeout (seconds)',
+        min: 0,
+      },
+      {
+        id: 'enableLogging',
+        type: 'checkbox',
+        checkboxLabel: 'Enable Logging',
+      },
+      {
+        id: 'notification',
+        type: 'checkbox',
+        checkboxLabel: 'Enable Email Notifications',
+      },
+      {
+        id: 'notificationEmail',
+        type: 'text',
+        label: 'Notification Email',
+        placeholder: 'Enter email address',
+        condition: {
+          dependsOn: 'notification',
+          operator: 'equals',
+          value: true,
+        },
+      },
+    ],
+    // Section definitions
+    sections: [
+      {
+        id: 'general',
+        title: 'General Information',
+        fieldIds: ['name', 'description', 'type'],
+      },
+      {
+        id: 'execution',
+        title: 'Execution Settings',
+        fieldIds: ['maxRetries', 'timeout', 'enableLogging'],
+      },
+      {
+        id: 'notifications',
+        title: 'Notifications',
+        fieldIds: ['notification', 'notificationEmail'],
+      },
+    ],
+    // Tab definitions
     tabs: [
       {
         id: 'basic',
         title: 'Basic Settings',
-        sections: [
-          {
-            id: 'general',
-            title: 'General Information',
-            fields: [
-              {
-                id: 'name',
-                type: 'text',
-                label: 'Workflow Name',
-                placeholder: 'Enter workflow name',
-                required: true,
-              },
-              {
-                id: 'description',
-                type: 'text',
-                label: 'Description',
-                placeholder: 'Enter description',
-              },
-              {
-                id: 'type',
-                type: 'select',
-                label: 'Workflow Type',
-                options: [
-                  { value: 'sequential', label: 'Sequential' },
-                  { value: 'parallel', label: 'Parallel' },
-                  { value: 'conditional', label: 'Conditional' },
-                ],
-              },
-            ],
-          },
-          {
-            id: 'execution',
-            title: 'Execution Settings',
-            fields: [
-              {
-                id: 'maxRetries',
-                type: 'number',
-                label: 'Max Retries',
-                min: 0,
-                max: 10,
-              },
-              {
-                id: 'timeout',
-                type: 'number',
-                label: 'Timeout (seconds)',
-                min: 0,
-              },
-              {
-                id: 'enableLogging',
-                type: 'checkbox',
-                checkboxLabel: 'Enable Logging',
-              },
-            ],
-          },
-        ],
+        sectionIds: ['general', 'execution'],
       },
       {
         id: 'advanced',
         title: 'Advanced Settings',
-        sections: [
-          {
-            id: 'notifications',
-            title: 'Notifications',
-            fields: [
-              {
-                id: 'notification',
-                type: 'checkbox',
-                checkboxLabel: 'Enable Email Notifications',
-              },
-              {
-                id: 'notificationEmail',
-                type: 'text',
-                label: 'Notification Email',
-                placeholder: 'Enter email address',
-                condition: {
-                  dependsOn: 'notification',
-                  operator: 'equals',
-                  value: true,
-                },
-              },
-            ],
-          },
-        ],
+        sectionIds: ['notifications'],
       },
     ],
     buttons: [
@@ -526,13 +511,104 @@ export default function ConfigFormDemo() {
     ],
   };
 
+  // Simple flat schema example - no tabs or sections
+  const simpleSchema = {
+    title: 'Simple Configuration',
+    // Direct list of fields
+    fields: [
+      {
+        id: 'name',
+        type: 'text',
+        label: 'Name',
+        placeholder: 'Enter name',
+        required: true,
+      },
+      {
+        id: 'description',
+        type: 'text',
+        label: 'Description',
+        placeholder: 'Enter description',
+        condition: {
+          dependsOn: 'enableFeature',
+          operator: 'equals',
+          value: true,
+        },
+      },
+      {
+        id: 'enableFeature',
+        type: 'checkbox',
+        checkboxLabel: 'Enable Feature',
+      },
+      {
+        id: 'brandColor',
+        type: 'color',
+        label: 'Brand Color',
+        placeholder: 'Select a color',
+      },
+      {
+        id: 'tags',
+        type: 'array',
+        label: 'Tags',
+        itemPlaceholder: 'Enter a tag',
+        addButtonText: 'Add Tag',
+      },
+      {
+        id: 'contactInfo',
+        type: 'static_key_value',
+        label: 'Contact Information',
+        keys: ['email', 'phone', 'address'],
+        valuePlaceholder: 'Enter information',
+      },
+      {
+        id: 'customFields',
+        type: 'dynamic_key_value',
+        label: 'Custom Fields',
+        keyPlaceholder: 'Field Name',
+        valuePlaceholder: 'Field Value',
+        addButtonText: 'Add Custom Field',
+      },
+      {
+        id: 'startDate',
+        type: 'date',
+        label: 'Start Date',
+        min: '2000-01-01',
+        max: '2030-12-31',
+        showCalendarIcon: true,
+      },
+      {
+        id: 'meetingTime',
+        type: 'time',
+        label: 'Meeting Time',
+        showSeconds: true,
+        showClockIcon: true,
+      },
+    
+    ],
+    buttons: [
+      {
+        id: 'save',
+        label: 'Save',
+        type: 'submit',
+        variant: 'primary',
+      },
+    ],
+  };
+
   return (
-    <div className="p-4">
+    <div className="p-4 space-y-8" style={{color:"black"}}>
       <ConfigFormV3 
         schema={schema} 
         initialValues={values} 
         onChange={handleChange} 
         onSubmit={handleSubmit} 
+      />
+      
+      <h2 className="text-xl font-bold mt-8 mb-4">Simple Flat Configuration</h2>
+      <ConfigFormV3 
+        schema={simpleSchema} 
+        initialValues={{name: '', description: '', enableFeature: false}} 
+        onChange={console.log} 
+        onSubmit={console.log} 
       />
     </div>
   );

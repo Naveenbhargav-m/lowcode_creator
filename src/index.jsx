@@ -1,7 +1,6 @@
 import { render } from "preact";
   import { LocationProvider, Router, Route, useLocation } from "preact-iso";
 import "./index.css";
-import "./styles/theme.css";
 import SideBar from "./components/sidebar.jsx";
 import { TablesPage } from "./table_builder/tables_page";
 import {ScreenPage} from "./screen_builder/screen_page";
@@ -16,33 +15,58 @@ import { QueryBuilderPage } from "./query_builder/query_builder_page";
 import WorkflowBuilder from "./tests/reactflow1";
 import { FormBuilderDemo } from "./tests/dynamic_form";
 import { VisualQueryBuilder } from "./tests/query_builder";
+import ConfigFormDemo from "./components/generic/config_form_v3/config_form";
 
 export function App() {
+  // Add global style to prevent body scrolling
+  const globalStyle = `
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    #app {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    
+    /* Hide all scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  `;
 
   return (
     <LocationProvider>
-   <div className="flex bg-white">
-    {
-      sideBarEnable.value ?   <SideBar /> : <span></span>
-    }
-  <main className="flex-grow bg-white">
-    <Router>
-      <Route path="/home" component={AppHomeScreen} />
-      <Route path="/forms" component={FormBuilderTest} />
-      <Route path="/screens" component={ScreenPage}/>
-      <Route path="/containers" component={TablesPage} />
-      <Route path="/workflows" component={WorkFlowPage} />
-      <Route path="/users" component={UsersPage}/>
-      <Route path="/settings" component={SettingsPage} />
-      <Route path="/" component={AppCreatorPage} />
-      <Route path="/queries" component={QueryBuilderPage} />
-      <Route path="/test" component={WorkflowBuilder} />
-      <Route path="/test2" component={VisualQueryBuilder} />
-      <Route default component={() => <div>Not Found</div>} />
-    </Router>
-  </main>
-</div>
-
+      <style dangerouslySetInnerHTML={{ __html: globalStyle }} />
+      <div className="flex bg-white h-screen w-screen overflow-hidden">
+        {sideBarEnable.value ? <SideBar /> : <span></span>}
+        <main className="flex-grow bg-white h-full w-full overflow-hidden">
+          <Router>
+            <Route path="/home" component={AppHomeScreen} />
+            <Route path="/forms" component={FormBuilderTest} />
+            <Route path="/screens" component={ScreenPage} />
+            <Route path="/containers" component={TablesPage} />
+            <Route path="/workflows" component={WorkFlowPage} />
+            <Route path="/users" component={UsersPage} />
+            <Route path="/settings" component={SettingsPage} />
+            <Route path="/" component={AppCreatorPage} />
+            <Route path="/queries" component={QueryBuilderPage} />
+            <Route path="/test" component={WorkflowBuilder} />
+            <Route path="/test2" component={ConfigFormDemo} />
+            <Route default component={() => <div>Not Found</div>} />
+          </Router>
+        </main>
+      </div>
     </LocationProvider>
   );
 }

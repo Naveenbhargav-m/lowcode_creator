@@ -3,6 +3,31 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+
+html, body {
+  overflow: auto;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
+}
+
+
 :root {
     overflow: auto;
     scrollbar-width: none; /* For Firefox */
@@ -10,6 +35,9 @@
 }
 
 
+:root::-webkit-scrollbar {
+  display: none;
+}
 input::-webkit-scrollbar {
     display: none; /* Hides scrollbar */
 }
@@ -23,6 +51,15 @@ input::-webkit-scrollbar {
 }
 
 
+.hide-scrollbar {
+  overflow: auto;
+  -ms-overflow-style: none;  /* Internet Explorer and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, and Opera */
+}
 
 
 

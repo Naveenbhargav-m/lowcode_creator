@@ -23,8 +23,8 @@ function TemplatePage() {
     return (
         <div style={{display:"contents"}}>
             <div className="min-h-screen h-screen w-full bg-white flex">
-            <div className="w-2/12 bg-white p-4 h-screen">
-            <div className="scrollable-div" style={{ flex: "0 0 auto" }}>
+            <div className="w-2/12 bg-white p-4 h-screen" style={{width:"18vw", height:"90vh"}}>
+            <div className="scrollable-div" style={{ flex: "0 0 auto", "overflow": "hidden" }}>
             <TemplateOptionTabs tabs={["templates", "components"]} onChange={(tab) => { 
                 templatesPagesSignal.value = tab; 
                 console.log("templates list value:",templatesPagesSignal.value); } }/>
@@ -38,7 +38,7 @@ function TemplatePage() {
             }
             </div>
 
-            <div className="w-10/12 h-screen bg-background scrollable-div">
+            <div className="w-10/12 h-screen bg-background scrollable-div" style={{width:"54vw"}}>
             <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
                 <TabComponent />
                 <SyncButton title={"sync"} onClick={(e) => {SyncData("_templates", templates);}} style={{marginRight:"40px"}}/>
@@ -46,7 +46,7 @@ function TemplatePage() {
             <TemplateView />
 
             </div>
-            <div className="w-2/12 bg-white h-screen scrollable-div">
+            <div className="w-2/12 bg-white h-screen scrollable-div" style={{"width":"28vw"}}>
                 <TemplateBuilderRightView />
             </div>
             </div>

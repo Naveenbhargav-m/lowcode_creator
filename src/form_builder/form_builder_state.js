@@ -169,12 +169,12 @@ function setCurrentForm(id) {
 
     }
     let temp = JSON.parse(JSON.stringify(children));
-    let finalElementSignals = {};
-    for(var key in temp) {
-        finalElementSignals[key] = signal({...temp[key]});
-    }
+    // let finalElementSignals = {};
+    // for(var key in temp) {
+    //     finalElementSignals[key] = signal({...temp[key]});
+    // }
     formRenderSignal.value = id;
-    currentFormConfig.value = {...finalElementSignals};
+    currentFormConfig.value = {...temp};
 }
 function setCurrentElements(newElements) {
     currentFormConfig.value = {...newElements};

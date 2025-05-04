@@ -1,3 +1,5 @@
+import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
+import { elementConfig } from "./configs";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
 
@@ -102,7 +104,9 @@ export function TemplateBuilderRightView() {
         configs = activeElement["configs"]["style"];
         advancedConfig = GetAdvancedConfigs(activeElement,false);
     }
-    return (<div>
-
+    return (
+    <div style={{width:"100%", "color": "black"}}>
+      <ConfigFormV3 schema={elementConfig} initialValues={{"style": {"display": "flex", "color": "black"},}} 
+      onChange={(data) => {console.log("onChange:",data);}} onSubmit={(data) => {console.log("on submit:",data);}}/>
     </div>);
 }
