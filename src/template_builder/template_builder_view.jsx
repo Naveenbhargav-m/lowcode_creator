@@ -247,8 +247,8 @@ function TemplateMobileView() {
     let style = {};
     let outerDivStyle = {
       position: "relative",
-      width: "100%",
       height: "100%",
+      width: "800px",
       backgroundColor: "#f9f9f9",
       border: "1px solid #e0e0e0",
       overflow: "auto",
