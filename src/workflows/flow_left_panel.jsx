@@ -77,7 +77,7 @@ function DragComponent( ) {
     {"name":"update Row", "type":"update_row","handles":[{"position": "bottom","type":"source"}, {"position": "top","type":"target"}]}, 
     {"name":"condition", "type":"condition","handles":[{"position": "bottom","type":"source"}, {"position": "top","type":"target"}]},];
     return ( 
-      < div className = " custom-drag-list "> 
+      < div className = " custom-drag-list " style={{color:"white"}}> 
         { registerNodes.map ( ( item , ind) => {
             console.log("ind", ind);
            return (
@@ -87,7 +87,7 @@ function DragComponent( ) {
               key = {ind}
               className = " custom-drag-item "
             >
-              <div style={{"padding":"0px 4px"}}><DynamicIcon name={icons[ind]} size={20}/></div>
+              <div style={{"padding":"0px 4px",color:"white"}}><DynamicIcon name={icons[ind]} size={20}/></div>
               { item.name }
             </ div >
             </Draggable>
