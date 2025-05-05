@@ -18,6 +18,8 @@ import { VisualQueryBuilder } from "./tests/query_builder";
 import ConfigFormDemo from "./components/generic/config_form_v3/config_form";
 import SecretsManager from "./secret_store/secret_store";
 import TemplateRegistrationPage from "./external_templates/external_templates";
+import { useEffect } from "preact/hooks";
+import { InitGlobalData } from "./states/global_repo";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -46,6 +48,10 @@ export function App() {
       scrollbar-width: none;
     }
   `;
+
+  useEffect((() => {
+    InitGlobalData();
+  }), []);
 
   return (
     <LocationProvider>
