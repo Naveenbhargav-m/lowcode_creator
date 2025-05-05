@@ -16,6 +16,8 @@ import WorkflowBuilder from "./tests/reactflow1";
 import { FormBuilderDemo } from "./tests/dynamic_form";
 import { VisualQueryBuilder } from "./tests/query_builder";
 import ConfigFormDemo from "./components/generic/config_form_v3/config_form";
+import SecretsManager from "./secret_store/secret_store";
+import TemplateRegistrationPage from "./external_templates/external_templates";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -50,12 +52,14 @@ export function App() {
       <style dangerouslySetInnerHTML={{ __html: globalStyle }} />
       <div className="flex bg-white h-screen w-screen overflow-hidden">
         {sideBarEnable.value ? <SideBar /> : <span></span>}
-        <main className="flex-grow bg-white h-full w-full overflow-hidden">
+        <main className="flex-grow bg-white h-full w-full overflow-hidden" style={{color:"black"}}>
           <Router>
             <Route path="/home" component={AppHomeScreen} />
             <Route path="/forms" component={FormBuilderTest} />
             <Route path="/screens" component={ScreenPage} />
             <Route path="/containers" component={TablesPage} />
+            <Route path="/secrets" component={SecretsManager} />
+            <Route path="/templates" component={TemplateRegistrationPage} />
             <Route path="/workflows" component={WorkFlowPage} />
             <Route path="/users" component={UsersPage} />
             <Route path="/settings" component={SettingsPage} />

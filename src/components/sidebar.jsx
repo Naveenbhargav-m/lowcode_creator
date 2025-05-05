@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Database, Braces, BookText, Frame, Workflow, User, Settings } from 'lucide-react';
+import { Home, Database, Braces, BookText, Frame, Workflow, User, Settings, BookTemplate, KeySquare } from 'lucide-react';
 import { AppLogo } from '../branding/logo';
 
 const Sidebar = () => {
@@ -34,7 +34,10 @@ const Sidebar = () => {
     { name: "Screens", value: "screens", icon: <Frame size={20} /> },
     { name: "Workflows", value: "workflows", icon: <Workflow size={20} /> },
     { name: "Users", value: "users", icon: <User size={20} /> },
-    { name: "Settings", value: "settings", icon: <Settings size={20} /> }
+    { name: "Settings", value: "settings", icon: <Settings size={20} /> },
+    {name: "Templates", value: "templates", icon: <BookTemplate size={20} />},
+    {name: "Secrets", value: "secrets", icon: <KeySquare size={20} />}
+
   ];
 
   // CSS styles as objects
