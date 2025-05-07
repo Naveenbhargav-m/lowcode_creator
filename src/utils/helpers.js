@@ -57,4 +57,9 @@ function setElementByID(array, id, newValue) {
     return newarr;
 }
   
-export {generateRandomName, generateUID, getSortedFields,getSortedSignalFields, getElementByID, setElementByID};
+
+function sortObjectByOrder(obj) {
+    return Object.values(obj).sort((a, b) => a.order - b.order);
+  }
+  
+export {generateRandomName, generateUID, getSortedFields,getSortedSignalFields, getElementByID, setElementByID, sortObjectByOrder};
