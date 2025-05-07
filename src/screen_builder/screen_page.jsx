@@ -14,7 +14,7 @@ import { useAuthCheck } from "../hooks/hooks";
 
 let config = {
   paths: ["id", "tabs", "tab"],
-  views_path: ["primitives", "containers", "templates", "tab"],
+  views_path: ["primitives", "containers", "templates", "my_templates","tab"],
 };
 
 let viewstyle = {

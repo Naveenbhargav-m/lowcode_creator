@@ -48,11 +48,6 @@ export function App() {
       scrollbar-width: none;
     }
   `;
-
-  useEffect((() => {
-    InitGlobalData();
-  }), []);
-
   return (
     <LocationProvider>
       <style dangerouslySetInnerHTML={{ __html: globalStyle }} />

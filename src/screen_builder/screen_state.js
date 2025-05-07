@@ -1,17 +1,19 @@
 // Signals for state management
 import { effect, signal } from "@preact/signals";
 import { actionsmap } from "./helper_methods";
-import { generateUID } from "../utils/helpers";
+import { generateUID, sortObjectByOrder } from "../utils/helpers";
 import { PrimitivesStylesMap } from "../components/primitives/primitives_base_styles";
 import { ContainersStylesMap } from "../components/containers/containers_bse_styles";
 import { GetDataFromAPi } from "../api/api_syncer";
+import { LoadUserTemplates } from "./data_functions";
+import { global_templates } from "../states/global_repo";
 
 
 const screenStyle = {"display":"flex","flexDirection":"column","minHeight":"200px", "minWidth":"150px","height":"100%", "width":"100%"};
 
 const tabSignal = signal("primitives");
 const tabDataSignal = signal({
-  "tabs": ["primitives", "containers", "templates"],
+  "tabs": ["primitives", "containers", "templates", "my_templates"],
   "tab": "primitives",
   primitives: [
       { icon: "text-cursor", title: "Text", value: "text", type: "primitive" },
@@ -57,6 +59,7 @@ const tabDataSignal = signal({
     { icon: "picture-in-picture-2", title: "Modal", value: "modal", type: "modal" },
     { icon: "picture-in-picture-2", title: "HoverCard", value: "hover_card", type: "modal" },
 ],
+"my_templates": [],
 });
 
 const containerBounds = {"height":0, "width":0};
@@ -103,6 +106,8 @@ function LoadScreens() {
   }).catch(error => {
       console.error("Error loading screens:", error);
   });
+
+  LoadUserTemplates();
 }
 
 
@@ -142,6 +147,9 @@ const handleDrop = (data, parentId = null) => {
   let myconfig = {};
   let type = data.data.type;
   let title = data.data.value;
+  if(type === "user_template") {
+    handleUserTemplateDrop(data);
+  }
   if(type === "primitive") {
     myconfig = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
   } else if(type === "container") {
@@ -157,38 +165,63 @@ const handleDrop = (data, parentId = null) => {
     children: [],
     ...myconfig,
   };
+  AddChildrensToScreenElements([newItem], parentId);
+};
 
-  if (parentId !== null) {
-      let parentElement = screenElements[parentId];
+
+function AddChildrensToScreenElements( newitems, parentId) {
+  if(newitems === undefined) {
+    return;
+  }
+  for(var i=0;i<newitems.length;i++) {
+    let newItem = newitems[i];
+    if (parentId !== null && parentId !== "screen") {
+        let parentElement = screenElements[parentId];
         parentElement.value.children.push(newItem.id);
         newItem.parent = parentId;
         screenElements[newItem.id] = signal(newItem);
         screenElements[newItem.id].value = {...newItem}; 
         screenElements[parentId].value = {...parentElement.value};
-  } else {
-    let curLength = Object.keys(screenElements).length + 1;
-    newItem["order"] = curLength;
-    screenElements[newItem.id] = signal(newItem);
-    screenElements[newItem.id].value = {...newItem}; 
-    screenElementAdded.value = newItem.id;
-  }
-  let temp = screens[activeScreen.value];
-  console.log("temp screens after drop:",temp);
-  if(temp !== undefined) {
-    let key = "mobile_children";
-    if(screenView.peek() !== "smartphone") {
-      key = "desktop_children";
+    } else {
+      let curLength = Object.keys(screenElements).length + 1;
+      newItem["order"] = curLength;
+      screenElements[newItem.id] = signal(newItem);
+      screenElements[newItem.id].value = {...newItem}; 
     }
-    temp[key] = JSON.parse(JSON.stringify(screenElements));
-    screenViewKey = key;
-    screens[activeScreen.value] = temp;
-    screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
   }
-  screenElementAdded.value = i;
-  screenElementsSorted.value = i;
-  console.log("new screens after drop:",screens);
-  localStorage.setItem("screen_config", JSON.stringify(screens));
-};
+let temp = screens[activeScreen.value];
+console.log("temp screens after drop:",temp);
+if(temp !== undefined) {
+  let key = "mobile_children";
+  if(screenView.peek() !== "smartphone") {
+    key = "desktop_children";
+  }
+  temp[key] = JSON.parse(JSON.stringify(screenElements));
+  screenViewKey = key;
+  screens[activeScreen.value] = temp;
+  screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
+}
+screenElementAdded.value = generateUID();
+screenElementsSorted.value = generateUID();
+console.log("new screens after drop:",screens);
+localStorage.setItem("screen_config", JSON.stringify(screens));
+}
+
+function handleUserTemplateDrop(data) {
+  console.log("called handle User Template Drop:",data);
+  let innerdata = data.data;
+  let tempID = innerdata["id"];
+  let mytemplate = global_templates[tempID];
+  let myelement = data["dropElementData"]["element"];
+  let currentView = screenView.value;
+  let key = "desktop_children";
+  if(currentView === "smartphone") {
+    key = "mobile_children";
+  }
+  let elements = mytemplate[key] || {};
+  let myelementArray = sortObjectByOrder(elements);
+  AddChildrensToScreenElements([...myelementArray], myelement);
+}
 
 function CreatenewScreen(data) {
   let name = data["name"];
