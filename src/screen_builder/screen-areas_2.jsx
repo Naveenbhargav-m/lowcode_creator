@@ -33,6 +33,13 @@ function RenderElement(item , dropCallBack, activeSignal, viewType, ElementsMap)
         {renderTemplate(item, dropCallBack, activeSignal)}
       </Drop>
     );
+  } else if(item.type === "user_template") {
+    console.log("RenderElement user_template", item);
+    return (
+      <Drop onDrop={(data) => dropCallBack(data, item.id)} dropElementData={{ element: item.id }}>
+        {renderContainer(item, dropCallBack,activeSignal,viewType, ElementsMap)}
+      </Drop>
+    );
   }
   return renderPrimitiveElement(item, activeSignal);
 }

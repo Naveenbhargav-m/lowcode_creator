@@ -149,6 +149,7 @@ const handleDrop = (data, parentId = null) => {
   let title = data.data.value;
   if(type === "user_template") {
     handleUserTemplateDrop(data);
+    return;
   }
   if(type === "primitive") {
     myconfig = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
@@ -211,7 +212,7 @@ function handleUserTemplateDrop(data) {
   console.log("called handle User Template Drop:",data);
   let innerdata = data.data;
   let tempID = innerdata["id"];
-  let mytemplate = global_templates[tempID];
+  let mytemplate = JSON.parse(JSON.stringify(global_templates[tempID]));
   let myelement = data["dropElementData"]["element"];
   let currentView = screenView.value;
   let key = "desktop_children";
@@ -220,7 +221,50 @@ function handleUserTemplateDrop(data) {
   }
   let elements = mytemplate[key] || {};
   let myelementArray = sortObjectByOrder(elements);
-  AddChildrensToScreenElements([...myelementArray], myelement);
+  let newelements = [];
+  var idlist = [];
+  let newtempID = generateUID();
+  for(var i=0;i<myelementArray.length;i++) {
+    var curelement = myelementArray[i];
+    let newid = generateUID();
+
+    curelement["id"] = newid;
+    console.log("current element:", curelement);
+    if(curelement["parent"] === undefined || curelement["parent"] === null || curelement["parent"] === "screen" || curelement["parent"] === "") {
+      curelement["parent"] = newtempID;
+    }
+    idlist.push(newid);
+    newelements.push(curelement);
+  }
+  let parent = null;
+  if(myelement !== "screen") {
+    parent = myelement;
+  }
+  var newtemplateObj = {
+    "id": newtempID,
+    type: "user_template",
+    template: "user_template",
+    title: "user_template",
+    "parent_container":{...containerBounds},
+    parent: parent,
+    children: [...idlist],
+    configs: {
+      style: {},
+      data_source: {},
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    },
+
+  };
+
+  let newarr = [newtemplateObj, ...newelements];
+  console.log("new array:", newarr);
+  AddChildrensToScreenElements([...newarr], myelement);
 }
 
 function CreatenewScreen(data) {

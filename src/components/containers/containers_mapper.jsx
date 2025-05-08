@@ -112,6 +112,7 @@ function RenderChildren({ dropCallBack , activeSignal,childrenElements, elementI
 
 
 export function renderContainer(layoutItem , dropCallBack , activeSignal, viewType, ElementsMap) {
+  console.log("in renderContainer", layoutItem);
   layoutItem.configs["id"] = layoutItem.id;
   const { title, children } = layoutItem;
   let childrenSignal = signal(children);
@@ -254,6 +255,19 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               ElementsMap={ElementsMap}
               />
       </Drawer>
+    case "user_template":
+      return (
+          <Card {...layoutItem}>
+          <RenderChildren 
+            dropCallBack={dropCallBack} 
+            activeSignal={activeSignal} 
+            childrenElements={childElements}
+            elementID={layoutItem["id"]}
+            viewType={viewType}
+            ElementsMap={ElementsMap}
+          />
+          </Card>
+      );
     default:
       return <div>Unknown Container</div>;
   }
