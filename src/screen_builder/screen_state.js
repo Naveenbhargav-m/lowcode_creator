@@ -149,6 +149,7 @@ const handleDrop = (data, parentId = null) => {
   let title = data.data.value;
   if(type === "user_template") {
     handleUserTemplateDrop(data);
+    return;
   }
   if(type === "primitive") {
     myconfig = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
@@ -222,20 +223,30 @@ function handleUserTemplateDrop(data) {
   let myelementArray = sortObjectByOrder(elements);
   let newelements = [];
   var idlist = [];
+  let newtempID = generateUID();
   for(var i=0;i<myelementArray.length;i++) {
     var curelement = myelementArray[i];
     let newid = generateUID();
+
     curelement["id"] = newid;
+    console.log("current element:", curelement);
+    if(curelement["parent"] === undefined || curelement["parent"] === null || curelement["parent"] === "screen" || curelement["parent"] === "") {
+      curelement["parent"] = newtempID;
+    }
     idlist.push(newid);
     newelements.push(curelement);
   }
+  let parent = null;
+  if(myelement !== "screen") {
+    parent = myelement;
+  }
   var newtemplateObj = {
-    "id": generateUID(),
+    "id": newtempID,
     type: "user_template",
     template: "user_template",
     title: "user_template",
     "parent_container":{...containerBounds},
-    parent: myelement,
+    parent: parent,
     children: [...idlist],
     configs: {
       style: {},
@@ -252,6 +263,7 @@ function handleUserTemplateDrop(data) {
   };
 
   let newarr = [newtemplateObj, ...newelements];
+  console.log("new array:", newarr);
   AddChildrensToScreenElements([...newarr], myelement);
 }
 
