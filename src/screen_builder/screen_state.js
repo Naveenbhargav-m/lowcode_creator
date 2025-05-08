@@ -211,7 +211,7 @@ function handleUserTemplateDrop(data) {
   console.log("called handle User Template Drop:",data);
   let innerdata = data.data;
   let tempID = innerdata["id"];
-  let mytemplate = global_templates[tempID];
+  let mytemplate = JSON.parse(JSON.stringify(global_templates[tempID]));
   let myelement = data["dropElementData"]["element"];
   let currentView = screenView.value;
   let key = "desktop_children";
@@ -220,7 +220,39 @@ function handleUserTemplateDrop(data) {
   }
   let elements = mytemplate[key] || {};
   let myelementArray = sortObjectByOrder(elements);
-  AddChildrensToScreenElements([...myelementArray], myelement);
+  let newelements = [];
+  var idlist = [];
+  for(var i=0;i<myelementArray.length;i++) {
+    var curelement = myelementArray[i];
+    let newid = generateUID();
+    curelement["id"] = newid;
+    idlist.push(newid);
+    newelements.push(curelement);
+  }
+  var newtemplateObj = {
+    "id": generateUID(),
+    type: "user_template",
+    template: "user_template",
+    title: "user_template",
+    "parent_container":{...containerBounds},
+    parent: myelement,
+    children: [...idlist],
+    configs: {
+      style: {},
+      data_source: {},
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    },
+
+  };
+
+  let newarr = [newtemplateObj, ...newelements];
+  AddChildrensToScreenElements([...newarr], myelement);
 }
 
 function CreatenewScreen(data) {
