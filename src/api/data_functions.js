@@ -70,5 +70,17 @@ function ProcessThemesDataToWrite(themes) {
 }
 
 
-
-export {ProcessFormsDataToWrite, ProcessScreenDataToWrite, ProcessSignalsToWrite, ProcessTemplatesDataTOWrite, ProcessThemesDataToWrite};
+function ProcessQueriesToWrite(queries) {
+    var resp = [];
+    for(var i=0;i<queries.length;i++) {
+        var obj = {};
+        var cur = queries[i];
+        var id = cur["id"];
+        var data = cur;
+        obj["id"] = id;
+        obj["query_data"] = cur;
+        resp.push(obj);
+    }
+    return resp;
+}
+export {ProcessFormsDataToWrite, ProcessQueriesToWrite, ProcessScreenDataToWrite, ProcessSignalsToWrite, ProcessTemplatesDataTOWrite, ProcessThemesDataToWrite};
