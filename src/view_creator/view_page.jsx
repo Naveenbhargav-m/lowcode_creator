@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Code, Eye, Save, ChevronRight, X, Plus, Search, Settings, Trash2, Edit } from 'lucide-react';
 import { TablesTab } from '../table_builder/tables_page';
 import { dbViewSignal } from '../table_builder/table_builder_state';
-import { mockViews } from './views_state';
-import { SyncViews } from './view_api';
+import { mockViews, views_signal } from './views_state';
+import { InitViews, SyncViews } from './view_api';
 
 // Main App Component
 export function DatabaseViewManager() {
@@ -14,23 +14,42 @@ export function DatabaseViewManager() {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newViewName, setNewViewName] = useState('');
   const [newViewDescription, setNewViewDescription] = useState('');
+
+  useEffect((() => {
+    InitViews();
+  }),[]);
   
   // Fetch views on mount (simulated)
   useEffect(() => {
-    // Add unique IDs to mock data if they don't have them
-    const viewsWithIds = mockViews.map(view => {
-      if (!view.id) {
-        return { ...view, id: 'view_' + Math.random().toString(36).substr(2, 9) };
-      }
-      return view;
+    // Make sure we're working with a deep copy of the views
+    const viewsWithIds = JSON.parse(JSON.stringify(views_signal.value)).map(view => {
+      return { ...view };
     });
     
     setViews(viewsWithIds);
     
-    // Find the first non-deleted view to select
-    const firstAvailableView = viewsWithIds.find(v => !v._deleted);
-    setSelectedView(firstAvailableView || null);
-  }, []);
+    // Find the first non-deleted view or preserve current selection if it still exists
+    const currentViewExists = selectedView && viewsWithIds.some(v => v.id === selectedView.id && !v._deleted);
+    
+    if (!currentViewExists) {
+      const firstAvailableView = viewsWithIds.find(v => !v._deleted);
+      setSelectedView(firstAvailableView || null);
+    } else if (selectedView) {
+      // Update the selected view with any changes from views_signal
+      const updatedSelectedView = viewsWithIds.find(v => v.id === selectedView.id);
+      setSelectedView(updatedSelectedView);
+    }
+  }, [views_signal.value]);
+
+  // Update selectedView when its properties change in the views array
+  useEffect(() => {
+    if (selectedView && selectedView.id) {
+      const updatedView = views.find(v => v.id === selectedView.id);
+      if (updatedView && JSON.stringify(updatedView) !== JSON.stringify(selectedView)) {
+        setSelectedView(updatedView);
+      }
+    }
+  }, [views]);
 
   // Generate a random unique ID
   const generateUniqueId = () => {
@@ -44,10 +63,11 @@ export function DatabaseViewManager() {
       description: 'Description here',
       sqlCode: 'SELECT * FROM table',
       fields: ['field1'],
-      "_change_type": "add"
+      "_change_type": "add",
+      "status": "pending"
     };
     
-    setViews([...views, newView]);
+    setViews(prevViews => [...prevViews, newView]);
     setSelectedView(newView);
     setNewViewName(newView.name);
     setNewViewDescription(newView.description);
@@ -75,6 +95,12 @@ export function DatabaseViewManager() {
     // In a real app, we would parse the SQL to extract fields
     updatedView.fields = extractFieldsFromSql(code);
     
+    // Update views array first
+    setViews(prevViews => 
+      prevViews.map(v => v.id === updatedView.id ? updatedView : v)
+    );
+    
+    // Then update selected view
     setSelectedView(updatedView);
   };
 
@@ -95,7 +121,9 @@ export function DatabaseViewManager() {
     }
     
     // Update the view in the views array
-    setViews(views.map(v => v.id === updatedView.id ? updatedView : v));
+    setViews(prevViews => 
+      prevViews.map(v => v.id === updatedView.id ? updatedView : v)
+    );
     
     // Update the selected view with the new copy
     setSelectedView(updatedView);
@@ -150,9 +178,12 @@ export function DatabaseViewManager() {
     }
   };
 
-  const filteredViews = views.filter(view => 
-    !view._deleted && view.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Memoize filtered views to prevent unnecessary re-renders
+  const filteredViews = useMemo(() => {
+    return views.filter(view => 
+      !view._deleted && view.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [views, searchTerm]);
 
   return (
     <div className="flex h-screen bg-gray-100 text-gray-800" style={{color:"black"}}>
@@ -256,20 +287,43 @@ function ViewSidebar({ views, selectedView, onSelectView, onCreateNew, searchTer
 }
 
 // Component for a single view item in the sidebar
+
 function ViewListItem({ view, isSelected, onClick }) {
+  // Get the status once and handle empty/undefined
+  const status = view.status ? view.status.toLowerCase().trim() : "";
+  
+  // Determine if failed status - check more explicitly
+  const isFailed = status === "failed";
+  
+  // Apply more prominent styling for failed views
+  const itemClassNames = [
+    "p-3 border-b border-gray-100 cursor-pointer flex items-center",
+    isSelected ? 'border-l-4 border-l-blue-600' : '',
+    isFailed ? 'bg-red-100' : isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+  ].join(' ');
+
+  // Also apply text styling for better visibility
+  const textClassName = isFailed ? "text-red-700" : "font-medium";
+
+  console.log(`View ${view.name} status: ${status}, isFailed: ${isFailed}`);
+
   return (
     <div 
-      className={`p-3 border-b border-gray-100 cursor-pointer flex items-center ${
-        isSelected ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'hover:bg-gray-50'
-      }`}
+      className={itemClassNames}
       onClick={onClick}
     >
-      <Eye size={16} className={`mr-2 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`} />
+      <Eye size={16} className={`mr-2 ${isSelected ? 'text-blue-600' : isFailed ? 'text-red-500' : 'text-gray-500'}`} />
       <div className="flex-1 overflow-hidden">
-        <h3 className="font-medium truncate">{view.name}</h3>
+        <h3 className={textClassName + " truncate"}>{view.name}</h3>
         <p className="text-xs text-gray-500 truncate">{view.description}</p>
+        {isFailed && (
+          <div className="flex items-center mt-1">
+            <span className="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+            <p className="text-xs text-red-600 font-medium">Failed</p>
+          </div>
+        )}
       </div>
-      <ChevronRight size={16} className="text-gray-400" />
+      <ChevronRight size={16} className={isFailed ? "text-red-400" : "text-gray-400"} />
     </div>
   );
 }
@@ -290,6 +344,9 @@ function ViewHeader({
   newViewDescription,
   setNewViewDescription
 }) {
+  const status = (view.status || "").toLowerCase().trim();
+  const isFailed = status === "failed";
+
   return (
     <div className="bg-white border-b border-gray-200 p-4 flex flex-col" style={{...style}}>
       <div className="flex justify-between items-center">
@@ -314,7 +371,10 @@ function ViewHeader({
             </div>
           ) : (
             <>
-              <h2 className="text-xl font-semibold">{view.name}</h2>
+              <div className="flex items-center">
+                <h2 className="text-xl font-semibold">{view.name}</h2>
+                {isFailed && <span className="ml-2 px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">Failed</span>}
+              </div>
               <p className="text-sm text-gray-500">{view.description}</p>
             </>
           )}
@@ -369,20 +429,27 @@ function ViewHeader({
 
 // Updated ViewDetails with proper centering and overflow handling
 function ViewDetails({ view }) {
+  // Handle potentially empty fields array
+  const fields = view.fields || [];
+  
   return (
     <div className="w-full overflow-y-auto p-4 flex justify-center">
       <div className="w-full">
         <h3 className="font-medium text-gray-700 mb-4 text-center">Selected Fields</h3>
         <div className="space-y-2 max-h-96 overflow-y-auto pb-4">
-          {view.fields.map((field, index) => (
-            <FieldItem key={index} field={field} />
-          ))}
+          {fields.length > 0 ? (
+            fields.map((field, index) => (
+              <FieldItem key={index} field={field} />
+            ))
+          ) : (
+            <div className="text-center text-gray-500">No fields selected</div>
+          )}
         </div>
         
         <div className="mt-6">
           <h3 className="font-medium text-gray-700 mb-2 text-center">SQL Preview</h3>
           <pre className="bg-gray-800 text-gray-200 p-4 rounded-md overflow-x-auto text-sm max-h-48">
-            {view.sqlCode}
+            {view.sqlCode || 'No SQL code available'}
           </pre>
         </div>
       </div>
@@ -411,7 +478,7 @@ function SqlEditor({ code, onChange }) {
       <div className="flex-1 border border-gray-300 rounded-md overflow-hidden">
         <textarea
           className="w-full h-64 p-4 font-mono text-sm focus:outline-none resize-none"
-          value={code}
+          value={code || ''}
           onChange={(e) => onChange(e.target.value)}
           spellCheck="false"
         />

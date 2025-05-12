@@ -1,4 +1,4 @@
-import { AppID, PrestClient } from "../states/global_state";
+import { ApiClient, AppID, PrestClient } from "../states/global_state";
 import { ProcessFormsDataToWrite, ProcessScreenDataToWrite, ProcessSignalsToWrite, ProcessTemplatesDataTOWrite, ProcessThemesDataToWrite } from "./data_functions";
 
 
@@ -79,7 +79,7 @@ function InsertBatchData(key,forms) {
 async function GetDataFromAPi(key) {
     let endpoint = `${AppID}/public/${key}`;
     try {
-        let response = await PrestClient.get(endpoint);
+        let response = await ApiClient.get(endpoint);
         return response || [];  // Always return an array
     } catch (error) {
         console.error(`Error fetching data for key "${key}":`, error);

@@ -24,7 +24,7 @@ const mockViews = [
     },
   ];
 
-const views = signal([]);
+const views_signal = signal([]);
 const originalViews = signal({});
 
-export {views, originalViews, mockViews};
+export {views_signal, originalViews, mockViews};

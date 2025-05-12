@@ -11,7 +11,7 @@ const activeField = signal({});
 
 async function LoadTables() {
   var endpoint = `${AppID}/public/_tables`;
-  let dbtables = await PrestClient.get(endpoint);
+  let dbtables = await ApiClient.get(endpoint);
   return dbtables;
 }
 

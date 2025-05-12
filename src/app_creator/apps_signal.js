@@ -18,7 +18,7 @@ const apps = signal([]);
 const showForm = signal(false);
 
 async function GetAppsfromDB() {
-  let myclient = PrestClient;
+  let myclient = ApiClient;
   let url = `${CreatorAPPID}/public/apps`;
   let response = await myclient.get(url);
 
