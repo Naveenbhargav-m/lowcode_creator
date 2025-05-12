@@ -63,7 +63,10 @@ class APIManager {
       // Fetch and store the request promise
       const fetchPromise = fetch(url, fetchOptions)
         .then(async (response) => {
-          if (!response.ok) throw new Error(`API Error: ${response.status}`);
+          if (!response.ok) { 
+            console.log("response is errored:",response);
+            return undefined;
+          };
           const data = await response.json();
   
           // Cache only GET responses
