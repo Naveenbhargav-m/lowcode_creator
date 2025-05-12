@@ -1,5 +1,7 @@
 import { signal } from "@preact/signals";
 import { generateUID } from "../utils/helpers";
+import { ApiClient, AppID } from "../states/global_state";
+import { SyncData } from "../api/api_syncer";
 let ActiveQuery = signal("1");
 let queries =  {};
 let QueryNames = signal([]);
@@ -36,7 +38,8 @@ function CreateQueryBlock(data) {
         "input_params": [],
         "input_js": [],
         "output_js": [],
-        "output_params": [], 
+        "output_params": [],
+        "_change_type": "add"
     };
     queries[id] = querymap;
     let existing = QueryNames.value;
@@ -52,6 +55,7 @@ function UpdateQueryPart(part ,data) {
     let activeQuery = ActiveQueryData.value;
     console.log("called update query active part : ",activeQuery);
     activeQuery[part] = data;
+    activeQuery["_change_type"] = activeQuery["_change_type"] || "update";
     let id = activeQuery["id"];
     queries[id] = activeQuery;
     ActiveQueryData.value = {...activeQuery};
@@ -62,19 +66,47 @@ function UpdateQueryPart(part ,data) {
 function LoadQueries() {
     let jsonStr = localStorage.getItem("queries");
     let map = JSON.parse(jsonStr);
-    queries = {...map};
-    let keys = Object.keys(queries);
-    let names = [];
-    for(var i=0;i<keys.length;i++) {
-        let cur = queries[keys[i]];
-        let obj = {"id": cur["id"], "name": cur["name"]};
-        names.push(obj);
-    }
-    QueryNames.value = [...names];
+
+    let url = `${AppID.value}/public/_queries`;
+    ApiClient.get(url).then(
+        (data) => {
+            if(data === undefined) {
+                console.log("queries data is undefined:",data);
+            }
+            var temp = {};
+            let length = data.length;
+            for(var i=0;i<length;i++) {
+                let cur = data[i];
+                let id = cur["id"];
+                let innerdata = cur["query_data"];
+                innerdata["id"] = id;
+                temp[id] = innerdata;
+            }
+            queries = {...temp};
+            let keys = Object.keys(queries);
+            let names = [];
+            for(var i=0;i<keys.length;i++) {
+                let cur = queries[keys[i]];
+                let obj = {"id": cur["id"], "name": cur["name"]};
+                names.push(obj);
+            }
+            QueryNames.value = [...names];
+        }
+    );
 }
 function SyncQueries() {
-    let str = JSON.stringify(queries);
-    localStorage.setItem("queries", str);
+    let keys = Object.keys(queries);
+    let queriesArr = [];
+    let newqueries = {};
+    for(var i=0;i<keys.length;i++) {
+        let cur = queries[keys[i]];
+        queriesArr.push(cur);
+        let copy = JSON.parse(JSON.stringify(cur));
+        delete copy["_change_type"];
+        newqueries[keys[i]] = copy;
+    }
+    SyncData("_queries", queriesArr);
+    queries = newqueries;
 }
 
 export {ActiveQuery,QueryNames, queries, ActiveQueryData,

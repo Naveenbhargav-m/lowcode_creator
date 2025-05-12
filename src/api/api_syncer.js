@@ -1,5 +1,5 @@
 import { ApiClient, AppID, PrestClient } from "../states/global_state";
-import { ProcessFormsDataToWrite, ProcessScreenDataToWrite, ProcessSignalsToWrite, ProcessTemplatesDataTOWrite, ProcessThemesDataToWrite } from "./data_functions";
+import { ProcessFormsDataToWrite, ProcessQueriesToWrite, ProcessScreenDataToWrite, ProcessSignalsToWrite, ProcessTemplatesDataTOWrite, ProcessThemesDataToWrite } from "./data_functions";
 
 
 
@@ -52,7 +52,7 @@ function UpdateBatchData(key,forms) {
     for(let i=0;i<forms.length;i++) {
         let formID = forms[i]["id"];
         delete forms[i]["id"];
-        PrestClient.patch(endpoint, {"query": {"id": formID}, "body": forms[i]});
+        ApiClient.patch(endpoint, {"query": {"where=id": formID}, "body": forms[i]});
     }
 }
 
@@ -73,7 +73,7 @@ function InsertBatchData(key,forms) {
         temp.push(temp1);
 
     }
-    PrestClient.post(endPoint,  {"body":forms});
+    ApiClient.post(endPoint,  {"body":forms});
 }
 
 async function GetDataFromAPi(key) {
@@ -95,6 +95,7 @@ function ProcessDataToWrite(tableName, data) {
         "_global_states": ProcessSignalsToWrite,
         "_templates": ProcessTemplatesDataTOWrite,
         "_themes": ProcessThemesDataToWrite,
+        "_queries": ProcessQueriesToWrite,
         "_components": { "component_name": "text", "configs": "json" },
         "_tables": { "tables_data": "json" },
         "_views": { "views_data": "json" },
