@@ -27,14 +27,16 @@ function UpdateActiveWorkflowNodes(updatedNodes) {
     let nodes = [...existingFlow["nodes"]]; // Clone the nodes array to prevent mutation issues
 
     // Update or add new nodes
-    updatedNodes.forEach((updatedNode) => {
-        let index = nodes.findIndex((node) => node.id === updatedNode.id);
-        if (index !== -1) {
-            nodes[index] = { ...nodes[index], ...updatedNode }; // Merge changes
-        } else {
-            nodes.push(updatedNode); // Add new node if it doesn’t exist
-        }
-    });
+    if(updatedNodes !== null) {
+        updatedNodes.forEach((updatedNode) => {
+            let index = nodes.findIndex((node) => node.id === updatedNode.id);
+            if (index !== -1) {
+                nodes[index] = { ...nodes[index], ...updatedNode }; // Merge changes
+            } else {
+                nodes.push(updatedNode); // Add new node if it doesn’t exist
+            }
+        });
+    }
     let isChanged = existingFlow["_change_type"] || "update";
     activeWorkFlow.value = {
         ...existingFlow,
@@ -55,6 +57,9 @@ function UpdateActiveWorkflowEdges(updatedEdges) {
      if(existingFlow["fid"] === undefined) {
         return;
     }
+    if(updatedEdges === null) {
+        return;
+    } 
     for(let i=0;i<updatedEdges.length;i++) {
         updatedEdges[i]["type"] = "smoothstep";
     }
