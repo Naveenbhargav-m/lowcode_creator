@@ -28,12 +28,14 @@ function GetWorkflowDataFromAPI() {
         }
         let temp = [];
         let namesAndIDs = [];
+        let workflowdatatemp = {};
         for(var i=0;i<myflows.length;i++) {
             let  curflow = myflows[i];
             let data = curflow["flow_data"];
-            let id = curflow["fid"];
-            workflowsData[id] = data;
+            let id = curflow["id"];
+            workflowdatatemp[id] = data;
             delete curflow["flow_data"];
+            console.log("data:",data, workflowsData, curflow);
             temp.push(curflow);
             let obj = {
                 "id": id,
@@ -41,6 +43,7 @@ function GetWorkflowDataFromAPI() {
             };
             namesAndIDs.push(obj);
         }
+        workflowsData.value = {...workflowdatatemp};
         workflows.value = [...temp];
         workflownames.value = [...namesAndIDs];
         return;
