@@ -1,177 +1,411 @@
 import { signal } from "@preact/signals";
 import { generateUID } from "../utils/helpers";
 
+/**
+ * State Management for Workflows
+ * Using signals for reactive state management
+ */
 
-let activeWorkFlow = signal({});
-let workflows = signal([]);
-let workflowsData = signal({});
-let workflownames = signal([]);
-let activeworkFlowBlock = signal({});
-let flowTab = signal("blocks");
-let activeFloweUpdated = signal("");
+// Core workflow state signals
+const activeWorkFlow = signal({});
+const workflows = signal([]);
+const workflowsData = signal({});
+const workflownames = signal([]);
+const activeworkFlowBlock = signal({});
+const flowTab = signal("blocks");
+const activeFloweUpdated = signal("");
 
-
-
+/**
+ * Updates nodes in the active workflow
+ * @param {Array} updatedNodes - Array of nodes to update or add
+ * @returns {void}
+ */
 function UpdateActiveWorkflowNodes(updatedNodes) {
-    let existingFlow = activeWorkFlow.peek(); // Avoid triggering reactivity
-    console.log("UpdateActiveWorkflowNodes:",existingFlow);
-    if(existingFlow === undefined || updatedNodes === undefined) {
+    // Validate inputs
+    if (!updatedNodes || !Array.isArray(updatedNodes)) {
+        console.warn("UpdateActiveWorkflowNodes: Invalid nodes data provided");
         return;
     }
-    if(existingFlow["fid"] === undefined) {
-        return;
-    }
-    if(existingFlow["nodes"] === undefined) {
-        return;
-    }
-    let nodes = [...existingFlow["nodes"]]; // Clone the nodes array to prevent mutation issues
 
+    const existingFlow = activeWorkFlow.peek(); // Avoid triggering reactivity
+    
+    // Validate existing flow
+    if (!existingFlow || typeof existingFlow !== 'object') {
+        console.warn("UpdateActiveWorkflowNodes: No active workflow exists");
+        return;
+    }
+    
+    if (!existingFlow["fid"]) {
+        console.warn("UpdateActiveWorkflowNodes: Active workflow missing fid");
+        return;
+    }
+    
+    // Handle case where nodes might be undefined
+    const currentNodes = Array.isArray(existingFlow["nodes"]) ? [...existingFlow["nodes"]] : [];
+    
     // Update or add new nodes
-    if(updatedNodes !== null) {
-        updatedNodes.forEach((updatedNode) => {
-            let index = nodes.findIndex((node) => node.id === updatedNode.id);
-            if (index !== -1) {
-                nodes[index] = { ...nodes[index], ...updatedNode }; // Merge changes
-            } else {
-                nodes.push(updatedNode); // Add new node if it doesn’t exist
-            }
-        });
-    }
-    let isChanged = existingFlow["_change_type"] || "update";
+    updatedNodes.forEach((updatedNode) => {
+        if (!updatedNode || !updatedNode.id) {
+            console.warn("UpdateActiveWorkflowNodes: Received invalid node", updatedNode);
+            return;
+        }
+        
+        const index = currentNodes.findIndex((node) => node && node.id === updatedNode.id);
+        if (index !== -1) {
+            currentNodes[index] = { ...currentNodes[index], ...updatedNode }; // Merge changes
+        } else {
+            currentNodes.push(updatedNode); // Add new node
+        }
+    });
+    
+    const isChanged = existingFlow["_change_type"] || "update";
+    
+    // Update active workflow with new nodes
     activeWorkFlow.value = {
         ...existingFlow,
-        nodes: nodes,
-        "_change_type": isChanged
+        nodes: currentNodes,
+        _change_type: isChanged
     };
-    console.log("after nodes change active Flow:",activeWorkFlow.value);
+    
+    // Update workflows collection with latest changes
     UpdateWorkflowsWithLatest(existingFlow);
 }
 
-
+/**
+ * Updates edges in the active workflow
+ * @param {Array} updatedEdges - Array of edges to update
+ * @returns {void}
+ */
 function UpdateActiveWorkflowEdges(updatedEdges) {
-    let existingFlow = activeWorkFlow.peek(); // Use peek() to avoid triggering reactivity
-    console.log("update Active Workflow Edges:",existingFlow);
-    if(existingFlow === undefined || updatedEdges === undefined) {
+    // Validate inputs
+    if (!updatedEdges || !Array.isArray(updatedEdges)) {
+        console.warn("UpdateActiveWorkflowEdges: Invalid edges data provided");
         return;
     }
-     if(existingFlow["fid"] === undefined) {
+
+    const existingFlow = activeWorkFlow.peek(); // Use peek() to avoid triggering reactivity
+    
+    // Validate existing flow
+    if (!existingFlow || typeof existingFlow !== 'object') {
+        console.warn("UpdateActiveWorkflowEdges: No active workflow exists");
         return;
     }
-    if(updatedEdges === null) {
+    
+    if (!existingFlow["fid"]) {
+        console.warn("UpdateActiveWorkflowEdges: Active workflow missing fid");
         return;
-    } 
-    for(let i=0;i<updatedEdges.length;i++) {
-        updatedEdges[i]["type"] = "smoothstep";
     }
-    let isChanged = existingFlow["_change_type"] || "update";
+    
+    // Apply edge type to all edges for consistency
+    const processedEdges = updatedEdges.map(edge => ({
+        ...edge,
+        type: "smoothstep"
+    }));
+    
+    const isChanged = existingFlow["_change_type"] || "update";
+    
+    // Update active workflow with new edges
     activeWorkFlow.value = {
         ...existingFlow,
-        edges: updatedEdges,
-        "_change_type": isChanged
+        edges: processedEdges,
+        _change_type: isChanged
     };
-    console.log("after edges change active Flow:",activeWorkFlow.value);
+    
+    // Update workflows collection with latest changes
     UpdateWorkflowsWithLatest(existingFlow);
-} 
+}
 
+/**
+ * Updates the workflows collection with the latest active workflow
+ * @param {Object} existingFlow - The current active workflow
+ * @returns {void}
+ */
 function UpdateWorkflowsWithLatest(existingFlow) {
-    if(existingFlow === undefined) {
+    // Validate inputs
+    if (!existingFlow || typeof existingFlow !== 'object') {
+        console.warn("UpdateWorkflowsWithLatest: Invalid flow provided");
         return;
     }
-    let activeID = existingFlow["id"];
-    if(activeID === undefined) {
+    
+    const activeID = existingFlow.id;
+    if (!activeID) {
+        console.warn("UpdateWorkflowsWithLatest: Flow missing ID");
         return;
     }
-    let flows = workflows.peek().map((flow1) =>
-        flow1.id === activeID ? activeWorkFlow.peek() : flow1
+    
+    // Get current workflows and update the matching one
+    const currentWorkflows = workflows.peek();
+    if (!Array.isArray(currentWorkflows)) {
+        console.warn("UpdateWorkflowsWithLatest: workflows is not an array");
+        return;
+    }
+    
+    const updatedWorkflows = currentWorkflows.map((flow) => 
+        flow && flow.id === activeID ? activeWorkFlow.peek() : flow
     );
-    console.log("sorted flows before updating:",flows);
-    workflows.value = [...flows];
-    localStorage.setItem("workflows", JSON.stringify(workflows.value));
-}
-
-function CreateWorkflow(data) {
-    let name = data["name"];
-    let id = generateUID();
-    let endID = generateUID();
-    let startID = generateUID();
-    let StarthandleID = generateUID();
-    let stopHandleID = generateUID();
-    let obj = {"name": name,
-         "fid": id,
-         "nodes": [
-          {"label":"start", "type":"start", "id": startID, 
-            "data": {"type":"start", "id": startID,"handles": [{"id":StarthandleID, "position": "bottom", "type": "source"}]},position: { x: 250, y: 250 }},
-          {"label":"end", "type":"end","id": endID, "data" :{ "type": "end", "id": endID, "handles": [{"id":stopHandleID, "position":"top", "type":"target"}]},position: { x: 350, y: 250 },}],
-         "edges": [],
-         "_change_type": "create"
-        };
-    let exist = workflows.peek();
-    exist.push(obj);
-    workflows.value = [...exist];
-    let namesexists = workflownames.peek();
-    let nameObj = {};
-    nameObj["id"] = obj["fid"];
-    nameObj["name"] = obj["name"];
-    namesexists.push(nameObj);
-    workflownames.value = [...namesexists];
-    SetWorkFlowActive(id);
-}
-
-
-function HandleWorkFlowBlockDrop(data) {
-    let operation = data["data"]["type"];
-    let name = data["data"]["name"];
-    let newid = generateUID();
-    let handles = data["data"]["handles"];
-    for(let i = 0;i<handles.length;i++) {
-        let id = generateUID();
-        handles[i]["id"] = id;
+    
+    // Update workflows signal and persist to localStorage
+    workflows.value = [...updatedWorkflows];
+    try {
+        localStorage.setItem("workflows", JSON.stringify(updatedWorkflows));
+    } catch (error) {
+        console.error("Failed to save workflows to localStorage:", error);
     }
-    let newnode = {
-        "label": name, 
-        "type":  operation, "id": newid , 
-        position: { x: 250, y: 250 }, 
-        data:{"type":  operation, "id": newid,"handles": [...handles]},
+}
+
+/**
+ * Creates a new workflow
+ * @param {Object} data - Data for the new workflow
+ * @returns {string} - ID of the created workflow
+ */
+function CreateWorkflow(data) {
+    // Validate input
+    if (!data || typeof data !== 'object' || !data.name) {
+        console.error("CreateWorkflow: Invalid workflow data. Name is required.");
+        return null;
+    }
+    
+    const name = data.name;
+    const id = generateUID();
+    const endID = generateUID();
+    const startID = generateUID();
+    const StarthandleID = generateUID();
+    const stopHandleID = generateUID();
+    
+    // Create workflow object with start and end nodes
+    const newWorkflow = {
+        name: name,
+        fid: id,
+        id: id, // Ensure both id and fid exist for consistency
+        nodes: [
+            {
+                label: "start", 
+                type: "start", 
+                id: startID, 
+                data: {
+                    type: "start", 
+                    id: startID,
+                    handles: [{
+                        id: StarthandleID, 
+                        position: "bottom", 
+                        type: "source"
+                    }]
+                },
+                position: { x: 250, y: 250 }
+            },
+            {
+                label: "end", 
+                type: "end",
+                id: endID, 
+                data: { 
+                    type: "end", 
+                    id: endID, 
+                    handles: [{
+                        id: stopHandleID, 
+                        position: "top", 
+                        type: "target"
+                    }]
+                },
+                position: { x: 350, y: 350 }
+            }
+        ],
+        edges: [],
+        _change_type: "create"
     };
-    let curFlow = activeWorkFlow.value;
-    let nodes = curFlow["nodes"];
-    let lastVal = curFlow["nodes"].pop();
-    nodes.push(newnode);
-    nodes.push(lastVal);
-    curFlow["nodes"] = [...nodes];
-    let isChanged = curFlow["_change_type"] || "update";
-    activeWorkFlow.value = {...curFlow, "_change_type": isChanged};
-    console.log("current flow:",curFlow);
-    activeFloweUpdated.value = generateUID(); 
+    
+    // Update workflows signal
+    const existingWorkflows = Array.isArray(workflows.peek()) ? [...workflows.peek()] : [];
+    existingWorkflows.push(newWorkflow);
+    workflows.value = existingWorkflows;
+    
+    // Update workflow names
+    const existingNames = Array.isArray(workflownames.peek()) ? [...workflownames.peek()] : [];
+    const nameObj = {
+        id: newWorkflow.fid,
+        name: newWorkflow.name
+    };
+    existingNames.push(nameObj);
+    workflownames.value = existingNames;
+    
+    // Set this workflow as active
+    SetWorkFlowActive(id);
+    
+    return id;
+}
+
+/**
+ * Handles dropping a block onto the workflow canvas
+ * @param {Object} data - Data for the dropped block
+ * @returns {void}
+ */
+function HandleWorkFlowBlockDrop(data) {
+    // Validate input
+    if (!data || !data.data || !data.data.type || !data.data.name) {
+        console.error("HandleWorkFlowBlockDrop: Invalid block data");
+        return;
+    }
+    
+    // Check if active workflow exists
+    const curFlow = activeWorkFlow.value;
+    if (!curFlow || !curFlow["nodes"] || !Array.isArray(curFlow["nodes"])) {
+        console.error("HandleWorkFlowBlockDrop: No active workflow or nodes array");
+        return;
+    }
+    
+    const operation = data.data.type;
+    const name = data.data.name;
+    const newid = generateUID();
+    
+    // Process handles and ensure they have unique IDs
+    let handles = Array.isArray(data.data.handles) ? [...data.data.handles] : [];
+    handles = handles.map(handle => ({
+        ...handle,
+        id: generateUID()
+    }));
+    
+    // Create new node
+    const newnode = {
+        label: name, 
+        type: operation, 
+        id: newid, 
+        position: { x: 250, y: 250 }, 
+        data: {
+            type: operation, 
+            id: newid,
+            handles: handles
+        },
+    };
+    
+    // Insert the new node before the end node
+    const nodes = [...curFlow["nodes"]];
+    // Find the end node to ensure it stays at the end
+    const endNodeIndex = nodes.findIndex(node => node && node.type === "end");
+    
+    if (endNodeIndex !== -1) {
+        const endNode = nodes.splice(endNodeIndex, 1)[0];
+        nodes.push(newnode);
+        nodes.push(endNode);
+    } else {
+        // If no end node found (shouldn't happen), just add the new node
+        nodes.push(newnode);
+    }
+    
+    // Update workflow
+    const isChanged = curFlow["_change_type"] || "update";
+    activeWorkFlow.value = {
+        ...curFlow,
+        nodes: nodes,
+        _change_type: isChanged
+    };
+    
+    activeFloweUpdated.value = generateUID();
     UpdateWorkflowsWithLatest(curFlow);
 }
 
-
+/**
+ * Stores block-specific data for a workflow
+ * @param {Object} newData - Data to store
+ * @param {string} workflowID - ID of the workflow
+ * @param {string} blockID - ID of the block
+ * @returns {void}
+ */
 function SetWorkflowDataBack(newData, workflowID, blockID) {
-    let existingData = workflowsData.value;
-    let currentflowData = existingData[workflowID] || {};
-    let currentBlockData = currentflowData[blockID] || {};
-    let data = currentBlockData["data"] || {};
-    let newdata = {...data, ...newData};
-    currentflowData[blockID] = newdata;
+    // Validate inputs
+    console.log("called set workflow data back:",newData, workflowID, blockID);
+    if (!newData || typeof newData !== 'object') {
+        console.warn("SetWorkflowDataBack: Invalid data provided");
+        return;
+    }
+    
+    if (!workflowID || !blockID) {
+        console.warn("SetWorkflowDataBack: Missing workflow ID or block ID");
+        return;
+    }
+    
+    // Get existing data structure or initialize new ones
+    const existingData = workflowsData.value || {};
+    const currentflowData = existingData[workflowID] || {};
+    const currentBlockData = currentflowData[blockID] || {};
+    const data = currentBlockData.data || {};
+    
+    // Merge the new data with existing data
+    const newBlockData = {
+        ...currentBlockData,
+            ...data,
+            ...newData   
+    };
+    // Update data structure
+    currentflowData[blockID] = newBlockData;
+    currentflowData["_change_type"] = currentflowData["_change_type"] || "update";
+    console.log("current flow data:",currentflowData, workflowID, blockID);
     existingData[workflowID] = currentflowData;
     workflowsData.value = {...existingData};
-    return;
 }
 
-
+/**
+ * Sets a workflow as the active workflow
+ * @param {string} id - ID of the workflow to activate
+ * @returns {boolean} - Success status
+ */
 function SetWorkFlowActive(id) {
-    let flow = workflows.peek();
-    flow.map((value) => {
-        if(value["fid"] === id) {
-            activeWorkFlow.value = {...value};
-        }
-    });
+    // Validate input
+    if (!id) {
+        console.warn("SetWorkFlowActive: No workflow ID provided");
+        return false;
+    }
+    
+    // Find the workflow with matching ID
+    const currentWorkflows = workflows.peek();
+    if (!Array.isArray(currentWorkflows)) {
+        console.warn("SetWorkFlowActive: workflows is not an array");
+        return false;
+    }
+    
+    const targetWorkflow = currentWorkflows.find(flow => flow && flow.fid === id);
+    
+    if (!targetWorkflow) {
+        console.warn(`SetWorkFlowActive: Workflow with ID ${id} not found`);
+        return false;
+    }
+    
+    // Set as active workflow
+    activeWorkFlow.value = {...targetWorkflow};
     activeFloweUpdated.value = generateUID();
-    console.log("setting active workflow:",activeWorkFlow);
+    return true;
 }
-export {activeWorkFlow, workflows, workflownames, 
-    CreateWorkflow, SetWorkFlowActive, flowTab, 
-    UpdateActiveWorkflowNodes, HandleWorkFlowBlockDrop,UpdateActiveWorkflowEdges,
-    activeFloweUpdated, activeworkFlowBlock, workflowsData, SetWorkflowDataBack
+
+// Initialize workflow state from localStorage if available
+try {
+    const savedWorkflows = localStorage.getItem("workflows");
+    if (savedWorkflows) {
+        const parsed = JSON.parse(savedWorkflows);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+            workflows.value = parsed;
+            
+            // Build workflow names list
+            const names = parsed.map(flow => ({
+                id: flow.fid,
+                name: flow.name
+            }));
+            workflownames.value = names;
+        }
+    }
+} catch (error) {
+    console.error("Error loading workflows from localStorage:", error);
+}
+
+export {
+    activeWorkFlow, 
+    workflows, 
+    workflownames, 
+    CreateWorkflow, 
+    SetWorkFlowActive, 
+    flowTab, 
+    UpdateActiveWorkflowNodes, 
+    HandleWorkFlowBlockDrop,
+    UpdateActiveWorkflowEdges,
+    activeFloweUpdated, 
+    activeworkFlowBlock, 
+    workflowsData, 
+    SetWorkflowDataBack
 };
