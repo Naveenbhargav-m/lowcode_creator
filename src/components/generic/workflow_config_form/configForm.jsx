@@ -1,5 +1,5 @@
 // ConfigForm.js
-import TabView, { Accordion, ArrayField, KeyValueMapper, SelectField, TextField } from "./components/fields";
+import TabView, { Accordion, ArrayField, CodeEditorField, KeyValueMapper, SelectField, TextField } from "./components/fields";
 import CodeEditorModal from "./components/code_model";
 import { Code } from "lucide-react";
 
@@ -168,6 +168,18 @@ const ConfigForm = ({
             value={values[id] || []}
             onChange={(value) => handleChange(id, value)}
             {...props}
+          />
+        );
+      case 'code':
+        return (
+          <CodeEditorField
+            key={id}
+            id={id}
+            label={label}
+            description={description}
+            value={values[id] || []}
+            onChange={(value) => handleChange(id, value)}
+            {...props} 
           />
         );
       default:

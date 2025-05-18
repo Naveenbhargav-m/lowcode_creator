@@ -73,6 +73,7 @@ function WorkflowNameTile({ obj }) {
 
 function DragComponent( ) {  
   let registerNodes = [
+    {"name":"Code", "type":"code_block","handles":[{"position": "bottom","type":"source"}, {"position": "top","type":"target"}]}, 
     {"name": "Insert Row", "type":"insert_row", "handles":[{"position": "bottom", "type":"source"}, {"position": "top", "type":"target"}]}, 
     {"name":"update Row", "type":"update_row","handles":[{"position": "bottom","type":"source"}, {"position": "top","type":"target"}]}, 
     {"name":"condition", "type":"condition","handles":[{"position": "bottom","type":"source"}, {"position": "top","type":"target"}]},];

@@ -315,3 +315,60 @@ export function End({ data }) {
     </FlowNode>
   );
 }
+
+
+
+export function CodeBlock({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  // Determine language for syntax highlighting
+  const language = data.language || 'javascript';
+
+  // Function to format code for preview
+  const formatCodePreview = (code) => {
+    if (!code) return null;
+    
+    // Split code into lines
+    const lines = code.split('\n');
+    
+    // If code is small enough, show it all
+    if (lines.length <= 5 && code.length < 200) {
+      return code;
+    }
+    
+    // Otherwise, show first few lines with ellipsis
+    return lines.slice(0, 3).join('\n') + (lines.length > 3 ? '\n...' : '');
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Code Block"
+      icon="code-2"
+      color={COLORS.code || "#6366F1"} // Indigo color if COLORS.code not defined
+    >
+      {data.code ? (
+        <div className="w-full max-w-full">
+          <div className="flex items-center justify-between mb-1 px-1">
+            <span className="text-xs font-medium text-gray-500">{language}</span>
+            <span className="text-xs text-gray-400">{data.code.split('\n').length} lines</span>
+          </div>
+          <div className="code-preview text-xs font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-hidden whitespace-pre border-l-4 border-indigo-500">
+            {formatCodePreview(data.code)}
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center space-x-2 text-gray-500">
+          <span>Execute code snippet</span>
+        </div>  
+      )}
+    </FlowNode>
+  );
+}
