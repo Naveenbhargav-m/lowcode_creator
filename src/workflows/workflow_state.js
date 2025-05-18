@@ -361,7 +361,7 @@ function SetWorkFlowActive(id) {
         return false;
     }
     
-    const targetWorkflow = currentWorkflows.find(flow => flow && flow.fid === id);
+    const targetWorkflow = currentWorkflows.find(flow => flow && flow.id === id);
     
     if (!targetWorkflow) {
         console.warn(`SetWorkFlowActive: Workflow with ID ${id} not found`);
@@ -369,7 +369,7 @@ function SetWorkFlowActive(id) {
     }
     
     // Set as active workflow
-    activeWorkFlow.value = {...targetWorkflow};
+    activeWorkFlow.value = {...targetWorkflow};    
     activeFloweUpdated.value = generateUID();
     return true;
 }

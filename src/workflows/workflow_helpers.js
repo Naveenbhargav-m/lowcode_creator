@@ -8,6 +8,7 @@ function GetWorkflowFormConfig(activeworkflow, activeblock) {
     let response = {};
     let flowdata = workflowsData.value;
     let id = activeworkflow["id"] || "";
+    console.log("flowdata:",flowdata, workflowsData.value,activeblock, id);
     let blockID = activeblock["id"] || "";
     let currentWorkflowData = flowdata[id] || {};
     let currentBlockData = currentWorkflowData[blockID] || {};
