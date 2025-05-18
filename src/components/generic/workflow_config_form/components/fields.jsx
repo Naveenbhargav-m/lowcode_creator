@@ -1,5 +1,7 @@
 import { ChevronUpIcon } from "lucide-react";
 import { useState } from "preact/hooks";
+import { useRef, useEffect } from 'react';
+
 export const TextField = ({ id, label, description, value, onChange, placeholder, required, disabled }) => {
   return (
     <div className="mb-4">
@@ -49,6 +51,144 @@ export const SelectField = ({ id, label, description, value, onChange, options, 
   );
 };
 
+
+
+// This is for the case statement in your form renderer
+// case 'code':
+//   return (
+//     <CodeEditorField
+//       key={id}
+//       id={id}
+//       label={label}
+//       description={description}
+//       value={values[id] || ''}
+//       onChange={(value) => handleChange(id, value)}
+//       {...props}
+//     />
+//   );
+
+export const CodeEditorField = ({ id, label, description, value, onChange, required, disabled, language = "javascript" }) => {
+  console.log("value in code editor:",value);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [codeContent, setCodeContent] = useState(value || "");
+  const textareaRef = useRef(null);
+  const popupRef = useRef(null);
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target) && 
+          textareaRef.current && !textareaRef.current.contains(event.target)) {
+        setIsPopupOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Handle ESC key to close popup
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsPopupOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleSave = () => {
+    onChange(codeContent);
+    setIsPopupOpen(false);
+  };
+
+  const handleCancel = () => {
+    setCodeContent(value);
+    setIsPopupOpen(false);
+  };
+
+  const getPreviewContent = () => {
+    if (!codeContent) return 'Click to add code';
+    // Limit the preview to 3 lines
+    console.log("code content:",codeContent);
+    const lines = codeContent.split('\n');
+    const previewLines = lines.slice(0, 3);
+    return previewLines.join('\n') + (lines.length > 3 ? '...' : '');
+  };
+
+  return (
+    <div className="mb-4 relative">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {description && <p className="text-sm text-gray-500 mb-2">{description}</p>}
+      
+      {/* Small textarea preview */}
+      <div 
+        ref={textareaRef}
+        onClick={() => !disabled && setIsPopupOpen(true)}
+        className={`
+          min-h-20 w-full px-3 py-2 border border-gray-300 rounded-md 
+          font-mono text-sm bg-gray-50 cursor-pointer whitespace-pre overflow-hidden
+          focus:outline-none focus:ring-2 focus:ring-blue-500
+          ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
+        `}
+      >
+        {getPreviewContent()}
+      </div>
+
+      {/* Popup code editor */}
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div 
+            ref={popupRef}
+            className="bg-white rounded-lg shadow-xl w-4/5 max-w-4xl max-h-4/5 flex flex-col"
+          >
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-lg font-medium text-gray-900">Edit Code</h3>
+              <div>
+                <span className="text-sm text-gray-500 mr-2">Language: {language}</span>
+              </div>
+            </div>
+            
+            <div className="p-4 flex-1 overflow-auto">
+              <textarea
+                autoFocus
+                value={codeContent}
+                onChange={(e) => setCodeContent(e.target.value)}
+                className="w-full h-96 font-mono text-sm p-2 border border-gray-300 rounded"
+                spellCheck="false"
+              />
+            </div>
+            
+            <div className="p-4 border-t border-gray-200 flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 
 import { PlusCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react';

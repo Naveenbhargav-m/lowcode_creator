@@ -1,7 +1,7 @@
 import { addEdge, ConnectionLineType, ConnectionMode, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import { activeFloweUpdated, activeWorkFlow, HandleWorkFlowBlockDrop, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflows, workflowsData } from "./workflow_state";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { Condition, End, InsertRow, Start, UpdateRow } from "./block_ components";
+import { CodeBlock, Condition, End, InsertRow, Start, UpdateRow } from "./block_ components";
 import { Drop } from "../components/custom/Drop";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncWorkflowData } from "./workflow_api";
@@ -11,6 +11,7 @@ import { SyncWorkflowData } from "./workflow_api";
 let nodeTypes = {
   "insert_row": InsertRow,
   "update_row": UpdateRow,
+  "code_block": CodeBlock,
   "condition": Condition,
   "start": Start,
   "end": End,
@@ -23,6 +24,13 @@ function FlowBuilder() {
 
   useEffect(() => {
     const activeFlow = activeWorkFlow.value || { nodes: [], edges: [] };
+    if(activeFlow["nodes"] === null || activeFlow["edges"] === null) {
+      activeFlow["nodes"] = [];
+    }
+
+    if(activeFlow["edges"] === null || activeFlow["edges"] === null) {
+      activeFlow["edges"] = [];
+    }
     console.log("active flow:", activeFlow);
     setNodes(activeFlow["nodes"]);
     setEdges(activeFlow["edges"]);

@@ -1,5 +1,6 @@
 import { GetDataFromAPi } from "../api/api_syncer";
-import { AppID, PrestClient } from "../states/global_state";
+import { ApiClient, AppID, PrestClient } from "../states/global_state";
+import { generateWorkflowSchema } from "./workflow_helpers";
 import { activeWorkFlow, workflownames, workflows, workflowsData } from "./workflow_state";
 
 
@@ -74,10 +75,14 @@ function SyncWorkflowData() {
         let dataCopy = { ...data };
         delete dataCopy["_change_type"];
         flowCopy["flow_data"] = dataCopy;
+        let workflowSchema = generateWorkflowSchema(flowCopy);
+        console.log("workflow schema generated:",workflowSchema);
+        flowCopy["workflow_schema"] = JSON.stringify(workflowSchema);
         delete flowCopy["_change_type"];
         flowCopy["flow_data"] = JSON.stringify(flowCopy["flow_data"]);
         flowCopy["edges"] = JSON.stringify(flowCopy["edges"]);
         flowCopy["nodes"] = JSON.stringify(flowCopy["nodes"]);
+        console.log("flow copy:",flowCopy);
         if(operation === "create") {  // Changed from "add" to "create"
             createFlows.push(flowCopy);
         } else if(operation === "update") {
@@ -98,31 +103,37 @@ function SyncWorkflowData() {
     NormalizeWorkflows();
 }
 
-function UpdateWorkflowsBatch(workflows) {
-    if(workflows === undefined) {
+function UpdateWorkflowsBatch(updateflows) {
+    if(updateflows === undefined) {
         return;
     }
-    if(workflows.length === 0) {
+    if(updateflows.length === 0) {
         return;
     }
     let endpoint = `${AppID}/public/_workflows`
-    for(let i=0;i<workflows.length;i++) {
-        let flowID = workflows[i]["fid"];
-        delete workflows[i]["id"];
-        PrestClient.patch(endpoint, {"query": {"fid": flowID}, "body": workflows[i]});
+    for(let i=0;i<updateflows.length;i++) {
+        let flowID = updateflows[i]["fid"];
+        delete updateflows[i]["id"];
+        ApiClient.patch(endpoint, {"query": {"where=fid": flowID}, "body": updateflows[i]});
     }
 }
 
 
-function InsertBatchWorkflows(workflows) {
-    if(workflows === undefined) {
+function InsertBatchWorkflows(createflows) {
+    if(createflows === undefined) {
         return;
     }
-    if(workflows.length === 0) {
+    if(createflows.length === 0) {
         return;
     }
-    let endPoint = `batch/${AppID}/public/_workflows`;
-    PrestClient.post(endPoint,  {"body":workflows});
+    let createflows2 = [];
+    for(let i=0;i<createflows.length;i++) {
+        let temp = createflows[i];
+        delete temp["id"];
+        createflows2.push(temp);
+    }
+    let endPoint = `${AppID}/public/_workflows`;
+    ApiClient.post(endPoint,  {"body":createflows2});
 }
 
 

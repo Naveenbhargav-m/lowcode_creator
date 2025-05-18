@@ -130,7 +130,16 @@ let blocksRequirements = {
       "call_flow": "dropdown",
       "name": "text"
     },
-   }
+   },
+   "code_block": {
+      "label": "Code",
+      "description": "Code block for you customization with more control",
+      "data": {
+        "input_map": "mapping",
+        "is_background": "toggle",
+        "max_time": "text"
+      },
+    }
 };
 
 let blockFormRequirements = {
@@ -169,6 +178,28 @@ let blockFormRequirements = {
                 "label": "output_mapping",
                 "type": "mapping",
                 "description": "output mapping from the workflow."
+              },
+            ],
+          },
+       ],
+      }
+      ],
+  },
+  "code_block": {
+    "sections": [
+      {
+       "id": "code_block",
+       "title": "Code Config",
+       "groups": [
+          {
+            "id": "code_block",
+            "title": "js_code",
+            "fields": [
+              {
+                "id": "js_code",
+                "label": "js_code",
+                "type": "code",
+                "description": "Can write js code here."
               },
             ],
           },
