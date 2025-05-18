@@ -23,6 +23,13 @@ function FlowBuilder() {
 
   useEffect(() => {
     const activeFlow = activeWorkFlow.value || { nodes: [], edges: [] };
+    if(activeFlow["nodes"] === null || activeFlow["edges"] === null) {
+      activeFlow["nodes"] = [];
+    }
+
+    if(activeFlow["edges"] === null || activeFlow["edges"] === null) {
+      activeFlow["edges"] = [];
+    }
     console.log("active flow:", activeFlow);
     setNodes(activeFlow["nodes"]);
     setEdges(activeFlow["edges"]);
