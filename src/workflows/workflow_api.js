@@ -1,5 +1,5 @@
 import { GetDataFromAPi } from "../api/api_syncer";
-import { AppID, PrestClient } from "../states/global_state";
+import { ApiClient, AppID, PrestClient } from "../states/global_state";
 import { activeWorkFlow, workflownames, workflows, workflowsData } from "./workflow_state";
 
 
@@ -109,7 +109,7 @@ function UpdateWorkflowsBatch(workflows) {
     for(let i=0;i<workflows.length;i++) {
         let flowID = workflows[i]["fid"];
         delete workflows[i]["id"];
-        PrestClient.patch(endpoint, {"query": {"fid": flowID}, "body": workflows[i]});
+        ApiClient.patch(endpoint, {"query": {"where=fid": flowID}, "body": workflows[i]});
     }
 }
 
@@ -121,8 +121,8 @@ function InsertBatchWorkflows(workflows) {
     if(workflows.length === 0) {
         return;
     }
-    let endPoint = `batch/${AppID}/public/_workflows`;
-    PrestClient.post(endPoint,  {"body":workflows});
+    let endPoint = `${AppID}/public/_workflows`;
+    ApiClient.post(endPoint,  {"body":workflows});
 }
 
 
