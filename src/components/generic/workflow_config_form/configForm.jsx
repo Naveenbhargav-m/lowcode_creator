@@ -177,7 +177,7 @@ const ConfigForm = ({
             id={id}
             label={label}
             description={description}
-            value={values[id] || []}
+            value={values[id] || ""}
             onChange={(value) => handleChange(id, value)}
             {...props} 
           />

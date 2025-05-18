@@ -130,7 +130,8 @@ let blocksRequirements = {
       "call_flow": "dropdown",
       "name": "text"
     },
-    "code_block": {
+   },
+   "code_block": {
       "label": "Code",
       "description": "Code block for you customization with more control",
       "data": {
@@ -139,7 +140,6 @@ let blocksRequirements = {
         "max_time": "text"
       },
     }
-   }
 };
 
 let blockFormRequirements = {

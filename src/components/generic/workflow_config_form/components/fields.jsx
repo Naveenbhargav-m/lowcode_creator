@@ -68,8 +68,9 @@ export const SelectField = ({ id, label, description, value, onChange, options, 
 //   );
 
 export const CodeEditorField = ({ id, label, description, value, onChange, required, disabled, language = "javascript" }) => {
+  console.log("value in code editor:",value);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [codeContent, setCodeContent] = useState(value);
+  const [codeContent, setCodeContent] = useState(value || "");
   const textareaRef = useRef(null);
   const popupRef = useRef(null);
 
@@ -115,6 +116,7 @@ export const CodeEditorField = ({ id, label, description, value, onChange, requi
   const getPreviewContent = () => {
     if (!codeContent) return 'Click to add code';
     // Limit the preview to 3 lines
+    console.log("code content:",codeContent);
     const lines = codeContent.split('\n');
     const previewLines = lines.slice(0, 3);
     return previewLines.join('\n') + (lines.length > 3 ? '...' : '');
