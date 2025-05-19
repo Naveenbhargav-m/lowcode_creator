@@ -52,7 +52,7 @@ function UpdateBatchData(key,forms) {
     for(let i=0;i<forms.length;i++) {
         let formID = forms[i]["id"];
         delete forms[i]["id"];
-        ApiClient.patch(endpoint, {"query": {"where=id": formID}, "body": forms[i]});
+        ApiClient.patch(endpoint, {"query": {"where": "id="+formID}, "body": forms[i]});
     }
 }
 
@@ -65,7 +65,7 @@ function InsertBatchData(key,forms) {
     if(forms.length === 0) {
         return;
     }
-    let endPoint = `batch/${AppID}/public/${key}`;
+    let endPoint = `${AppID}/public/${key}`;
     let temp = [];
     for(let i=0;i<forms.length;i++) {
         let temp1 = forms[i];
