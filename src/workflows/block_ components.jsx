@@ -372,3 +372,322 @@ export function CodeBlock({ data }) {
     </FlowNode>
   );
 }
+
+
+
+export function ReadRow({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Read Row"
+      icon="database"
+      color={COLORS.database || "#10B981"} // Green color if COLORS.database not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.table && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Table:</span>
+            <span className="text-xs">{data.table}</span>
+          </div>
+        )}
+        {data.conditions && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Conditions:</span>
+            <span className="text-xs">{data.conditions}</span>
+          </div>
+        )}
+        {!data.table && !data.conditions && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Read data from database</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}
+
+export function DeleteRow({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Delete Row"
+      icon="trash-2"
+      color={COLORS.delete || "#EF4444"} // Red color if COLORS.delete not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.table && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Table:</span>
+            <span className="text-xs">{data.table}</span>
+          </div>
+        )}
+        {data.conditions && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Conditions:</span>
+            <span className="text-xs">{data.conditions}</span>
+          </div>
+        )}
+        {!data.table && !data.conditions && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Delete data from database</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}
+
+export function HttpCall({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="HTTP Call"
+      icon="globe"
+      color={COLORS.http || "#8B5CF6"} // Purple color if COLORS.http not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.method && data.url && (
+          <>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-medium px-1 py-0.5 bg-purple-100 dark:bg-purple-900 rounded">
+                {data.method}
+              </span>
+              <span className="text-xs truncate max-w-xs">{data.url}</span>
+            </div>
+            {data.headers && (
+              <div className="text-xs text-gray-500">
+                {Object.keys(data.headers).length} header{Object.keys(data.headers).length !== 1 ? 's' : ''}
+              </div>
+            )}
+          </>
+        )}
+        {(!data.method || !data.url) && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Make API request</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}
+
+export function Loop({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom },
+      { id: 'loop-body', type: 'source', position: Position.Right }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Loop"
+      icon="repeat"
+      color={COLORS.loop || "#F59E0B"} // Amber color if COLORS.loop not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.collection && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Collection:</span>
+            <span className="text-xs">{data.collection}</span>
+          </div>
+        )}
+        {data.variable && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Variable:</span>
+            <span className="text-xs">{data.variable}</span>
+          </div>
+        )}
+        {!data.collection && !data.variable && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Iterate through items</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}
+
+export function CreateTopic({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Create Topic"
+      icon="message-square-plus"
+      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.topicName && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Topic:</span>
+            <span className="text-xs">{data.topicName}</span>
+          </div>
+        )}
+        {data.options && Object.keys(data.options).length > 0 && (
+          <div className="text-xs text-gray-500">
+            With {Object.keys(data.options).length} option{Object.keys(data.options).length !== 1 ? 's' : ''}
+          </div>
+        )}
+        {!data.topicName && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Create topic</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}
+
+export function SubscribeTopic({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Subscribe Topic"
+      icon="bell"
+      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.topicName && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Topic:</span>
+            <span className="text-xs">{data.topicName}</span>
+          </div>
+        )}
+        {data.subscriber && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Subscriber:</span>
+            <span className="text-xs">{data.subscriber}</span>
+          </div>
+        )}
+        {!data.topicName && !data.subscriber && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Subscribe to messaging topic</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}
+
+export function UnsubscribeTopic({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Unsubscribe Topic"
+      icon="bell-off"
+      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.topicName && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Topic:</span>
+            <span className="text-xs">{data.topicName}</span>
+          </div>
+        )}
+        {data.subscriber && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Subscriber:</span>
+            <span className="text-xs">{data.subscriber}</span>
+          </div>
+        )}
+        {!data.topicName && !data.subscriber && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Unsubscribe topic</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}
+
+export function DeleteTopic({ data }) {
+  // Default handles if none provided
+  const nodeData = {
+    ...data,
+    handles: data.handles || [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom }
+    ]
+  };
+
+  return (
+    <FlowNode
+      data={nodeData}
+      name="Delete Topic"
+      icon="message-square-x"
+      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
+    >
+      <div className="flex flex-col space-y-1">
+        {data.topicName && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium">Topic:</span>
+            <span className="text-xs">{data.topicName}</span>
+          </div>
+        )}
+        {!data.topicName && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <span>Delete topic</span>
+          </div>
+        )}
+      </div>
+    </FlowNode>
+  );
+}

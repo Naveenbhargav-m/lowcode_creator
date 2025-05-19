@@ -1,12 +1,10 @@
-import { addEdge, ConnectionLineType, ConnectionMode, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
+import { addEdge, ConnectionLineType, ConnectionMode, ReactFlow, useEdgesState, useNodesState, Controls, Background, Panel } from "@xyflow/react";
 import { activeFloweUpdated, activeWorkFlow, HandleWorkFlowBlockDrop, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflows, workflowsData } from "./workflow_state";
-import { useCallback, useEffect, useState } from "preact/hooks";
-import { CodeBlock, Condition, End, InsertRow, Start, UpdateRow } from "./block_ components";
+import { useCallback, useEffect, useState, useRef } from "preact/hooks";
+import { CodeBlock, Condition, CreateTopic, DeleteRow, DeleteTopic, End, HttpCall, InsertRow, Loop, ReadRow, Start, SubscribeTopic, UnsubscribeTopic, UpdateRow } from "./block_ components";
 import { Drop } from "../components/custom/Drop";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncWorkflowData } from "./workflow_api";
-
-
 
 let nodeTypes = {
   "insert_row": InsertRow,
@@ -15,12 +13,21 @@ let nodeTypes = {
   "condition": Condition,
   "start": Start,
   "end": End,
+  "read_rows": ReadRow,
+  "delete_rows": DeleteRow,
+  "loop": Loop,
+  "http_call": HttpCall,
+  "subscribe_topic": SubscribeTopic,
+  "unsubscribe_topic": UnsubscribeTopic,
+  "create_topic": CreateTopic,
+  "delete_topic": DeleteTopic,
 };
 
 function FlowBuilder() {
-  
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [selectedElements, setSelectedElements] = useState({ nodes: [], edges: [] });
+  const reactFlowInstance = useRef(null);
 
   useEffect(() => {
     const activeFlow = activeWorkFlow.value || { nodes: [], edges: [] };
@@ -46,10 +53,66 @@ function FlowBuilder() {
 
   const onConnect = useCallback(
     (params) => {
-      console.log("Connection params:", params); // Debugging log
+      console.log("Connection params:", params);
       setEdges((eds) => addEdge(params, eds));
     },
     [],
+  );
+
+  // Handle node selection
+  const onSelectionChange = useCallback(
+    (elements) => {
+      setSelectedElements(elements);
+    },
+    []
+  );
+
+  // Delete selected elements (nodes and edges)
+  const deleteSelectedElements = useCallback(() => {
+    // Delete selected edges
+    if (selectedElements.edges && selectedElements.edges.length > 0) {
+      setEdges((eds) => eds.filter(e => !selectedElements.edges.some(se => se.id === e.id)));
+    }
+    
+    // Delete selected nodes
+    if (selectedElements.nodes && selectedElements.nodes.length > 0) {
+      const nodesToRemove = selectedElements.nodes.map(node => node.id);
+      setNodes((nds) => nds.filter(node => !nodesToRemove.includes(node.id)));
+      
+      // Also remove any connected edges
+      setEdges((eds) => eds.filter(
+        edge => !nodesToRemove.includes(edge.source) && !nodesToRemove.includes(edge.target)
+      ));
+    }
+  }, [selectedElements, setEdges, setNodes]);
+
+  // Handle keyboard shortcuts
+  const onKeyDown = useCallback(
+    (event) => {
+      // Delete on Delete or Backspace key
+      if ((event.key === 'Delete' || event.key === 'Backspace') && 
+          (selectedElements.nodes.length > 0 || selectedElements.edges.length > 0)) {
+        event.preventDefault();
+        deleteSelectedElements();
+      }
+    },
+    [deleteSelectedElements, selectedElements]
+  );
+
+  // Register keyboard event listener
+  useEffect(() => {
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [onKeyDown]);
+
+  // Store React Flow instance
+  const onInit = useCallback(
+    (instance) => {
+      reactFlowInstance.current = instance;
+    },
+    []
   );
 
   // Default React Flow props for better connection behavior
@@ -90,9 +153,45 @@ function FlowBuilder() {
             connectionLineStyle={{ stroke: '#aaa', strokeWidth: 2 }}
             connectionLineType={ConnectionLineType.SmoothStep}
             selectNodesOnDrag={false}
-            // panOnDrag={[1, 2]} // Only pan when middle or right mouse button is used for dragging
-            zoomOnDoubleClick={false} // Disable zoom on double click
-          />
+            onInit={onInit}
+            onSelectionChange={onSelectionChange}
+            deleteKeyCode={['Delete', 'Backspace']}
+            selectionOnDrag
+            selectionMode="partial"
+            multiSelectionKeyCode="Control"
+          >
+            {/* Controls for zoom, fit view */}
+            <Controls />
+            
+            {/* Background grid pattern */}
+            <Background color="#aaa" gap={16} />
+            
+            {/* Custom panel with delete button
+            <Panel position="top-right" style={{ marginRight: '10px', marginTop: '10px' }}>
+              <button 
+                onClick={deleteSelectedElements}
+                disabled={!selectedElements.nodes.length && !selectedElements.edges.length}
+                style={{
+                  padding: '6px 10px',
+                  backgroundColor: (selectedElements.nodes.length || selectedElements.edges.length) ? '#f44336' : '#e0e0e0',
+                  color: (selectedElements.nodes.length || selectedElements.edges.length) ? 'white' : '#9e9e9e',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: (selectedElements.nodes.length || selectedElements.edges.length) ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '14px'
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 6H5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Delete
+              </button>
+            </Panel> */}
+          </ReactFlow>
         </div>
       </Drop>
     </>

@@ -135,7 +135,14 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
   let childElements = childrenSignal.value.map(childId => ElementsMap[childId]?.value);
   switch (title) {
     case "card":
-      return <Card {...layoutItem}>
+      return (
+        <SelectableComponent
+        id={layoutItem.id}
+        onRemove={(id)=> {viewType === "template" ? DeleteTemplateElements(layoutItem["id"]) : DeleteScreenElement(layoutItem["id"])}}
+        onChick={(e,id)=> {e.stopPropagation();activeSignal.value = layoutItem.id;}}
+        isSelected={activeSignal.value === layoutItem.id}
+        >
+      <Card {...layoutItem}>
               <RenderChildren 
               dropCallBack={dropCallBack} 
               activeSignal={activeSignal} 
@@ -144,7 +151,9 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               viewType={viewType}
               ElementsMap={ElementsMap}
               />
-            </Card>;
+            </Card>
+          </SelectableComponent>
+            );
     case "grid_view":
       return <GridView {...layoutItem}>
               <RenderChildren 
@@ -157,7 +166,14 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
                     />
             </GridView>;
     case "container":
-      return <Container {...layoutItem}>
+      return (
+      <SelectableComponent
+      id={layoutItem.id}
+      onRemove={(id)=> {viewType === "template" ? DeleteTemplateElements(layoutItem["id"]) : DeleteScreenElement(layoutItem["id"])}}
+      onChick={(e,id)=> {e.stopPropagation();activeSignal.value = layoutItem.id;}}
+      isSelected={activeSignal.value === layoutItem.id}
+      >
+      <Container {...layoutItem}>
            <RenderChildren 
               dropCallBack={dropCallBack} 
               activeSignal={activeSignal} 
@@ -166,7 +182,9 @@ export function renderContainer(layoutItem , dropCallBack , activeSignal, viewTy
               viewType={viewType}
               ElementsMap={ElementsMap}
               />
-          </Container>;
+          </Container>
+          </SelectableComponent>
+          );
     case "list_view":
       return <ListView {...layoutItem}>
          <RenderChildren 

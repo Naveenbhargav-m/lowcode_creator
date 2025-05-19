@@ -126,6 +126,24 @@ import { EventsConfigWrapper } from './config_form_components/event_panel2';
             label: 'Margin', 
             type: 'text',
             cssProperty: 'margin'
+          },
+          { 
+            id: 'height', 
+            label: 'Height', 
+            type: 'text',
+            cssProperty: 'height'
+          },
+          { 
+            id: 'width', 
+            label: 'Width', 
+            type: 'text',
+            cssProperty: 'width'
+          },
+          { 
+            id: 'z-index', 
+            label: 'z-index', 
+            type: 'text',
+            cssProperty: 'z-index'
           }
         ]
       }
