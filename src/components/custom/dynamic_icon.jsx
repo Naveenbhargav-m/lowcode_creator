@@ -87,6 +87,13 @@ import {
   CircleDot,
   DiamondPlus,
   CirclePlay,
+  BookOpen,
+  Trash,
+  Repeat,
+  Radio,
+  MailCheck,
+  MailQuestion,
+  Webhook,
 } from "lucide-react";
 
 export default function DynamicIcon({ name, size, style = {}}) {
@@ -179,7 +186,14 @@ export default function DynamicIcon({ name, size, style = {}}) {
     "network": <Network size={size} style={{...style}}/>,
     "circle-dot": <CircleDot size={size} style={{...style}}/>,
     "diamond-plus": <DiamondPlus size={size} style={{...style}}/>,
-    "circle-play": <CirclePlay size={size} style={{...style}}/>
+    "circle-play": <CirclePlay size={size} style={{...style}}/>,
+    "book-open": <BookOpen size={size} style={{...style}}/>,
+    "trash": <Trash size={size} style={{...style}}/>,
+    "repeat": <Repeat size={size} style={{...style}}/>,
+    "radio": <Radio size={size} style={{...style}}/>,
+    "mail-check": <MailCheck size={size} style={{...style}}/>,
+    "mail-question": <MailQuestion size={size} style={{...style}}/>,
+    "webhook": <Webhook size={size} style={{...style}}/>
   };
 
   return icon_map[name] || null;

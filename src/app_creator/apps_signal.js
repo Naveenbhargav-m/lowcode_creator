@@ -27,7 +27,7 @@ async function GetAppsfromDB() {
 
 
 function InsertNewApp(appData) {
-  let baseurl = `api/create-database`;
+  let baseurl = `create-database`;
   let dbname = appData["gen_name"];
   let firstbody = {"name": dbname};
   ApiClient.post(baseurl, {body:firstbody}).then((resp) => {
@@ -38,7 +38,7 @@ function InsertNewApp(appData) {
       return;
     }
     let creatorBase = `${CreatorAPPID}/public/apps`;
-    PrestClient.post(creatorBase, {body:appData});
+    ApiClient.post(creatorBase, {body:appData});
     let existing = apps.value;
     existing.push(appData);
     apps.value = [...existing];

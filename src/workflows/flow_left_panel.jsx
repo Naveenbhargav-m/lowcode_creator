@@ -22,9 +22,18 @@ const COLORS = {
 // Map node types to their colors
 const NODE_COLORS = {
   "code_block": COLORS.code,
+  "condition": COLORS.insert,
+  "loop": COLORS.condition,
   "insert_row": COLORS.insert,
   "update_row": COLORS.update,
-  "condition": COLORS.condition,
+  "read_rows": COLORS.active,
+  "delete_rows": COLORS.condition,
+  "http_request": COLORS.code,
+  "create_topic": COLORS.insert,
+  "subscribe_topic": COLORS.insert,
+  "unsubscribe_topic": COLORS.condition,
+  "delete_topic": COLORS.border,
+
 };
 
 // Icons mapping
@@ -33,6 +42,14 @@ const icons = [
   "database",
   "parentheses",
   "workflow",
+  "book-open",
+  "trash",
+  "repeat",
+  "webhook",
+  "radio",
+  "mail-check",
+  "mail-question",
+  "trash"
 ];
 
 function WorkflowsList() {
@@ -62,7 +79,7 @@ function WorkflowsList() {
 
 function WorkflowsListPanel() {
   return(
-    <div style={{ width: "100%", height: "100%" }}>
+    <div className="scrollable-div" style={{ width: "100%", height: "50vh" }}>
       {workflownames.value.map((value, index) => {
         return (
           <WorkflowNameTile obj={value} key={index} />
@@ -135,10 +152,19 @@ function DragComponent() {
     {"name": "Insert Row", "type": "insert_row", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
     {"name": "Update Row", "type": "update_row", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
     {"name": "Condition", "type": "condition", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "Read Rows", "type": "read_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "Delete Rows", "type": "delete_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "Loop", "type": "loop", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "http_call", "type": "http_call", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "create_topic", "type": "create_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "subscribe topic", "type": "subscribe_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "unsubscribe topic", "type": "unsubscribe_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+    {"name": "delete topic", "type": "delete_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+
   ];
   
   return (
-    <div className="custom-drag-list" style={{ padding: "8px 0" }}> 
+    <div className="custom-drag-list scrollable-div" style={{ padding: "8px 0" , height:"70vh" }}> 
       {registerNodes.map((item, ind) => {
         const nodeColor = NODE_COLORS[item.type] || COLORS.active;
         
