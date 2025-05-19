@@ -38,6 +38,11 @@ export const ConfigFormV3 = ({
     setOpenSections(initialOpenSections);
   }, [schema]);
 
+
+
+  useEffect((() => {
+    setFormValues({...initialValues});
+  }), [initialValues]);
   // Handle value changes
   const handleFieldChange = (fieldId, value) => {
     setFormValues(prev => {
