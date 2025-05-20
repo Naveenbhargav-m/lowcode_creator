@@ -20,6 +20,7 @@ import SecretsManager from "./secret_store/secret_store";
 import TemplateRegistrationPage from "./external_templates/external_templates";
 import { useEffect } from "preact/hooks";
 import { InitGlobalData } from "./states/global_repo";
+import ConfigPanelTest from "./tests/popup";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -68,6 +69,7 @@ export function App() {
             <Route path="/queries" component={QueryBuilderPage} />
             <Route path="/test" component={WorkflowBuilder} />
             <Route path="/test2" component={ConfigFormDemo} />
+            <Route path="/test_panel" component={ConfigPanelTest} />
             <Route default component={() => <div>Not Found</div>} />
           </Router>
         </main>

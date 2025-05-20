@@ -35,6 +35,7 @@ function LoadQueries() {
         (data) => {
             if(data === undefined) {
                 console.log("queries data is undefined:",data);
+                return;
             }
             var temp = {};
             let length = data.length;
