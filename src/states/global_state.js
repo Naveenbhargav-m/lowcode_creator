@@ -3,7 +3,7 @@ import { APIManager } from "../api/api_manager";
 import { GetDataFromAPi, SyncData } from "../api/api_syncer";
 
 let sideBarEnable = signal(true);
-const PrestDBaseUrl = "http://localhost:8000";
+const PrestDBaseUrl = "http://localhost:8001/api";
 const CreatorBackendUrl = "http://localhost:8001/api";
 const AppID = signal("");
 const CreatorAPPID = signal("nokodo_creator");

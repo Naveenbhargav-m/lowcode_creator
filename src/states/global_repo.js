@@ -1,7 +1,7 @@
 import { APIManager } from "../api/api_manager";
 import { GetDataFromAPi } from "../api/api_syncer";
 import { LoadTables } from "../table_builder/table_builder_state";
-import { AppID, PrestDBaseUrl } from "./global_state";
+import { ApiClient, AppID, PrestDBaseUrl } from "./global_state";
 
 let global_templates = {};
 let global_screens = {};
@@ -11,10 +11,7 @@ let global_states = {};
 let global_workflows = {};
 let global_tables = {};
 let global_views = {};
-let global_queries = {
-    "dummy_query1":  {},
-    "dummy_query2": {},
-};
+let global_queries = {};
 let global_data_templates = {};
 let global_secrets = {};
 let global_groups = {};
@@ -28,8 +25,31 @@ function InitGlobalData() {
     LoadGlobalTables();
     LoadGlobalViews();
     LoadGlobalWorkflows();
+    LoadQueries();
 }
 
+
+function LoadQueries() {
+    let url = `${AppID.value}/public/_queries`;
+    ApiClient.get(url).then(
+        (data) => {
+            if(data === undefined) {
+                console.log("queries data is undefined:",data);
+                return;
+            }
+            var temp = {};
+            let length = data.length;
+            for(var i=0;i<length;i++) {
+                let cur = data[i];
+                let id = cur["id"];
+                let innerdata = cur["query_data"];
+                innerdata["id"] = id;
+                temp[id] = innerdata;
+            }
+            global_queries = {...temp};
+        }
+    );
+}
 
 function LoadGlobalTemplates() {
     GetDataFromAPi("_templates").then((myscreens) => {  

@@ -14,7 +14,7 @@ export function TemplateBuilderRightView() {
     } 
     console.log("active template element changed:",activeElementID);
     const handleChange = (styles) => {
-      styles = groupObjectValues(styles, groupings);
+      // styles = groupObjectValues(styles, groupings);
       console.log("existing element:",activeElement);
       if(activeElement !== undefined) {
         console.log("config:",styles);
@@ -25,6 +25,7 @@ export function TemplateBuilderRightView() {
   
     const handleSubmit = (styles) => {
       styles = groupObjectValues(styles, groupings);
+      console.log("inner styles to update:",styles);
       if(activeElement !== undefined) {
         activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...styles};
         activeTemplateElements[activeElementID].value = {...activeElement};
@@ -68,10 +69,12 @@ export function TemplateBuilderRightView() {
     console.log("active element:", activeElement);
     var initalConfig = activeElement["configs"] || {};
     var initalStyles = initalConfig["style"] || {};
+    console.log("inital styles1:",initalStyles );
     var innerstyles = ungroupObjectValues(initalStyles);
+    console.log("inner styles:",innerstyles);
     return (
     <div style={{width:"100%", "color": "black"}}>
-      <ConfigFormV3 schema={elementConfig} initialValues={{...innerstyles}} 
+      <ConfigFormV3 schema={elementConfig} initialValues={{...innerstyles.values}} 
       onChange={(data) => {handleChange(data|| {});}} onSubmit={(data) => {handleSubmit(data || {})}}/>
     </div>);
 }

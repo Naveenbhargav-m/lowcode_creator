@@ -237,41 +237,48 @@ export function groupObjectValues(values, grouping) {
     
     return result;
   }
+/**
+ * Flattens a grouped object back to a single level and extracts the grouping schema
+ * @param {Object} groupedValues - The object with values organized into groups
+ * @returns {Object} - An object containing the flattened values and the extracted grouping schema
+ */
+export function ungroupObjectValues(groupedValues) {
+  // Initialize result objects
+  const flattenedValues = {};
+  const extractedGrouping = {};
   
-  /**
-   * Flattens a grouped object back to a single level and extracts the grouping schema
-   * @param {Object} groupedValues - The object with values organized into groups
-   * @returns {Object} - An object containing the flattened values and the extracted grouping schema
-   */
-  export function ungroupObjectValues(groupedValues) {
-    // Initialize result objects
-    const flattenedValues = {};
-    const extractedGrouping = {};
+  // Process each group in the grouped values
+  for (const groupName in groupedValues) {
+    // Get the group object
+    const groupObj = groupedValues[groupName];
     
-    // Process each group in the grouped values
-    for (const groupName in groupedValues) {
-      // Get the group object
-      const groupObj = groupedValues[groupName];
-      
-      // Initialize the group in the extracted grouping schema
-      extractedGrouping[groupName] = [];
-      
-      // Process each key-value pair in the group
-      for (const key in groupObj) {
-        // Add the key-value pair to the flattened values
-        flattenedValues[key] = groupObj[key];
-        
-        // Add the key to the extracted grouping schema
-        extractedGrouping[groupName].push(key);
-      }
+    // Check if this is a leaf value (not an object or null/array)
+    if (groupObj === null || 
+        typeof groupObj !== 'object' || 
+        Array.isArray(groupObj)) {
+      // Keep leaf values at the top level
+      flattenedValues[groupName] = groupObj;
+      continue;
     }
     
-    return {
-      values: flattenedValues,
-      grouping: extractedGrouping
-    };
+    // Initialize the group in the extracted grouping schema
+    extractedGrouping[groupName] = [];
+    
+    // Process each key-value pair in the group
+    for (const key in groupObj) {
+      // Add the key-value pair to the flattened values
+      flattenedValues[key] = groupObj[key];
+      
+      // Add the key to the extracted grouping schema
+      extractedGrouping[groupName].push(key);
+    }
   }
   
+  return {
+    values: flattenedValues,
+    grouping: extractedGrouping
+  };
+}
 //   // Example usage for grouping:
 //   const values = {
 //     "color": "black",

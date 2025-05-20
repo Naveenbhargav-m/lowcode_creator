@@ -64,14 +64,12 @@ function UpdateQueryPart(part ,data) {
 
 }
 function LoadQueries() {
-    let jsonStr = localStorage.getItem("queries");
-    let map = JSON.parse(jsonStr);
-
     let url = `${AppID.value}/public/_queries`;
     ApiClient.get(url).then(
         (data) => {
             if(data === undefined) {
                 console.log("queries data is undefined:",data);
+                return;
             }
             var temp = {};
             let length = data.length;
