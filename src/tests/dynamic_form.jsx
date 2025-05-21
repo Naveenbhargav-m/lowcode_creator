@@ -368,7 +368,7 @@ function Row({ children, style = {}, hidden = false }) {
   if (hidden) return null;
   
   return (
-    <div style={{...styles.layout.row, ...style}}>
+    <div style={{...styles.layout.row, ...style["container"]}}>
       {children}
     </div>
   );
@@ -378,7 +378,7 @@ function Column({ children, style = {}, hidden = false }) {
   if (hidden) return null;
   
   return (
-    <div style={{...styles.layout.column, ...style}}>
+    <div style={{...styles.layout.column, ...style["container"]}}>
       {children}
     </div>
   );

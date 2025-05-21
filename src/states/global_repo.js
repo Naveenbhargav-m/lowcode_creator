@@ -47,6 +47,7 @@ function LoadQueries() {
                 temp[id] = innerdata;
             }
             global_queries = {...temp};
+            console.log("global queries:",global_queries);
         }
     );
 }
@@ -63,6 +64,7 @@ function LoadGlobalTemplates() {
             screensmap[curScreen["id"]] = { ...curScreen["configs"],"id": curScreen["id"] };
         }
         global_templates = screensmap;
+        console.log("global templates:",global_templates);
     }).catch(error => {
         console.error("Error loading global templates:", error);
     });
@@ -81,6 +83,7 @@ function LoadGlobalScreens() {
             screensmap[curScreen["id"]] = { ...curScreen["configs"],"id": curScreen["id"] };
         }
         global_screens = screensmap;
+        console.log("global screens:",screensmap); 
     }).catch(error => {
         console.error("Error loading global screens:", error);
     });
@@ -100,7 +103,7 @@ function LoadGlobalForms() {
             screensmap[curForm["id"]] = { ...curForm["configs"],"id": curForm["id"] };
         }
         global_forms = screensmap;
-  
+        console.log("global forms:",global_forms);
     });  
 }
 
@@ -130,6 +133,7 @@ function LoadGlobalTables() {
         }
 
         global_tables = tablesmap;
+        console.log("global tables:",global_tables);
       });
 }
 
@@ -148,6 +152,7 @@ function LoadGlobalViews() {
                 let name = currentView["name"];
                 global_views[name] = currentView;
             }
+            console.log("global views:",global_views);
         }
     });
 }
@@ -169,6 +174,7 @@ function LoadGlobalWorkflows() {
             temp[id] = curflow;
         }
         global_workflows = temp;
+        console.log("global workflows:",global_workflows);
         return;
     })
 }

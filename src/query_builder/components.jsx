@@ -1,8 +1,8 @@
 import { useSignal } from "@preact/signals";
 import GlobalSignalsPopup  from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import { ActiveQueryData, CreateQueryBlock, UpdateQueryPart } from "./query_signal";
-import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye, ArrowUp, ArrowDown, Code2Icon } from "lucide-react";
+import { ActiveQueryData, CreateQueryBlock, SyncQueries, UpdateQueryPart } from "./query_signal";
+import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye, ArrowUp, ArrowDown, Code2Icon, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
 import { fieldsGlobalSignals } from "../states/common_repo";
@@ -36,20 +36,12 @@ export function CreateQueryBar() {
 }
 
 export function TablesView({ prefilData }) {
-let style = {
+  let style = {
     "paddingTop": "50px"
-};
+  };
   const activeQuery = ActiveQueryData.value;
   const [activeTab, setActiveTab] = useState("select");
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
-  if (activeQuery["id"] === undefined) {
-    return (
-      <div className="flex items-center justify-center h-96 text-lg text-gray-500">
-        <Database className="mr-2" /> Select a Query to Begin
-      </div>
-    );
-  }
   
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
@@ -58,83 +50,125 @@ let style = {
   const toggleAdvanced = () => {
     setShowAdvanced(!showAdvanced);
   };
+
+  const handleSync = () => {
+    // Add your sync functionality here
+    SyncQueries();
+    console.log("Sync button clicked");
+  };
   
-  return (
-    <div className="flex h-screen max-h-[calc(100vh-100px)] overflow-hidden" 
-    style={{ maxWidth: "95vw", ...style }}>
-      {/* Vertical Tab Navigation */}
-      <div 
-        className="w-48 flex-shrink-0 bg-gray-50 border-r border-gray-200"
-        style={{ boxShadow: "2px 0 5px rgba(0,0,0,0.05)",borderRadius:"20px" }}
-      >
-        <QueryTabs activeTab={activeTab} onTabChange={handleTabChange} />
-      </div>
-      
-      {/* Content Area */}
-      <div className="flex-1 overflow-auto p-6 bg-white">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-800">
-            {activeQuery.
-// @ts-ignore
-            name || "Untitled Query"}
-          </h2>
-          <div className="flex items-center">
-            <button 
-              className={`flex items-center text-sm px-3 py-1 rounded ${showAdvanced ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}
-              onClick={toggleAdvanced}
-            >
-              <Code size={14} className="mr-1" />
-              {showAdvanced ? "Hide JSON" : "Advanced JSON"}
-            </button>
-          </div>
+  // If no query selected, show placeholder with sync button
+  if (activeQuery["id"] === undefined) {
+    return (
+      <div className="relative h-full">
+        {/* Sync Button */}
+        <div className="fixed top-4 right-8">
+          <button 
+            className="flex items-center text-sm px-3 py-1 rounded bg-green-100 text-green-700 shadow-sm hover:bg-green-200 transition-colors"
+            onClick={handleSync}
+          >
+            <RefreshCcw size={14} className="mr-1" />
+            Sync
+          </button>
         </div>
         
-        {showAdvanced && <AdvancedJsonView queryData={activeQuery} />}
+        <div className="flex items-center justify-center h-96 text-lg text-gray-500">
+          <Database className="mr-2" /> Select a Query to Begin
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="relative">
+      {/* Sync Button */}
+      <div className="fixed top-4 right-8">
+        <button 
+          className="flex items-center text-sm px-3 py-1 rounded bg-green-100 text-green-700 shadow-sm hover:bg-green-200 transition-colors"
+          onClick={handleSync}
+        >
+          <RefreshCcw size={14} className="mr-1" />
+          Sync
+        </button>
+      </div>
+      
+      {/* Main Content */}
+      <div className="flex h-screen max-h-[calc(100vh-100px)] overflow-hidden" 
+      style={{ maxWidth: "95vw", ...style }}>
+        {/* Vertical Tab Navigation */}
+        <div 
+          className="w-48 flex-shrink-0 bg-gray-50 border-r border-gray-200"
+          style={{ boxShadow: "2px 0 5px rgba(0,0,0,0.05)", borderRadius: "20px" }}
+        >
+          <QueryTabs activeTab={activeTab} onTabChange={handleTabChange} />
+        </div>
         
-        <div className="mt-4">
-          {activeTab === "select" && (
-            <SelectBlock 
-              select={activeQuery["select_fields"] || []} 
-              Aggregations={activeQuery["select_aggregate_fields"] || []}
-              updateCallBack={UpdateQueryPart}
-            />
-          )}
-          {activeTab === "join" && <JoinBlock initalData={activeQuery["join_fields"]} updateCallBack={(data) => {
-            UpdateQueryPart("join_fields", data);
-          }}  />}
-          {activeTab === "where" && <WhereBlock whereInp={activeQuery["where_fields"]} 
-          updateCallback={(key, data) => {UpdateQueryPart(key, data)}} />}
-          {activeTab === "groupby" && <GroupByBlock 
-          initalgroups={activeQuery["group_fields"]}
-          updateCallBack={(data) => UpdateQueryPart("group_fields", data)}
-          />}
-          {activeTab === "orderby" && <OrderByBlock 
-          selectInput={activeQuery["order_fields"]}
-          aggregationInput={activeQuery["order_aggregate_fields"]}
-          updateCallback={(key,data) => {UpdateQueryPart(key,data)}}
-           />}
-          {activeTab === "preview" && <PreviewBlock queryData={activeQuery} />}
-          {activeTab === "input" && <JSEditorWithInputFields 
-          initialCode={activeQuery["input_js"]}
-          initialFields={activeQuery["input_params"]}
-          isInput={true}
-          onParamsChange={(obj) => {
-            UpdateQueryPart("input_js", obj["code"]);
-            UpdateQueryPart("input_params", obj["fields"]);
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto p-6 bg-white">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {activeQuery.
+  // @ts-ignore
+              name || "Untitled Query"}
+            </h2>
+            <div className="flex items-center">
+              <button 
+                className={`flex items-center text-sm px-3 py-1 rounded ${showAdvanced ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}
+                onClick={toggleAdvanced}
+              >
+                <Code size={14} className="mr-1" />
+                {showAdvanced ? "Hide JSON" : "Advanced JSON"}
+              </button>
+            </div>
+          </div>
+          
+          {showAdvanced && <AdvancedJsonView queryData={activeQuery} />}
+          
+          <div className="mt-4">
+            {activeTab === "select" && (
+              <SelectBlock 
+                select={activeQuery["select_fields"] || []} 
+                Aggregations={activeQuery["select_aggregate_fields"] || []}
+                updateCallBack={UpdateQueryPart}
+              />
+            )}
+            {activeTab === "join" && <JoinBlock initalData={activeQuery["join_fields"]} updateCallBack={(data) => {
+              UpdateQueryPart("join_fields", data);
+            }}  />}
+            {activeTab === "where" && <WhereBlock whereInp={activeQuery["where_fields"]} 
+            updateCallback={(key, data) => {UpdateQueryPart(key, data)}} />}
+            {activeTab === "groupby" && <GroupByBlock 
+            initalgroups={activeQuery["group_fields"]}
+            updateCallBack={(data) => UpdateQueryPart("group_fields", data)}
+            />}
+            {activeTab === "orderby" && <OrderByBlock 
+            selectInput={activeQuery["order_fields"]}
+            aggregationInput={activeQuery["order_aggregate_fields"]}
+            updateCallback={(key,data) => {UpdateQueryPart(key,data)}}
+             />}
+            {activeTab === "preview" && <PreviewBlock queryData={activeQuery} />}
+            {activeTab === "input" && <JSEditorWithInputFields 
+            initialCode={activeQuery["input_js"]}
+            initialFields={activeQuery["input_params"]}
+            isInput={true}
+            onParamsChange={(obj) => {
+              UpdateQueryPart("input_js", obj["code"]);
+              UpdateQueryPart("input_params", obj["fields"]);
 
-          }}
-          />}
+            }}
+            />}
 
-          {activeTab === "output" && <JSEditorWithInputFields 
-          initialCode={activeQuery["output_js"]}
-          initialFields={activeQuery["output_params"]}
-          isInput={false}
-          onParamsChange={(obj) => {
-            UpdateQueryPart("output_js", obj["code"]);
-            UpdateQueryPart("output_params", obj["fields"]);
+            {activeTab === "output" && <JSEditorWithInputFields 
+            initialCode={activeQuery["output_js"]}
+            initialFields={activeQuery["output_params"]}
+            isInput={false}
+            onParamsChange={(obj) => {
+              UpdateQueryPart("output_js", obj["code"]);
+              UpdateQueryPart("output_params", obj["fields"]);
 
-          }}
-          />}
+            }}
+            />}
+          </div>
         </div>
       </div>
     </div>
@@ -265,6 +299,7 @@ function JoinBlock( {initalData, updateCallBack}) {
       
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
+        // @ts-ignore
         fields={fieldsGlobalSignals.value}
         onClose={handlePopupClose}
       />
@@ -495,6 +530,7 @@ function GroupByBlock({initalgroups, updateCallBack}) {
       
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
+        // @ts-ignore
         fields={fieldsGlobalSignals.value}
         onClose={(e, data) => {
           console.log("Group By selection:", data);
@@ -557,6 +593,7 @@ function OrderByBlock( {selectInput, aggregationInput , updateCallback}) {
       
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
+        // @ts-ignore
         fields={fieldsGlobalSignals.value}
         onClose={(e, data) => {
           console.log("Order By selection:", data);
@@ -614,6 +651,7 @@ function SelectBlock({ select, Aggregations, updateCallBack }) {
       
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
+        // @ts-ignore
         fields={fieldsGlobalSignals.value}
         onClose={(e, data) => {
           console.log("Selected fields:", data);
@@ -1312,6 +1350,7 @@ function AggregationPopup({ position, item, aggregations, setAggregations, onClo
         
         <GlobalSignalsPopup 
           initialOpen={isOpen.value}
+          // @ts-ignore
           fields={fieldsGlobalSignals.value}
           onClose={handlePopupClose}
         />

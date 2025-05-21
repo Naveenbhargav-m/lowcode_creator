@@ -33,14 +33,13 @@ function GetFormField(fieldArray, id , index = -1) {
     if(fieldArray === undefined) {
         return undefined;
     }
-    for(var i=0;i<fieldArray;i++) {
+    for(var i=0;i<fieldArray.length;i++) {
         let currentField = fieldArray[i];
         if(currentField["id"] === id) {
-            currentField = {...currentField};
+            console.log("matched:",currentField);
             return currentField;
         }
         if(index != -1 && index == i) {
-            currentField = {...currentField};
             return currentField;
         }
     }

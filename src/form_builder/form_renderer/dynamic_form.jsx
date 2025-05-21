@@ -9,14 +9,14 @@ const fieldTypes = {
     component: TextInput,
     defaultProps: {
       type: 'text',
-      placeholder: 'Enter text...',
+      placeholder: 'Enter text (key: text)...',
     }
   },
   select: {
     component: SelectInput,
     defaultProps: {
       options: [],
-      placeholder: 'Select an option...',
+      placeholder: 'Select an option (key: select)...',
     }
   },
   checkbox: {
@@ -29,7 +29,7 @@ const fieldTypes = {
     component: TextareaInput,
     defaultProps: {
       rows: 4,
-      placeholder: 'Enter text...',
+      placeholder: 'Enter text (key: textarea)...',
     }
   },
   row: {
@@ -550,7 +550,7 @@ function FormBuilderDemo() {
         title: 'Personal Information',
         children: ['firstName', 'lastName', 'email'],
         style: {
-          panel: {
+          container: {
             backgroundColor: '#f0f9ff',
             borderLeft: '4px solid #3b82f6',
           }
@@ -684,7 +684,7 @@ function FormBuilderDemo() {
         children: ['mailingAddressRow'],
         hidden: { field: 'hasMailingAddress', operator: 'neq', value: true },
         style: {
-          panel: {
+          container: {
             backgroundColor: '#fef2f2',
             borderLeft: '4px solid #ef4444',
           }
@@ -768,7 +768,7 @@ function FormBuilderDemo() {
           rows: 4
         },
         style: {
-          textarea: {
+          input: {
             minHeight: '100px'
           }
         }

@@ -18,11 +18,12 @@ export function TextInput({
     if (hidden) return null;
     
     return (
-      <div style={{...styles.base.field, ...style.container}}>
-        {label && <label htmlFor={id} style={{...styles.base.label, ...style.label}}>{label}</label>}
+      <div style={{...styles.base.field, ...style["container"]}}>
+        {label && <label htmlFor={id} style={{...styles.base.label, ...style["label"]}}>{label}</label>}
         <input
           id={id}
           value={value || ''}
+          // @ts-ignore
           onChange={(e) => onChange(id, e.target.value, e)}
           onFocus={(e) => {
             setFocused(true);
@@ -36,11 +37,11 @@ export function TextInput({
             ...styles.base.input,
             ...(focused ? styles.base.focused : {}),
             ...(error ? styles.base.error : {}),
-            ...style.input
+            ...style["input"]
           }}
           {...props}
         />
-        {error && <div style={{...styles.base.errorText, ...style.error}}>{error}</div>}
+        {error && <div style={{...styles.base.errorText, ...style["error"]}}>{error}</div>}
       </div>
     );
   }
@@ -63,12 +64,12 @@ export function TextInput({
     if (hidden) return null;
     
     return (
-      <div style={{...styles.base.field, ...style.container}}>
-        {label && <label htmlFor={id} style={{...styles.base.label, ...style.label}}>{label}</label>}
+      <div style={{...styles.base.field, ...style["contianer"]}}>
+        {label && <label htmlFor={id} style={{...styles.base.label, ...style["label"]}}>{label}</label>}
         <select
           id={id}
           value={value || ''}
-          onChange={(e) => onChange(id, e.target.value, e)}
+          onChange={(e) => onChange(id, e.target["value"], e)}
           onFocus={(e) => {
             setFocused(true);
             onFocus && onFocus(id, e);
@@ -81,7 +82,7 @@ export function TextInput({
             ...styles.base.select,
             ...(focused ? styles.base.focused : {}),
             ...(error ? styles.base.error : {}),
-            ...style.select
+            ...style["input"]
           }}
           {...props}
         >
@@ -92,7 +93,7 @@ export function TextInput({
             </option>
           ))}
         </select>
-        {error && <div style={{...styles.base.errorText, ...style.error}}>{error}</div>}
+        {error && <div style={{...styles.base.errorText, ...style["error"]}}>{error}</div>}
       </div>
     );
   }
@@ -112,21 +113,21 @@ export function TextInput({
     if (hidden) return null;
     
     return (
-      <div style={{...styles.base.field, ...style.container}}>
-        <div style={{...styles.base.checkbox, ...style.checkboxWrapper}}>
+      <div style={{...styles.base.field, ...style["container"]}}>
+        <div style={{...styles.base.checkbox}}>
           <input
             id={id}
             type="checkbox"
             checked={checked || false}
-            onChange={(e) => onChange(id, e.target.checked, e)}
+            onChange={(e) => onChange(id, e.target["checked"], e)}
             onFocus={(e) => onFocus && onFocus(id, e)}
             onBlur={(e) => onBlur && onBlur(id, e)}
-            style={{...styles.base.checkboxInput, ...style.checkbox}}
+            style={{...styles.base.checkboxInput, ...style["input"]}}
             {...props}
           />
-          {label && <label htmlFor={id} style={{...styles.base.label, margin: 0, ...style.label}}>{label}</label>}
+          {label && <label htmlFor={id} style={{...styles.base.label, margin: 0, ...style["label"]}}>{label}</label>}
         </div>
-        {error && <div style={{...styles.base.errorText, ...style.error}}>{error}</div>}
+        {error && <div style={{...styles.base.errorText, ...style["error"]}}>{error}</div>}
       </div>
     );
   }
@@ -148,12 +149,12 @@ export function TextInput({
     if (hidden) return null;
     
     return (
-      <div style={{...styles.base.field, ...style.container}}>
-        {label && <label htmlFor={id} style={{...styles.base.label, ...style.label}}>{label}</label>}
+      <div style={{...styles.base.field, ...style["container"]}}>
+        {label && <label htmlFor={id} style={{...styles.base.label, ...style["label"]}}>{label}</label>}
         <textarea
           id={id}
           value={value || ''}
-          onChange={(e) => onChange(id, e.target.value, e)}
+          onChange={(e) => onChange(id, e.target["value"], e)}
           onFocus={(e) => {
             setFocused(true);
             onFocus && onFocus(id, e);
@@ -166,11 +167,11 @@ export function TextInput({
             ...styles.base.input,
             ...(focused ? styles.base.focused : {}),
             ...(error ? styles.base.error : {}),
-            ...style.textarea
+            ...style["input"]
           }}
           {...props}
         />
-        {error && <div style={{...styles.base.errorText, ...style.error}}>{error}</div>}
+        {error && <div style={{...styles.base.errorText, ...style["error"]}}>{error}</div>}
       </div>
     );
   }
@@ -190,7 +191,7 @@ export function TextInput({
     if (hidden) return null;
     
     return (
-      <div style={{...styles.layout.column, ...style}}>
+      <div style={{...styles.layout.column, ...style["container"]}}>
         {children}
       </div>
     );
@@ -200,9 +201,9 @@ export function TextInput({
     if (hidden) return null;
     
     return (
-      <div style={{...styles.layout.panel, ...style.panel}}>
-        {title && <h3 style={{margin: '0 0 12px 0', fontSize: '16px', ...style.title}}>{title}</h3>}
-        <div style={{...style.content}}>
+      <div style={{...styles.layout.panel, ...style["container"]}}>
+        {title && <h3 style={{margin: '0 0 12px 0', fontSize: '16px', ...style["label"]}}>{title}</h3>}
+        <div style={{...style["input"]}}>
           {children}
         </div>
       </div>
@@ -212,7 +213,7 @@ export function TextInput({
   // Form Steps Component
   export function FormSteps({ steps, currentStep, onStepChange, style = {} }) {
     return (
-      <div style={{...styles.layout.steps, ...style.steps}}>
+      <div style={{...styles.layout.steps, ...style["container"]}}>
         {steps.map((step, index) => (
           <button
             key={index}
@@ -224,7 +225,7 @@ export function TextInput({
                 : index < currentStep 
                   ? styles.layout.completedStep 
                   : styles.layout.inactiveStep),
-              ...style.step
+              ...style["input"]
             }}
           >
             {step.title}
