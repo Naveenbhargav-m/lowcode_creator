@@ -59,8 +59,10 @@ function UpdateQueryPart(part ,data) {
     let id = activeQuery["id"];
     queries[id] = activeQuery;
     ActiveQueryData.value = {...activeQuery};
+    let activeid = ActiveQuery.value["id"];
+    queries[activeid] = ActiveQuery.value;
     console.log("called update Query Part:",part, data, activeQuery);
-    SyncQueries();
+    
 
 }
 function LoadQueries() {
@@ -95,16 +97,13 @@ function LoadQueries() {
 function SyncQueries() {
     let keys = Object.keys(queries);
     let queriesArr = [];
-    let newqueries = {};
     for(var i=0;i<keys.length;i++) {
         let cur = queries[keys[i]];
-        queriesArr.push(cur);
         let copy = JSON.parse(JSON.stringify(cur));
-        delete copy["_change_type"];
-        newqueries[keys[i]] = copy;
+        queriesArr.push(copy);
     }
     SyncData("_queries", queriesArr);
-    queries = newqueries;
+    // queries = newqueries;
 }
 
 export {ActiveQuery,QueryNames, queries, ActiveQueryData,

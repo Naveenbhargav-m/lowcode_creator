@@ -12,6 +12,7 @@ import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
 import { useAuthCheck } from "../hooks/hooks";
 import { DynamicForm } from "./form_renderer/dynamic_form";
+import { FormBuilderRightPanel } from "./form_right_elements";
 
 function EditArea() {
     useEffect((
@@ -138,7 +139,7 @@ function EditArea() {
     </div>
   
     <div className="w-2/6 bg-white h-screen scrollable-div" style={{height:"100vh", width:"24vw"}}>
-     <div> yet to be implemented</div>
+            <FormBuilderRightPanel />
     </div>
   </div>);
   }  
