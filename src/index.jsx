@@ -17,6 +17,7 @@ import ConfigFormDemo from "./components/generic/config_form_v3/config_form";
 import SecretsManager from "./secret_store/secret_store";
 import TemplateRegistrationPage from "./external_templates/external_templates";
 import { FormBuilderDemo } from "./form_builder/form_renderer/dynamic_form";
+import NestedConfigFormDemo from "./components/generic/config_form_v3/config_form";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -65,7 +66,7 @@ export function App() {
             <Route path="/queries" component={QueryBuilderPage} />
             <Route path="/test" component={WorkflowBuilder} />
             <Route path="/test2" component={ConfigFormDemo} />
-            <Route path="/test_panel" component={FormBuilderDemo} />
+            <Route path="/test_panel" component={NestedConfigFormDemo} />
             <Route default component={() => <div>Not Found</div>} />
           </Router>
         </main>

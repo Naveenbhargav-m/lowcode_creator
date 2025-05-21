@@ -1,10 +1,78 @@
+import "./config_form.css";
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Code, Eye } from 'lucide-react';
 import { Accordion, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, NumberField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
 
-// Centralized styles - same as original
+// Helper functions for handling nested objects
+const getNestedValue = (obj, path) => {
+  if (!path) return obj;
+  
+  const keys = path.split('.');
+  let result = obj;
+  
+  for (const key of keys) {
+    if (result === undefined || result === null) return undefined;
+    result = result[key];
+  }
+  
+  return result;
+};
 
-// Improved main form component
+const setNestedValue = (obj, path, value) => {
+  if (!path) return value;
+  
+  const keys = path.split('.');
+  const result = { ...obj };
+  let current = result;
+  
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    
+    if (i === keys.length - 1) {
+      // If value is undefined or null and we want to clear it
+      if (value === undefined || value === null) {
+        delete current[key];
+      } else {
+        current[key] = value;
+      }
+    } else {
+      // Create the object path if it doesn't exist
+      if (current[key] === undefined || current[key] === null) {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+  }
+  
+  return result;
+};
+
+// Clean empty objects recursively
+const cleanEmptyObjects = (obj) => {
+  if (obj === null || typeof obj !== 'object') return obj;
+  
+  const result = { ...obj };
+  
+  Object.keys(result).forEach(key => {
+    if (typeof result[key] === 'object' && result[key] !== null) {
+      // Clean nested objects
+      result[key] = cleanEmptyObjects(result[key]);
+      
+      // Remove empty objects
+      if (Object.keys(result[key]).length === 0) {
+        delete result[key];
+      }
+    } else if (result[key] === undefined) {
+      // Remove undefined values
+      delete result[key];
+    }
+  });
+  
+  return result;
+};
+
+// Enhanced main form component with nested object support
+
 export const ConfigFormV3 = ({ 
   schema, 
   initialValues = {}, 
@@ -38,19 +106,22 @@ export const ConfigFormV3 = ({
     setOpenSections(initialOpenSections);
   }, [schema]);
 
-
-
-  useEffect((() => {
+  useEffect(() => {
     setFormValues({...initialValues});
-  }), [initialValues]);
-  // Handle value changes
+  }, [initialValues]);
+
+  // Handle value changes with support for nested paths
   const handleFieldChange = (fieldId, value) => {
     setFormValues(prev => {
-      const newValues = { ...prev, [fieldId]: value };
+      // Support for nested paths
+      const updatedValues = setNestedValue(prev, fieldId, value);
+      
       if (onChange) {
-        onChange(newValues);
+        // Clean empty objects before returning
+        onChange(cleanEmptyObjects(updatedValues));
       }
-      return newValues;
+      
+      return updatedValues;
     });
   };
 
@@ -70,7 +141,7 @@ export const ConfigFormV3 = ({
       setJsonError(null);
       setFormValues(parsed);
       if (onChange) {
-        onChange(parsed);
+        onChange(cleanEmptyObjects(parsed));
       }
     } catch (error) {
       setJsonError('Invalid JSON format');
@@ -89,7 +160,8 @@ export const ConfigFormV3 = ({
   // Handle form submission
   const handleSubmit = () => {
     if (onSubmit) {
-      onSubmit(formValues);
+      // Clean empty objects before submitting
+      onSubmit(cleanEmptyObjects(formValues));
     }
   };
 
@@ -104,7 +176,7 @@ export const ConfigFormV3 = ({
     if (!field.condition) return true;
     
     const { dependsOn, operator, value } = field.condition;
-    const dependentValue = formValues[dependsOn];
+    const dependentValue = getNestedValue(formValues, dependsOn);
     
     switch (operator) {
       case 'equals':
@@ -126,41 +198,55 @@ export const ConfigFormV3 = ({
     }
   };
 
-  // Render field based on type
+  // Generate a field label with path information
+  const getFieldGroupLabel = (field) => {
+    // If the field has a parent path, show it
+    if (field.path && !field.hidePathInLabel) {
+      const pathParts = field.path.split('.');
+      return `${pathParts[pathParts.length - 1]}: ${field.label || ''}`;
+    }
+    
+    return field.label || '';
+  };
+
+  // Render field based on type with support for nested values
   const renderField = (field) => {
     if (!field || !isFieldVisible(field)) return null;
 
+    // Get the actual field value using the path
+    const fieldValue = getNestedValue(formValues, field.id);
+    
     let fieldComponent;
     switch (field.type) {
       case 'text':
-        fieldComponent = <TextField field={field} value={formValues[field.id]} onChange={handleFieldChange} />;
+        fieldComponent = <TextField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'number':
-        fieldComponent = <NumberField field={field} value={formValues[field.id]} onChange={handleFieldChange} />;
+        fieldComponent = <NumberField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'select':
-        fieldComponent = <SelectField field={field} value={formValues[field.id]} onChange={handleFieldChange} />;
+        fieldComponent = <SelectField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'checkbox':
-        fieldComponent = <CheckboxField field={field} value={formValues[field.id]} onChange={handleFieldChange} />;
+        fieldComponent = <CheckboxField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'array': 
-        fieldComponent = <ArrayField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        fieldComponent = <ArrayField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'color': 
-        fieldComponent = <ColorField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        fieldComponent = <ColorField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'static_key_value': 
-        fieldComponent = <StaticKeyValueField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        fieldComponent = <StaticKeyValueField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'dynamic_key_value': 
-        fieldComponent = <DynamicKeyValueField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        fieldComponent = <DynamicKeyValueField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'date': 
-        fieldComponent = <DateField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        fieldComponent = <DateField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       case 'time': 
-        fieldComponent = <TimeField field={field} value={formValues[field.id]} onChange={handleFieldChange}/>
+        fieldComponent = <TimeField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
       default:
         fieldComponent = <div>Unsupported field type: {field.type}</div>;
@@ -170,7 +256,7 @@ export const ConfigFormV3 = ({
       <div key={field.id} className={styles.fieldGroup}>
         {field.label && (
           <label htmlFor={field.id} className={styles.fieldLabel}>
-            {field.label}
+            {getFieldGroupLabel(field)}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
@@ -261,7 +347,6 @@ export const ConfigFormV3 = ({
         <textarea
           className={styles.jsonEditor}
           value={jsonValue}
-          // @ts-ignore
           onChange={(e) => handleJsonChange(e.target.value)}
         />
         {jsonError && <div className={styles.error}>{jsonError}</div>}
@@ -278,27 +363,32 @@ export const ConfigFormV3 = ({
     if (schema.tabs) {
       return (
         <>
-          <div className={styles.tabsContainer}>
+         <div className="overflow-x-auto pb-4">
+         <div className="flex whitespace-nowrap">
+              {schema.tabs.map((tab) => (
+                <div
+                  key={tab.id}
+                  className={`${styles.tab} ${
+                    activeTab === tab.id ? styles.activeTab : styles.inactiveTab
+                  }`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.title}
+                </div>
+              ))}
+            </div>
+          </div>
+         
+          <div className={styles.tabContent}>
             {schema.tabs.map((tab) => (
               <div
                 key={tab.id}
-                className={`${styles.tab} ${
-                  activeTab === tab.id ? styles.activeTab : styles.inactiveTab
-                }`}
-                onClick={() => setActiveTab(tab.id)}
+                style={{ display: activeTab === tab.id ? 'block' : 'none' }}
               >
-                {tab.title}
+                {renderTabContent(tab)}
               </div>
             ))}
-          </div>
-          {schema.tabs.map((tab) => (
-            <div
-              key={tab.id}
-              style={{ display: activeTab === tab.id ? 'block' : 'none' }}
-            >
-              {renderTabContent(tab)}
             </div>
-          ))}
         </>
       );
     }
@@ -332,11 +422,11 @@ export const ConfigFormV3 = ({
         >
           {isJsonMode ? (
             <>
-              <Eye size={16} className="mr-1" /> Form Mode
+              <Eye size={14} className="mr-1" /> Form Mode
             </>
           ) : (
             <>
-              <Code size={16} className="mr-1" /> JSON Mode
+              <Code size={14} className="mr-1" /> JSON Mode
             </>
           )}
         </div>
@@ -373,17 +463,27 @@ export const ConfigFormV3 = ({
   );
 };
 
-// Sample usage with demo data - using the new structure
-export default function ImprovedConfigFormDemo() {
+// Sample usage with demo data - using the new structure with nested objects
+export default function NestedConfigFormDemo() {
   const [values, setValues] = useState({
-    name: 'Workflow 1',
-    type: 'sequential',
-    maxRetries: 3,
-    timeout: 60,
-    enableLogging: true,
-    description: 'This is a sample workflow',
-    notification: false,
-    notificationEmail: '',
+    name: 'Component 1',
+    style: {
+      container: {
+        borderRadius: '30px',
+        color: 'blue',
+        padding: '10px'
+      },
+      label: {
+        borderRadius: '5px',
+        color: 'red',
+        fontWeight: 'bold'
+      }
+    },
+    animation: {
+      enabled: true,
+      duration: 300,
+      type: 'fade'
+    }
   });
 
   const handleChange = (newValues) => {
@@ -396,64 +496,97 @@ export default function ImprovedConfigFormDemo() {
     alert('Configuration saved!');
   };
 
-  // New schema structure with centralized fields
+  // Schema structure with nested fields
   const schema = {
-    title: 'Workflow Configuration',
-    // Centralized field definitions
+    title: 'Component Configuration',
+    // Centralized field definitions with paths
     fields: [
       {
         id: 'name',
         type: 'text',
-        label: 'Workflow Name',
-        placeholder: 'Enter workflow name',
+        label: 'Component Name',
+        placeholder: 'Enter component name',
         required: true,
       },
+      // Style section - Container fields
       {
-        id: 'description',
+        id: 'style.container.borderRadius',
         type: 'text',
-        label: 'Description',
-        placeholder: 'Enter description',
+        label: 'Border Radius',
+        placeholder: '0px',
+        path: 'style.container',
       },
       {
-        id: 'type',
+        id: 'style.container.color',
+        type: 'color',
+        label: 'Color',
+        path: 'style.container',
+      },
+      {
+        id: 'style.container.padding',
+        type: 'text',
+        label: 'Padding',
+        placeholder: '0px',
+        path: 'style.container',
+      },
+      // Style section - Label fields
+      {
+        id: 'style.label.borderRadius',
+        type: 'text',
+        label: 'Border Radius',
+        placeholder: '0px',
+        path: 'style.label',
+      },
+      {
+        id: 'style.label.color',
+        type: 'color',
+        label: 'Color',
+        path: 'style.label',
+      },
+      {
+        id: 'style.label.fontWeight',
         type: 'select',
-        label: 'Workflow Type',
+        label: 'Font Weight',
         options: [
-          { value: 'sequential', label: 'Sequential' },
-          { value: 'parallel', label: 'Parallel' },
-          { value: 'conditional', label: 'Conditional' },
+          { value: 'normal', label: 'Normal' },
+          { value: 'bold', label: 'Bold' },
+          { value: 'lighter', label: 'Lighter' },
+          { value: 'bolder', label: 'Bolder' },
         ],
+        path: 'style.label',
       },
+      // Animation settings
       {
-        id: 'maxRetries',
-        type: 'number',
-        label: 'Max Retries',
-        min: 0,
-        max: 10,
-      },
-      {
-        id: 'timeout',
-        type: 'number',
-        label: 'Timeout (seconds)',
-        min: 0,
-      },
-      {
-        id: 'enableLogging',
+        id: 'animation.enabled',
         type: 'checkbox',
-        checkboxLabel: 'Enable Logging',
+        checkboxLabel: 'Enable Animation',
+        path: 'animation',
       },
       {
-        id: 'notification',
-        type: 'checkbox',
-        checkboxLabel: 'Enable Email Notifications',
-      },
-      {
-        id: 'notificationEmail',
-        type: 'text',
-        label: 'Notification Email',
-        placeholder: 'Enter email address',
+        id: 'animation.duration',
+        type: 'number',
+        label: 'Duration (ms)',
+        min: 100,
+        max: 5000,
+        path: 'animation',
         condition: {
-          dependsOn: 'notification',
+          dependsOn: 'animation.enabled',
+          operator: 'equals',
+          value: true,
+        },
+      },
+      {
+        id: 'animation.type',
+        type: 'select',
+        label: 'Animation Type',
+        options: [
+          { value: 'fade', label: 'Fade' },
+          { value: 'slide', label: 'Slide' },
+          { value: 'zoom', label: 'Zoom' },
+        ],
+        path: 'animation',
+        condition: {
+          dependsOn: 'animation.enabled',
           operator: 'equals',
           value: true,
         },
@@ -464,17 +597,22 @@ export default function ImprovedConfigFormDemo() {
       {
         id: 'general',
         title: 'General Information',
-        fieldIds: ['name', 'description', 'type'],
+        fieldIds: ['name'],
       },
       {
-        id: 'execution',
-        title: 'Execution Settings',
-        fieldIds: ['maxRetries', 'timeout', 'enableLogging'],
+        id: 'container-style',
+        title: 'Container Style',
+        fieldIds: ['style.container.borderRadius', 'style.container.color', 'style.container.padding'],
       },
       {
-        id: 'notifications',
-        title: 'Notifications',
-        fieldIds: ['notification', 'notificationEmail'],
+        id: 'label-style',
+        title: 'Label Style',
+        fieldIds: ['style.label.borderRadius', 'style.label.color', 'style.label.fontWeight'],
+      },
+      {
+        id: 'animation-settings',
+        title: 'Animation Settings',
+        fieldIds: ['animation.enabled', 'animation.duration', 'animation.type'],
       },
     ],
     // Tab definitions
@@ -482,12 +620,17 @@ export default function ImprovedConfigFormDemo() {
       {
         id: 'basic',
         title: 'Basic Settings',
-        sectionIds: ['general', 'execution'],
+        sectionIds: ['general'],
+      },
+      {
+        id: 'styles',
+        title: 'Style Settings',
+        sectionIds: ['container-style', 'label-style'],
       },
       {
         id: 'advanced',
         title: 'Advanced Settings',
-        sectionIds: ['notifications'],
+        sectionIds: ['animation-settings'],
       },
     ],
     buttons: [
@@ -503,118 +646,45 @@ export default function ImprovedConfigFormDemo() {
         type: 'button',
         variant: 'secondary',
         onClick: () => setValues({
-          name: 'Workflow 1',
-          type: 'sequential',
-          maxRetries: 3,
-          timeout: 60,
-          enableLogging: true,
-          description: 'This is a sample workflow',
-          notification: false,
-          notificationEmail: '',
+          name: 'Component 1',
+          style: {
+            container: {
+              borderRadius: '30px',
+              color: 'blue',
+              padding: '10px'
+            },
+            label: {
+              borderRadius: '5px',
+              color: 'red',
+              fontWeight: 'bold'
+            }
+          },
+          animation: {
+            enabled: true,
+            duration: 300,
+            type: 'fade'
+          }
         }),
       },
     ],
   };
 
-  // Simple flat schema example - no tabs or sections
-  const simpleSchema = {
-    title: 'Simple Configuration',
-    // Direct list of fields
-    fields: [
-      {
-        id: 'name',
-        type: 'text',
-        label: 'Name',
-        placeholder: 'Enter name',
-        required: true,
-      },
-      {
-        id: 'description',
-        type: 'text',
-        label: 'Description',
-        placeholder: 'Enter description',
-        condition: {
-          dependsOn: 'enableFeature',
-          operator: 'equals',
-          value: true,
-        },
-      },
-      {
-        id: 'enableFeature',
-        type: 'checkbox',
-        checkboxLabel: 'Enable Feature',
-      },
-      {
-        id: 'brandColor',
-        type: 'color',
-        label: 'Brand Color',
-        placeholder: 'Select a color',
-      },
-      {
-        id: 'tags',
-        type: 'array',
-        label: 'Tags',
-        itemPlaceholder: 'Enter a tag',
-        addButtonText: 'Add Tag',
-      },
-      {
-        id: 'contactInfo',
-        type: 'static_key_value',
-        label: 'Contact Information',
-        keys: ['email', 'phone', 'address'],
-        valuePlaceholder: 'Enter information',
-      },
-      {
-        id: 'customFields',
-        type: 'dynamic_key_value',
-        label: 'Custom Fields',
-        keyPlaceholder: 'Field Name',
-        valuePlaceholder: 'Field Value',
-        addButtonText: 'Add Custom Field',
-      },
-      {
-        id: 'startDate',
-        type: 'date',
-        label: 'Start Date',
-        min: '2000-01-01',
-        max: '2030-12-31',
-        showCalendarIcon: true,
-      },
-      {
-        id: 'meetingTime',
-        type: 'time',
-        label: 'Meeting Time',
-        showSeconds: true,
-        showClockIcon: true,
-      },
-    
-    ],
-    buttons: [
-      {
-        id: 'save',
-        label: 'Save',
-        type: 'submit',
-        variant: 'primary',
-      },
-    ],
-  };
-
   return (
-    <div className="p-4 space-y-8" style={{color:"black"}}>
-      <ConfigFormV3 
+    <div className="p-4 space-y-8 h-screen overflow-y-auto" style={{ maxHeight: 'calc(100vh - 40px)' }}>
+      <ConfigFormV3
         schema={schema} 
         initialValues={values} 
         onChange={handleChange} 
         onSubmit={handleSubmit} 
       />
       
-      <h2 className="text-xl font-bold mt-8 mb-4">Simple Flat Configuration</h2>
-      <ConfigFormV3 
-        schema={simpleSchema} 
-        initialValues={{name: '', description: '', enableFeature: false}} 
-        onChange={console.log} 
-        onSubmit={console.log} 
-      />
+      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+        <h3 className="text-lg font-bold mb-2">Current Form Values:</h3>
+        <pre className="whitespace-pre-wrap overflow-auto max-h-64">
+          {JSON.stringify(values, null, 2)}
+        </pre>
+      </div>
     </div>
+
   );
 }

@@ -13,15 +13,17 @@ function DeleteFormField(fieldArray , id) {
 
 function UpdateFormField(fieldArray , newconfig, id , index = -1) {
     let newarr = [];
-    for(var i=0;i<fieldArray;i++) {
+    for(var i=0;i<fieldArray.length;i++) {
         let currentField = fieldArray[i];
         if(currentField["id"] === id) {
             currentField = {...currentField, ...newconfig};
             newarr.push(currentField);
+            continue;
         }
         if(index != -1 && index == i) {
             currentField = {...currentField, ...newconfig};
             newarr.push(currentField);
+            continue;
         }
         newarr.push(currentField);
     }
