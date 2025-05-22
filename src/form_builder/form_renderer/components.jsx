@@ -2,6 +2,32 @@ import { useState } from "preact/hooks";
 import { styles } from "./styles";
 import { useRef } from 'react';
 
+// fields List:
+/*
+ TextInput
+ SelectInput
+ CheckboxInput
+ TextareaInput
+ Row
+ Column
+ Panel
+ FormSteps
+ PasswordInput
+ MarkdownInput
+ RangesliderInput.
+ DualRangeSliderInput.
+ EmailInput.
+ DateInput.
+ DateTimeInput.
+ TimeInput.
+ MonthInput.
+ WeekInput
+ MultiSelectInput.
+ LookupInput.
+ FileUploadInput.
+ ImageUploadGrid.
+ ImageSelectGrid.
+*/
 
 export function TextInput({ 
     id, 
