@@ -89,7 +89,7 @@ export const TemplateElementConfigFormSchema = {
     {
       id: 'configs.options',
       type: 'option_mapper',
-      label: 'Dropdown Options',
+      label: 'Options',
       path: 'configs.options',
       required: true,
       optionsConfig: {
@@ -307,9 +307,14 @@ export const TemplateElementConfigFormSchema = {
   // Section definitions
   sections: [
     {
+      id: "options",
+      "fieldIds": ["configs.options"],
+      title: "Options",
+    },
+    {
       id: 'basic',
       title: 'Basic Settings',
-      fieldIds: ['value', 'configs.options']
+      fieldIds: ['value', "options"]
     },
     {
       id: 'style-section',
@@ -364,7 +369,7 @@ export const TemplateElementConfigFormSchema = {
     {
       id: 'general',
       title: 'General',
-      sectionIds: ['basic', 'style-section']
+      sectionIds: ['basic', "options",'style-section']
     },
     {
       id: 'events',
