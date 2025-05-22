@@ -7,6 +7,7 @@ import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
 import { fieldsGlobalSignals } from "../states/common_repo";
 import { JSEditorWithInputFields } from "./components_2";
+import { data_map } from "../states/global_repo";
 
 // Theme colors
 const THEME = {
@@ -652,7 +653,7 @@ function SelectBlock({ select, Aggregations, updateCallBack }) {
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
         // @ts-ignore
-        fields={fieldsGlobalSignals.value}
+        fields={data_map["tables"]}
         onClose={(e, data) => {
           console.log("Selected fields:", data);
           if (data) {

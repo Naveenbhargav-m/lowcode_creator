@@ -468,17 +468,17 @@ const formFieldSchema = {
       },
       {
         id: 'validation-tab',
-        title: 'Validation & Actions',
+        title: 'Validation',
         sectionIds: ['validation-section', 'actions-section', 'visibility-section']
       },
       {
         id: 'styles',
-        title: 'Style Settings',
+        title: 'Styles',
         sectionIds: ['container-style', 'label-style', 'input-style', 'error-style']
       },
       {
         id: 'advanced',
-        title: 'Advanced Settings',
+        title: 'Advanced',
         sectionIds: ['children-section']
       }
     ],
@@ -487,75 +487,11 @@ const formFieldSchema = {
     buttons: [
       {
         id: 'save',
-        label: 'Save Field Configuration',
+        label: 'save',
         type: 'submit',
         variant: 'primary',
       },
     ],
   };
-  
-  // Example object structure that this schema will generate/edit
-  const exampleFormFieldConfig = {
-    type: 'text',
-    label: 'First Name',
-    defaultValue: '',
-    required: true,
-    validation: [
-      { type: 'required', message: 'This field is required' },
-      { type: 'minLength', value: 2, message: 'Minimum 2 characters required' }
-    ],
-    validateOn: ['change', 'blur'],
-    actions: [
-      { event: 'change', action: 'updateField', params: 'lastName' }
-    ],
-    props: {
-      placeholder: "Enter your first name",
-      disabled: false,
-      readOnly: false
-    },
-    style: {
-      container: {
-        padding: '0px',
-        margin: '0 0 15px 0',
-        borderRadius: '0px',
-        backgroundColor: 'transparent',
-        border: 'none'
-      },
-      label: {
-        padding: '0px',
-        margin: '0 0 5px 0',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        color: '#333'
-      },
-      input: {
-        padding: '8px 12px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-        fontSize: '14px',
-        backgroundColor: '#fff',
-        color: '#333',
-        focusBorder: '1px solid #007bff',
-        focusBoxShadow: '0 0 0 3px rgba(0,123,255,.25)'
-      },
-      error: {
-        padding: '4px 0',
-        margin: '4px 0 0 0',
-        fontSize: '12px',
-        color: '#dc3545',
-        fontWeight: 'normal'
-      }
-    },
-    hidden: {
-      dependsOn: 'showFirstName',
-      operator: 'equals',
-      value: true
-    },
-    options: [
-      { label: "Option 1", value: "option1" },
-      { label: "Option 2", value: "option2" }
-    ],
-    children: []
-  };
-  
-  export { formFieldSchema, exampleFormFieldConfig };
+
+  export { formFieldSchema };
