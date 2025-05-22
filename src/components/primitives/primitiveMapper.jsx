@@ -5,7 +5,6 @@ import { Text, Number, TextArea, ProgressBar, Avatar, AvatarGroup, Dropdown, But
 
 // Function to map drop data to the correct primitive component
 
-
 function ActiveWrapper({data,activeSignal ,children }) {
   return (
         <div style={{display:"contents"}} onClick={(e) => {
@@ -78,6 +77,7 @@ export const renderPrimitiveElement = (data, activeSignal) => {
       return (
         <ActiveWrapper data={data} activeSignal={activeSignal}>
         <Avatar
+          // @ts-ignore
           src={data}
           config={{...configObj}}
 

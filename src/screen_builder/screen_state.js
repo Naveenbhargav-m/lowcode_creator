@@ -28,13 +28,6 @@ const tabDataSignal = signal({
       { icon: "badge-check", title: "Badge", value: "badge", type: "primitive" },
       { icon: "smile", title: "Icon", value: "icon", type: "primitive" },
       { icon: "mouse-pointer", title: "Icon Button", value: "icon_button", type: "primitive" },
-      { icon: "users", title: "Avatar Group", value: "avatar_group", type: "primitive" },
-      { icon: "chevron-down", title: "Dropdown", value: "drop_down", type: "primitive" },
-      { icon: "square", title: "Button", value: "button", type: "primitive" },
-      { icon: "image", title: "Image", value: "image", type: "primitive" },
-      { icon: "badge-check", title: "Badge", value: "badge", type: "primitive" },
-      { icon: "smile", title: "Icon", value: "icon", type: "primitive" },
-      { icon: "mouse-pointer", title: "Icon Button", value: "icon_button", type: "primitive" },
     ],
   containers:  [
     { icon: "square", title: "Card", value: "card", type: "container" },
