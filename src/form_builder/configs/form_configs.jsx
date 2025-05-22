@@ -35,11 +35,20 @@ const checkbox = {
     actions:{}
 };
 
+const date = {
+    id: 'date',
+    type: 'date',
+    label: 'Pick a date',
+    defaultValue: false,
+    actions:{}
+};
+
 const fieldConfigs = {
     "textfield": {...textfield},
     "checkbox": {...checkbox},
     "textarea": {...textfield},
-    "dropdown": {...select}
+    "dropdown": {...select},
+    "date": {...date},
 };
 
 

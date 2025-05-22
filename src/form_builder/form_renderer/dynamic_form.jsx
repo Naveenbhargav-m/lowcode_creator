@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { CheckboxInput, Column, FormSteps, Panel, Row, SelectInput, TextareaInput, TextInput } from './components';
+import { CheckboxInput, Column, DateInput, FormSteps, Panel, Row, SelectInput, TextareaInput, TextInput } from './components';
 import { styles } from './styles';
 import { SelectableComponent } from '../../components/custom/selectAble';
 import { DeleteFormElement, formActiveElement } from '../form_builder_state';
@@ -50,7 +50,14 @@ const fieldTypes = {
       title: '',
       children: [],
     }
-  }
+  },
+  date: {
+    component: DateInput,
+    defaultProps: {
+      title: '',
+      children: [],
+    }
+  },
 };
 
 // Form Field Components
