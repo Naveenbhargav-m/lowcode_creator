@@ -1,4 +1,4 @@
-import { Calendar, ChevronDown, ChevronUp, Clock, Palette, Plus, X } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, Clock, Palette, Plus, X , Edit2, Trash2, Check} from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
 
 export const styles = {
@@ -73,6 +73,171 @@ export const styles = {
   subFormContent: "space-y-4",
 
     
+  };
+
+
+
+  var stylesobj = {
+    container: {
+      border: '1px solid #e5e7eb',
+      borderRadius: '12px',
+      padding: '20px',
+      backgroundColor: '#ffffff',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '20px'
+    },
+    title: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#111827',
+      margin: 0
+    },
+    addButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '10px 16px',
+      backgroundColor: '#6366f1',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      fontSize: '13px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+    },
+    addButtonHover: {
+      backgroundColor: '#4f46e5',
+      transform: 'translateY(-1px)',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+    },
+    optionsList: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+      maxHeight: '400px',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      paddingRight: '4px'
+    },
+    optionItem: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '16px',
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: '10px',
+      transition: 'all 0.2s ease',
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+    },
+    optionItemHover: {
+      borderColor: '#d1d5db',
+      boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)'
+    },
+    optionItemEditing: {
+      backgroundColor: '#f8faff',
+      borderColor: '#6366f1',
+      boxShadow: '0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      transform: 'scale(1.01)'
+    },
+    input: {
+      flex: 1,
+      padding: '8px 12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '6px',
+      fontSize: '14px',
+      outline: 'none',
+      transition: 'all 0.2s ease',
+      backgroundColor: '#ffffff'
+    },
+    inputFocus: {
+      borderColor: '#6366f1',
+      boxShadow: '0 0 0 3px rgba(99, 102, 241, 0.1)'
+    },
+    optionDisplay: {
+      flex: 1,
+      padding: '8px 12px',
+      fontSize: '14px',
+      color: '#374151',
+      backgroundColor: 'transparent',
+      border: 'none',
+      textAlign: 'left'
+    },
+    buttonGroup: {
+      display: 'flex',
+      gap: '6px'
+    },
+    iconButton: {
+      padding: '8px',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.2s ease',
+      width: '32px',
+      height: '32px'
+    },
+    editButton: {
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280'
+    },
+    editButtonHover: {
+      backgroundColor: '#e5e7eb',
+      color: '#374151',
+      transform: 'scale(1.05)'
+    },
+    deleteButton: {
+      backgroundColor: '#fef2f2',
+      color: '#dc2626'
+    },
+    deleteButtonHover: {
+      backgroundColor: '#fee2e2',
+      color: '#b91c1c',
+      transform: 'scale(1.05)'
+    },
+    saveButton: {
+      backgroundColor: '#ecfdf5',
+      color: '#059669'
+    },
+    saveButtonHover: {
+      backgroundColor: '#d1fae5',
+      color: '#047857',
+      transform: 'scale(1.05)'
+    },
+    cancelButton: {
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280'
+    },
+    cancelButtonHover: {
+      backgroundColor: '#e5e7eb',
+      color: '#374151',
+      transform: 'scale(1.05)'
+    },
+    emptyState: {
+      textAlign: 'center',
+      padding: '32px',
+      color: '#9ca3af',
+      fontSize: '14px',
+      fontStyle: 'italic'
+    },
+    fieldLabel: {
+      fontSize: '12px',
+      fontWeight: '600',
+      color: '#6b7280',
+      marginBottom: '4px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.025em'
+    }
   };
   
   // Field components - same as original
@@ -414,6 +579,7 @@ export const ColorField = ({ field, value, onChange }) => (
           type="text"
           placeholder="DD"
           value={date.day}
+          // @ts-ignore
           onChange={(e) => handlePartChange('day', e.target.value)}
           className="w-12 p-2 border rounded text-center"
           maxLength={2}
@@ -423,6 +589,7 @@ export const ColorField = ({ field, value, onChange }) => (
           type="text"
           placeholder="MM"
           value={date.month}
+          // @ts-ignore
           onChange={(e) => handlePartChange('month', e.target.value)}
           className="w-12 p-2 border rounded text-center"
           maxLength={2}
@@ -432,6 +599,7 @@ export const ColorField = ({ field, value, onChange }) => (
           type="text"
           placeholder="YYYY"
           value={date.year}
+          // @ts-ignore
           onChange={(e) => handlePartChange('year', e.target.value)}
           className="w-16 p-2 border rounded text-center"
           maxLength={4}
@@ -493,6 +661,7 @@ export const ColorField = ({ field, value, onChange }) => (
           type="text"
           placeholder="HH"
           value={time.hours}
+          // @ts-ignore
           onChange={(e) => handlePartChange('hours', e.target.value)}
           className="w-12 p-2 border rounded text-center"
           maxLength={2}
@@ -502,6 +671,7 @@ export const ColorField = ({ field, value, onChange }) => (
           type="text"
           placeholder="MM"
           value={time.minutes}
+          // @ts-ignore
           onChange={(e) => handlePartChange('minutes', e.target.value)}
           className="w-12 p-2 border rounded text-center"
           maxLength={2}
@@ -513,6 +683,7 @@ export const ColorField = ({ field, value, onChange }) => (
               type="text"
               placeholder="SS"
               value={time.seconds}
+              // @ts-ignore
               onChange={(e) => handlePartChange('seconds', e.target.value)}
               className="w-12 p-2 border rounded text-center"
               maxLength={2}
@@ -582,6 +753,7 @@ export const ColorField = ({ field, value, onChange }) => (
           id={field.id}
           value={dateValue}
           onChange={handleDateChange}
+          // @ts-ignore
           onClick={(e) => e.target.showPicker && e.target.showPicker()}
           className="w-full p-2 pr-8 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           min={field.min}
@@ -593,7 +765,9 @@ export const ColorField = ({ field, value, onChange }) => (
             className="absolute right-2 cursor-pointer"
             onClick={() => {
               const input = document.getElementById(field.id);
+              // @ts-ignore
               if (input && input.showPicker) {
+                // @ts-ignore
                 input.showPicker();
               }
             }}
@@ -633,6 +807,7 @@ export const ColorField = ({ field, value, onChange }) => (
           id={field.id}
           value={timeValue}
           onChange={handleTimeChange}
+          // @ts-ignore
           onClick={(e) => e.target.showPicker && e.target.showPicker()}
           className="w-full p-2 pr-8 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={field.disabled}
@@ -759,3 +934,520 @@ export const ColorField = ({ field, value, onChange }) => (
     );
   };
   
+
+
+
+// @ts-ignore
+export const OptionsListField = ({ field, value, onChange }) => {
+  const [options, setOptions] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editingValues, setEditingValues] = useState({});
+
+  // Configuration from field object
+  const config = field.optionsConfig || {
+    valueKey: 'value',
+    labelKey: 'label',
+    valueLabel: 'Value',
+    labelLabel: 'Label'
+  };
+
+  const { valueKey, labelKey, valueLabel, labelLabel } = config;
+
+  // Initialize options from value
+  useEffect(() => {
+    if (Array.isArray(value)) {
+      setOptions(value);
+    } else if (value) {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+          setOptions(parsed);
+        } else {
+          setOptions([]);
+        }
+      } catch {
+        setOptions([]);
+      }
+    } else {
+      setOptions([]);
+    }
+  }, [value]);
+
+  // Update parent when options change - always return array
+  const updateParent = (newOptions) => {
+    setOptions(newOptions);
+    // Ensure we always pass an array to the parent
+    const arrayToPass = Array.isArray(newOptions) ? newOptions : [];
+    console.log("array to pass:",arrayToPass);
+    onChange(field.id, arrayToPass);
+  };
+
+  const addNewOption = () => {
+    // @ts-ignore
+    const newId = Date.now().toString();
+    const newOption = {
+      [valueKey]: '',
+      [labelKey]: ''
+    };
+    
+    const newOptions = [...options, newOption];
+    updateParent(newOptions);
+    setEditingId(newOptions.length - 1);
+    setEditingValues({ [valueKey]: '', [labelKey]: '' });
+  };
+
+  const startEditing = (index) => {
+    setEditingId(index);
+    setEditingValues({ ...options[index] });
+  };
+
+  const saveEditing = () => {
+    if (editingId !== null) {
+      const newOptions = [...options];
+      newOptions[editingId] = { ...editingValues };
+      updateParent(newOptions);
+    }
+    setEditingId(null);
+    setEditingValues({});
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditingValues({});
+  };
+
+  const deleteOption = (index) => {
+    const newOptions = options.filter((_, i) => i !== index);
+    updateParent(newOptions);
+    if (editingId === index) {
+      setEditingId(null);
+      setEditingValues({});
+    }
+  };
+
+  const updateEditingValue = (key, newValue) => {
+    setEditingValues(prev => ({
+      ...prev,
+      [key]: newValue
+    }));
+  };
+
+  // Responsive styles
+  const stylesobj = {
+    container: {
+      width: '100%',
+      maxWidth: '100%',
+      overflowX: 'auto',
+      padding: '16px',
+      boxSizing: 'border-box',
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: '8px',
+      minWidth: '300px'
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '16px',
+      gap: '12px',
+      flexWrap: 'wrap',
+      minWidth: '280px'
+    },
+    title: {
+      margin: '0',
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#1f2937',
+      flexShrink: 0
+    },
+    addButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: '8px 12px',
+      backgroundColor: '#3b82f6',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'all 0.2s ease',
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+      whiteSpace: 'nowrap',
+      flexShrink: 0
+    },
+    addButtonHover: {
+      backgroundColor: '#2563eb',
+      transform: 'translateY(-1px)',
+      boxShadow: '0 4px 8px rgba(59, 130, 246, 0.3)'
+    },
+    emptyState: {
+      textAlign: 'center',
+      padding: '32px 16px',
+      color: '#6b7280',
+      fontSize: '14px',
+      backgroundColor: '#f9fafb',
+      borderRadius: '6px',
+      border: '2px dashed #d1d5db'
+    },
+    optionsList: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+      minWidth: '280px'
+    },
+    optionItem: {
+      background: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: '8px',
+      padding: '16px',
+      transition: 'all 0.2s ease',
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+      minWidth: '280px'
+    },
+    optionItemEditing: {
+      borderColor: '#3b82f6',
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+    },
+    optionItemHover: {
+      borderColor: '#d1d5db',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+    },
+    optionContent: {
+      display: 'flex',
+      flexDirection: 'row',
+      gap: '16px',
+      alignItems: 'flex-start',
+      flexWrap: 'wrap'
+    },
+    optionField: {
+      flex: '1',
+      minWidth: '120px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px'
+    },
+    optionDisplay: {
+      flex: '1',
+      minWidth: '120px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px'
+    },
+    fieldLabel: {
+      fontSize: '12px',
+      fontWeight: '600',
+      color: '#374151',
+      textTransform: 'uppercase',
+      letterSpacing: '0.025em'
+    },
+    fieldValue: {
+      fontSize: '14px',
+      color: '#1f2937',
+      wordBreak: 'break-word'
+    },
+    input: {
+      width: '100%',
+      padding: '8px 12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '6px',
+      fontSize: '14px',
+      transition: 'all 0.2s ease',
+      boxSizing: 'border-box',
+      backgroundColor: '#ffffff'
+    },
+    inputFocus: {
+      borderColor: '#3b82f6',
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+    },
+    buttonGroup: {
+      display: 'flex',
+      gap: '8px',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      flexShrink: 0,
+      marginTop: 'auto'
+    },
+    iconButton: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '32px',
+      height: '32px',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280'
+    },
+    editButton: {
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280'
+    },
+    editButtonHover: {
+      backgroundColor: '#3b82f6',
+      color: 'white',
+      transform: 'scale(1.05)'
+    },
+    deleteButton: {
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280'
+    },
+    deleteButtonHover: {
+      backgroundColor: '#ef4444',
+      color: 'white',
+      transform: 'scale(1.05)'
+    },
+    saveButton: {
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280'
+    },
+    saveButtonHover: {
+      backgroundColor: '#10b981',
+      color: 'white',
+      transform: 'scale(1.05)'
+    },
+    cancelButton: {
+      backgroundColor: '#f3f4f6',
+      color: '#6b7280'
+    },
+    cancelButtonHover: {
+      backgroundColor: '#f59e0b',
+      color: 'white',
+      transform: 'scale(1.05)'
+    }
+  };
+
+  return (
+    <div style={stylesobj.container}>
+      <div style={stylesobj.header}>
+        <h4 style={stylesobj.title}>{field.label || 'Options'}</h4>
+        <button
+          style={stylesobj.addButton}
+          onClick={addNewOption}
+          onMouseEnter={(e) => {
+            // @ts-ignore
+            e.target.style.backgroundColor = stylesobj.addButtonHover.backgroundColor;
+            // @ts-ignore
+            e.target.style.transform = stylesobj.addButtonHover.transform;
+            // @ts-ignore
+            e.target.style.boxShadow = stylesobj.addButtonHover.boxShadow;
+          }}
+          onMouseLeave={(e) => {
+            // @ts-ignore
+            e.target.style.backgroundColor = stylesobj.addButton.backgroundColor;
+            // @ts-ignore
+            e.target.style.transform = 'none';
+            // @ts-ignore
+            e.target.style.boxShadow = stylesobj.addButton.boxShadow;
+          }}
+        >
+          <Plus size={14} />
+          Add Option
+        </button>
+      </div>
+
+      {options.length === 0 ? (
+        <div style={stylesobj.emptyState}>
+          No options configured. Click "Add Option" to get started.
+        </div>
+      ) : (
+        <div style={stylesobj.optionsList}>
+          {options.map((option, index) => (
+            <div 
+              key={index} 
+              style={{
+                ...stylesobj.optionItem,
+                ...(editingId === index ? stylesobj.optionItemEditing : {})
+              }}
+              onMouseEnter={(e) => {
+                if (editingId !== index) {
+                  // @ts-ignore
+                  e.target.style.borderColor = stylesobj.optionItemHover.borderColor;
+                  // @ts-ignore
+                  e.target.style.boxShadow = stylesobj.optionItemHover.boxShadow;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (editingId !== index) {
+                  // @ts-ignore
+                  e.target.style.borderColor = stylesobj.optionItem.borderColor;
+                  // @ts-ignore
+                  e.target.style.boxShadow = stylesobj.optionItem.boxShadow;
+                }
+              }}
+            >
+              <div style={stylesobj.optionContent}>
+                {editingId === index ? (
+                  <>
+                    <div style={stylesobj.optionField}>
+                      <div style={stylesobj.fieldLabel}>{valueLabel}</div>
+                      <input
+                        type="text"
+                        value={editingValues[valueKey] || ''}
+                        // @ts-ignore
+                        onChange={(e) => updateEditingValue(valueKey, e.target.value)}
+                        style={stylesobj.input}
+                        placeholder={`Enter ${valueLabel.toLowerCase()}`}
+                        onFocus={(e) => {
+                          // @ts-ignore
+                          e.target.style.borderColor = stylesobj.inputFocus.borderColor;
+                          // @ts-ignore
+                          e.target.style.boxShadow = stylesobj.inputFocus.boxShadow;
+                        }}
+                        onBlur={(e) => {
+                          // @ts-ignore
+                          e.target.style.borderColor = stylesobj.input.borderColor;
+                          // @ts-ignore
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+                    <div style={stylesobj.optionField}>
+                      <div style={stylesobj.fieldLabel}>{labelLabel}</div>
+                      <input
+                        type="text"
+                        value={editingValues[labelKey] || ''}
+                        // @ts-ignore
+                        onChange={(e) => updateEditingValue(labelKey, e.target.value)}
+                        style={stylesobj.input}
+                        placeholder={`Enter ${labelLabel.toLowerCase()}`}
+                        onFocus={(e) => {
+                          // @ts-ignore
+                          e.target.style.borderColor = stylesobj.inputFocus.borderColor;
+                          // @ts-ignore
+                          e.target.style.boxShadow = stylesobj.inputFocus.boxShadow;
+                        }}
+                        onBlur={(e) => {
+                          // @ts-ignore
+                          e.target.style.borderColor = stylesobj.input.borderColor;
+                          // @ts-ignore
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={stylesobj.optionDisplay}>
+                      <div style={stylesobj.fieldLabel}>{valueLabel}</div>
+                      <div style={stylesobj.fieldValue}>{option[valueKey] || '<empty>'}</div>
+                    </div>
+                    <div style={stylesobj.optionDisplay}>
+                      <div style={stylesobj.fieldLabel}>{labelLabel}</div>
+                      <div style={stylesobj.fieldValue}>{option[labelKey] || '<empty>'}</div>
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              <div style={stylesobj.buttonGroup}>
+                {editingId === index ? (
+                  <>
+                    <button
+                      style={stylesobj.iconButton}
+                      onClick={saveEditing}
+                      onMouseEnter={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.saveButtonHover.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.saveButtonHover.color;
+                        // @ts-ignore
+                        e.target.style.transform = stylesobj.saveButtonHover.transform;
+                      }}
+                      onMouseLeave={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.saveButton.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.saveButton.color;
+                        // @ts-ignore
+                        e.target.style.transform = 'none';
+                      }}
+                    >
+                      <Check size={14} />
+                    </button>
+                    <button
+                      style={stylesobj.iconButton}
+                      onClick={cancelEditing}
+                      onMouseEnter={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.cancelButtonHover.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.cancelButtonHover.color;
+                        // @ts-ignore
+                        e.target.style.transform = stylesobj.cancelButtonHover.transform;
+                      }}
+                      onMouseLeave={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.cancelButton.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.cancelButton.color;
+                        // @ts-ignore
+                        e.target.style.transform = 'none';
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      style={stylesobj.iconButton}
+                      onClick={() => startEditing(index)}
+                      onMouseEnter={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.editButtonHover.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.editButtonHover.color;
+                        // @ts-ignore
+                        e.target.style.transform = stylesobj.editButtonHover.transform;
+                      }}
+                      onMouseLeave={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.editButton.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.editButton.color;
+                        // @ts-ignore
+                        e.target.style.transform = 'none';
+                      }}
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      style={stylesobj.iconButton}
+                      onClick={() => deleteOption(index)}
+                      onMouseEnter={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.deleteButtonHover.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.deleteButtonHover.color;
+                        // @ts-ignore
+                        e.target.style.transform = stylesobj.deleteButtonHover.transform;
+                      }}
+                      onMouseLeave={(e) => {
+                        // @ts-ignore
+                        e.target.style.backgroundColor = stylesobj.deleteButton.backgroundColor;
+                        // @ts-ignore
+                        e.target.style.color = stylesobj.deleteButton.color;
+                        // @ts-ignore
+                        e.target.style.transform = 'none';
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

@@ -1,7 +1,7 @@
 import "./config_form.css";
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Code, Eye } from 'lucide-react';
-import { Accordion, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, NumberField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
+import { Accordion, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, NumberField, OptionsListField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
 
 // Helper functions for handling nested objects
 const getNestedValue = (obj, path) => {
@@ -114,8 +114,9 @@ export const ConfigFormV3 = ({
   const handleFieldChange = (fieldId, value) => {
     setFormValues(prev => {
       // Support for nested paths
+      console.log("handle change:",value, fieldId);
       const updatedValues = setNestedValue(prev, fieldId, value);
-      
+      console.log("handle change:",updatedValues, fieldId);
       if (onChange) {
         // Clean empty objects before returning
         onChange(cleanEmptyObjects(updatedValues));
@@ -218,6 +219,9 @@ export const ConfigFormV3 = ({
     
     let fieldComponent;
     switch (field.type) {
+      case 'option_mapper':
+        fieldComponent = <OptionsListField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />
+        break;
       case 'text':
         fieldComponent = <TextField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
         break;
@@ -347,6 +351,7 @@ export const ConfigFormV3 = ({
         <textarea
           className={styles.jsonEditor}
           value={jsonValue}
+          // @ts-ignore
           onChange={(e) => handleJsonChange(e.target.value)}
         />
         {jsonError && <div className={styles.error}>{jsonError}</div>}
