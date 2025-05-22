@@ -27,35 +27,32 @@ function OptionsMapper({ options }) {
   }
 
 function FormBuilderLeftPanel() {
-    let elements = [
-      ["text-cursor-input","textfield"],
-      ["vote","checkbox"],
-      ["text","textarea"],
-      ["chevron-down","dropdown"],
-      ["text-cursor-input","password"],
-      ["toggle-right","switch"],
-      ["circle-check","radio"],
-      ["list-filter-plus","multi_select"],
-      ["chart-no-axes-gantt","slider"],
-      ["palette","color"],
-      ["upload","file_upload"],
-      ["star","rating"],
-      ["calendar","date"],
-      ["link-2","url"],
-      ["phone","phone"],
-      ["calendar-clock","date_time"],
-      ["clock-2","time"],
-      ["calendar-range","date_range"],
-      ["calendar-days","week"],
-      ["calendar-fold","month"],
-      ["letter-text","rich_text"],
-      ["hash","markdown"],
-      ["columns-3","column"],
-      ["rows-3","row"],
-      ["sliders-horizantal","two_slider"],
-      
-     
-    ];
+  let elements = [
+    ["text-cursor-input", "textfield"],
+    ["chevron-down", "dropdown"],
+    ["vote", "checkbox"],
+    ["text", "textarea"],
+    ["text-cursor-input", "password"],
+    ["hash", "markdown"],
+    ["chart-no-axes-gantt", "slider"],
+    ["sliders-horizontal", "dual_slider"],
+    ["mail", "email"],
+    ["calendar", "date"],
+    ["calendar-clock", "date_time"],
+    ["clock-2", "time"],
+    ["calendar-fold", "month"],
+    ["calendar-days", "week"],
+    ["list-filter-plus", "multi_select"],
+    ["search", "lookup"],
+    ["upload", "file_upload"],
+    ["image", "image_upload_grid"],
+    ["grid-3x3", "image_select_grid"],
+    ["columns-3", "column"],
+    ["rows-3", "row"],
+    ["layout-panel-top", "panel"],
+    ["list-ordered", "form_steps"]
+  ];
+  
     return (
       
       <OptionsMapper options={elements}/>

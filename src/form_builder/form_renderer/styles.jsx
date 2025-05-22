@@ -78,7 +78,6 @@ const styles = {
         color: '#374151',
       },
     },
-    
     // Layout styles
     layout: {
       form: {

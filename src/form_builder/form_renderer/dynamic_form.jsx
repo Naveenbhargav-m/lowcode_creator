@@ -1,57 +1,169 @@
 import { useState, useEffect, useMemo } from 'react';
-import { CheckboxInput, Column, FormSteps, Panel, Row, SelectInput, TextareaInput, TextInput } from './components';
+import { CheckboxInput, Column, DateInput, DateTimeInput, DualRangeSliderInput, EmailInput, FileUploadInput, FormSteps, ImageSelectGrid, ImageUploadGrid, LookupInput, MarkdownInput, MonthInput, MultiSelectInput, Panel, PasswordInput, Row, SelectInput, TextareaInput, TextInput, TimeInput, WeekInput } from './components';
 import { styles } from './styles';
 import { SelectableComponent } from '../../components/custom/selectAble';
 import { DeleteFormElement, formActiveElement } from '../form_builder_state';
 // Field type definitions with default props
-const fieldTypes = {
-  text: {
-    component: TextInput,
-    defaultProps: {
-      type: 'text',
-      placeholder: 'Enter text (key: text)...',
+
+  // Extended fieldTypes mapping
+  const fieldTypes = {
+    text: {
+      component: TextInput,
+      defaultProps: {
+        type: 'text',
+        placeholder: 'Enter text (key: text)...',
+      }
+    },
+    select: {
+      component: SelectInput,
+      defaultProps: {
+        options: [],
+        placeholder: 'Select an option (key: select)...',
+      }
+    },
+    checkbox: {
+      component: CheckboxInput,
+      defaultProps: {
+        checked: false,
+      }
+    },
+    textarea: {
+      component: TextareaInput,
+      defaultProps: {
+        rows: 4,
+        placeholder: 'Enter text (key: textarea)...',
+      }
+    },
+    password: {
+      component: PasswordInput,
+      defaultProps: {
+        type: 'password',
+        placeholder: 'Enter password...',
+      }
+    },
+    markdown: {
+      component: MarkdownInput,
+      defaultProps: {
+        placeholder: 'Enter markdown text...',
+      }
+    },
+    slider: {
+      component: DualRangeSliderInput,
+      defaultProps: {
+        min: 0,
+        max: 100,
+        step: 1,
+        defaultValue: 50,
+      }
+    },
+    dual_slider: {
+      component: DualRangeSliderInput,
+      defaultProps: {
+        min: 0,
+        max: 100,
+        step: 1,
+        defaultValue: [25, 75],
+      }
+    },
+    email: {
+      component: EmailInput,
+      defaultProps: {
+        type: 'email',
+        placeholder: 'Enter email address...',
+      }
+    },
+    date: {
+      component: DateInput,
+      defaultProps: {
+        placeholder: 'Select date...',
+      }
+    },
+    date_time: {
+      component: DateTimeInput,
+      defaultProps: {
+        placeholder: 'Select date and time...',
+      }
+    },
+    time: {
+      component: TimeInput,
+      defaultProps: {
+        placeholder: 'Select time...',
+      }
+    },
+    month: {
+      component: MonthInput,
+      defaultProps: {
+        placeholder: 'Select month...',
+      }
+    },
+    week: {
+      component: WeekInput,
+      defaultProps: {
+        placeholder: 'Select week...',
+      }
+    },
+    multi_select: {
+      component: MultiSelectInput,
+      defaultProps: {
+        options: [],
+        placeholder: 'Select multiple options...',
+      }
+    },
+    lookup: {
+      component: LookupInput,
+      defaultProps: {
+        options: [],
+        placeholder: 'Search and select...',
+      }
+    },
+    file_upload: {
+      component: FileUploadInput,
+      defaultProps: {
+        accept: '*/*',
+        multiple: false,
+      }
+    },
+    image_upload_grid: {
+      component: ImageUploadGrid,
+      defaultProps: {
+        maxFiles: 5,
+        accept: 'image/*',
+      }
+    },
+    image_select_grid: {
+      component: ImageSelectGrid,
+      defaultProps: {
+        options: [],
+        multiple: false,
+      }
+    },
+    row: {
+      component: Row,
+      defaultProps: {
+        children: [],
+      }
+    },
+    column: {
+      component: Column,
+      defaultProps: {
+        children: [],
+      }
+    },
+    panel: {
+      component: Panel,
+      defaultProps: {
+        title: '',
+        children: [],
+      }
+    },
+    form_steps: {
+      component: FormSteps,
+      defaultProps: {
+        steps: [],
+        currentStep: 0,
+      }
     }
-  },
-  select: {
-    component: SelectInput,
-    defaultProps: {
-      options: [],
-      placeholder: 'Select an option (key: select)...',
-    }
-  },
-  checkbox: {
-    component: CheckboxInput,
-    defaultProps: {
-      checked: false,
-    }
-  },
-  textarea: {
-    component: TextareaInput,
-    defaultProps: {
-      rows: 4,
-      placeholder: 'Enter text (key: textarea)...',
-    }
-  },
-  row: {
-    component: Row,
-    defaultProps: {
-      children: [],
-    }
-  },
-  column: {
-    component: Column,
-    defaultProps: {
-      children: [],
-    }
-  },
-  panel: {
-    component: Panel,
-    defaultProps: {
-      title: '',
-      children: [],
-    }
-  }
-};
+  };
 
 // Form Field Components
 // Field Renderer Component
