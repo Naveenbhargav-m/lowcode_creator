@@ -137,13 +137,13 @@ const NumberBaseConfig = {
     value: 70,
     configs: {
       style: number_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};",
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
     },
 };
 
@@ -151,13 +151,13 @@ const TextAreabaseConfig = {
     value: "This the is the base text value for the Text Area",
     configs: {
       style: text_area_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};",
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
     },
 };
 
@@ -166,13 +166,13 @@ const AvatarConfig = {
     value: url,
     configs: {
       style: text_area_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};",
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
     },
 };
 
@@ -181,26 +181,28 @@ const AvatarGroupConfig = {
     value: [url, url],
     configs: {
       style: text_area_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 };
 
 const ProgressBarConfig = {
     value: 40,
     configs: {
       style: progress_bar_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 };
 
 
@@ -211,26 +213,28 @@ const DropdownConfig = {
       "options": [
         { value: "1", label: "Option 1" },
         { value: "2", label: "Option 2" },],
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+        onClick: {"actions": [], "code": ""},
+        onDoubleClick:  {"actions": [], "code": ""},
+        onHover:  {"actions": [], "code": ""},
+        onHoverEnter:  {"actions": [], "code": ""},
+        onHoverLeave: {"actions": [], "code": ""},
+        valueCode:  {"actions": [], "code": ""},
+        childrenCode: {"actions": [], "code": ""},
+    }
 };
 
 const ButtonConfig = {
     value: "Cick meee",
     configs: {
       style: button_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""}, 
+}
 };
 
 
@@ -238,13 +242,14 @@ const ImageConfig = {
     value: url,
     configs: {
       style: image_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 };
 
 
@@ -252,13 +257,14 @@ const BadgeConfig = {
     value: "triller",
     configs: {
       style: badge_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 };
 
 
@@ -266,26 +272,28 @@ const IconConfig = {
     value: "database",
     configs: {
       style: icon_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 };
 
 const IconButtonConfig = {
     value: "database",
     configs: {
       style: icon_button_base_style,
-      onClick: "return {};",
-      onDoubleClick: "return {};",
-      onHover:"return {};",
-      onHoverEnter:"return {};",
-      onHoverLeave:"return {};",
-      valueCode: "return {};",
-      childrenCode:"return {};"}
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 };
 const PrimitivesStylesMap = {
     text: Text_base_config,

@@ -1,5 +1,5 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
-import { elementConfig, groupings, groupObjectValues, ungroupObjectValues } from "./configs";
+import { TemplateElementConfigFormSchema } from "./configs";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
 
@@ -14,21 +14,20 @@ export function TemplateBuilderRightView() {
       activeElement = activeTemplateElements[activeElementID].value;
     }
 
-    console.log("active template element changed:",activeElementID);
-    const handleChange = (styles) => {
-      console.log("existing element:",activeElement);
+    const handleChange = (data) => {
+      console.log("handle change:", data, activeElement);
+      return;
       if(activeElement !== undefined) {
-        console.log("config:",styles);
-        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...styles};
+        activeElement = {...activeElement,...data};
         activeTemplateElements[activeElementID].value = {...activeElement};
       }
     };
   
-    const handleSubmit = (styles) => {
-      styles = groupObjectValues(styles, groupings);
-      console.log("inner styles to update:",styles);
+    const handleSubmit = (data) => {
+      console.log("handle change:", data, activeElement);
+      return;
       if(activeElement !== undefined) {
-        activeElement["configs"]["style"] = {...activeElement["configs"]["style"],...styles};
+        activeElement= {...activeElement,...data};
         activeTemplateElements[activeElementID].value = {...activeElement};
         let mytemp = templates[activeTamplate.peek()];
         if(templateDesignView.value === "smartphone") {
@@ -43,19 +42,10 @@ export function TemplateBuilderRightView() {
         localStorage.setItem("templates",JSON.stringify(templates));
       }
     };
-
-    console.log("active element:", activeElement);
-    var initalConfig = activeElement["configs"] || {};
-    var initalStyles = initalConfig["style"] || {};
-    console.log("inital styles1:",initalStyles );
-    var innerstyles = ungroupObjectValues(initalStyles);
-    console.log("inner styles:",innerstyles);
-
-
-  
+    console.log("Active Element:",activeElement);
     return (
     <div style={{width:"100%", "color": "black"}}>
-      <ConfigFormV3 schema={elementConfig} initialValues={{...innerstyles.values}} 
+      <ConfigFormV3 schema={TemplateElementConfigFormSchema} initialValues={{...activeElement}} 
       onChange={(data) => {handleChange(data|| {});}} onSubmit={(data) => {handleSubmit(data || {})}}/>
     </div>);
 }
