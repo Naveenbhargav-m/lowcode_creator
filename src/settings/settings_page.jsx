@@ -67,6 +67,7 @@ export function SettingsPage() {
     }
 
     getDataFromAPI().then((data) => {
+        // @ts-ignore
         setSettings(data);
     });
   }, []);
@@ -121,6 +122,7 @@ export function SettingsPage() {
       favicon: settings.appearance.favicon,
       home_route_name: settings.homePage,
       home_route_screen_name: settings.routes.find(r => r.path === settings.homePage)?.component.name || "",
+      // @ts-ignore
       home_route_screen_id: settings.homeRouteScreenId,
       route_mapping: JSON.stringify(settings.routes.map(route => ({
         path: route.path,
