@@ -1,53 +1,120 @@
-import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, Folder, File, Check, X, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  ChevronDown, 
+  ChevronRight, 
+  Search, 
+  X, 
+  Check, 
+  Folder, 
+  Database, 
+  Table, 
+  File 
+} from 'lucide-react';
 
 // Dummy data for testing
 const dummyData = {
+  "User Data": [
+    {
+      id: "user_table_1",
+      name: "Users",
+      fields: [
+        { name: "email", type: "string", fid: "user_email" },
+        { name: "age", type: "number", fid: "user_age" },
+        { name: "name", type: "string", fid: "user_name" }
+      ]
+    },
+    {
+      id: "profile_table_1", 
+      name: "User Profiles",
+      fields: [
+        { name: "bio", type: "text", fid: "profile_bio" },
+        { name: "avatar", type: "string", fid: "profile_avatar" }
+      ]
+    }
+  ],
   "System Metrics": [
-    { name: "CPU Usage", description: "Central Processing Unit utilization" },
-    { name: "Memory Usage", description: "RAM utilization" },
-    { name: "Disk I/O", description: "Disk input/output operations" },
-    { name: "Network Traffic", description: "Network bandwidth utilization" }
+    {
+      id: "cpu_usage",
+      name: "CPU Usage"
+    },
+    {
+      id: "memory_usage", 
+      name: "Memory Usage"
+    }
   ],
-  "Application Logs": [
-    { name: "Error Rate", description: "Application error frequency" },
-    { name: "Response Time", description: "API response timing" },
-    { name: "Request Count", description: "Number of incoming requests" }
-  ],
-  "User Analytics": [
-    { name: "Active Users", description: "Currently active users" },
-    { name: "Session Duration", description: "Average user session length" },
-    { name: "Conversion Rate", description: "User conversion percentage" },
-    { name: "Bounce Rate", description: "Single page visit percentage" }
-  ],
-  "Infrastructure": [
-    { name: "Server Health", description: "Overall server status" },
-    { name: "Load Balancer Status", description: "Load distribution metrics" },
-    { name: "Database Connections", description: "Active database connections" }
+  "Analytics": [
+    {
+      id: "events_table",
+      name: "Events",
+      fields: [
+        { name: "event_type", type: "string", fid: "evt_type" },
+        { name: "timestamp", type: "datetime", fid: "evt_time" },
+        { name: "user_id", type: "string", fid: "evt_user" }
+      ]
+    }
   ]
 };
 
-export default function GlobalSignalsPopup({ initialOpen = false, fields = dummyData, onClose = (e,data) => {} }) {
+export default function GlobalSignalsPopup({ initialOpen = true, fields = dummyData, onClose = (e, data) => {} }) {
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [pickedItems, setPickedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedSections, setExpandedSections] = useState({});
   const [filteredSections, setFilteredSections] = useState(fields);
 
-
-  useEffect((() => {
+  useEffect(() => {
     setIsOpen(initialOpen);
-  }),[initialOpen]);
+  }, [initialOpen]);
   
   // Initialize expanded sections when component mounts
   useEffect(() => {
     const initialExpandedState = {};
-    Object.keys(fields).forEach(key => {
-      initialExpandedState[key] = false;
-    });
+    
+    const initializeExpanded = (obj, prefix = '') => {
+      Object.keys(obj).forEach(key => {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
+        initialExpandedState[fullKey] = false;
+        
+        if (Array.isArray(obj[key])) {
+          obj[key].forEach((item, index) => {
+            if (typeof item === 'object' && item !== null) {
+              Object.keys(item).forEach(subKey => {
+                if (Array.isArray(item[subKey])) {
+                  const subFullKey = `${fullKey}[${index}].${subKey}`;
+                  initialExpandedState[subFullKey] = false;
+                }
+              });
+            }
+          });
+        }
+      });
+    };
+    
+    initializeExpanded(fields);
     setExpandedSections(initialExpandedState);
     setFilteredSections(fields);
   }, [fields]);
+  
+  // Helper function to check if an item matches search term
+  const itemMatchesSearch = (item, searchTerm) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    
+    if (typeof item === 'string') {
+      return item.toLowerCase().includes(term);
+    }
+    
+    if (typeof item === 'object' && item !== null) {
+      return Object.values(item).some(value => {
+        if (typeof value === 'string') {
+          return value.toLowerCase().includes(term);
+        }
+        return false;
+      });
+    }
+    
+    return false;
+  };
   
   // Filter sections and items based on search term
   useEffect(() => {
@@ -63,28 +130,44 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
       // Check if section name matches
       const sectionMatches = section.toLowerCase().includes(searchTermLower);
       
-      // Filter items that match search term
-      const matchingItems = items.filter(item => 
-        item.name.toLowerCase().includes(searchTermLower) ||
-        (item.description && item.description.toLowerCase().includes(searchTermLower))
-      );
-      
-      // Include section if section name matches or if it has matching items
-      if (sectionMatches || matchingItems.length > 0) {
-        filtered[section] = matchingItems.length > 0 ? matchingItems : items;
+      if (Array.isArray(items)) {
+        // Filter items that match search term
+        const matchingItems = items.filter(item => itemMatchesSearch(item, searchTerm));
         
-        // Auto-expand sections with matching items when searching
-        if (searchTerm) {
-          setExpandedSections(prev => ({
-            ...prev,
-            [section]: true
-          }));
+        // Include section if section name matches or if it has matching items
+        if (sectionMatches || matchingItems.length > 0) {
+          filtered[section] = matchingItems.length > 0 ? matchingItems : items;
+          
+          // Auto-expand sections with matching items when searching
+          if (searchTerm) {
+            setExpandedSections(prev => ({
+              ...prev,
+              [section]: true
+            }));
+          }
         }
       }
     });
     
+    // @ts-ignore
     setFilteredSections(filtered);
   }, [searchTerm, fields]);
+  
+  // FIXED: Generate path for nested items - use field identifier instead of index
+  const generatePath = (section, itemIndex, subField = null, subItemIndex = null, fieldData = null) => {
+    if (subField && subItemIndex !== null && fieldData) {
+      // For nested fields, use the field's fid or name as identifier
+      const fieldId = fieldData.fid || fieldData.name || `field_${subItemIndex}`;
+      return `${section}.${fieldId}`;
+    }
+    if (subField) {
+      return `${section}[${itemIndex}].${subField}`;
+    }
+    // For top-level items, use the item's id or name
+    const item = fields[section]?.[itemIndex];
+    const itemId = item?.id || item?.name || `item_${itemIndex}`;
+    return `${section}.${itemId}`;
+  };
   
   // Toggle an item selection
   const toggleItem = (path) => {
@@ -102,23 +185,22 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
   
   // Toggle a section's expanded state
   const toggleSection = (section) => {
-    setExpandedSections({
-      ...expandedSections,
-      [section]: !expandedSections[section]
-    });
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
   
-  // Toggle all items in a section
-  const toggleSectionItems = (section, items) => {
-    const sectionPaths = items.map(item => `${section}.${item.name}`);
-    const allSelected = sectionPaths.every(path => pickedItems.includes(path));
+  // Toggle all items in a section or subsection
+  const toggleSectionItems = (paths) => {
+    const allSelected = paths.every(path => pickedItems.includes(path));
     
     if (allSelected) {
       // Remove all items from this section
-      setPickedItems(pickedItems.filter(item => !sectionPaths.includes(item)));
+      setPickedItems(pickedItems.filter(item => !paths.includes(item)));
     } else {
       // Add all missing items from this section
-      const newItems = sectionPaths.filter(path => !pickedItems.includes(path));
+      const newItems = paths.filter(path => !pickedItems.includes(path));
       setPickedItems([...pickedItems, ...newItems]);
     }
   };
@@ -126,7 +208,7 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
   // Expand all sections
   const expandAll = () => {
     const newExpandedSections = {};
-    Object.keys(fields).forEach(key => {
+    Object.keys(expandedSections).forEach(key => {
       newExpandedSections[key] = true;
     });
     setExpandedSections(newExpandedSections);
@@ -135,7 +217,7 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
   // Collapse all sections
   const collapseAll = () => {
     const newExpandedSections = {};
-    Object.keys(fields).forEach(key => {
+    Object.keys(expandedSections).forEach(key => {
       newExpandedSections[key] = false;
     });
     setExpandedSections(newExpandedSections);
@@ -150,7 +232,7 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
   const handleApply = () => {
     console.log("Selected items:", pickedItems);
     setIsOpen(false);
-    onClose(null,pickedItems);
+    onClose(null, pickedItems);
   };
 
   // Toggle the popup open/closed
@@ -160,7 +242,7 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
   
   // Highlight search matches
   const highlightMatches = (text, term) => {
-    if (!term) return text;
+    if (!term || typeof text !== 'string') return text;
     
     const parts = text.split(new RegExp(`(${term})`, 'gi'));
     return parts.map((part, i) => 
@@ -169,11 +251,113 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
     );
   };
   
+  // FIXED: Render nested fields with proper path generation
+  const renderNestedFields = (item, itemIndex, section) => {
+    if (!item.fields || !Array.isArray(item.fields)) return null;
+    
+    const fieldsKey = `${section}[${itemIndex}].fields`;
+    const fieldsExpanded = expandedSections[fieldsKey];
+    
+    // Calculate selected fields count with proper paths
+    const fieldPaths = item.fields.map((field, fieldIndex) => 
+      generatePath(section, itemIndex, 'fields', fieldIndex, field)
+    );
+    const selectedFieldsCount = fieldPaths.filter(path => pickedItems.includes(path)).length;
+    const allFieldsSelected = selectedFieldsCount === item.fields.length;
+    const someFieldsSelected = selectedFieldsCount > 0 && !allFieldsSelected;
+    
+    return (
+      <div className="ml-8 mt-2 border-l-2 border-gray-200 pl-4">
+        {/* Fields header */}
+        <div 
+          className="bg-gray-50 hover:bg-gray-100 p-2 flex items-center justify-between cursor-pointer rounded"
+          onClick={() => toggleSection(fieldsKey)}
+        >
+          <div className="flex items-center">
+            {fieldsExpanded ? (
+              <ChevronDown size={16} className="text-gray-500 mr-2" />
+            ) : (
+              <ChevronRight size={16} className="text-gray-500 mr-2" />
+            )}
+            <Table size={16} className="text-green-500 mr-2" />
+            <span className="text-sm font-medium text-gray-700">
+              Fields ({item.fields.length})
+            </span>
+            
+            {/* Selection indicator */}
+            {(someFieldsSelected || allFieldsSelected) && (
+              <span className="ml-2 text-xs bg-green-100 text-green-800 rounded-full px-2 py-0.5">
+                {selectedFieldsCount}/{item.fields.length}
+              </span>
+            )}
+          </div>
+          
+          {/* Select All Fields button */}
+          <button
+            className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSectionItems(fieldPaths);
+            }}
+          >
+            {allFieldsSelected ? 'Deselect All' : 'Select All'}
+          </button>
+        </div>
+        
+        {/* Fields list */}
+        {fieldsExpanded && (
+          <div className="mt-2 space-y-1">
+            {item.fields.map((field, fieldIndex) => {
+              const fieldPath = generatePath(section, itemIndex, 'fields', fieldIndex, field);
+              const isSelected = pickedItems.includes(fieldPath);
+              
+              return (
+                <div
+                  key={fieldIndex}
+                  className={`p-2 rounded flex items-center cursor-pointer ${
+                    isSelected ? 'bg-green-100' : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => toggleItem(fieldPath)}
+                >
+                  <div className={`w-4 h-4 rounded flex items-center justify-center mr-2 border ${
+                    isSelected ? 'bg-green-500 border-green-600' : 'border-gray-300'
+                  }`}>
+                    {isSelected && <Check size={12} className="text-white" />}
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <div className="flex items-center">
+                      <File size={14} className="text-gray-400 mr-2" />
+                      <span className={`text-sm ${isSelected ? 'text-green-800' : 'text-gray-700'}`}>
+                        {searchTerm ? highlightMatches(field.name, searchTerm) : field.name}
+                      </span>
+                      <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-1 rounded">
+                        {field.type}
+                      </span>
+                    </div>
+                    {field.fid && (
+                      <span className="text-xs text-gray-400 ml-6">
+                        ID: {field.fid}
+                      </span>
+                    )}
+                    {/* Show the generated path for debugging */}
+                    <span className="text-xs text-blue-500 ml-6 font-mono">
+                      Path: {fieldPath}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+  
   return (
-    <div className="flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-4">      
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col overflow-hidden" style={{ maxHeight: '90vh' }}>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl flex flex-col overflow-hidden" style={{ maxHeight: '90vh' }}>
             
             {/* Search box */}
             <div className="px-4 py-3 border-b border-gray-200">
@@ -215,6 +399,18 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
               </div>
             )}
             
+            {/* Selected items display for debugging */}
+            {pickedItems.length > 0 && (
+              <div className="px-4 py-2 bg-green-50 border-b border-green-100">
+                <p className="text-xs text-green-800 font-medium mb-1">Selected Paths:</p>
+                <div className="text-xs text-green-700 font-mono space-y-1">
+                  {pickedItems.map((path, index) => (
+                    <div key={index}>{path}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {/* Expand/collapse controls */}
             <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
               <span className="text-sm text-gray-600 font-medium">Categories</span>
@@ -235,27 +431,33 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
             </div>
             
             {/* Content - Scrollable area */}
-            <div className="flex-1 overflow-y-auto" style={{ overflowY: 'auto' }}>
+            <div className="flex-1 overflow-y-auto">
               <div className="p-4 space-y-3">
                 {Object.keys(filteredSections).length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     No signals match your search
                   </div>
                 ) : (
-                  Object.entries(filteredSections).map(([section, items], index) => {
-                    // Calculate how many items in this section are selected
-                    const selectedCount = items.filter(item => 
-                      pickedItems.includes(`${section}.${item.name}`)
-                    ).length;
+                  Object.entries(filteredSections).map(([section, items], sectionIndex) => {
+                    if (!Array.isArray(items)) return null;
                     
-                    // Check if all items in this section are selected
-                    const allSelected = selectedCount === items.length && items.length > 0;
+                    // Calculate how many items in this section are selected (including nested items)
+                    const allPaths = [];
+                    items.forEach((item, itemIndex) => {
+                      allPaths.push(generatePath(section, itemIndex));
+                      if (item.fields && Array.isArray(item.fields)) {
+                        item.fields.forEach((field, fieldIndex) => {
+                          allPaths.push(generatePath(section, itemIndex, 'fields', fieldIndex, field));
+                        });
+                      }
+                    });
                     
-                    // Check if some items in this section are selected
+                    const selectedCount = allPaths.filter(path => pickedItems.includes(path)).length;
+                    const allSelected = selectedCount === allPaths.length && allPaths.length > 0;
                     const someSelected = selectedCount > 0 && !allSelected;
                     
                     return (
-                      <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div key={sectionIndex} className="border border-gray-200 rounded-lg overflow-hidden">
                         {/* Section Header */}
                         <div 
                           className="bg-gray-50 hover:bg-gray-100 p-3 flex items-center justify-between cursor-pointer"
@@ -271,11 +473,12 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
                             <span className="font-medium text-gray-800">
                               {searchTerm ? highlightMatches(section, searchTerm) : section}
                             </span>
+                            <span className="ml-2 text-sm text-gray-500">({items.length})</span>
                             
                             {/* Selection indicator */}
                             {(someSelected || allSelected) && (
                               <span className="ml-2 text-xs bg-blue-100 text-blue-800 rounded-full px-2 py-0.5">
-                                {selectedCount}/{items.length}
+                                {selectedCount}/{allPaths.length}
                               </span>
                             )}
                           </div>
@@ -286,7 +489,7 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
                               className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleSectionItems(section, items);
+                                toggleSectionItems(allPaths);
                               }}
                             >
                               {allSelected ? 'Deselect All' : 'Select All'}
@@ -296,37 +499,46 @@ export default function GlobalSignalsPopup({ initialOpen = false, fields = dummy
                         
                         {/* Section Items */}
                         {expandedSections[section] && (
-                          <div className="max-h-64 overflow-y-auto">
+                          <div className="max-h-96 overflow-y-auto">
                             {items.map((item, itemIndex) => {
-                              const itemPath = `${section}.${item.name}`;
+                              const itemPath = generatePath(section, itemIndex);
                               const isSelected = pickedItems.includes(itemPath);
                               
                               return (
-                                <div
-                                  key={itemIndex}
-                                  className={`mx-2 my-1 px-3 py-2 rounded-md flex items-center cursor-pointer ${
-                                    isSelected ? 'bg-blue-100' : 'hover:bg-gray-50'
-                                  }`}
-                                  onClick={() => toggleItem(itemPath)}
-                                >
-                                  <div className={`w-5 h-5 rounded flex items-center justify-center mr-2 border ${
-                                    isSelected ? 'bg-blue-500 border-blue-600' : 'border-gray-300'
-                                  }`}>
-                                    {isSelected && <Check size={14} className="text-white" />}
-                                  </div>
-                                  <div className="flex flex-col">
-                                    <div className="flex items-center">
-                                      <File size={16} className="text-gray-400 mr-2" />
-                                      <span className={isSelected ? 'text-blue-800' : 'text-gray-700'}>
-                                        {searchTerm ? highlightMatches(item.name, searchTerm) : item.name}
+                                <div key={itemIndex} className="mx-2 my-1">
+                                  {/* Main item */}
+                                  <div
+                                    className={`px-3 py-2 rounded-md flex items-center cursor-pointer ${
+                                      isSelected ? 'bg-blue-100' : 'hover:bg-gray-50'
+                                    }`}
+                                    onClick={() => toggleItem(itemPath)}
+                                  >
+                                    <div className={`w-5 h-5 rounded flex items-center justify-center mr-2 border ${
+                                      isSelected ? 'bg-blue-500 border-blue-600' : 'border-gray-300'
+                                    }`}>
+                                      {isSelected && <Check size={14} className="text-white" />}
+                                    </div>
+                                    <div className="flex flex-col flex-1">
+                                      <div className="flex items-center">
+                                        <Database size={16} className="text-gray-400 mr-2" />
+                                        <span className={isSelected ? 'text-blue-800' : 'text-gray-700'}>
+                                          {searchTerm ? highlightMatches(item.name || item.id, searchTerm) : (item.name || item.id)}
+                                        </span>
+                                        {item.id && item.name && (
+                                          <span className="ml-2 text-xs text-gray-500">
+                                            (ID: {item.id})
+                                          </span>
+                                        )}
+                                      </div>
+                                      {/* Show the generated path for debugging */}
+                                      <span className="text-xs text-blue-500 font-mono">
+                                        Path: {itemPath}
                                       </span>
                                     </div>
-                                    {item.description && (
-                                      <span className="text-xs text-gray-500 ml-6">
-                                        {searchTerm ? highlightMatches(item.description, searchTerm) : item.description}
-                                      </span>
-                                    )}
                                   </div>
+                                  
+                                  {/* Nested fields if they exist */}
+                                  {renderNestedFields(item, itemIndex, section)}
                                 </div>
                               );
                             })}
