@@ -1,5 +1,7 @@
 import { Calendar, ChevronDown, ChevronUp, Clock, Palette, Plus, X , Edit2, Trash2, Check} from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
+import GlobalSignalsPopup from "../../../state_components/global_popup";
+import { data_map } from "../../../states/global_repo";
 
 export const styles = {
     container: "w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md",
@@ -77,6 +79,7 @@ export const styles = {
 
 
 
+  // @ts-ignore
   var stylesobj = {
     container: {
       border: '1px solid #e5e7eb',
@@ -934,9 +937,6 @@ export const ColorField = ({ field, value, onChange }) => (
     );
   };
   
-
-
-
 // @ts-ignore
 export const OptionsListField = ({ field, value, onChange }) => {
   const [options, setOptions] = useState([]);
@@ -983,6 +983,7 @@ export const OptionsListField = ({ field, value, onChange }) => {
   };
 
   const addNewOption = () => {
+    // @ts-ignore
     // @ts-ignore
     const newId = Date.now().toString();
     const newOption = {
@@ -1447,6 +1448,298 @@ export const OptionsListField = ({ field, value, onChange }) => {
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+};
+
+
+
+export const GlobalSelectField = ({ field, value, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  // Initialize and sync selectedItems with value prop
+  useEffect(() => {
+    if (Array.isArray(value)) {
+      setSelectedItems(value);
+    } else if (value === null || value === undefined) {
+      setSelectedItems([]);
+    } else {
+      // Handle case where value might be a single item
+      setSelectedItems([value]);
+    }
+  }, [value]);
+
+  const handleSelectionComplete = (selectedData) => {
+    console.log("Selected fields:", selectedData);
+    const newSelection = Array.isArray(selectedData) ? selectedData : [];
+    setSelectedItems(newSelection);
+    onChange?.(field.id, newSelection);
+    setIsOpen(false);
+  };
+
+  const removeItem = (itemToRemove) => {
+    // Fix: Use a more robust comparison - create a unique identifier
+    const getItemKey = (item) => {
+      if (item.id) return `id_${item.id}`;
+      if (item.value) return `value_${item.value}`;
+      if (typeof item === 'string') return `string_${item}`;
+      return `index_${JSON.stringify(item)}`;
+    };
+
+    const itemKey = getItemKey(itemToRemove);
+    const newSelection = selectedItems.filter(item => getItemKey(item) !== itemKey);
+    
+    setSelectedItems(newSelection);
+    onChange?.(field.id, newSelection);
+  };
+
+  const clearAll = () => {
+    setSelectedItems([]);
+    onChange?.(field.id, []);
+  };
+
+  const getItemDisplayName = (item) => {
+    if (typeof item === 'string') return item;
+    return item?.name || item?.label || item?.title || item?.value || 'Unknown';
+  };
+
+  const hasSelectedItems = selectedItems && selectedItems.length > 0;
+
+  const containerStyle = {
+    position: 'relative',
+    width: '100%',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  };
+
+  const buttonStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    padding: '12px 16px',
+    border: hasSelectedItems ? '2px solid #3b82f6' : '2px solid #e5e7eb',
+    borderRadius: '12px',
+    background: field?.disabled ? '#f9fafb' : 'white',
+    cursor: field?.disabled ? 'not-allowed' : 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    opacity: field?.disabled ? 0.6 : 1,
+    boxShadow: hasSelectedItems 
+      ? '0 0 0 3px rgba(59, 130, 246, 0.1)' 
+      : '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+    fontSize: '14px',
+    fontWeight: '500'
+  };
+
+  const buttonTextStyle = {
+    flex: 1,
+    textAlign: 'left',
+    color: hasSelectedItems ? '#1f2937' : '#6b7280',
+    fontWeight: hasSelectedItems ? '600' : '500'
+  };
+
+  const dropdownIconStyle = {
+    color: '#6b7280',
+    fontSize: '16px',
+    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+  };
+
+  const chipsContainerStyle = {
+    marginTop: '12px',
+    padding: '16px',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+    border: '1px solid #e2e8f0',
+    borderRadius: '12px',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
+  };
+
+  const chipsWrapperStyle = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    marginBottom: selectedItems.length > 1 ? '12px' : '0'
+  };
+
+  const chipStyle = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    background: 'rgba(255, 255, 255, 0.9)',
+    backdropFilter: 'blur(10px)',
+    color: '#1f2937',
+    padding: '8px 4px 8px 14px',
+    borderRadius: '24px',
+    fontSize: '13px',
+    fontWeight: '500',
+    maxWidth: '220px',
+    border: '1px solid rgba(59, 130, 246, 0.2)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1)',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    overflow: 'hidden'
+  };
+
+  const chipTextStyle = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    marginRight: '8px',
+    fontSize: '13px',
+    fontWeight: '500',
+    color: '#374151'
+  };
+
+  const chipRemoveStyle = {
+    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    border: 'none',
+    color: 'white',
+    cursor: field?.disabled ? 'not-allowed' : 'pointer',
+    fontSize: '12px',
+    fontWeight: '600',
+    padding: '0',
+    marginLeft: '8px',
+    width: '22px',
+    height: '22px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    opacity: field?.disabled ? 0.5 : 1,
+    boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
+    flexShrink: 0
+  };
+
+  const clearAllButtonStyle = {
+    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '16px',
+    fontSize: '12px',
+    fontWeight: '600',
+    cursor: field?.disabled ? 'not-allowed' : 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
+    opacity: field?.disabled ? 0.5 : 1
+  };
+
+  return (
+    <div style={containerStyle}>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!field?.disabled) {
+            setIsOpen(!isOpen);
+          }
+        }}
+        style={buttonStyle}
+        disabled={field?.disabled}
+        onMouseEnter={(e) => {
+          if (!field?.disabled) {
+            e.target.style.borderColor = hasSelectedItems ? '#2563eb' : '#9ca3af';
+            e.target.style.boxShadow = hasSelectedItems 
+              ? '0 0 0 3px rgba(37, 99, 235, 0.15)' 
+              : '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!field?.disabled) {
+            e.target.style.borderColor = hasSelectedItems ? '#3b82f6' : '#e5e7eb';
+            e.target.style.boxShadow = hasSelectedItems 
+              ? '0 0 0 3px rgba(59, 130, 246, 0.1)' 
+              : '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
+          }
+        }}
+      >
+        <span style={buttonTextStyle}>
+          {hasSelectedItems 
+            ? `${selectedItems.length} item${selectedItems.length !== 1 ? 's' : ''} selected`
+            : field?.placeholder || 'Select items...'
+          }
+        </span>
+        <span style={dropdownIconStyle}>▼</span>
+      </button>
+
+      {hasSelectedItems && (
+        <div style={chipsContainerStyle}>
+          <div style={chipsWrapperStyle}>
+            {selectedItems.map((item, index) => {
+              // Create a unique key for each item
+              const itemKey = item.id || item.value || `${getItemDisplayName(item)}_${index}`;
+              
+              return (
+                <div 
+                  key={itemKey} 
+                  style={chipStyle}
+                  onMouseEnter={(e) => {
+                    if (!field?.disabled) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!field?.disabled) {
+                      e.currentTarget.style.transform = 'translateY(0px)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+                    }
+                  }}
+                >
+                  <span style={chipTextStyle}>
+                    {getItemDisplayName(item)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!field?.disabled) {
+                        removeItem(item);
+                      }
+                    }}
+                    style={chipRemoveStyle}
+                    disabled={field?.disabled}
+                    aria-label={`Remove ${getItemDisplayName(item)}`}
+                    onMouseEnter={(e) => {
+                      if (!field?.disabled) {
+                        e.target.style.background = 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)';
+                        e.target.style.transform = 'scale(1.1)';
+                        e.target.style.boxShadow = '0 3px 6px rgba(239, 68, 68, 0.4)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!field?.disabled) {
+                        e.target.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                        e.target.style.transform = 'scale(1)';
+                        e.target.style.boxShadow = '0 2px 4px rgba(239, 68, 68, 0.3)';
+                      }
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      
+      {isOpen && (
+        <GlobalSignalsPopup
+          initialOpen={isOpen}
+          fields={data_map}
+          selectedItems={selectedItems}
+          onClose={(e, newdata) => {
+            console.log("new data:", newdata);
+            setIsOpen(false);
+            if (newdata !== undefined) {
+              handleSelectionComplete(newdata);
+            }
+          }}
+        />
       )}
     </div>
   );

@@ -13,11 +13,8 @@ import { WorkFlowPage } from "./workflows/workflow_page";
 import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
 import WorkflowBuilder from "./tests/reactflow1";
-import ConfigFormDemo from "./components/generic/config_form_v3/config_form";
 import SecretsManager from "./secret_store/secret_store";
 import TemplateRegistrationPage from "./external_templates/external_templates";
-import { FormBuilderDemo } from "./form_builder/form_renderer/dynamic_form";
-import NestedConfigFormDemo from "./components/generic/config_form_v3/config_form";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -65,8 +62,6 @@ export function App() {
             <Route path="/" component={AppCreatorPage} />
             <Route path="/queries" component={QueryBuilderPage} />
             <Route path="/test" component={WorkflowBuilder} />
-            <Route path="/test2" component={ConfigFormDemo} />
-            <Route path="/test_panel" component={NestedConfigFormDemo} />
             <Route default component={() => <div>Not Found</div>} />
           </Router>
         </main>

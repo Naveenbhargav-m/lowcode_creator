@@ -15,8 +15,6 @@ export function TemplateBuilderRightView() {
     }
 
     const handleChange = (data) => {
-      console.log("handle change:", data, activeElement);
-      return;
       if(activeElement !== undefined) {
         activeElement = {...activeElement,...data};
         activeTemplateElements[activeElementID].value = {...activeElement};
@@ -24,8 +22,6 @@ export function TemplateBuilderRightView() {
     };
   
     const handleSubmit = (data) => {
-      console.log("handle change:", data, activeElement);
-      return;
       if(activeElement !== undefined) {
         activeElement= {...activeElement,...data};
         activeTemplateElements[activeElementID].value = {...activeElement};
