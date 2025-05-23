@@ -1,5 +1,7 @@
 import { Calendar, ChevronDown, ChevronUp, Clock, Palette, Plus, X , Edit2, Trash2, Check} from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
+import GlobalSignalsPopup from "../../../state_components/global_popup";
+import { data_map } from "../../../states/global_repo";
 
 export const styles = {
     container: "w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md",
@@ -930,6 +932,51 @@ export const ColorField = ({ field, value, onChange }) => (
             </div>
           ))}
         </div>
+      </div>
+    );
+  };
+  
+
+
+  export const GlobalSelectField = ({ field, value = [], onChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedItems, setSelectedItems] = useState(value);
+  
+    const handleSelectionComplete = (selectedData) => {
+      console.log("Selected fields:", selectedData);
+      if (selectedData) {
+        setSelectedItems(selectedData);
+        onChange(field.id, selectedData);
+      }
+      setIsOpen(false);
+    };
+  
+    const displayValue = selectedItems.length > 0 
+      ? `${selectedItems.length} items selected`
+      : field.placeholder || 'Select items...';
+  
+    return (
+      <div className={styles.multiSelectContainer}>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className={styles.multiSelectButton}
+          disabled={field.disabled}
+        >
+          {displayValue}
+        </button>
+        
+        {isOpen && (
+          <GlobalSignalsPopup
+            initialOpen={isOpen}
+            // @ts-ignore
+            fields={data_map}
+            onClose={(e,newdata) => {
+              console.log("new data:",newdata);
+              handleSelectionComplete(newdata);
+            }}
+          />
+        )}
       </div>
     );
   };

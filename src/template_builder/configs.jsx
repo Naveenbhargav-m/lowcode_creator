@@ -12,6 +12,13 @@ export const TemplateElementConfigFormSchema = {
       placeholder: 'Enter default selected value',
       path: '', // Root level
     },
+    {
+      id: 'picker',
+      type: 'data_picker',
+      label: 'Default Value',
+      placeholder: 'Enter default selected value',
+      path: '', // Root level
+    },
     
     // Style configuration fields
     {
@@ -314,7 +321,7 @@ export const TemplateElementConfigFormSchema = {
     {
       id: 'basic',
       title: 'Basic Settings',
-      fieldIds: ['value', "options"]
+      fieldIds: ['value', "options", "picker"]
     },
     {
       id: 'style-section',
@@ -465,44 +472,3 @@ export function ungroupObjectValues(groupedValues) {
     grouping: extractedGrouping
   };
 }
-//   // Example usage for grouping:
-//   const values = {
-//     "color": "black",
-//     "backgroundColor": "green",
-//     "onClick": "run_query",
-//     "data_source": "query1"
-//   };
-  
-//   const grouping = {
-//     "style": ["color", "backgroundColor"],
-//     "data": ["data_source"],
-//     "actions": ["onClick", "onDouble", "click"]
-//   };
-  
-//   const groupedResult = groupObjectValues(values, grouping);
-//   console.log("Grouped Result:", groupedResult);
-//   /* Output:
-//   {
-//     style: { color: 'black', backgroundColor: 'green' },
-//     data: { data_source: 'query1' },
-//     actions: { onClick: 'run_query' }
-//   }
-//   */
-  
-//   // Example usage for ungrouping:
-//   const ungroupedResult = ungroupObjectValues(groupedResult);
-//   console.log("Flattened Values:", ungroupedResult.values);
-//   console.log("Extracted Grouping Schema:", ungroupedResult.grouping);
-//   /* Output:
-//   Flattened Values: {
-//     color: 'black',
-//     backgroundColor: 'green',
-//     data_source: 'query1',
-//     onClick: 'run_query'
-//   }
-//   Extracted Grouping Schema: {
-//     style: ['color', 'backgroundColor'],
-//     data: ['data_source'],
-//     actions: ['onClick']
-//   }
-//   */

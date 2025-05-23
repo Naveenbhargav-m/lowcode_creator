@@ -1,7 +1,7 @@
 import "./config_form.css";
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Code, Eye } from 'lucide-react';
-import { Accordion, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, NumberField, OptionsListField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
+import { Accordion, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, GlobalSelectField, NumberField, OptionsListField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
 
 // Helper functions for handling nested objects
 const getNestedValue = (obj, path) => {
@@ -219,6 +219,9 @@ export const ConfigFormV3 = ({
     
     let fieldComponent;
     switch (field.type) {
+      case 'data_picker':
+        fieldComponent = <GlobalSelectField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)}/>
+        break;
       case 'option_mapper':
         fieldComponent = <OptionsListField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />
         break;
