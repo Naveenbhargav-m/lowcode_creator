@@ -1,46 +1,85 @@
 import { useAuthCheck } from "../hooks/hooks";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Settings, Home, Route, Workflow, Image, Type, ChevronRight, Save, ArrowLeft } from 'lucide-react';
+import { data_map } from "../states/global_repo";
+import { getDataFromAPI, PostDataToAPI } from "./settings_api";
 
 // Dummy data
 const initialSettings = {
-  homePage: "/dashboard",
+  homePage: "",
   routes: [
-    { path: "/dashboard", component: "Dashboard" },
-    { path: "/projects", component: "Projects" },
-    { path: "/users", component: "Users" }
+    // { path: "/dashboard", component: {"name": "Dashboard", "id": 1 }},
+    // { path: "/projects", component:  {"name": "Projects", "id": 2 } },
+    // { path: "/users", component: {"name": "Users", "id": 3 } }
   ],
   workflows: {
-    frontend: "default-frontend-init",
-    backend: "default-backend-init"
+    // frontend: {"name":"default-frontend-init", "id": 2},
+    // backend: {"name": "default-backend-init", "id":3},
   },
   appearance: {
-    title: "BuildFlow Studio",
-    favicon: "/favicon.ico"
+    title: "",
+    favicon: ""
   }
 };
 
-// Available components for route mapping
-const availableComponents = [
-  "Dashboard", "Projects", "Users", "Analytics", 
-  "Settings", "Profile", "Login", "Register"
-];
+// // Available components for route mapping
+// const availableComponents = [
+//   "Dashboard", "Projects", "Users", "Analytics", 
+//   "Settings", "Profile", "Login", "Register"
+// ];
 
-// Available workflow templates
-const workflowTemplates = {
-  frontend: ["default-frontend-init", "react-frontend-init", "vue-frontend-init", "angular-frontend-init"],
-  backend: ["default-backend-init", "express-backend-init", "django-backend-init", "flask-backend-init"]
-};
+// // Available workflow templates
+// const workflowTemplates = {
+//   frontend: ["default-frontend-init", "react-frontend-init", "vue-frontend-init", "angular-frontend-init"],
+//   backend: ["default-backend-init", "express-backend-init", "django-backend-init", "flask-backend-init"]
+// };
+
 
 export function SettingsPage() {
-  const [settings, setSettings] = useState(initialSettings);
+  const [settings, setSettings] = useState({...initialSettings});
   const [activeSection, setActiveSection] = useState('general');
-  const [newRoute, setNewRoute] = useState({ path: "", component: "" });
+  const [newRoute, setNewRoute] = useState({ path: "", component: null });
   const [savedMessage, setSavedMessage] = useState("");
+  const [availableComponents, setAvailableComponents] = useState([]);
+  const [workflowTemplates, setWorkflowTemplates] = useState({
+    frontend: [],
+    backend: []
+  });
+
+  useEffect(() => {
+    if (data_map) {
+      const screenarr = data_map["screens"] || [];
+      const workflowarr = data_map["workflows"] || [];
+      
+      // Separate frontend and backend workflows (you might need to adjust this logic)
+      const frontendWorkflows = workflowarr.filter(w => 
+        w.name.includes('frontend') || w.name.includes('react') || w.name.includes('vue') || w.name.includes('angular')
+      );
+      const backendWorkflows = workflowarr.filter(w => 
+        w.name.includes('backend') || w.name.includes('express') || w.name.includes('django') || w.name.includes('flask')
+      );
+      
+      setAvailableComponents(screenarr);
+      setWorkflowTemplates({
+        frontend: frontendWorkflows.length > 0 ? frontendWorkflows : workflowarr,
+        backend: backendWorkflows.length > 0 ? backendWorkflows : workflowarr
+      });
+    }
+
+    getDataFromAPI().then((data) => {
+        // @ts-ignore
+        setSettings(data);
+    });
+  }, []);
 
   // Handle settings changes
   const updateHomePage = (value) => {
-    setSettings(prev => ({ ...prev, homePage: value }));
+    const selectedRoute = settings.routes.find(route => route.path === value);
+    setSettings(prev => ({ 
+      ...prev, 
+      homePage: value,
+      homeRouteScreenId: selectedRoute ? selectedRoute.component.id.toString() : ""
+    }));
   };
 
   const addRoute = () => {
@@ -49,7 +88,7 @@ export function SettingsPage() {
         ...prev,
         routes: [...prev.routes, { ...newRoute }]
       }));
-      setNewRoute({ path: "", component: "" });
+      setNewRoute({ path: "", component: null });
     }
   };
 
@@ -60,10 +99,12 @@ export function SettingsPage() {
     }));
   };
 
-  const updateWorkflow = (type, value) => {
+  const updateWorkflow = (type, selectedValue) => {
+    // selectedValue should be in format "name|id"
+    const [name, id] = selectedValue.split('|');
     setSettings(prev => ({
       ...prev,
-      workflows: { ...prev.workflows, [type]: value }
+      workflows: { ...prev.workflows, [type]: { name, id: parseInt(id) } }
     }));
   };
 
@@ -75,9 +116,29 @@ export function SettingsPage() {
   };
 
   const saveSettings = () => {
-    // In a real app, this would save to backend
-    console.log("Saving settings:", settings);
+    // Prepare data for database insertion
+    const dbData = {
+      web_title: settings.appearance.title,
+      favicon: settings.appearance.favicon,
+      home_route_name: settings.homePage,
+      home_route_screen_name: settings.routes.find(r => r.path === settings.homePage)?.component.name || "",
+      // @ts-ignore
+      home_route_screen_id: settings.homeRouteScreenId,
+      route_mapping: JSON.stringify(settings.routes.map(route => ({
+        path: route.path,
+        component_name: route.component.name,
+        component_id: route.component.id
+      }))),
+      init_frontend_workflow_name: settings.workflows.frontend.name,
+      init_frontend_workflow_id: settings.workflows.frontend.id.toString(),
+      init_backend_workflow_name: settings.workflows.backend.name,
+      init_backend_workflow_id: settings.workflows.backend.id.toString()
+    };
+    
+    console.log("Saving settings to database:", dbData);
+    console.log("Full settings object:", settings);
     setSavedMessage("Settings saved successfully!");
+    PostDataToAPI(settings);
     setTimeout(() => setSavedMessage(""), 3000);
   };
 
@@ -149,11 +210,12 @@ export function SettingsPage() {
                 <select 
                   className="w-full border border-gray-300 rounded-lg p-2"
                   value={settings.homePage}
+                  // @ts-ignore
                   onChange={(e) => updateHomePage(e.target.value)}
                 >
                   {settings.routes.map((route, index) => (
                     <option key={index} value={route.path}>
-                      {route.path} ({route.component})
+                      {route.path} ({route.component.name})
                     </option>
                   ))}
                 </select>
@@ -175,7 +237,7 @@ export function SettingsPage() {
                     <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                       <div>
                         <span className="font-medium">{route.path}</span>
-                        <span className="text-gray-500 ml-2">→ {route.component}</span>
+                        <span className="text-gray-500 ml-2">→ {route.component.name} (ID: {route.component.id})</span>
                       </div>
                       <button 
                         onClick={() => removeRoute(index)}
@@ -196,6 +258,7 @@ export function SettingsPage() {
                       placeholder="/new-route"
                       className="w-full border border-gray-300 rounded-lg p-2"
                       value={newRoute.path}
+                      // @ts-ignore
                       onChange={(e) => setNewRoute({...newRoute, path: e.target.value})}
                     />
                   </div>
@@ -203,12 +266,23 @@ export function SettingsPage() {
                     <label className="block text-sm font-medium mb-1">Component</label>
                     <select 
                       className="w-full border border-gray-300 rounded-lg p-2"
-                      value={newRoute.component}
-                      onChange={(e) => setNewRoute({...newRoute, component: e.target.value})}
+                      value={newRoute.component ? `${newRoute.component.name}|${newRoute.component.id}` : ""}
+                      onChange={(e) => {
+                        // @ts-ignore
+                        if (e.target.value) {
+                          // @ts-ignore
+                          const [name, id] = e.target.value.split('|');
+                          setNewRoute({...newRoute, component: { name, id: parseInt(id) }});
+                        } else {
+                          setNewRoute({...newRoute, component: null});
+                        }
+                      }}
                     >
                       <option value="">Select Component</option>
                       {availableComponents.map((comp, index) => (
-                        <option key={index} value={comp}>{comp}</option>
+                        <option key={index} value={`${comp.name}|${comp.id}`}>
+                          {comp.name} (ID: {comp.id})
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -230,22 +304,28 @@ export function SettingsPage() {
                 <h3 className="text-lg font-medium mb-4">Frontend Initialization</h3>
                 <select 
                   className="w-full border border-gray-300 rounded-lg p-2 mb-4"
-                  value={settings.workflows.frontend}
+                  value={`${settings.workflows.frontend.name}|${settings.workflows.frontend.id}`}
+                  // @ts-ignore
                   onChange={(e) => updateWorkflow('frontend', e.target.value)}
                 >
                   {workflowTemplates.frontend.map((template, index) => (
-                    <option key={index} value={template}>{template}</option>
+                    <option key={index} value={`${template.name}|${template.id}`}>
+                      {template.name} (ID: {template.id})
+                    </option>
                   ))}
                 </select>
                 
                 <h3 className="text-lg font-medium mb-4">Backend Initialization</h3>
                 <select 
                   className="w-full border border-gray-300 rounded-lg p-2"
-                  value={settings.workflows.backend}
+                  value={`${settings.workflows.backend.name}|${settings.workflows.backend.id}`}
+                  // @ts-ignore
                   onChange={(e) => updateWorkflow('backend', e.target.value)}
                 >
                   {workflowTemplates.backend.map((template, index) => (
-                    <option key={index} value={template}>{template}</option>
+                    <option key={index} value={`${template.name}|${template.id}`}>
+                      {template.name} (ID: {template.id})
+                    </option>
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
@@ -264,6 +344,7 @@ export function SettingsPage() {
                   type="text"
                   className="w-full border border-gray-300 rounded-lg p-2 mb-6"
                   value={settings.appearance.title}
+                  // @ts-ignore
                   onChange={(e) => updateAppearance('title', e.target.value)}
                   placeholder="Application Title"
                 />
@@ -282,6 +363,7 @@ export function SettingsPage() {
                       type="text"
                       className="w-full border border-gray-300 rounded-lg p-2"
                       value={settings.appearance.favicon}
+                      // @ts-ignore
                       onChange={(e) => updateAppearance('favicon', e.target.value)}
                       placeholder="/favicon.ico"
                     />
