@@ -3,6 +3,715 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Code, Eye } from 'lucide-react';
 import { Accordion, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, GlobalSelectField, NumberField, OptionsListField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
 
+// // Helper functions for handling nested objects
+// const getNestedValue = (obj, path) => {
+//   if (!path) return obj;
+  
+//   const keys = path.split('.');
+//   let result = obj;
+  
+//   for (const key of keys) {
+//     if (result === undefined || result === null) return undefined;
+//     result = result[key];
+//   }
+  
+//   return result;
+// };
+
+// const setNestedValue = (obj, path, value) => {
+//   if (!path) return value;
+  
+//   const keys = path.split('.');
+//   const result = { ...obj };
+//   let current = result;
+  
+//   for (let i = 0; i < keys.length; i++) {
+//     const key = keys[i];
+    
+//     if (i === keys.length - 1) {
+//       // If value is undefined or null and we want to clear it
+//       if (value === undefined || value === null) {
+//         delete current[key];
+//       } else {
+//         current[key] = value;
+//       }
+//     } else {
+//       // Create the object path if it doesn't exist
+//       if (current[key] === undefined || current[key] === null) {
+//         current[key] = {};
+//       }
+//       current = current[key];
+//     }
+//   }
+  
+//   return result;
+// };
+
+// // Clean empty objects recursively
+// const cleanEmptyObjects = (obj) => {
+//   if (obj === null || typeof obj !== 'object') return obj;
+  
+//   const result = { ...obj };
+  
+//   Object.keys(result).forEach(key => {
+//     if (typeof result[key] === 'object' && result[key] !== null) {
+//       // Clean nested objects
+//       result[key] = cleanEmptyObjects(result[key]);
+      
+//       // Remove empty objects
+//       if (Object.keys(result[key]).length === 0) {
+//         delete result[key];
+//       }
+//     } else if (result[key] === undefined) {
+//       // Remove undefined values
+//       delete result[key];
+//     }
+//   });
+  
+//   return result;
+// };
+
+// // Enhanced main form component with nested object support
+
+// export const ConfigFormV3 = ({ 
+//   schema, 
+//   initialValues = {}, 
+//   onChange, 
+//   onSubmit 
+// }) => {
+//   const [activeTab, setActiveTab] = useState(schema.tabs && schema.tabs.length > 0 ? schema.tabs[0].id : null);
+//   const [formValues, setFormValues] = useState(initialValues);
+//   const [openSections, setOpenSections] = useState({});
+//   const [isJsonMode, setIsJsonMode] = useState(false);
+//   const [jsonError, setJsonError] = useState(null);
+//   const [jsonValue, setJsonValue] = useState(JSON.stringify(initialValues, null, 2));
+
+//   // Initialize open sections
+//   useEffect(() => {
+//     // First section of each tab is open by default
+//     const initialOpenSections = {};
+    
+//     if (schema.tabs) {
+//       schema.tabs.forEach(tab => {
+//         if (tab.sectionIds && tab.sectionIds.length > 0) {
+//           initialOpenSections[tab.sectionIds[0]] = true;
+//         }
+//       });
+//     } else if (schema.sections) {
+//       if (schema.sections.length > 0) {
+//         initialOpenSections[schema.sections[0].id] = true;
+//       }
+//     }
+    
+//     setOpenSections(initialOpenSections);
+//   }, [schema]);
+
+//   useEffect(() => {
+//     setFormValues({...initialValues});
+//   }, [initialValues]);
+
+//   // Handle value changes with support for nested paths
+//   const handleFieldChange = (fieldId, value) => {
+//     setFormValues(prev => {
+//       // Support for nested paths
+//       console.log("handle change:",value, fieldId);
+//       const updatedValues = setNestedValue(prev, fieldId, value);
+//       console.log("handle change:",updatedValues, fieldId);
+//       if (onChange) {
+//         // Clean empty objects before returning
+//         onChange(cleanEmptyObjects(updatedValues));
+//       }
+      
+//       return updatedValues;
+//     });
+//   };
+
+//   // Toggle accordion sections
+//   const toggleSection = (sectionId) => {
+//     setOpenSections(prev => ({
+//       ...prev,
+//       [sectionId]: !prev[sectionId]
+//     }));
+//   };
+
+//   // Handle JSON editor changes
+//   const handleJsonChange = (jsonString) => {
+//     setJsonValue(jsonString);
+//     try {
+//       const parsed = JSON.parse(jsonString);
+//       setJsonError(null);
+//       setFormValues(parsed);
+//       if (onChange) {
+//         onChange(cleanEmptyObjects(parsed));
+//       }
+//     } catch (error) {
+//       setJsonError('Invalid JSON format');
+//     }
+//   };
+
+//   // Toggle between form and JSON mode
+//   const toggleJsonMode = () => {
+//     if (!isJsonMode) {
+//       // Switching to JSON mode
+//       setJsonValue(JSON.stringify(formValues, null, 2));
+//     }
+//     setIsJsonMode(!isJsonMode);
+//   };
+
+//   // Handle form submission
+//   const handleSubmit = () => {
+//     if (onSubmit) {
+//       // Clean empty objects before submitting
+//       onSubmit(cleanEmptyObjects(formValues));
+//     }
+//   };
+
+//   // Get field definition by ID
+//   const getFieldById = (fieldId) => {
+//     if (!schema.fields) return null;
+//     return schema.fields.find(field => field.id === fieldId);
+//   };
+
+//   // Determine if a field should be visible based on conditions
+//   const isFieldVisible = (field) => {
+//     if (!field.condition) return true;
+    
+//     const { dependsOn, operator, value } = field.condition;
+//     const dependentValue = getNestedValue(formValues, dependsOn);
+    
+//     switch (operator) {
+//       case 'equals':
+//         return dependentValue === value;
+//       case 'notEquals':
+//         return dependentValue !== value;
+//       case 'contains':
+//         return dependentValue?.includes(value);
+//       case 'greaterThan':
+//         return dependentValue > value;
+//       case 'lessThan':
+//         return dependentValue < value;
+//       case 'exists':
+//         return dependentValue !== undefined && dependentValue !== null;
+//       case 'notExists':
+//         return dependentValue === undefined || dependentValue === null;
+//       default:
+//         return true;
+//     }
+//   };
+
+//   // Generate a field label with path information
+//   const getFieldGroupLabel = (field) => {
+//     // If the field has a parent path, show it
+//     if (field.path && !field.hidePathInLabel) {
+//       const pathParts = field.path.split('.');
+//       return `${pathParts[pathParts.length - 1]}: ${field.label || ''}`;
+//     }
+    
+//     return field.label || '';
+//   };
+
+//   // Render field based on type with support for nested values
+//   const renderField = (field) => {
+//     if (!field || !isFieldVisible(field)) return null;
+
+//     // Get the actual field value using the path
+//     const fieldValue = getNestedValue(formValues, field.id);
+    
+//     let fieldComponent;
+//     switch (field.type) {
+//       case 'data_picker':
+//         fieldComponent = <GlobalSelectField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)}/>
+//         break;
+//       case 'option_mapper':
+//         fieldComponent = <OptionsListField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />
+//         break;
+//       case 'text':
+//         fieldComponent = <TextField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'number':
+//         fieldComponent = <NumberField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'select':
+//         fieldComponent = <SelectField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'checkbox':
+//         fieldComponent = <CheckboxField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'array': 
+//         fieldComponent = <ArrayField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'color': 
+//         fieldComponent = <ColorField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'static_key_value': 
+//         fieldComponent = <StaticKeyValueField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'dynamic_key_value': 
+//         fieldComponent = <DynamicKeyValueField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'date': 
+//         fieldComponent = <DateField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       case 'time': 
+//         fieldComponent = <TimeField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+//         break;
+//       default:
+//         fieldComponent = <div>Unsupported field type: {field.type}</div>;
+//     }
+
+//     return (
+//       <div key={field.id} className={styles.fieldGroup}>
+//         {field.label && (
+//           <label htmlFor={field.id} className={styles.fieldLabel}>
+//             {getFieldGroupLabel(field)}
+//             {field.required && <span className="text-red-500 ml-1">*</span>}
+//           </label>
+//         )}
+//         {fieldComponent}
+//         {field.description && (
+//           <p className="mt-1 text-sm text-gray-500">{field.description}</p>
+//         )}
+//       </div>
+//     );
+//   };
+
+//   // Render field by ID
+//   const renderFieldById = (fieldId) => {
+//     const field = getFieldById(fieldId);
+//     return renderField(field);
+//   };
+
+//   // Render section fields
+//   const renderSectionFields = (fields) => {
+//     // If fields is an array of field objects, render them directly
+//     if (fields && typeof fields[0] === 'object') {
+//       return fields.map(field => renderField(field));
+//     }
+//     // If fields is an array of field IDs, look up fields and render them
+//     return fields.map(fieldId => renderFieldById(fieldId));
+//   };
+
+//   // Get section by ID
+//   const getSectionById = (sectionId) => {
+//     if (!schema.sections) return null;
+//     return schema.sections.find(section => section.id === sectionId);
+//   };
+
+//   // Render sections
+//   const renderSections = (sections) => {
+//     // If sections is an array of section objects, render them directly
+//     if (sections && typeof sections[0] === 'object') {
+//       return sections.map(section => (
+//         <Accordion
+//           key={section.id}
+//           title={section.title}
+//           isOpen={!!openSections[section.id]}
+//           toggle={() => toggleSection(section.id)}
+//         >
+//           {section.fields && renderSectionFields(section.fields)}
+//           {section.fieldIds && renderSectionFields(section.fieldIds)}
+//         </Accordion>
+//       ));
+//     }
+//     // If sections is an array of section IDs, look up sections and render them
+//     return sections.map(sectionId => {
+//       const section = getSectionById(sectionId);
+//       if (!section) return null;
+      
+//       return (
+//         <Accordion
+//           key={section.id}
+//           title={section.title}
+//           isOpen={!!openSections[section.id]}
+//           toggle={() => toggleSection(section.id)}
+//         >
+//           {section.fields && renderSectionFields(section.fields)}
+//           {section.fieldIds && renderSectionFields(section.fieldIds)}
+//         </Accordion>
+//       );
+//     });
+//   };
+
+//   // Render a tab's content
+//   const renderTabContent = (tab) => {
+//     return (
+//       <div>
+//         {tab.sections && renderSections(tab.sections)}
+//         {tab.sectionIds && renderSections(tab.sectionIds)}
+//         {tab.fields && renderSectionFields(tab.fields)}
+//         {tab.fieldIds && renderSectionFields(tab.fieldIds)}
+//       </div>
+//     );
+//   };
+
+//   // Render the JSON editor
+//   const renderJsonEditor = () => {
+//     return (
+//       <div>
+//         <div className={styles.jsonEditorHeader}>
+//           <h3 className="text-md font-medium">JSON Editor</h3>
+//         </div>
+//         <textarea
+//           className={styles.jsonEditor}
+//           value={jsonValue}
+//           // @ts-ignore
+//           onChange={(e) => handleJsonChange(e.target.value)}
+//         />
+//         {jsonError && <div className={styles.error}>{jsonError}</div>}
+//       </div>
+//     );
+//   };
+
+//   // Render form content based on schema structure
+//   const renderFormContent = () => {
+//     if (isJsonMode) {
+//       return renderJsonEditor();
+//     }
+
+//     if (schema.tabs) {
+//       return (
+//         <>
+//          <div className="overflow-x-auto pb-4">
+//          <div className="flex whitespace-nowrap">
+//               {schema.tabs.map((tab) => (
+//                 <div
+//                   key={tab.id}
+//                   className={`${styles.tab} ${
+//                     activeTab === tab.id ? styles.activeTab : styles.inactiveTab
+//                   }`}
+//                   onClick={() => setActiveTab(tab.id)}
+//                 >
+//                   {tab.title}
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+         
+//           <div className={styles.tabContent}>
+//             {schema.tabs.map((tab) => (
+//               <div
+//                 key={tab.id}
+//                 style={{ display: activeTab === tab.id ? 'block' : 'none' }}
+//               >
+//                 {renderTabContent(tab)}
+//               </div>
+//             ))}
+//             </div>
+//         </>
+//       );
+//     }
+
+//     if (schema.sections) {
+//       return renderSections(schema.sections);
+//     }
+
+//     if (schema.sectionIds) {
+//       return renderSections(schema.sectionIds);
+//     }
+
+//     if (schema.fields) {
+//       return renderSectionFields(schema.fields);
+//     }
+
+//     if (schema.fieldIds) {
+//       return renderSectionFields(schema.fieldIds);
+//     }
+
+//     return <div>No form content defined</div>;
+//   };
+
+//   return (
+//     <div className={styles.container}>
+//       <div className={styles.header}>
+//         <h2 className={styles.title}>{schema.title || 'Configuration'}</h2>
+//         <div 
+//           className={styles.modeSwitcher} 
+//           onClick={toggleJsonMode}
+//         >
+//           {isJsonMode ? (
+//             <>
+//               <Eye size={14} className="mr-1" /> Form Mode
+//             </>
+//           ) : (
+//             <>
+//               <Code size={14} className="mr-1" /> JSON Mode
+//             </>
+//           )}
+//         </div>
+//       </div>
+
+//       <div className={styles.formContainer}>
+//         {renderFormContent()}
+
+//         <div className={styles.buttonGroup}>
+//           {schema.buttons?.map((button) => (
+//             <button
+//               key={button.id}
+//               type="button"
+//               className={`${styles.button} ${
+//                 button.variant === 'primary' ? styles.primaryButton : styles.secondaryButton
+//               }`}
+//               onClick={button.type === 'submit' ? handleSubmit : button.onClick}
+//             >
+//               {button.label}
+//             </button>
+//           ))}
+//           {!schema.buttons && (
+//             <button
+//               type="button"
+//               className={`${styles.button} ${styles.primaryButton}`}
+//               onClick={handleSubmit}
+//             >
+//               Save
+//             </button>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+
+// /*
+
+// this is working great.
+// based on a field value i can show and hide.
+// i also want that based on a field value i can change the config of field -> like for select adding or removing option.
+// or updating the value for the existing field etc.
+
+// you understood.
+// implement it in easy to use and maintainable way.
+
+// */
+
+// // Sample usage with demo data - using the new structure with nested objects
+// export default function NestedConfigFormDemo() {
+//   const [values, setValues] = useState({
+//     name: 'Component 1',
+//     style: {
+//       container: {
+//         borderRadius: '30px',
+//         color: 'blue',
+//         padding: '10px'
+//       },
+//       label: {
+//         borderRadius: '5px',
+//         color: 'red',
+//         fontWeight: 'bold'
+//       }
+//     },
+//     animation: {
+//       enabled: true,
+//       duration: 300,
+//       type: 'fade'
+//     }
+//   });
+
+//   const handleChange = (newValues) => {
+//     setValues(newValues);
+//     console.log('Form values changed:', newValues);
+//   };
+
+//   const handleSubmit = (formValues) => {
+//     console.log('Form submitted with values:', formValues);
+//     alert('Configuration saved!');
+//   };
+
+//   // Schema structure with nested fields
+//   const schema = {
+//     title: 'Component Configuration',
+//     // Centralized field definitions with paths
+//     fields: [
+//       {
+//         id: 'name',
+//         type: 'text',
+//         label: 'Component Name',
+//         placeholder: 'Enter component name',
+//         required: true,
+//       },
+//       // Style section - Container fields
+//       {
+//         id: 'style.container.borderRadius',
+//         type: 'text',
+//         label: 'Border Radius',
+//         placeholder: '0px',
+//         path: 'style.container',
+//       },
+//       {
+//         id: 'style.container.color',
+//         type: 'color',
+//         label: 'Color',
+//         path: 'style.container',
+//       },
+//       {
+//         id: 'style.container.padding',
+//         type: 'text',
+//         label: 'Padding',
+//         placeholder: '0px',
+//         path: 'style.container',
+//       },
+//       // Style section - Label fields
+//       {
+//         id: 'style.label.borderRadius',
+//         type: 'text',
+//         label: 'Border Radius',
+//         placeholder: '0px',
+//         path: 'style.label',
+//       },
+//       {
+//         id: 'style.label.color',
+//         type: 'color',
+//         label: 'Color',
+//         path: 'style.label',
+//       },
+//       {
+//         id: 'style.label.fontWeight',
+//         type: 'select',
+//         label: 'Font Weight',
+//         options: [
+//           { value: 'normal', label: 'Normal' },
+//           { value: 'bold', label: 'Bold' },
+//           { value: 'lighter', label: 'Lighter' },
+//           { value: 'bolder', label: 'Bolder' },
+//         ],
+//         path: 'style.label',
+//       },
+//       // Animation settings
+//       {
+//         id: 'animation.enabled',
+//         type: 'checkbox',
+//         checkboxLabel: 'Enable Animation',
+//         path: 'animation',
+//       },
+//       {
+//         id: 'animation.duration',
+//         type: 'number',
+//         label: 'Duration (ms)',
+//         min: 100,
+//         max: 5000,
+//         path: 'animation',
+//         condition: {
+//           dependsOn: 'animation.enabled',
+//           operator: 'equals',
+//           value: true,
+//         },
+//       },
+//       {
+//         id: 'animation.type',
+//         type: 'select',
+//         label: 'Animation Type',
+//         options: [
+//           { value: 'fade', label: 'Fade' },
+//           { value: 'slide', label: 'Slide' },
+//           { value: 'zoom', label: 'Zoom' },
+//         ],
+//         path: 'animation',
+//         condition: {
+//           dependsOn: 'animation.enabled',
+//           operator: 'equals',
+//           value: true,
+//         },
+//       },
+//     ],
+//     // Section definitions
+//     sections: [
+//       {
+//         id: 'general',
+//         title: 'General Information',
+//         fieldIds: ['name'],
+//       },
+//       {
+//         id: 'container-style',
+//         title: 'Container Style',
+//         fieldIds: ['style.container.borderRadius', 'style.container.color', 'style.container.padding'],
+//       },
+//       {
+//         id: 'label-style',
+//         title: 'Label Style',
+//         fieldIds: ['style.label.borderRadius', 'style.label.color', 'style.label.fontWeight'],
+//       },
+//       {
+//         id: 'animation-settings',
+//         title: 'Animation Settings',
+//         fieldIds: ['animation.enabled', 'animation.duration', 'animation.type'],
+//       },
+//     ],
+//     // Tab definitions
+//     tabs: [
+//       {
+//         id: 'basic',
+//         title: 'Basic Settings',
+//         sectionIds: ['general'],
+//       },
+//       {
+//         id: 'styles',
+//         title: 'Style Settings',
+//         sectionIds: ['container-style', 'label-style'],
+//       },
+//       {
+//         id: 'advanced',
+//         title: 'Advanced Settings',
+//         sectionIds: ['animation-settings'],
+//       },
+//     ],
+//     buttons: [
+//       {
+//         id: 'save',
+//         label: 'Save Configuration',
+//         type: 'submit',
+//         variant: 'primary',
+//       },
+//       {
+//         id: 'reset',
+//         label: 'Reset',
+//         type: 'button',
+//         variant: 'secondary',
+//         onClick: () => setValues({
+//           name: 'Component 1',
+//           style: {
+//             container: {
+//               borderRadius: '30px',
+//               color: 'blue',
+//               padding: '10px'
+//             },
+//             label: {
+//               borderRadius: '5px',
+//               color: 'red',
+//               fontWeight: 'bold'
+//             }
+//           },
+//           animation: {
+//             enabled: true,
+//             duration: 300,
+//             type: 'fade'
+//           }
+//         }),
+//       },
+//     ],
+//   };
+
+//   return (
+//     <div className="p-4 space-y-8 h-screen overflow-y-auto" style={{ maxHeight: 'calc(100vh - 40px)' }}>
+//       <ConfigFormV3
+//         schema={schema} 
+//         initialValues={values} 
+//         onChange={handleChange} 
+//         onSubmit={handleSubmit} 
+//       />
+      
+//       <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+//         <h3 className="text-lg font-bold mb-2">Current Form Values:</h3>
+//         <pre className="whitespace-pre-wrap overflow-auto max-h-64">
+//           {JSON.stringify(values, null, 2)}
+//         </pre>
+//       </div>
+//     </div>
+
+//   );
+// }
+
+
+
 // Helper functions for handling nested objects
 const getNestedValue = (obj, path) => {
   if (!path) return obj;
@@ -71,14 +780,83 @@ const cleanEmptyObjects = (obj) => {
   return result;
 };
 
-// Enhanced main form component with nested object support
+// Helper function to evaluate dynamic conditions
+const evaluateCondition = (condition, formValues) => {
+  if (!condition) return true;
+  
+  const { dependsOn, operator, value } = condition;
+  const dependentValue = getNestedValue(formValues, dependsOn);
+  
+  switch (operator) {
+    case 'equals':
+      return dependentValue === value;
+    case 'notEquals':
+      return dependentValue !== value;
+    case 'contains':
+      return dependentValue?.includes(value);
+    case 'greaterThan':
+      return dependentValue > value;
+    case 'lessThan':
+      return dependentValue < value;
+    case 'exists':
+      return dependentValue !== undefined && dependentValue !== null;
+    case 'notExists':
+      return dependentValue === undefined || dependentValue === null;
+    case 'in':
+      return Array.isArray(value) && value.includes(dependentValue);
+    case 'notIn':
+      return Array.isArray(value) && !value.includes(dependentValue);
+    default:
+      return true;
+  }
+};
 
-export const ConfigFormV3 = ({ 
+// Helper function to apply dynamic configuration to a field
+const applyDynamicConfig = (field, formValues) => {
+  if (!field.dynamicConfig) return field;
+  
+  let dynamicField = { ...field };
+  
+  // Process each dynamic configuration rule
+  field.dynamicConfig.forEach(config => {
+    if (evaluateCondition(config.condition, formValues)) {
+      // Apply the configuration changes
+      dynamicField = { ...dynamicField, ...config.changes };
+      
+      // Handle special cases for merging arrays (like options)
+      if (config.changes.options) {
+        if (config.mergeMode === 'replace') {
+          dynamicField.options = config.changes.options;
+        } else if (config.mergeMode === 'append') {
+          dynamicField.options = [...(field.options || []), ...config.changes.options];
+        } else if (config.mergeMode === 'filter') {
+          // Filter existing options based on a condition
+          dynamicField.options = (field.options || []).filter(option => {
+            return config.changes.options.includes(option.value);
+          });
+        }
+      }
+      
+      // Handle dynamic validation rules
+      if (config.changes.validation) {
+        dynamicField.validation = {
+          ...(dynamicField.validation || {}),
+          ...config.changes.validation
+        };
+      }
+    }
+  });
+  
+  return dynamicField;
+};
+
+// Enhanced main form component with nested object support and dynamic field configuration
+export  function ConfigFormV3({ 
   schema, 
   initialValues = {}, 
   onChange, 
   onSubmit 
-}) => {
+}){
   const [activeTab, setActiveTab] = useState(schema.tabs && schema.tabs.length > 0 ? schema.tabs[0].id : null);
   const [formValues, setFormValues] = useState(initialValues);
   const [openSections, setOpenSections] = useState({});
@@ -114,9 +892,9 @@ export const ConfigFormV3 = ({
   const handleFieldChange = (fieldId, value) => {
     setFormValues(prev => {
       // Support for nested paths
-      console.log("handle change:",value, fieldId);
+      console.log("handle change:", value, fieldId);
       const updatedValues = setNestedValue(prev, fieldId, value);
-      console.log("handle change:",updatedValues, fieldId);
+      console.log("handle change:", updatedValues, fieldId);
       if (onChange) {
         // Clean empty objects before returning
         onChange(cleanEmptyObjects(updatedValues));
@@ -166,37 +944,19 @@ export const ConfigFormV3 = ({
     }
   };
 
-  // Get field definition by ID
+  // Get field definition by ID with dynamic configuration applied
   const getFieldById = (fieldId) => {
     if (!schema.fields) return null;
-    return schema.fields.find(field => field.id === fieldId);
+    const field = schema.fields.find(field => field.id === fieldId);
+    if (!field) return null;
+    
+    // Apply dynamic configuration based on current form values
+    return applyDynamicConfig(field, formValues);
   };
 
   // Determine if a field should be visible based on conditions
   const isFieldVisible = (field) => {
-    if (!field.condition) return true;
-    
-    const { dependsOn, operator, value } = field.condition;
-    const dependentValue = getNestedValue(formValues, dependsOn);
-    
-    switch (operator) {
-      case 'equals':
-        return dependentValue === value;
-      case 'notEquals':
-        return dependentValue !== value;
-      case 'contains':
-        return dependentValue?.includes(value);
-      case 'greaterThan':
-        return dependentValue > value;
-      case 'lessThan':
-        return dependentValue < value;
-      case 'exists':
-        return dependentValue !== undefined && dependentValue !== null;
-      case 'notExists':
-        return dependentValue === undefined || dependentValue === null;
-      default:
-        return true;
-    }
+    return evaluateCondition(field.condition, formValues);
   };
 
   // Generate a field label with path information
@@ -210,66 +970,69 @@ export const ConfigFormV3 = ({
     return field.label || '';
   };
 
-  // Render field based on type with support for nested values
+  // Render field based on type with support for nested values and dynamic configuration
   const renderField = (field) => {
     if (!field || !isFieldVisible(field)) return null;
 
+    // Apply dynamic configuration to the field
+    const dynamicField = applyDynamicConfig(field, formValues);
+    
     // Get the actual field value using the path
-    const fieldValue = getNestedValue(formValues, field.id);
+    const fieldValue = getNestedValue(formValues, dynamicField.id);
     
     let fieldComponent;
-    switch (field.type) {
+    switch (dynamicField.type) {
       case 'data_picker':
-        fieldComponent = <GlobalSelectField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)}/>
+        fieldComponent = <GlobalSelectField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>
         break;
       case 'option_mapper':
-        fieldComponent = <OptionsListField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />
+        fieldComponent = <OptionsListField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />
         break;
       case 'text':
-        fieldComponent = <TextField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <TextField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'number':
-        fieldComponent = <NumberField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <NumberField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'select':
-        fieldComponent = <SelectField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <SelectField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'checkbox':
-        fieldComponent = <CheckboxField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <CheckboxField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'array': 
-        fieldComponent = <ArrayField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <ArrayField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'color': 
-        fieldComponent = <ColorField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <ColorField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'static_key_value': 
-        fieldComponent = <StaticKeyValueField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <StaticKeyValueField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'dynamic_key_value': 
-        fieldComponent = <DynamicKeyValueField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <DynamicKeyValueField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'date': 
-        fieldComponent = <DateField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <DateField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       case 'time': 
-        fieldComponent = <TimeField field={field} value={fieldValue} onChange={(id, value) => handleFieldChange(field.id, value)} />;
+        fieldComponent = <TimeField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
       default:
-        fieldComponent = <div>Unsupported field type: {field.type}</div>;
+        fieldComponent = <div>Unsupported field type: {dynamicField.type}</div>;
     }
 
     return (
-      <div key={field.id} className={styles.fieldGroup}>
-        {field.label && (
-          <label htmlFor={field.id} className={styles.fieldLabel}>
-            {getFieldGroupLabel(field)}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
+      <div key={dynamicField.id} className={styles.fieldGroup}>
+        {dynamicField.label && (
+          <label htmlFor={dynamicField.id} className={styles.fieldLabel}>
+            {getFieldGroupLabel(dynamicField)}
+            {dynamicField.required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
         {fieldComponent}
-        {field.description && (
-          <p className="mt-1 text-sm text-gray-500">{field.description}</p>
+        {dynamicField.description && (
+          <p className="mt-1 text-sm text-gray-500">{dynamicField.description}</p>
         )}
       </div>
     );
@@ -471,228 +1234,207 @@ export const ConfigFormV3 = ({
   );
 };
 
-// Sample usage with demo data - using the new structure with nested objects
-export default function NestedConfigFormDemo() {
-  const [values, setValues] = useState({
-    name: 'Component 1',
-    style: {
-      container: {
-        borderRadius: '30px',
-        color: 'blue',
-        padding: '10px'
-      },
-      label: {
-        borderRadius: '5px',
-        color: 'red',
-        fontWeight: 'bold'
-      }
+/*
+USAGE EXAMPLES:
+
+// Example 1: Dynamic Select Options based on another field
+const schemaExample1 = {
+  fields: [
+    {
+      id: 'category',
+      type: 'select',
+      label: 'Category',
+      options: [
+        { value: 'electronics', label: 'Electronics' },
+        { value: 'clothing', label: 'Clothing' },
+        { value: 'books', label: 'Books' }
+      ]
     },
-    animation: {
-      enabled: true,
-      duration: 300,
-      type: 'fade'
-    }
-  });
-
-  const handleChange = (newValues) => {
-    setValues(newValues);
-    console.log('Form values changed:', newValues);
-  };
-
-  const handleSubmit = (formValues) => {
-    console.log('Form submitted with values:', formValues);
-    alert('Configuration saved!');
-  };
-
-  // Schema structure with nested fields
-  const schema = {
-    title: 'Component Configuration',
-    // Centralized field definitions with paths
-    fields: [
-      {
-        id: 'name',
-        type: 'text',
-        label: 'Component Name',
-        placeholder: 'Enter component name',
-        required: true,
-      },
-      // Style section - Container fields
-      {
-        id: 'style.container.borderRadius',
-        type: 'text',
-        label: 'Border Radius',
-        placeholder: '0px',
-        path: 'style.container',
-      },
-      {
-        id: 'style.container.color',
-        type: 'color',
-        label: 'Color',
-        path: 'style.container',
-      },
-      {
-        id: 'style.container.padding',
-        type: 'text',
-        label: 'Padding',
-        placeholder: '0px',
-        path: 'style.container',
-      },
-      // Style section - Label fields
-      {
-        id: 'style.label.borderRadius',
-        type: 'text',
-        label: 'Border Radius',
-        placeholder: '0px',
-        path: 'style.label',
-      },
-      {
-        id: 'style.label.color',
-        type: 'color',
-        label: 'Color',
-        path: 'style.label',
-      },
-      {
-        id: 'style.label.fontWeight',
-        type: 'select',
-        label: 'Font Weight',
-        options: [
-          { value: 'normal', label: 'Normal' },
-          { value: 'bold', label: 'Bold' },
-          { value: 'lighter', label: 'Lighter' },
-          { value: 'bolder', label: 'Bolder' },
-        ],
-        path: 'style.label',
-      },
-      // Animation settings
-      {
-        id: 'animation.enabled',
-        type: 'checkbox',
-        checkboxLabel: 'Enable Animation',
-        path: 'animation',
-      },
-      {
-        id: 'animation.duration',
-        type: 'number',
-        label: 'Duration (ms)',
-        min: 100,
-        max: 5000,
-        path: 'animation',
-        condition: {
-          dependsOn: 'animation.enabled',
-          operator: 'equals',
-          value: true,
-        },
-      },
-      {
-        id: 'animation.type',
-        type: 'select',
-        label: 'Animation Type',
-        options: [
-          { value: 'fade', label: 'Fade' },
-          { value: 'slide', label: 'Slide' },
-          { value: 'zoom', label: 'Zoom' },
-        ],
-        path: 'animation',
-        condition: {
-          dependsOn: 'animation.enabled',
-          operator: 'equals',
-          value: true,
-        },
-      },
-    ],
-    // Section definitions
-    sections: [
-      {
-        id: 'general',
-        title: 'General Information',
-        fieldIds: ['name'],
-      },
-      {
-        id: 'container-style',
-        title: 'Container Style',
-        fieldIds: ['style.container.borderRadius', 'style.container.color', 'style.container.padding'],
-      },
-      {
-        id: 'label-style',
-        title: 'Label Style',
-        fieldIds: ['style.label.borderRadius', 'style.label.color', 'style.label.fontWeight'],
-      },
-      {
-        id: 'animation-settings',
-        title: 'Animation Settings',
-        fieldIds: ['animation.enabled', 'animation.duration', 'animation.type'],
-      },
-    ],
-    // Tab definitions
-    tabs: [
-      {
-        id: 'basic',
-        title: 'Basic Settings',
-        sectionIds: ['general'],
-      },
-      {
-        id: 'styles',
-        title: 'Style Settings',
-        sectionIds: ['container-style', 'label-style'],
-      },
-      {
-        id: 'advanced',
-        title: 'Advanced Settings',
-        sectionIds: ['animation-settings'],
-      },
-    ],
-    buttons: [
-      {
-        id: 'save',
-        label: 'Save Configuration',
-        type: 'submit',
-        variant: 'primary',
-      },
-      {
-        id: 'reset',
-        label: 'Reset',
-        type: 'button',
-        variant: 'secondary',
-        onClick: () => setValues({
-          name: 'Component 1',
-          style: {
-            container: {
-              borderRadius: '30px',
-              color: 'blue',
-              padding: '10px'
-            },
-            label: {
-              borderRadius: '5px',
-              color: 'red',
-              fontWeight: 'bold'
-            }
+    {
+      id: 'subcategory',
+      type: 'select',
+      label: 'Subcategory',
+      options: [], // Base options (empty)
+      dynamicConfig: [
+        {
+          condition: { dependsOn: 'category', operator: 'equals', value: 'electronics' },
+          changes: {
+            options: [
+              { value: 'phones', label: 'Phones' },
+              { value: 'laptops', label: 'Laptops' },
+              { value: 'tablets', label: 'Tablets' }
+            ]
           },
-          animation: {
-            enabled: true,
-            duration: 300,
-            type: 'fade'
+          mergeMode: 'replace'
+        },
+        {
+          condition: { dependsOn: 'category', operator: 'equals', value: 'clothing' },
+          changes: {
+            options: [
+              { value: 'shirts', label: 'Shirts' },
+              { value: 'pants', label: 'Pants' },
+              { value: 'shoes', label: 'Shoes' }
+            ]
+          },
+          mergeMode: 'replace'
+        },
+        {
+          condition: { dependsOn: 'category', operator: 'equals', value: 'books' },
+          changes: {
+            options: [
+              { value: 'fiction', label: 'Fiction' },
+              { value: 'non-fiction', label: 'Non-Fiction' },
+              { value: 'textbooks', label: 'Textbooks' }
+            ]
+          },
+          mergeMode: 'replace'
+        }
+      ]
+    }
+  ]
+};
+
+// Example 2: Dynamic Field Properties (label, required, validation)
+const schemaExample2 = {
+  fields: [
+    {
+      id: 'userType',
+      type: 'select',
+      label: 'User Type',
+      options: [
+        { value: 'individual', label: 'Individual' },
+        { value: 'business', label: 'Business' }
+      ]
+    },
+    {
+      id: 'taxId',
+      type: 'text',
+      label: 'Tax ID',
+      required: false,
+      dynamicConfig: [
+        {
+          condition: { dependsOn: 'userType', operator: 'equals', value: 'business' },
+          changes: {
+            label: 'Business Tax ID',
+            required: true,
+            validation: {
+              pattern: '^[0-9]{2}-[0-9]{7}$',
+              message: 'Tax ID must be in format: XX-XXXXXXX'
+            }
           }
-        }),
-      },
-    ],
-  };
+        },
+        {
+          condition: { dependsOn: 'userType', operator: 'equals', value: 'individual' },
+          changes: {
+            label: 'SSN (Optional)',
+            required: false,
+            validation: {
+              pattern: '^[0-9]{3}-[0-9]{2}-[0-9]{4}$',
+              message: 'SSN must be in format: XXX-XX-XXXX'
+            }
+          }
+        }
+      ]
+    }
+  ]
+};
 
-  return (
-    <div className="p-4 space-y-8 h-screen overflow-y-auto" style={{ maxHeight: 'calc(100vh - 40px)' }}>
-      <ConfigFormV3
-        schema={schema} 
-        initialValues={values} 
-        onChange={handleChange} 
-        onSubmit={handleSubmit} 
-      />
-      
-      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-        <h3 className="text-lg font-bold mb-2">Current Form Values:</h3>
-        <pre className="whitespace-pre-wrap overflow-auto max-h-64">
-          {JSON.stringify(values, null, 2)}
-        </pre>
-      </div>
-    </div>
+// Example 3: Dynamic Field Type Change
+const schemaExample3 = {
+  fields: [
+    {
+      id: 'inputMode',
+      type: 'select',
+      label: 'Input Mode',
+      options: [
+        { value: 'text', label: 'Text Input' },
+        { value: 'select', label: 'Dropdown' },
+        { value: 'number', label: 'Number Input' }
+      ]
+    },
+    {
+      id: 'dynamicField',
+      type: 'text',
+      label: 'Dynamic Field',
+      dynamicConfig: [
+        {
+          condition: { dependsOn: 'inputMode', operator: 'equals', value: 'select' },
+          changes: {
+            type: 'select',
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' }
+            ]
+          }
+        },
+        {
+          condition: { dependsOn: 'inputMode', operator: 'equals', value: 'number' },
+          changes: {
+            type: 'number',
+            validation: {
+              min: 0,
+              max: 100
+            }
+          }
+        }
+      ]
+    }
+  ]
+};
 
-  );
-}
+// Example 4: Conditional Options Filtering
+const schemaExample4 = {
+  fields: [
+    {
+      id: 'plan',
+      type: 'select',
+      label: 'Plan Type',
+      options: [
+        { value: 'basic', label: 'Basic' },
+        { value: 'premium', label: 'Premium' },
+        { value: 'enterprise', label: 'Enterprise' }
+      ]
+    },
+    {
+      id: 'features',
+      type: 'select',
+      label: 'Available Features',
+      multiple: true,
+      options: [
+        { value: 'feature1', label: 'Basic Feature 1', plan: 'basic' },
+        { value: 'feature2', label: 'Basic Feature 2', plan: 'basic' },
+        { value: 'feature3', label: 'Premium Feature 1', plan: 'premium' },
+        { value: 'feature4', label: 'Premium Feature 2', plan: 'premium' },
+        { value: 'feature5', label: 'Enterprise Feature 1', plan: 'enterprise' },
+        { value: 'feature6', label: 'Enterprise Feature 2', plan: 'enterprise' }
+      ],
+      dynamicConfig: [
+        {
+          condition: { dependsOn: 'plan', operator: 'equals', value: 'basic' },
+          changes: {
+            options: [
+              { value: 'feature1', label: 'Basic Feature 1' },
+              { value: 'feature2', label: 'Basic Feature 2' }
+            ]
+          },
+          mergeMode: 'replace'
+        },
+        {
+          condition: { dependsOn: 'plan', operator: 'equals', value: 'premium' },
+          changes: {
+            options: [
+              { value: 'feature1', label: 'Basic Feature 1' },
+              { value: 'feature2', label: 'Basic Feature 2' },
+              { value: 'feature3', label: 'Premium Feature 1' },
+              { value: 'feature4', label: 'Premium Feature 2' }
+            ]
+          },
+          mergeMode: 'replace'
+        }
+      ]
+    }
+  ]
+};
+
+*/
