@@ -22,7 +22,7 @@ function SyncData(key, forms) {
         let operation = curFlow["_change_type"] || "";
         delete curFlow["_change_type"];
         console.log("operation:", operation);
-        if (operation === "add") {
+        if (operation === "add" || operation === "create") {
             createFlows.push(curFlow);
         } else if (operation === "update") {
             updateFlows.push(curFlow);
@@ -103,6 +103,9 @@ function ProcessDataToWrite(tableName, data) {
     };    
     let respData = [];
     let tabelFunc = tableKeysMap[tableName];
+    if(tabelFunc === undefined) {
+        return data;
+    }
     respData = tabelFunc(data);
     return respData;
 }

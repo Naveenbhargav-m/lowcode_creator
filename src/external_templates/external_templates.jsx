@@ -10,7 +10,8 @@ const initialTemplates = [
     platform: 'SendGrid',
     group: 'Onboarding',
     content: 'Welcome to our platform! Were excited to have you on board.',
-    subject: 'Welcome to Our Platform'
+    subject: 'Welcome to Our Platform',
+    "extras": {},
   },
   {
     id: 2,
@@ -19,7 +20,8 @@ const initialTemplates = [
     platform: 'Mailchimp',
     group: 'Account',
     content: 'You requested a password reset. Click the link below to reset your password.',
-    subject: 'Password Reset Request'
+    subject: 'Password Reset Request',
+    "extras": {},
   },
   {
     id: 3,
@@ -28,6 +30,7 @@ const initialTemplates = [
     platform: 'Twilio',
     group: 'Transactions',
     content: 'Your order #12345 has been confirmed and is being processed.',
+    "extras": {},
   },
   {
     id: 4,
@@ -36,6 +39,8 @@ const initialTemplates = [
     platform: 'Twilio',
     group: 'Notifications',
     content: 'Reminder: You have an appointment scheduled for tomorrow at 2 PM.',
+    "extras": {},
+
   }
 ];
 

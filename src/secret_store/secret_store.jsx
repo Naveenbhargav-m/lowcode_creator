@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Search, Lock, Key, Loader2, History, RefreshCw } from 'lucide-react';
-import { CreateGroup, CreateSecret, UpdateGroup, UpdateSecret, DeleteGroup, DeleteSecret, GetDataFromAPI } from './secret_store_api'; 
+import { Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Search, Lock, Key, Loader2, History, RefreshCw, Upload, AlertCircle } from 'lucide-react';
+import { GetDataFromAPI, SetDataToAPI } from './secret_store_api';
+
 // Loading Component
 const LoadingSpinner = ({ size = 16 }) => (
   <Loader2 size={size} className="animate-spin" />
@@ -10,17 +11,41 @@ const LoadingSpinner = ({ size = 16 }) => (
 const SecretItem = ({ secret, onEdit, onDelete, isLoading }) => {
   const [showValue, setShowValue] = useState(false);
   
+  const getChangeIndicator = () => {
+    if (!secret._change_type) return null;
+    
+    const indicators = {
+      create: { color: 'bg-green-100 text-green-700', text: 'NEW' },
+      update: { color: 'bg-yellow-100 text-yellow-700', text: 'MOD' },
+      delete: { color: 'bg-red-100 text-red-700', text: 'DEL' }
+    };
+    
+    const indicator = indicators[secret._change_type];
+    return (
+      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${indicator.color}`}>
+        {indicator.text}
+      </span>
+    );
+  };
+  
   return (
-    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm mb-3 hover:shadow-md transition-all duration-200">
+    <div className={`flex items-center justify-between p-4 bg-white rounded-lg border shadow-sm mb-3 hover:shadow-md transition-all duration-200 ${
+      secret._change_type === 'delete' ? 'opacity-50 border-red-200 bg-red-50' : 'border-gray-200'
+    }`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-2">
-          <h3 className="font-medium text-gray-800 truncate">{secret.name}</h3>
+          <h3 className={`font-medium truncate ${secret._change_type === 'delete' ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
+            {secret.name}
+          </h3>
           <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium shrink-0">
             {secret.group_name || secret.group}
           </span>
+          {getChangeIndicator()}
         </div>
         <div className="flex items-center gap-2 mb-2">
-          <div className="text-sm text-gray-600 font-mono bg-gray-50 px-3 py-2 rounded flex-1 min-w-0">
+          <div className={`text-sm font-mono bg-gray-50 px-3 py-2 rounded flex-1 min-w-0 ${
+            secret._change_type === 'delete' ? 'text-gray-400' : 'text-gray-600'
+          }`}>
             <div className="truncate">
               {showValue ? secret.value : '••••••••••••••••••••'}
             </div>
@@ -29,6 +54,7 @@ const SecretItem = ({ secret, onEdit, onDelete, isLoading }) => {
             onClick={() => setShowValue(!showValue)} 
             className="text-gray-500 hover:text-blue-600 transition-colors shrink-0"
             title={showValue ? 'Hide value' : 'Show value'}
+            disabled={secret._change_type === 'delete'}
           >
             <Lock size={16} />
           </button>
@@ -43,7 +69,7 @@ const SecretItem = ({ secret, onEdit, onDelete, isLoading }) => {
       <div className="flex shrink-0 ml-4 gap-2">
         <button 
           onClick={() => onEdit(secret)} 
-          disabled={isLoading}
+          disabled={isLoading || secret._change_type === 'delete'}
           className="text-gray-500 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Edit secret"
         >
@@ -53,7 +79,7 @@ const SecretItem = ({ secret, onEdit, onDelete, isLoading }) => {
           onClick={() => onDelete(secret.id)} 
           disabled={isLoading}
           className="text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Delete secret"
+          title={secret._change_type === 'delete' ? 'Restore secret' : 'Delete secret'}
         >
           {isLoading ? <LoadingSpinner /> : <Trash2 size={16} />}
         </button>
@@ -70,6 +96,8 @@ const GroupPanel = ({ group, secrets, onEdit, onDelete, isOpen, onToggle, isLoad
   
   if (filteredSecrets.length === 0) return null;
   
+  const changedCount = filteredSecrets.filter(s => s._change_type).length;
+  
   return (
     <div className="mb-4">
       <div 
@@ -78,7 +106,13 @@ const GroupPanel = ({ group, secrets, onEdit, onDelete, isOpen, onToggle, isLoad
       >
         <h2 className="font-semibold text-gray-700 flex items-center">
           <Key size={16} className="mr-2 text-blue-600" />
-          {group} <span className="ml-2 text-sm text-gray-500">({filteredSecrets.length})</span>
+          {group} 
+          <span className="ml-2 text-sm text-gray-500">({filteredSecrets.length})</span>
+          {changedCount > 0 && (
+            <span className="ml-2 px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+              {changedCount} changed
+            </span>
+          )}
         </h2>
         {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
       </div>
@@ -124,14 +158,14 @@ const Modal = ({ isOpen, onClose, children }) => {
 const SecretForm = ({ secret, groups, onSave, onCancel, isLoading }) => {
   const [name, setName] = useState(secret?.name || '');
   const [value, setValue] = useState(secret?.value || '');
-  const [group, setGroup] = useState(secret?.group_name || secret?.group || (groups.length > 0 ? groups[0] : ''));
+  const [group, setGroup] = useState(secret?.group_name || secret?.group || (groups.length > 0 ? groups[0].name || groups[0] : ''));
   const [newGroup, setNewGroup] = useState('');
   const [showNewGroup, setShowNewGroup] = useState(false);
 
   useEffect(() => {
     setName(secret?.name || '');
     setValue(secret?.value || '');
-    setGroup(secret?.group_name || secret?.group || (groups.length > 0 ? groups[0] : ''));
+    setGroup(secret?.group_name || secret?.group || (groups.length > 0 ? groups[0].name || groups[0] : ''));
     setNewGroup('');
     setShowNewGroup(false);
   }, [secret, groups]);
@@ -145,15 +179,18 @@ const SecretForm = ({ secret, groups, onSave, onCancel, isLoading }) => {
     const finalGroup = showNewGroup ? newGroup.trim() : group;
     const now = new Date().toISOString();
     
-    // Create object with correct field names for database
+    // Preserve 'create' _change_type if it's already a new secret
+    const changeType = secret?._change_type === 'create' ? 'create' : (secret ? 'update' : 'create');
+    
     const secretData = {
       id: secret?.id || Date.now().toString(),
       name: name.trim(),
       value: value.trim(),
-      group_name: finalGroup, // Use group_name to match DB schema
+      group_name: finalGroup,
       created_at: secret?.created_at || secret?.createdAt || now,
       updated_at: now,
-      is_active: true
+      is_active: true,
+      _change_type: changeType
     };
     
     onSave(secretData, showNewGroup ? newGroup.trim() : null);
@@ -189,7 +226,6 @@ const SecretForm = ({ secret, groups, onSave, onCancel, isLoading }) => {
           <input
             type="text"
             value={name}
-            // @ts-ignore
             onChange={(e) => setName(e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="e.g. AWS Access Key"
@@ -231,7 +267,7 @@ const SecretForm = ({ secret, groups, onSave, onCancel, isLoading }) => {
                   <option value="">No groups available</option>
                 ) : (
                   groups.map(g => (
-                    <option key={g.id} value={g.name}>{g.name}</option>
+                    <option key={g.id || g} value={g.name || g}>{g.name || g}</option>
                   ))
                 )}
               </select>
@@ -311,13 +347,21 @@ export default function SecretsManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [openGroups, setOpenGroups] = useState({});
   const [error, setError] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Load data on component mount
   useEffect(() => {
     loadData();
   }, []);
+
+  // Check for changes whenever secrets change
+  useEffect(() => {
+    const changedSecrets = secrets.filter(s => s._change_type);
+    setHasChanges(changedSecrets.length > 0);
+  }, [secrets]);
 
   const loadData = async () => {
     setIsInitialLoading(true);
@@ -326,9 +370,10 @@ export default function SecretsManager() {
       const data = await GetDataFromAPI();
       setSecrets(data.secrets || []);
       setGroups(data.groups || []);
-      console.log("data:",data);
+      
       // Set all groups to open by default
-      const initialOpenGroups = (data.groups || []).reduce((acc, group) => {
+      const groupNames = (data.groups || []).map(g => g.name || g);
+      const initialOpenGroups = groupNames.reduce((acc, group) => {
         acc[group] = true;
         return acc;
       }, {});
@@ -341,6 +386,58 @@ export default function SecretsManager() {
     }
   };
 
+  // Option 1: Send _change_type with secrets (preserve change tracking)
+const handleSync = async () => {
+  if (!hasChanges) return;
+  
+  setIsSyncing(true);
+  setError(null);
+  try {
+    // Keep deleted secrets but mark them, preserve _change_type
+    const secretsToSync = secrets.map(s => ({
+      ...s,
+      is_active: s._change_type !== 'delete' // Mark deleted secrets as inactive
+    }));
+    
+    // Include _change_type for groups that have it
+    const changedGroups = groups.filter(g => g._change_type);
+    const existingGroups = groups.filter(g => !g._change_type);
+    const uniqueGroupNames = [...new Set(secretsToSync.map(s => s.group_name))];
+    
+    // Merge existing groups with new ones, preserving _change_type
+    const groupsToSync = [
+      ...existingGroups,
+      ...changedGroups,
+      // Add any completely new groups from secrets
+      ...uniqueGroupNames
+        .filter(name => !groups.some(g => (g.name || g) === name))
+        .map(name => ({ name, _change_type: 'create' }))
+    ];
+    
+    await SetDataToAPI(secretsToSync, groupsToSync);
+    
+    // Clear change tracking after successful sync
+    setSecrets(secretsToSync.map(s => {
+      const { _change_type, ...cleanSecret } = s;
+      return s._change_type === 'delete' ? null : cleanSecret;
+    }).filter(Boolean));
+    
+    setGroups(groupsToSync.map(g => {
+      const { _change_type, ...cleanGroup } = g;
+      return cleanGroup;
+    }));
+    
+    setHasChanges(false);
+    
+  } catch (error) {
+    console.error('Error syncing data:', error);
+    setError('Failed to sync changes. Please try again.');
+  } finally {
+    setIsSyncing(false);
+  }
+};
+
+
   const filteredSecrets = secrets.filter(secret => {
     if (!searchTerm) return true;
     const groupName = secret.group_name || secret.group || '';
@@ -351,26 +448,24 @@ export default function SecretsManager() {
     );
   });
 
-  const handleSaveSecret = async (secret, newGroupName) => {
+  const handleSaveSecret = (secret, newGroupName) => {
     setIsLoading(true);
-    setError(null);
     try {
       const isEditing = secret.id && secrets.some(s => s.id === secret.id);
       
-      // Create new group if needed
-      if (newGroupName && !groups.includes(newGroupName)) {
-        await CreateGroup({ name: newGroupName });
-        setGroups([...groups, newGroupName]);
+      // Add new group if needed
+      if (newGroupName && !groups.some(g => (g.name || g) === newGroupName)) {
+        const newGroup = { name: newGroupName, id: Date.now().toString(), "_change_type": "create" };
+        setGroups([...groups, newGroup]);
         setOpenGroups({...openGroups, [newGroupName]: true});
       }
       
-      let savedSecret;
       if (isEditing) {
-        savedSecret = await UpdateSecret(secret.id, secret);
-        setSecrets(secrets.map(s => s.id === secret.id ? { ...s, ...savedSecret } : s));
+        secret["_change_type"] = secret["_change_type"] || "update";
+        setSecrets(secrets.map(s => s.id === secret.id ? { ...s, ...secret } : s));
       } else {
-        savedSecret = await CreateSecret(secret);
-        setSecrets([...secrets, savedSecret]);
+        secret["_change_type"] = "create";
+        setSecrets([...secrets, secret]);
       }
       
       setEditingSecret(null);
@@ -383,19 +478,28 @@ export default function SecretsManager() {
     }
   };
 
-  const handleDeleteSecret = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this secret?')) return;
+  const handleDeleteSecret = (id) => {
+    const secret = secrets.find(s => s.id === id);
+    if (!secret) return;
     
-    setIsLoading(true);
-    setError(null);
-    try {
-      await DeleteSecret(id);
-      setSecrets(secrets.filter(secret => secret.id !== id));
-    } catch (error) {
-      console.error('Error deleting secret:', error);
-      setError('Failed to delete secret. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (secret._change_type === 'delete') {
+      // Restore deleted secret
+      setSecrets(secrets.map(s => 
+        s.id === id 
+          ? { ...s, _change_type: s._change_type === 'create' ? 'create' : undefined }
+          : s
+      ));
+    } else {
+      // Mark as deleted or remove if it was just created
+      if (secret._change_type === 'create') {
+        setSecrets(secrets.filter(s => s.id !== id));
+      } else {
+        setSecrets(secrets.map(s => 
+          s.id === id 
+            ? { ...s, _change_type: 'delete' }
+            : s
+        ));
+      }
     }
   };
 
@@ -407,7 +511,20 @@ export default function SecretsManager() {
   };
 
   const handleRefresh = () => {
+    if (hasChanges && !window.confirm('You have unsaved changes. Refreshing will lose them. Continue?')) {
+      return;
+    }
     loadData();
+  };
+
+  const getChangeSummary = () => {
+    const changedSecrets = secrets.filter(s => s._change_type);
+    const summary = {
+      create: changedSecrets.filter(s => s._change_type === 'create').length,
+      update: changedSecrets.filter(s => s._change_type === 'update').length,
+      delete: changedSecrets.filter(s => s._change_type === 'delete').length
+    };
+    return summary;
   };
 
   if (isInitialLoading) {
@@ -421,6 +538,8 @@ export default function SecretsManager() {
     );
   }
 
+  const changeSummary = getChangeSummary();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-6">
@@ -430,19 +549,47 @@ export default function SecretsManager() {
             <h1 className="text-3xl font-bold text-gray-800 flex items-center">
               <Lock className="mr-3 text-blue-600" />
               Secrets Manager
+              {hasChanges && <AlertCircle className="ml-2 text-orange-500" size={20} />}
             </h1>
-            <p className="text-gray-600 mt-1">Securely manage your API keys and secrets</p>
+            <p className="text-gray-600 mt-1">
+              Securely manage your API keys and secrets
+              {hasChanges && (
+                <span className="ml-2 text-orange-600 font-medium">
+                  • {changeSummary.create + changeSummary.update + changeSummary.delete} unsaved changes
+                </span>
+              )}
+            </p>
           </div>
           
           <div className="flex gap-3">
             <button
               onClick={handleRefresh}
-              disabled={isLoading}
+              disabled={isLoading || isSyncing}
               className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
               title="Refresh data"
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             </button>
+            
+            {hasChanges && (
+              <button
+                onClick={handleSync}
+                disabled={isSyncing}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center shadow-sm transition-all"
+              >
+                {isSyncing ? (
+                  <>
+                    <LoadingSpinner size={16} className="mr-2" />
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} className="mr-2" />
+                    Sync Changes ({changeSummary.create + changeSummary.update + changeSummary.delete})
+                  </>
+                )}
+              </button>
+            )}
             
             <button
               onClick={() => {
@@ -462,6 +609,36 @@ export default function SecretsManager() {
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700">{error}</p>
+          </div>
+        )}
+        
+        {/* Change Summary */}
+        {hasChanges && (
+          <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <AlertCircle className="text-orange-500 mr-2" size={16} />
+                <span className="text-orange-700 font-medium">Pending Changes:</span>
+                <div className="ml-4 flex gap-4 text-sm">
+                  {changeSummary.create > 0 && (
+                    <span className="text-green-700">{changeSummary.create} new</span>
+                  )}
+                  {changeSummary.update > 0 && (
+                    <span className="text-yellow-700">{changeSummary.update} modified</span>
+                  )}
+                  {changeSummary.delete > 0 && (
+                    <span className="text-red-700">{changeSummary.delete} deleted</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={handleSync}
+                disabled={isSyncing}
+                className="text-sm px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50"
+              >
+                Sync Now
+              </button>
+            </div>
           </div>
         )}
         
@@ -504,18 +681,21 @@ export default function SecretsManager() {
         {/* Secrets List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 max-h-[70vh] overflow-y-auto">
           <div className="p-6">
-            {groups.map(group => (
-              <GroupPanel
-                key={group}
-                group={group}
-                secrets={filteredSecrets}
-                onEdit={setEditingSecret}
-                onDelete={handleDeleteSecret}
-                isOpen={openGroups[group]}
-                onToggle={() => toggleGroup(group)}
-                isLoading={isLoading}
-              />
-            ))}
+            {groups.map(group => {
+              const groupName = group.name || group;
+              return (
+                <GroupPanel
+                  key={groupName}
+                  group={groupName}
+                  secrets={filteredSecrets}
+                  onEdit={setEditingSecret}
+                  onDelete={handleDeleteSecret}
+                  isOpen={openGroups[groupName]}
+                  onToggle={() => toggleGroup(groupName)}
+                  isLoading={isLoading}
+                />
+              );
+            })}
             
             {filteredSecrets.length === 0 && searchTerm && (
               <div className="text-center py-12 text-gray-500">
@@ -537,7 +717,12 @@ export default function SecretsManager() {
         
         {/* Stats Footer */}
         <div className="mt-6 text-center text-sm text-gray-500">
-          Total: {secrets.length} secrets • {groups.length} groups
+          Total: {secrets.filter(s => s._change_type !== 'delete').length} secrets • {groups.length} groups
+          {hasChanges && (
+            <span className="ml-4 text-orange-600">
+              • {changeSummary.create + changeSummary.update + changeSummary.delete} pending changes
+            </span>
+          )}
         </div>
       </div>
     </div>
