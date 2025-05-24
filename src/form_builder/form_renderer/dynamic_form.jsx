@@ -511,7 +511,7 @@ function DynamicForm({ formConfig }) {
         />
       )}
       
-      <form onSubmit={handleSubmit}>
+      <form style={{display:"flex", "flexDirection": "column"}} onSubmit={handleSubmit}>
         {fieldsToRender.map(field => 
           renderField(field, values, errors, handleChange, handleFocus, handleBlur)
         )}
@@ -538,23 +538,27 @@ function DynamicForm({ formConfig }) {
                   Next
                 </button>
               ) : (
+                <div style={{display:'flex', "flexDirection": "row-reverse"}}>
                 <button
                   type="submit"
                   style={{...styles.base.button, ...styles.base.primaryButton}}
                 >
                   Submit
                 </button>
+                </div>
               )}
             </>
           )}
           
           {(!formConfig.steps || formConfig.steps.length === 0) && (
-            <button
-              type="submit"
-              style={{...styles.base.button, ...styles.base.primaryButton}}
-            >
-              Submit
-            </button>
+          <div style={{display:'flex', justifyContent: 'flex-end', width:"100%"}}>
+          <button
+            type="submit"
+            style={{...styles.base.button, ...styles.base.primaryButton}}
+          >
+            Submit
+          </button>
+        </div>
           )}
         </div>
       </form>
