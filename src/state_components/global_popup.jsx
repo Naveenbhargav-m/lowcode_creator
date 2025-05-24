@@ -55,7 +55,7 @@ const dummyData = {
   ]
 };
 
-export default function GlobalSignalsPopup({ initialOpen = true, fields = dummyData, onClose = (e, data) => {} }) {
+export default function GlobalSignalsPopup({ initialOpen = true, fields = dummyData, selectedItems = [], onClose = (e, data) => {} }) {
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [pickedItems, setPickedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,6 +65,12 @@ export default function GlobalSignalsPopup({ initialOpen = true, fields = dummyD
   useEffect(() => {
     setIsOpen(initialOpen);
   }, [initialOpen]);
+
+  useEffect((
+    ()=> {
+      setPickedItems(selectedItems);
+    }
+  ),[selectedItems]);
   
   // Initialize expanded sections when component mounts
   useEffect(() => {
