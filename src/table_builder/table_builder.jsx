@@ -1,345 +1,206 @@
-// Main App Component
 import { useState, useEffect } from 'react';
-import { ArrowRight, ChevronDown, ChevronUp, Database } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp, Database, Plus, X, Save, Trash2, Table } from 'lucide-react';
 
-import { Plus, X, Save, Trash2, Table as TableIcon } from 'lucide-react';
-import { generateUID } from '../utils/helpers';
-import { GenerateTransactionsV2 } from './utilities';
-import { TablesTab } from './tables_page';
-import { dbViewSignal, LoadTables, SaveTablesData } from './table_builder_state';
-import { signal } from '@preact/signals';
+// Mock functions - replace with your actual implementations
+const generateUID = () => Math.random().toString(36).substr(2, 9);
+const GenerateTransactionsV2 = (origTables, tables, origRelations, relations) => ({ changes: 'mock' });
+const LoadTables = () => Promise.resolve([{ tables_data: { tables: [], relations: [] } }]);
+const SaveTablesData = (data) => Promise.resolve(data.config);
 
-let fieldStyle = {"color": "black"};
+const DATA_TYPES = [
+  'VARCHAR', 'TEXT', 'INTEGER', 'BIGINT', 'SMALLINT', 
+  'BOOLEAN', 'DATE', 'TIME', 'TIMESTAMP', 'DECIMAL', 
+  'NUMERIC', 'REAL', 'DOUBLE PRECISION', 'JSON', 'JSONB',
+  'UUID', 'SERIAL', 'BIGSERIAL'
+];
 
-let makeInitCopy = signal("");
-export default function TableBuilderV6() {
-    const [tables, setTables] = useState([]);
-      const [relations, setRelations] = useState([]);
-      const [activeTable, setActiveTable] = useState(null);
-      const [showSql, setShowSql] = useState(false);
-      const [jsonOutput, setJsonOutput] = useState('');
-      // Store original state for comparison when generating transactions
-      const [originalTables, setOriginalTables] = useState([]);
-      const [originalRelations, setOriginalRelations] = useState([]);
-      // Track modified items
-      const [modifiedItems, setModifiedItems] = useState({
-        tables: new Set(), // table ids
-        fields: new Set(), // "tableId_fieldId" strings
-        relations: new Set() // relation ids
-      });
+export default function TableBuilderV7() {
+  const [tables, setTables] = useState([]);
+  const [relations, setRelations] = useState([]);
+  const [activeTable, setActiveTable] = useState(null);
+  const [activeField, setActiveField] = useState(null);
+  const [originalData, setOriginalData] = useState({ tables: [], relations: [] });
+  const [showSql, setShowSql] = useState(false);
+  const [jsonOutput, setJsonOutput] = useState('');
 
-      useEffect((() => {
-        LoadTables().then((data) => {
-          console.log("tables data from db:",data);
-          if(data === undefined) {
-            return;
-          }
-          let firstObj = data[0];
-          if(firstObj === undefined) {
-            return;
-          }
-          var tableData = firstObj["tables_data"];
-          if(tableData === undefined) {
-            return;
-          }
-          let tables = tableData["tables"] || [];
-          let relations = tableData["relations"] || [];
-          setTables(tables);
-          setRelations(relations);
-          makeInitCopy.value = generateUID();
-        });
-      }), []);
+  // Load initial data
+  useEffect(() => {
+    LoadTables().then((data) => {
+      if (!data?.[0]?.tables_data) return;
       
-      // Initialize original state from initial tables/relations
-      useEffect(() => {
-        if (originalTables.length === 0 && tables.length > 0) {
-          setOriginalTables(JSON.parse(JSON.stringify(tables)));
-        }
-        if (originalRelations.length === 0 && relations.length > 0) {
-          setOriginalRelations(JSON.parse(JSON.stringify(relations)));
-        }
-      }, [makeInitCopy.value]);
+      const { tables = [], relations = [] } = data[0].tables_data;
+      setTables(tables);
+      setRelations(relations);
+      setOriginalData({ tables: JSON.parse(JSON.stringify(tables)), relations: JSON.parse(JSON.stringify(relations)) });
       
-      // Set the first table as active by default
-      useEffect(() => {
-        if (tables.length > 0 && activeTable === null) {
-          setActiveTable(tables[0].fid);
-        }
-      }, [tables, activeTable]);
-      
-      // Find active table
-      const currentTable = tables.find(t => t.fid === activeTable);
-      
-      // Helper function to mark items as modified
-      const markAsModified = (type, id) => {
-        setModifiedItems(prev => {
-          const newState = {...prev};
-          newState[type].add(id);
-          return newState;
-        });
-      };
-      
-      // Create a new table
-      const handleCreateTable = (tableName) => {
-        if (!tableName.trim()) return;
-        
-        const newId = Math.max(0, ...tables.map(t => t.id)) + 1;
-        let myid = generateUID();
-        const newTable = {
-          id: newId,
-          fid: myid,
-          name: tableName.trim().toLowerCase(),
-          fields: [
-            { id: 1, name: 'id', type: 'SERIAL', primaryKey: true, nullable: false, defaultValue: null }
-          ]
-        };
-        
-        // New tables are automatically considered modified
-        markAsModified('tables', myid);
-        
-        setTables([...tables, newTable]);
-        setActiveTable(newId);
-        return newTable;
-      };
-      
-      // Delete a table
-      const handleDeleteTable = (tableId) => {
-        // Mark as modified before deleting
-        markAsModified('tables', tableId);
-        
-        const tableToDelete = tables.find(t => t.fid === tableId);
-        
-        // Delete relations involving this table
-        if (tableToDelete) {
-          const relationsToModify = relations.filter(r => 
-            r.fromTable === tableToDelete.name || r.toTable === tableToDelete.name
-          );
-          
-          relationsToModify.forEach(relation => {
-            markAsModified('relations', relation.fid);
-          });
-          
-          setRelations(relations.filter(r => 
-            r.fromTable !== tableToDelete.name && r.toTable !== tableToDelete.name
-          ));
-        }
-        
-        setTables(tables.filter(t => t.fid !== tableId));
-        
-        // Set active table to another one if the active one is deleted
-        if (activeTable === tableId) {
-          const remainingTables = tables.filter(t => t.fid !== tableId);
-          setActiveTable(remainingTables.length > 0 ? remainingTables[0].fid : null);
-        }
-      };
-      
-      // Add a new field to a table
-      const handleAddField = (tableId) => {
-        const table = tables.find(t => t.fid === tableId);
-        if (!table) return;
-        
-        markAsModified('tables', tableId);
-        
-        const newFieldId = Math.max(0, ...table.fields.map(f => f.id)) + 1;
-        let myid = generateUID();
-        setTables(tables.map(table => {
-          if (table.fid === tableId) {
-            return {
-              ...table,
-              fields: [
-                ...table.fields,
-                { id: newFieldId, fid: myid, name: 'new_field', type: 'VARCHAR', length: 255, nullable: true, defaultValue: null }
-              ]
-            };
-          }
-          return table;
-        }));
-      };
-      
-      // Delete a field
-      const handleDeleteField = (tableId, fieldId) => {
-        markAsModified('tables', tableId);
-        markAsModified('fields', `${tableId}_${fieldId}`);
-        
-        setTables(tables.map(table => {
-          if (table.fid === tableId) {
-            return {
-              ...table,
-              fields: table.fields.filter(field => field.fid !== fieldId)
-            };
-          }
-          return table;
-        }));
-      };
-      
-      // Update field properties
-      const handleUpdateField = (tableId, fieldId, property, value) => {
-        markAsModified('tables', tableId);
-        markAsModified('fields', `${tableId}_${fieldId}`);
-        
-        setTables(tables.map(table => {
-          if (table.fid === tableId) {
-            return {
-              ...table,
-              fields: table.fields.map(field => {
-                if (field.fid === fieldId) {
-                  return { ...field, [property]: value };
-                }
-                return field;
-              })
-            };
-          }
-          return table;
-        }));
-      };
-      
-      // Add a new relation
-      const handleAddRelation = (fromTable, fromField, toTable, toField) => {
-        const newId = Math.max(0, ...relations.map(r => r.id)) + 1;
-        let myid = generateUID();
-        const newRelation = {
-          id: newId,
-          fid: myid,
-          fromTable,
-          fromField,
-          toTable,
-          toField
-        };
-        
-        markAsModified('relations', newId);
-        
-        setRelations([...relations, newRelation]);
-        return newRelation;
-      };
-      
-      // Delete a relation
-      const handleDeleteRelation = (relationId) => {
-        markAsModified('relations', relationId);
-        
-        setRelations(relations.filter(r => r.fid !== relationId));
-      };
-  // Generate SQL output 
-  const handleGenerateJson = () => {
-    // Generate the configuration JSON (for reloading the state)
-    const configJson = {
-      tables: tables.map(table => ({
-        id: table.id,
-        fid: table.fid,
-        name: table.name,
-        fields: table.fields.map(field => ({
-          fid: field.fid,
-          id: field.id,
-          name: field.name,
-          type: field.type,
-          length: field.length || null,
-          primaryKey: !!field.primaryKey,
-          nullable: !!field.nullable,
-          defaultValue: field.defaultValue || null
-        }))
-      })),
-      relations: relations.map(relation => ({
-        id: relation.id,
-        fid: relation.fid,
-        fromTable: relation.fromTable,
-        fromField: relation.fromField,
-        toTable: relation.toTable,
-        toField: relation.toField
-      }))
-    };
-    
-    // Generate the transactions JSON
-    const transactions = GenerateTransactionsV2(originalTables, tables, originalRelations, relations);
-    
-    // Combine both outputs
-    const output = {
-      config: configJson,
-      transactions: transactions
-    };
-    SaveTablesData(output).then((newdata) => {
-      console.log("new data:",newdata);
-      var tables1 = newdata["tables"] || [];
-      let relations1 = newdata["relations"] || [];
-      setTables(tables1);
-      setRelations(relations1);
+      if (tables.length > 0 && !activeTable) {
+        setActiveTable(tables[0].fid);
+      }
     });
-    setJsonOutput(JSON.stringify(output, null, 2));
-    setShowSql(true);
+  }, []);
+
+  // Table operations
+  const createTable = (name) => {
+    if (!name.trim()) return;
+    
+    const newTable = {
+      id: Math.max(0, ...tables.map(t => t.id)) + 1,
+      fid: generateUID(),
+      name: name.trim().toLowerCase(),
+      fields: [
+        { id: 1, fid: generateUID(), name: 'id', type: 'SERIAL', primaryKey: true, nullable: false }
+      ]
+    };
+    
+    setTables(prev => [...prev, newTable]);
+    setActiveTable(newTable.fid);
   };
 
-      // Update relation properties
-      const handleUpdateRelation = (relationId, property, value) => {
-        markAsModified('relations', relationId);
-        
-        setRelations(relations.map(relation => {
-          if (relation.fid === relationId) {
-            return { ...relation, [property]: value };
-          }
-          return relation;
-        }));
-      };
+  const deleteTable = (tableId) => {
+    const table = tables.find(t => t.fid === tableId);
+    if (!table) return;
 
-      // Update table name
-      const handleUpdateTableName = (tableId, newName) => {
-        if (!newName.trim()) return;
-        
-        markAsModified('tables', tableId);
-        
-        setTables(tables.map(table => {
-          if (table.fid === tableId) {
-            return { ...table, name: newName.trim().toLowerCase() };
+    // Remove related relations
+    setRelations(prev => prev.filter(r => 
+      r.fromTable !== table.name && r.toTable !== table.name
+    ));
+    
+    setTables(prev => prev.filter(t => t.fid !== tableId));
+    
+    if (activeTable === tableId) {
+      const remaining = tables.filter(t => t.fid !== tableId);
+      setActiveTable(remaining.length > 0 ? remaining[0].fid : null);
+    }
+  };
+
+  // Field operations
+  const addField = (tableId) => {
+    const newField = {
+      id: Date.now(),
+      fid: generateUID(),
+      name: 'new_field',
+      type: 'VARCHAR',
+      length: 255,
+      nullable: true
+    };
+
+    setTables(prev => prev.map(table => 
+      table.fid === tableId 
+        ? { ...table, fields: [...table.fields, newField] }
+        : table
+    ));
+
+    // Auto-open the new field for editing
+    setActiveField(newField.fid);
+  };
+
+  const updateField = (tableId, fieldId, property, value) => {
+    setTables(prev => prev.map(table => 
+      table.fid === tableId 
+        ? {
+            ...table,
+            fields: table.fields.map(field => 
+              field.fid === fieldId 
+                ? { ...field, [property]: value }
+                : field
+            )
           }
-          return table;
-        }));
-      };
-      
-  
+        : table
+    ));
+  };
+
+  const deleteField = (tableId, fieldId) => {
+    setTables(prev => prev.map(table => 
+      table.fid === tableId 
+        ? { ...table, fields: table.fields.filter(f => f.fid !== fieldId) }
+        : table
+    ));
+  };
+
+  // Relation operations
+  const addRelation = (fromTable, fromField, toTable, toField) => {
+    const newRelation = {
+      id: Date.now(),
+      fid: generateUID(),
+      fromTable,
+      fromField,
+      toTable,
+      toField
+    };
+    
+    setRelations(prev => [...prev, newRelation]);
+  };
+
+  const deleteRelation = (relationId) => {
+    setRelations(prev => prev.filter(r => r.fid !== relationId));
+  };
+
+  // Sync operation
+  const handleSync = async () => {
+    const config = { tables, relations };
+    const transactions = GenerateTransactionsV2(originalData.tables, tables, originalData.relations, relations);
+    const output = { config, transactions };
+    
+    try {
+      const result = await SaveTablesData(output);
+      // Update original data to current state after successful sync
+      setOriginalData({ tables: JSON.parse(JSON.stringify(tables)), relations: JSON.parse(JSON.stringify(relations)) });
+      setJsonOutput(JSON.stringify(output, null, 2));
+    } catch (error) {
+      console.error('Sync failed:', error);
+    }
+  };
+
+  const currentTable = tables.find(t => t.fid === activeTable);
+
   return (
-    <div className="flex flex-col h-screen bg-gray-50" style={{"color": "black"}}>
-      <header className="bg-green text-white">
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-indigo-600 text-white p-4">
         <div className="flex items-center justify-between">
-          <div className="w-64">
-          <TablesTab onTableSelect={(tab) => dbViewSignal.value = tab}/>
-          </div>
+          <h1 className="text-xl font-semibold">Table Builder</h1>
           <button 
-            onClick={handleGenerateJson}
+            onClick={handleSync}
             className="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-indigo-50 transition-colors"
-            style={{marginRight: "30px", "backgroundColor":"black", "color": "white"}}
           >
-            sync
+            Sync
           </button>
         </div>
       </header>
-      
-      {/* Main Content */}
+
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
-        <div className="w-64 bg-white shadow-md border-r border-gray-200 p-4">
-          {/* Tables List Component */}
-          <TablesList 
-            tables={tables}
-            activeTable={activeTable}
-            setActiveTable={setActiveTable}
-            onCreateTable={handleCreateTable}
-            onDeleteTable={handleDeleteTable}
-          />
-          
-          {/* Relations Panel Component */}
-          <RelationsPanel 
-            tables={tables}
-            relations={relations}
-            onAddRelation={handleAddRelation}
-            onDeleteRelation={handleDeleteRelation}
-          />
+        {/* Left Sidebar - Made fully scrollable */}
+        <div className="w-64 bg-white shadow-md border-r border-gray-200 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4">
+            <TablesList 
+              tables={tables}
+              activeTable={activeTable}
+              onTableSelect={setActiveTable}
+              onCreateTable={createTable}
+              onDeleteTable={deleteTable}
+            />
+            
+            <div className="mt-6">
+              <RelationsPanel 
+                tables={tables}
+                relations={relations}
+                onAddRelation={addRelation}
+                onDeleteRelation={deleteRelation}
+              />
+            </div>
+          </div>
         </div>
-        
-        {/* Main Content - Table Editor */}
+
+        {/* Main Content */}
         <div className="flex-1 p-6 overflow-auto">
           {currentTable ? (
             <TableEditor
               table={currentTable}
-              onAddField={handleAddField}
-              onUpdateField={handleUpdateField}
-              onDeleteField={handleDeleteField}
+              activeField={activeField}
+              onFieldSelect={setActiveField}
+              onAddField={addField}
+              onUpdateField={updateField}
+              onDeleteField={deleteField}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -349,463 +210,401 @@ export default function TableBuilderV6() {
           )}
         </div>
       </div>
-      
-      {/* SQL Output Modal */}
-      <SqlModal
-        isOpen={showSql}
-        onClose={() => setShowSql(false)}
-        jsonOutput={jsonOutput}
-      />
+
+      {/* SQL Modal */}
+      {showSql && (
+        <SqlModal
+          isOpen={showSql}
+          onClose={() => setShowSql(false)}
+          jsonOutput={jsonOutput}
+        />
+      )}
     </div>
   );
 }
-  
-  function TablesList({ tables, activeTable, setActiveTable, onCreateTable, onDeleteTable }) {
-    const [isCreatingTable, setIsCreatingTable] = useState(false);
-    const [newTableName, setNewTableName] = useState('');
-    
-    const handleCreateTable = () => {
-      if (newTableName.trim()) {
-        onCreateTable(newTableName);
-        setNewTableName('');
-        setIsCreatingTable(false);
-      }
-    };
-    
-    return (
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Tables</h2>
-          <button 
-            onClick={() => setIsCreatingTable(true)}
-            className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
-          >
-            <Plus size={20} />
+
+function TablesList({ tables, activeTable, onTableSelect, onCreateTable, onDeleteTable }) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+
+  const handleCreate = () => {
+    if (newName.trim()) {
+      onCreateTable(newName);
+      setNewName('');
+      setIsCreating(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-medium text-gray-900">Tables</h2>
+        <button 
+          onClick={() => setIsCreating(true)}
+          className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
+        >
+          <Plus size={20} />
+        </button>
+      </div>
+
+      {isCreating && (
+        <div className="mb-4 flex items-center">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Table name"
+            className="flex-1 p-2 border border-gray-300 rounded mr-2 text-sm"
+            autoFocus
+          />
+          <button onClick={handleCreate} className="bg-green-500 text-white p-1 rounded hover:bg-green-600">
+            <Save size={18} />
+          </button>
+          <button onClick={() => setIsCreating(false)} className="ml-1 bg-gray-300 text-gray-700 p-1 rounded hover:bg-gray-400">
+            <X size={18} />
           </button>
         </div>
-        
-        {/* New Table Input */}
-        {isCreatingTable && (
-           <div className="mb-4 flex items-center relative z-20">
-            <input
-              type="text"
-              value={newTableName}
-              onChange={(e) => setNewTableName(e.target.value)}
-              placeholder="Table name"
-              className="flex-1 p-2 border border-gray-300 rounded mr-2"
-            />
-            <button
-              onClick={(e) => {console.log("callled save");e.stopPropagation();handleCreateTable();}}
-              className="bg-green-500 text-white p-1 rounded hover:bg-green-600 transition-colors"
+      )}
 
-            >
-              <Save size={18} />
-            </button>
+      <div className="space-y-1 max-h-64 overflow-y-auto">
+        {tables.map(table => (
+          <div 
+            key={table.fid}
+            className={`flex items-center justify-between p-2 rounded cursor-pointer ${
+              activeTable === table.fid ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-gray-100'
+            }`}
+            onClick={() => onTableSelect(table.fid)}
+          >
+            <div className="flex items-center">
+              <Table size={16} className="mr-2" />
+              <span className="text-sm">{table.name}</span>
+            </div>
             <button
-              onClick={(e) => setIsCreatingTable(false)}
-              className="ml-1 bg-gray-300 text-gray-700 p-1 rounded hover:bg-gray-400 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteTable(table.fid);
+              }}
+              className="text-gray-500 hover:text-red-500 transition-colors"
             >
-              <X size={18} />
+              <Trash2 size={14} />
             </button>
           </div>
-        )}
-        
-        {/* Tables List */}
-        <ul className="space-y-1">
-          {tables.map(table => (
-            <li 
-              key={table.fid}
-              className={`flex items-center justify-between p-2 rounded cursor-pointer ${
-                activeTable === table.fid ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-gray-100'
-              }`}
-              onClick={() => setActiveTable(table.fid)}
-            >
-              <div className="flex items-center">
-                <TableIcon size={16} className="mr-2" />
-                <span>{table.name}</span>
-                {table.isNew && (
-                  <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">New</span>
-                )}
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteTable(table.fid);
-                }}
-                className="text-gray-500 hover:text-red-500 transition-colors"
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RelationsPanel({ tables, relations, onAddRelation, onDeleteRelation }) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [form, setForm] = useState({ fromTable: '', fromField: '', toTable: '', toField: '' });
+
+  const handleAdd = () => {
+    if (form.fromTable && form.fromField && form.toTable && form.toField) {
+      onAddRelation(form.fromTable, form.fromField, form.toTable, form.toField);
+      setForm({ fromTable: '', fromField: '', toTable: '', toField: '' });
+      setIsCreating(false);
+    }
+  };
+
+  const getTableFields = (tableName) => {
+    const table = tables.find(t => t.name === tableName);
+    return table?.fields || [];
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-lg font-medium text-gray-900">Relations</h2>
+        <button 
+          onClick={() => setIsCreating(true)}
+          className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
+          disabled={tables.length < 2}
+        >
+          <Plus size={20} />
+        </button>
+      </div>
+
+      {isCreating && (
+        <div className="bg-indigo-50 p-3 rounded border mb-4 max-h-80 overflow-y-auto">
+          <h3 className="text-sm font-medium mb-3 text-indigo-700">Create Relation</h3>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium mb-1">From Table</label>
+              <select 
+                value={form.fromTable}
+                onChange={(e) => setForm({...form, fromTable: e.target.value, fromField: ''})}
+                className="w-full p-2 text-sm border rounded"
               >
-                <Trash2 size={16} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-  
-  function RelationsPanel({ tables, relations, onAddRelation, onDeleteRelation }) {
-    const [isCreatingRelation, setIsCreatingRelation] = useState(false);
-    const [fromTable, setFromTable] = useState('');
-    const [fromField, setFromField] = useState('');
-    const [toTable, setToTable] = useState('');
-    const [toField, setToField] = useState('');
-    
-    const handleAddRelation = () => {
-      if (fromTable && fromField && toTable && toField) {
-        onAddRelation(fromTable, fromField, toTable, toField);
-        resetForm();
-      }
-    };
-    
-    const resetForm = () => {
-      setFromTable('');
-      setFromField('');
-      setToTable('');
-      setToField('');
-      setIsCreatingRelation(false);
-    };
-    
-    const getTableFields = (tableName) => {
-      const table = tables.find(t => t.name === tableName);
-      return table ? table.fields : [];
-    };
-    
-    return (
-      <div className="mt-6" style={{"height": "600px"}}>
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-medium">Relations</h2>
-          <button 
-            onClick={() => setIsCreatingRelation(true)}
-            className="bg-indigo-600 text-white p-1 rounded hover:bg-indigo-700 transition-colors"
-            disabled={tables.length < 2}
-          >
-            <Plus size={20} />
-          </button>
-        </div>
-        
-        {/* Relation Creator */}
-        {isCreatingRelation && (
-  <div className="flex flex-col h-96 mb-8" style={{"paddingBottom":"30px"}}>
-    <div className="bg-indigo-50 p-4 rounded border border-indigo-100 overflow-y-auto" style={{paddingBottom:"50px"}}>
-      <h3 className="text-sm font-medium mb-3 text-indigo-700">Create Relation</h3>
-      
-      <div className="mb-3">
-        <label className="block text-xs font-medium mb-1 text-gray-600">From Table</label>
-        <select 
-          value={fromTable} 
-          onChange={(e) => {
-            setFromTable(e.target.value);
-            setFromField('');
-          }}
-          className="w-full p-2 text-sm border border-gray-300 rounded mb-2"
-        >
-          <option value="">Select table</option>
-          {tables.map(table => (
-            <option key={table.fid} value={table.name}>{table.name}</option>
-          ))}
-        </select>
-        
-        {fromTable && (
-          <>
-            <label className="block text-xs font-medium mb-1 text-gray-600">From Field</label>
-            <select 
-              value={fromField} 
-              onChange={(e) => setFromField(e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 rounded mb-2"
-            >
-              <option value="">Select field</option>
-              {getTableFields(fromTable).map(field => (
-                <option key={field.fid} value={field.name}>{field.name}</option>
-              ))}
-            </select>
-          </>
-        )}
-      </div>
-      
-      <div className="mb-3">
-        <label className="block text-xs font-medium mb-1 text-gray-600">To Table</label>
-        <select 
-          value={toTable} 
-          onChange={(e) => {
-            setToTable(e.target.value);
-            setToField('');
-          }}
-          className="w-full p-2 text-sm border border-gray-300 rounded mb-2"
-        >
-          <option value="">Select table</option>
-          {tables.map(table => (
-            <option key={table.fid} value={table.name}>{table.name}</option>
-          ))}
-        </select>
-        
-        {toTable && (
-          <>
-            <label className="block text-xs font-medium mb-1 text-gray-600">To Field</label>
-            <select 
-              value={toField} 
-              onChange={(e) => setToField(e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 rounded mb-2"
-            >
-              <option value="">Select field</option>
-              {getTableFields(toTable).map(field => (
-                <option key={field.fid} value={field.name}>{field.name}</option>
-              ))}
-            </select>
-          </>
-        )}
-      </div>
-      
-      <div className="flex space-x-2 mt-4">
-        <button
-          onClick={handleAddRelation}
-          disabled={!fromTable || !fromField || !toTable || !toField}
-          className={`flex-1 py-2 rounded text-sm ${
-            !fromTable || !fromField || !toTable || !toField
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-indigo-600 text-white hover:bg-indigo-700'
-          }`}
-        >
-          Add
-        </button>
-        <button
-          onClick={resetForm}
-          className="flex-1 py-2 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-        
-        {/* Relations List */}
-        <div className="space-y-2 mt-3">
-          {relations.length === 0 ? (
-            <p className="text-sm text-gray-500 italic">No relations defined</p>
-          ) : (
-            relations.map(relation => (
-<div key={relation.fid} className="bg-white border border-gray-200 rounded p-2 shadow-sm">
-  <div className="flex justify-between items-center">
-    <div className="flex items-center overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-      <ArrowRight size={14} className="text-indigo-600 mx-1 flex-shrink-0" />
-      <div className="text-sm whitespace-nowrap overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        <span className="font-medium">{relation.fromTable}</span>
-        <span className="text-gray-500 mx-1">{relation.fromField}</span>
-        <span className="mx-1">→</span>
-        <span className="font-medium">{relation.toTable}</span>
-        <span className="text-gray-500 mx-1">{relation.toField}</span>
-      </div>
-    </div>
-    <button
-      onClick={() => onDeleteRelation(relation.fid)}
-      className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 ml-2"
-    >
-      <Trash2 size={14} />
-    </button>
-  </div>
-  {relation.isNew && (
-    <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded mt-1 inline-block">New</span>
-  )}
-</div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  }
-  
-  // Data types for PostgreSQL
-  const DATA_TYPES = [
-    'VARCHAR', 'TEXT', 'INTEGER', 'BIGINT', 'SMALLINT', 
-    'BOOLEAN', 'DATE', 'TIME', 'TIMESTAMP', 'DECIMAL', 
-    'NUMERIC', 'REAL', 'DOUBLE PRECISION', 'JSON', 'JSONB',
-    'UUID', 'SERIAL', 'BIGSERIAL'
-  ];
-  
-  function TableEditor({ table, onAddField, onUpdateField, onDeleteField }) {
-    const [activeFieldId, setActiveFieldId] = useState(null);
-    
-    const handleFieldClick = (fieldId) => {
-      setActiveFieldId(activeFieldId === fieldId ? null : fieldId);
-    };
-    
-    const handleAddField = () => {
-      const newFieldId = onAddField(table.fid);
-      // Automatically open the new field for editing
-      setActiveFieldId(newFieldId);
-    };
-    
-    return (
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {table.name}
-            {table.isNew && (
-              <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded">New Table</span>
+                <option value="">Select table</option>
+                {tables.map(table => (
+                  <option key={table.fid} value={table.name}>{table.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {form.fromTable && (
+              <div>
+                <label className="block text-xs font-medium mb-1">From Field</label>
+                <select 
+                  value={form.fromField}
+                  onChange={(e) => setForm({...form, fromField: e.target.value})}
+                  className="w-full p-2 text-sm border rounded"
+                >
+                  <option value="">Select field</option>
+                  {getTableFields(form.fromTable).map(field => (
+                    <option key={field.fid} value={field.name}>{field.name}</option>
+                  ))}
+                </select>
+              </div>
             )}
-          </h2>
-          <button
-            onClick={handleAddField}
-            className="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition-colors flex items-center"
-          >
-            <Plus size={18} className="mr-1" />
-            Add Field
-          </button>
-        </div>
-        
-        {/* Fields List */}
-        <div className="space-y-2" style={{"display": "flex", "flexDirection": "column", "alignItems": "center"}}>
-          {table.fields.map(field => (
-            <div key={field.fid} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style={{minWidth:"400px"}}>
-              {/* Field Header - Always visible */}
-              <div 
-                className={`flex items-center justify-between p-3 cursor-pointer ${activeFieldId === field.fid ? 'bg-indigo-50 border-b border-indigo-100' : 'hover:bg-gray-50'}`}
-                onClick={() => handleFieldClick(field.fid)}
+
+            <div>
+              <label className="block text-xs font-medium mb-1">To Table</label>
+              <select 
+                value={form.toTable}
+                onChange={(e) => setForm({...form, toTable: e.target.value, toField: ''})}
+                className="w-full p-2 text-sm border rounded"
               >
-                <div className="flex items-center">
-                  <div className="flex flex-col">
-                    <div className="flex items-center">
-                      <span className="font-medium">{field.name || 'Unnamed Field'}</span>
-                      {field.isNew && (
-                        <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">New</span>
-                      )}
-                      {field.primaryKey && (
-                        <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">PK</span>
-                      )}
-                    </div>
-                    <span className="text-sm text-gray-500"  style={{"fontSize": "0.6em"}}>{field.type}{field.length ? `(${field.length})` : ''}</span>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFieldClick(field.fid);
-                    }}
-                    className="text-gray-400 hover:text-indigo-600 p-1 rounded-full hover:bg-gray-100"
-                  >
-                    {activeFieldId === field.fid ? (
-                      <ChevronUp size={16} />
-                    ) : (
-                      <ChevronDown size={16} />
-                    )}
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteField(table.fid, field.fid);
-                    }}
-                    disabled={field.primaryKey}
-                    className={`ml-1 p-1 rounded-full ${
-                      field.primaryKey 
-                        ? 'text-gray-300 cursor-not-allowed' 
-                        : 'text-gray-400 hover:text-red-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                <option value="">Select table</option>
+                {tables.map(table => (
+                  <option key={table.fid} value={table.name}>{table.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {form.toTable && (
+              <div>
+                <label className="block text-xs font-medium mb-1">To Field</label>
+                <select 
+                  value={form.toField}
+                  onChange={(e) => setForm({...form, toField: e.target.value})}
+                  className="w-full p-2 text-sm border rounded"
+                >
+                  <option value="">Select field</option>
+                  {getTableFields(form.toTable).map(field => (
+                    <option key={field.fid} value={field.name}>{field.name}</option>
+                  ))}
+                </select>
               </div>
-              
-              {/* Field Details - Only visible when active */}
-              {activeFieldId === field.fid && (
-                <div className="p-4 bg-white border-t border-gray-100">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                      <input
-                        type="text"
-                        value={field.name || ''}
-                        onChange={(e) => onUpdateField(table.fid, field.fid, 'name', e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded"
-                        placeholder="Field name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                      <select
-                        value={field.type}
-                        onChange={(e) => onUpdateField(table.fid, field.fid, 'type', e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded"
-                      >
-                        {DATA_TYPES.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                    </div>
-                    
-                    {['VARCHAR', 'CHAR', 'DECIMAL', 'NUMERIC'].includes(field.type) && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Length/Precision</label>
-                        <input
-                          type="number"
-                          value={field.length || ''}
-                          onChange={(e) => onUpdateField(table.fid, field.fid, 'length', e.target.value ? parseInt(e.target.value) : null)}
-                          className="w-full p-2 border border-gray-300 rounded"
-                          placeholder="Length"
-                        />
-                      </div>
-                    )}
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Default Value</label>
-                      <input
-                        type="text"
-                        value={field.defaultValue || ''}
-                        onChange={(e) => onUpdateField(table.fid, field.fid, 'defaultValue', e.target.value || null)}
-                        className="w-full p-2 border border-gray-300 rounded"
-                        placeholder="Default value"
-                      />
-                    </div>
-                    
-                    <div className="col-span-2 flex space-x-6">
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={field.primaryKey || false}
-                          onChange={(e) => onUpdateField(table.fid, field.fid, 'primaryKey', e.target.checked)}
-                          className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Primary Key</span>
-                      </label>
-                      
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={!field.nullable}
-                          onChange={(e) => onUpdateField(table.fid, field.fid, 'nullable', !e.target.checked)}
-                          className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Required</span>
-                      </label>
-                    </div>
-                  </div>
+            )}
+
+            <div className="flex space-x-2">
+              <button
+                onClick={handleAdd}
+                disabled={!form.fromTable || !form.fromField || !form.toTable || !form.toField}
+                className="flex-1 py-2 rounded text-sm bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-gray-300"
+              >
+                Add
+              </button>
+              <button
+                onClick={() => setIsCreating(false)}
+                className="flex-1 py-2 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2 max-h-60 overflow-y-auto">
+        {relations.length === 0 ? (
+          <p className="text-sm text-gray-500 italic">No relations defined</p>
+        ) : (
+          relations.map(relation => (
+            <div key={relation.fid} className="bg-white border rounded p-2 shadow-sm">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center text-xs">
+                  <span className="font-medium">{relation.fromTable}</span>
+                  <span className="text-gray-500 mx-1">.{relation.fromField}</span>
+                  <ArrowRight size={12} className="mx-1" />
+                  <span className="font-medium">{relation.toTable}</span>
+                  <span className="text-gray-500 mx-1">.{relation.toField}</span>
                 </div>
+                <button
+                  onClick={() => onDeleteRelation(relation.fid)}
+                  className="text-gray-400 hover:text-red-500"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TableEditor({ table, activeField, onFieldSelect, onAddField, onUpdateField, onDeleteField }) {
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">{table.name}</h2>
+        <button
+          onClick={() => onAddField(table.fid)}
+          className="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition-colors flex items-center"
+        >
+          <Plus size={18} className="mr-1" />
+          Add Field
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {table.fields.map(field => (
+          <FieldEditor
+            key={field.fid}
+            field={field}
+            tableId={table.fid}
+            isActive={activeField === field.fid}
+            onToggle={() => onFieldSelect(activeField === field.fid ? null : field.fid)}
+            onUpdate={onUpdateField}
+            onDelete={onDeleteField}
+          />
+        ))}
+
+        {table.fields.length === 0 && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+            <p className="text-gray-500">No fields defined yet. Click "Add Field" to create one.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FieldEditor({ field, tableId, isActive, onToggle, onUpdate, onDelete }) {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div 
+        className={`flex items-center justify-between p-3 cursor-pointer ${
+          isActive ? 'bg-indigo-50 border-b border-indigo-100' : 'hover:bg-gray-50'
+        }`}
+        onClick={onToggle}
+      >
+        <div className="flex items-center">
+          <div>
+            <div className="flex items-center">
+              <span className="font-medium">{field.name || 'Unnamed Field'}</span>
+              {field.primaryKey && (
+                <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">PK</span>
               )}
             </div>
-          ))}
-          
-          {table.fields.length === 0 && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-              <p className="text-gray-500">No fields defined yet. Click "Add Field" to create one.</p>
-            </div>
-          )}
+            <span className="text-xs text-gray-500">
+              {field.type}{field.length ? `(${field.length})` : ''}
+            </span>
+          </div>
+        </div>
+        
+        <div className="flex items-center">
+          <button className="text-gray-400 hover:text-indigo-600 p-1">
+            {isActive ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(tableId, field.fid);
+            }}
+            disabled={field.primaryKey}
+            className={`ml-1 p-1 rounded ${
+              field.primaryKey 
+                ? 'text-gray-300 cursor-not-allowed' 
+                : 'text-gray-400 hover:text-red-600'
+            }`}
+          >
+            <Trash2 size={14} />
+          </button>
         </div>
       </div>
-    );
-  }
+
+      {isActive && (
+        <div className="p-4 bg-white border-t border-gray-100">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={field.name || ''}
+                onChange={(e) => onUpdate(tableId, field.fid, 'name', e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+                placeholder="Field name"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select
+                value={field.type}
+                onChange={(e) => onUpdate(tableId, field.fid, 'type', e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+              >
+                {DATA_TYPES.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+
+            {['VARCHAR', 'CHAR', 'DECIMAL', 'NUMERIC'].includes(field.type) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Length</label>
+                <input
+                  type="number"
+                  value={field.length || ''}
+                  onChange={(e) => onUpdate(tableId, field.fid, 'length', e.target.value ? parseInt(e.target.value) : null)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Default Value</label>
+              <input
+                type="text"
+                value={field.defaultValue || ''}
+                onChange={(e) => onUpdate(tableId, field.fid, 'defaultValue', e.target.value || null)}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+
+            <div className="col-span-2 flex space-x-6">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={field.primaryKey || false}
+                  onChange={(e) => onUpdate(tableId, field.fid, 'primaryKey', e.target.checked)}
+                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                />
+                <span className="ml-2 text-sm text-gray-700">Primary Key</span>
+              </label>
+              
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={!field.nullable}
+                  onChange={(e) => onUpdate(tableId, field.fid, 'nullable', !e.target.checked)}
+                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                />
+                <span className="ml-2 text-gray-700">Required</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SqlModal({ isOpen, onClose, jsonOutput }) {
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-auto">
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-medium">JSON Output</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={24} />
           </button>
         </div>
