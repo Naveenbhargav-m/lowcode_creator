@@ -127,7 +127,6 @@ function SetCurrentScreen() {
   }
   let newElements = {};
   for(const key in elements) {
-    let val = elements[key].value;
     newElements[key] = signal({...elements[key]});
   }
   localStorage.setItem("screen_config",JSON.stringify(screens));

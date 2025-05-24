@@ -44,6 +44,36 @@ function RenderElement(item , dropCallBack, activeSignal, viewType, ElementsMap)
   return renderPrimitiveElement(item, activeSignal);
 }
 
+
+
+
+function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHolder , buttonLabel, buttonCallBack }) {
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between", // Ensures spacing
+      width: "100%",
+      padding: "10px"
+    }}>
+      {/* Centered IconGroup */}
+      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+        <IconGroup names={iconNames} onChange={onIconChange} />
+      </div>
+  
+      {/* Right-Aligned Button Component */}
+      <div style={{ marginLeft: "auto" }}>
+      <CreateFormButton 
+        formLabel={formLabel} 
+        placeHolder={placeHolder} 
+        buttonLabel={buttonLabel} 
+        callback={buttonCallBack}/>
+      </div>
+    </div>
+  );
+}
+
+
 function ScreenBuilderArea() {
   return (
   <div>
@@ -180,70 +210,108 @@ function MobileView() {
 function DesktopView() {
   let curScreen = activeScreen.value;
   let style = {};
-  if(curScreen !== "" && curScreen !== undefined) {
+  let outerDivStyle = {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#f9f9f9",
+    border: "1px solid #e0e0e0",
+    overflow: "auto",
+    padding: "10px",
+    scrollbarWidth: "none", // For Firefox
+    msOverflowStyle: "none", // For Internet Explorer and Edge
+  };
+
+  if (curScreen !== "" && curScreen !== undefined) {
     console.log("screen styles:", curScreen);
     style = screens[curScreen]["desktop_style"];
   }
+
+  // Reactive: Compute items from `screenElements` - Same as MobileView
+  const items = useSignal([]);
+  useEffect(() => {
+    console.log("Desktop rerendering:");
+    const elementsArray = Object.values(screenElements);
+    const filteredItems = elementsArray.filter((item) => !item.value.parent);
+    const sortedItems = filteredItems.sort((a, b) => {
+                          const orderA = a.value.order ?? Infinity;
+                          const orderB = b.value.order ?? Infinity;
+                          return orderA - orderB;});
+    console.log("Desktop sorted Items before rendering:", sortedItems);
+    items.value = sortedItems;
+    screenElementAdded.value = generateUID();
+  }, [screenElements, screenElementsSorted.value]);
+
+  let sortableItems = useComputed(() => items.value.map((item) => ({
+    id: item.value.id,
+    name: item.value.title,
+    style: item.value.style || {},
+  })));
+
+  function SortItems(items, newItems) {
+    const itemMap = new Map(items.map((item) => [item.value.id, item]));
+    let sortedItems = newItems.map(({ id }) => itemMap.get(id)).filter(Boolean);
+    console.log("Desktop sorted Items after first sort:", sortedItems);
+    return sortedItems;
+  }
+
+  function SetSortedItems(sortedItems) {
+    console.log("Desktop set sorted Items:", sortedItems);
+    let updatedItems = [];
+    for(var i=0;i<sortedItems.length;i++) {
+      let cur = sortedItems[i];
+      let id = cur.value["id"]
+      cur.value["order"] = i;
+      screenElements[id].value = {...cur.value};
+      screens[curScreen][screenViewKey] = screenElements;
+      screens[curScreen]["_change_type"] = screens[curScreen]["_change_type"] || "update";
+      updatedItems.push(cur);
+    }
+    console.log("Desktop set sorted items before updation:", updatedItems);
+    items.value = [...updatedItems];
+  }
+
   return (
     <DesktopMockup>
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        backgroundColor: "#f9f9f9",
-        border: "1px solid #e0e0e0",
-        overflow: "auto",
-        padding: "10px",
-        scrollbarWidth: "none", // For Firefox
-        msOverflowStyle: "none", // For Internet Explorer and Edge
-      }}
-      className="scrollbar-hide" // Additional class to target WebKit browsers
-    >
-      <Drop
-        onDrop={(data) => {handleDrop(data);}}
-        dropElementData={{ element: "screen" }}
-        wrapParent={true}
-      >
-        <div style={{...style}}>
-        {screenElementAdded.value.length > 0 && Object.values(screenElements).map((item, ind) => {
-              if (!item.value.parent) {
-                return <div>{RenderElement(item.peek(),handleDrop, activeElement, "screen", screenElements)}</div>;
-              }
-        })}
-        </div>
-      </Drop>
+      <div style={{ ...outerDivStyle }} className="scrollbar-hide">
+        <Drop
+          onDrop={(data) => {handleDrop(data);}}
+          dropElementData={{ element: "screen" }}
+          wrapParent={true}
+        >
+          <div style={{...style}} onClick={() => (activeElement.value = "screen")}>
+            <ReactSortable
+              list={sortableItems.value}
+              setList={(newList) => {
+                let temp = [...SortItems(items.value, newList)];
+                SetSortedItems(temp);
+              }}
+              group="elements"
+              animation={150}
+              ghostClass="element-ghost"
+            >
+              {screenElementAdded.value.length > 0 &&
+                items.value.map((item) => {
+                  if (!item.value.parent) {
+                    console.log("Desktop rendering after removal:", screenElementAdded.value); 
+                    return (<div key={item.value.id}>
+                      <SelectableComponent 
+                          onChick={(e,id) => {
+                          console.log("Desktop clicked me:", id);}}
+                          onRemove={(e,id) => {DeleteScreenElement(id)}}
+                          id={item.value["id"]}
+                          isSelected={activeElement.value === item.value.id}
+                          >
+                      {RenderElement(item.peek(), handleDrop, activeElement, "screen", screenElements)}
+                      </SelectableComponent>
+                      </div>);
+                  }
+                })}
+            </ReactSortable>
+          </div>
+        </Drop>
       </div>
-      </DesktopMockup>
-  );
-}
-
-
-
-
-function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHolder , buttonLabel, buttonCallBack }) {
-  return (
-    <div style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between", // Ensures spacing
-      width: "100%",
-      padding: "10px"
-    }}>
-      {/* Centered IconGroup */}
-      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-        <IconGroup names={iconNames} onChange={onIconChange} />
-      </div>
-  
-      {/* Right-Aligned Button Component */}
-      <div style={{ marginLeft: "auto" }}>
-      <CreateFormButton 
-        formLabel={formLabel} 
-        placeHolder={placeHolder} 
-        buttonLabel={buttonLabel} 
-        callback={buttonCallBack}/>
-      </div>
-    </div>
+    </DesktopMockup>
   );
 }
 
