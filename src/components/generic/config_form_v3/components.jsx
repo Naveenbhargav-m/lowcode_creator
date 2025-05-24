@@ -1744,3 +1744,456 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
     </div>
   );
 };
+
+
+
+import { ChevronRight, Copy, Move, Code, Eye } from 'lucide-react';
+
+// Action configurations - easily extensible
+const ACTION_CONFIGS = {
+  trigger_workflow: {
+    label: 'Trigger Workflow',
+    fields: [
+      { key: 'workflowId', label: 'Workflow ID', type: 'text', placeholder: 'workflow-123' },
+      { key: 'parameters', label: 'Parameters', type: 'json', placeholder: '{"key": "value"}' }
+    ]
+  },
+  update_state: {
+    label: 'Update State',
+    fields: [
+      { key: 'stateKey', label: 'State Key', type: 'text', placeholder: 'user.name' },
+      { key: 'value', label: 'Value', type: 'text', placeholder: 'New value' }
+    ]
+  },
+  show_form: {
+    label: 'Show Form',
+    fields: [
+      { key: 'formId', label: 'Form ID', type: 'text', placeholder: 'user-form' },
+      { key: 'modal', label: 'Modal', type: 'select', options: [
+        { value: false, label: 'Inline' },
+        { value: true, label: 'Modal' }
+      ]}
+    ]
+  },
+  navigate: {
+    label: 'Navigate',
+    fields: [
+      { key: 'url', label: 'URL', type: 'text', placeholder: '/dashboard' },
+      { key: 'target', label: 'Target', type: 'select', options: [
+        { value: '_self', label: 'Same Window' },
+        { value: '_blank', label: 'New Window' }
+      ]}
+    ]
+  },
+  api_call: {
+    label: 'API Call',
+    fields: [
+      { key: 'endpoint', label: 'Endpoint', type: 'text', placeholder: '/api/users' },
+      { key: 'method', label: 'Method', type: 'select', options: [
+        { value: 'GET', label: 'GET' },
+        { value: 'POST', label: 'POST' },
+        { value: 'PUT', label: 'PUT' },
+        { value: 'DELETE', label: 'DELETE' }
+      ]},
+      { key: 'body', label: 'Body', type: 'json', placeholder: '{"data": "value"}' }
+    ]
+  }
+};
+
+// Utility function to safely get nested values
+const safeGet = (obj, path, defaultValue = null) => {
+  try {
+    return path.split('.').reduce((acc, key) => acc?.[key], obj) ?? defaultValue;
+  } catch {
+    return defaultValue;
+  }
+};
+
+// Compact field components
+const CompactTextField = ({ field, value, onChange }) => (
+  <div className="mb-2">
+    <label className="block text-xs font-medium text-gray-600 mb-1">{field.label}</label>
+    <input
+      type="text"
+      value={value || ''}
+      onChange={(e) => onChange(field.key, e.target.value)}
+      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
+      placeholder={field.placeholder}
+    />
+  </div>
+);
+
+const CompactSelectField = ({ field, value, onChange }) => (
+  <div className="mb-2">
+    <label className="block text-xs font-medium text-gray-600 mb-1">{field.label}</label>
+    <select
+      value={value || ''}
+      onChange={(e) => onChange(field.key, e.target.value === 'true' ? true : e.target.value === 'false' ? false : e.target.value)}
+      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
+    >
+      {field.options?.map(option => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+const CompactJsonField = ({ field, value, onChange }) => (
+  <div className="mb-2">
+    <label className="block text-xs font-medium text-gray-600 mb-1">{field.label}</label>
+    <textarea
+      value={value || ''}
+      onChange={(e) => onChange(field.key, e.target.value)}
+      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400 font-mono"
+      rows={2}
+      placeholder={field.placeholder}
+    />
+  </div>
+);
+
+// Ultra-compact collapsible section
+const CompactSection = ({ title, isOpen, onToggle, children, actions, className = "" }) => (
+  <div className={`border border-gray-200 rounded mb-1 bg-white ${className}`}>
+    <div 
+      className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50 min-h-[32px]"
+      onClick={onToggle}
+    >
+      <div className="flex items-center space-x-1 flex-1 min-w-0">
+        {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        <span className="text-xs font-medium text-gray-800 truncate">{title}</span>
+      </div>
+      {actions && (
+        <div className="flex items-center space-x-1 ml-1" onClick={(e) => e.stopPropagation()}>
+          {actions}
+        </div>
+      )}
+    </div>
+    {isOpen && (
+      <div className="px-2 pb-2 border-t border-gray-100 bg-gray-50">
+        {children}
+      </div>
+    )}
+  </div>
+);
+
+// Compact action item
+const CompactActionItem = ({ item = {}, index, onUpdate, onRemove, onDuplicate, onMove, canMoveUp, canMoveDown }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const actionConfig = ACTION_CONFIGS[item.type];
+
+  const handleTypeChange = (key, newType) => {
+    const newItem = { type: newType, description: item.description || '' };
+    
+    if (ACTION_CONFIGS[newType]) {
+      ACTION_CONFIGS[newType].fields.forEach(field => {
+        if (field.options && field.options.length > 0) {
+          newItem[field.key] = field.options[0].value;
+        } else {
+          newItem[field.key] = '';
+        }
+      });
+    }
+    
+    onUpdate(newItem);
+  };
+
+  const handleFieldChange = (key, value) => {
+    onUpdate({ [key]: value });
+  };
+
+  const renderField = (fieldConfig) => {
+    const fieldValue = item[fieldConfig.key];
+    
+    switch (fieldConfig.type) {
+      case 'select':
+        return <CompactSelectField field={fieldConfig} value={fieldValue} onChange={handleFieldChange} />;
+      case 'json':
+        return <CompactJsonField field={fieldConfig} value={fieldValue} onChange={handleFieldChange} />;
+      default:
+        return <CompactTextField field={fieldConfig} value={fieldValue} onChange={handleFieldChange} />;
+    }
+  };
+
+  return (
+    <CompactSection
+      title={`${index + 1}. ${actionConfig?.label || item.type || 'New Action'}`}
+      isOpen={isExpanded}
+      onToggle={() => setIsExpanded(!isExpanded)}
+      actions={
+        <div className="flex space-x-1">
+          <button
+            onClick={() => onMove(index, 'up')}
+            disabled={!canMoveUp}
+            className="text-gray-400 hover:text-gray-600 disabled:opacity-30 p-1"
+            title="Move Up"
+          >
+            <Move size={10} />
+          </button>
+          <button
+            onClick={() => onDuplicate()}
+            className="text-gray-500 hover:text-gray-700 p-1"
+            title="Duplicate"
+          >
+            <Copy size={10} />
+          </button>
+          <button
+            onClick={() => onRemove()}
+            className="text-red-500 hover:text-red-700 p-1"
+            title="Remove"
+          >
+            <Trash2 size={10} />
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-2">
+        <CompactSelectField
+          field={{
+            key: 'type',
+            label: 'Type',
+            options: [
+              { value: '', label: 'Select Type' },
+              ...Object.entries(ACTION_CONFIGS).map(([value, config]) => ({
+                value,
+                label: config.label
+              }))
+            ]
+          }}
+          value={item.type}
+          onChange={handleTypeChange}
+        />
+        
+        {actionConfig?.fields?.map(fieldConfig => (
+          <div key={fieldConfig.key}>
+            {renderField(fieldConfig)}
+          </div>
+        ))}
+        
+        <CompactTextField
+          field={{ key: 'description', label: 'Description', placeholder: 'Action description' }}
+          value={item.description}
+          onChange={handleFieldChange}
+        />
+      </div>
+    </CompactSection>
+  );
+};
+
+// Compact actions list
+const CompactActionsList = ({ actions = [], onChange }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const addItem = () => {
+    const newItem = { type: '', description: '' };
+    onChange([...actions, newItem]);
+  };
+
+  const updateItem = (index, updates) => {
+    const newActions = [...actions];
+    newActions[index] = { ...newActions[index], ...updates };
+    onChange(newActions);
+  };
+
+  const removeItem = (index) => {
+    onChange(actions.filter((_, i) => i !== index));
+  };
+
+  const duplicateItem = (index) => {
+    const newActions = [...actions];
+    newActions.splice(index + 1, 0, { ...actions[index] });
+    onChange(newActions);
+  };
+
+  const moveItem = (index, direction) => {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === actions.length - 1)) return;
+    
+    const newActions = [...actions];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    [newActions[index], newActions[targetIndex]] = [newActions[targetIndex], newActions[index]];
+    onChange(newActions);
+  };
+
+  return (
+    <CompactSection
+      title={`Actions (${actions.length})`}
+      isOpen={isExpanded}
+      onToggle={() => setIsExpanded(!isExpanded)}
+      actions={
+        <button
+          onClick={addItem}
+          className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          <Plus size={10} />
+          <span>Add</span>
+        </button>
+      }
+    >
+      {actions.length === 0 ? (
+        <div className="text-center py-2 text-xs text-gray-500">
+          No actions. Click "Add" to create one.
+        </div>
+      ) : (
+        <div className="space-y-1">
+          {actions.map((item, index) => (
+            <CompactActionItem
+              key={index}
+              item={item}
+              index={index}
+              onUpdate={(updates) => updateItem(index, updates)}
+              onRemove={() => removeItem(index)}
+              onDuplicate={() => duplicateItem(index)}
+              onMove={moveItem}
+              canMoveUp={index > 0}
+              canMoveDown={index < actions.length - 1}
+            />
+          ))}
+        </div>
+      )}
+    </CompactSection>
+  );
+};
+
+// Compact event config
+const CompactEventConfig = ({ eventName, config = {}, onChange }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const updateActions = (actions) => {
+    onChange(eventName, { ...config, actions });
+  };
+
+  const updateCode = (code) => {
+    onChange(eventName, { ...config, code });
+  };
+
+  const actions = config.actions || [];
+  const code = config.code || '';
+
+  return (
+    <CompactSection
+      title={`${eventName.replace(/([A-Z])/g, ' $1').trim()} (${actions.length})`}
+      isOpen={isExpanded}
+      onToggle={() => setIsExpanded(!isExpanded)}
+    >
+      <div className="space-y-2">
+        <CompactActionsList
+          actions={actions}
+          onChange={updateActions}
+        />
+        
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Custom Code</label>
+          <textarea
+            value={code}
+            onChange={(e) => updateCode(e.target.value)}
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400 font-mono"
+            rows={3}
+            placeholder="// Custom JavaScript code"
+          />
+        </div>
+      </div>
+    </CompactSection>
+  );
+};
+
+// Main compact component
+export const ActionsConfig = ({ configs = {}, onChange }) => {
+  const [isJsonMode, setIsJsonMode] = useState(false);
+  const [jsonValue, setJsonValue] = useState('');
+  const [internalConfigs, setInternalConfigs] = useState({});
+
+  // Initialize internal state from props
+  useEffect(() => {
+    const initialConfigs = configs && Object.keys(configs).length > 0 
+      ? configs 
+      : {
+          onClick: { actions: [], code: '' },
+          onHover: { actions: [], code: '' },
+          onDoubleClick: { actions: [], code: '' },
+          valueCode: { actions: [], code: '' }
+        };
+    setInternalConfigs(initialConfigs);
+  }, []);
+
+  // Sync JSON view with internal state
+  useEffect(() => {
+    try {
+      setJsonValue(JSON.stringify(internalConfigs, null, 2));
+    } catch (error) {
+      setJsonValue('{}');
+    }
+  }, [internalConfigs]);
+
+  const handleConfigChange = (eventName, eventConfig) => {
+    const newConfigs = { ...internalConfigs, [eventName]: eventConfig };
+    setInternalConfigs(newConfigs);
+    onChange?.(newConfigs);
+  };
+
+  const handleJsonChange = (value) => {
+    setJsonValue(value);
+    try {
+      const parsed = JSON.parse(value);
+      const newConfigs = parsed || {};
+      setInternalConfigs(newConfigs);
+      onChange?.(newConfigs);
+    } catch (error) {
+      // Invalid JSON, don't update
+    }
+  };
+
+  const currentEvents = Object.keys(internalConfigs);
+
+  return (
+    <div className="w-full max-w-full">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <h3 className="text-sm font-semibold text-gray-800">Actions</h3>
+        <button
+          onClick={() => setIsJsonMode(!isJsonMode)}
+          className="flex items-center space-x-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs font-medium text-gray-600"
+        >
+          {isJsonMode ? <Eye size={12} /> : <Code size={12} />}
+          <span>{isJsonMode ? 'Form' : 'JSON'}</span>
+        </button>
+      </div>
+
+      {isJsonMode ? (
+        <textarea
+          value={jsonValue}
+          onChange={(e) => handleJsonChange(e.target.value)}
+          className="w-full h-64 px-2 py-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400 font-mono"
+          placeholder="{}"
+        />
+      ) : (
+        <div className="space-y-1">
+          {currentEvents.map((eventName) => {
+            const eventConfig = internalConfigs[eventName] || { actions: [], code: '' };
+            return (
+              <CompactEventConfig
+                key={eventName}
+                eventName={eventName}
+                config={eventConfig}
+                onChange={handleConfigChange}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Simple demo - testing with just console.log callback
+export default function Demo() {
+  return (
+    <div className="p-4 max-w-md mx-auto">
+      <ActionsConfig 
+        configs={{}} 
+        onChange={(newConfigs) => {
+          console.log('Actions updated:', newConfigs);
+        }} 
+      />
+    </div>
+  );
+}

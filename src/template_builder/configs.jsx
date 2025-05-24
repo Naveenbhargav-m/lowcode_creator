@@ -106,210 +106,13 @@ export const TemplateElementConfigFormSchema = {
                 labelLabel: 'Value'
               }
     },
-    
-    // Event handlers - onClick
     {
-      id: 'configs.onClick.actions',
-      type: 'array',
-      label: 'Click Actions',
-      path: 'configs.onClick',
-      itemTemplate: {
-        type: { 
-          type: 'select', 
-          label: 'Action Type',
-          options: [
-            { value: 'navigate', label: 'Navigate' },
-            { value: 'setState', label: 'Set State' },
-            { value: 'apiCall', label: 'API Call' },
-            { value: 'showModal', label: 'Show Modal' },
-            { value: 'custom', label: 'Custom' }
-          ]
-        },
-        target: { type: 'text', label: 'Target/Parameter' },
-        value: { type: 'text', label: 'Value' }
-      }
-    },
-    {
-      id: 'configs.onClick.code',
-      type: 'text',
-      label: 'Click Custom Code',
-      placeholder: 'console.log("clicked");',
-      path: 'configs.onClick',
-    },
-    
-    // Event handlers - onDoubleClick
-    {
-      id: 'configs.onDoubleClick.actions',
-      type: 'array',
-      label: 'Double Click Actions',
-      path: 'configs.onDoubleClick',
-      itemTemplate: {
-        type: { 
-          type: 'select', 
-          label: 'Action Type',
-          options: [
-            { value: 'navigate', label: 'Navigate' },
-            { value: 'setState', label: 'Set State' },
-            { value: 'apiCall', label: 'API Call' },
-            { value: 'showModal', label: 'Show Modal' },
-            { value: 'custom', label: 'Custom' }
-          ]
-        },
-        target: { type: 'text', label: 'Target/Parameter' },
-        value: { type: 'text', label: 'Value' }
-      }
-    },
-    {
-      id: 'configs.onDoubleClick.code',
-      type: 'text',
-      label: 'Double Click Custom Code',
-      path: 'configs.onDoubleClick',
-    },
-    
-    // Event handlers - onHover
-    {
-      id: 'configs.onHover.actions',
-      type: 'array',
-      label: 'Hover Actions',
-      path: 'configs.onHover',
-      itemTemplate: {
-        type: { 
-          type: 'select', 
-          label: 'Action Type',
-          options: [
-            { value: 'navigate', label: 'Navigate' },
-            { value: 'setState', label: 'Set State' },
-            { value: 'apiCall', label: 'API Call' },
-            { value: 'showModal', label: 'Show Modal' },
-            { value: 'custom', label: 'Custom' }
-          ]
-        },
-        target: { type: 'text', label: 'Target/Parameter' },
-        value: { type: 'text', label: 'Value' }
-      }
-    },
-    {
-      id: 'configs.onHover.code',
-      type: 'text',
-      label: 'Hover Custom Code',
-      path: 'configs.onHover',
-    },
-    
-    // Event handlers - onHoverEnter
-    {
-      id: 'configs.onHoverEnter.actions',
-      type: 'array',
-      label: 'Hover Enter Actions',
-      path: 'configs.onHoverEnter',
-      itemTemplate: {
-        type: { 
-          type: 'select', 
-          label: 'Action Type',
-          options: [
-            { value: 'navigate', label: 'Navigate' },
-            { value: 'setState', label: 'Set State' },
-            { value: 'apiCall', label: 'API Call' },
-            { value: 'showModal', label: 'Show Modal' },
-            { value: 'custom', label: 'Custom' }
-          ]
-        },
-        target: { type: 'text', label: 'Target/Parameter' },
-        value: { type: 'text', label: 'Value' }
-      }
-    },
-    {
-      id: 'configs.onHoverEnter.code',
-      type: 'text',
-      label: 'Hover Enter Custom Code',
-      path: 'configs.onHoverEnter',
-    },
-    
-    // Event handlers - onHoverLeave
-    {
-      id: 'configs.onHoverLeave.actions',
-      type: 'array',
-      label: 'Hover Leave Actions',
-      path: 'configs.onHoverLeave',
-      itemTemplate: {
-        type: { 
-          type: 'select', 
-          label: 'Action Type',
-          options: [
-            { value: 'navigate', label: 'Navigate' },
-            { value: 'setState', label: 'Set State' },
-            { value: 'apiCall', label: 'API Call' },
-            { value: 'showModal', label: 'Show Modal' },
-            { value: 'custom', label: 'Custom' }
-          ]
-        },
-        target: { type: 'text', label: 'Target/Parameter' },
-        value: { type: 'text', label: 'Value' }
-      }
-    },
-    {
-      id: 'configs.onHoverLeave.code',
-      type: 'text',
-      label: 'Hover Leave Custom Code',
-      path: 'configs.onHoverLeave',
-    },
-    
-    // Value and Children Code
-    {
-      id: 'configs.valueCode.actions',
-      type: 'array',
-      label: 'Value Code Actions',
-      path: 'configs.valueCode',
-      itemTemplate: {
-        type: { 
-          type: 'select', 
-          label: 'Action Type',
-          options: [
-            { value: 'transform', label: 'Transform Value' },
-            { value: 'validate', label: 'Validate' },
-            { value: 'format', label: 'Format' },
-            { value: 'custom', label: 'Custom' }
-          ]
-        },
-        target: { type: 'text', label: 'Target/Parameter' },
-        value: { type: 'text', label: 'Value' }
-      }
-    },
-    {
-      id: 'configs.valueCode.code',
-      type: 'text',
-      label: 'Value Custom Code',
-      placeholder: 'return value;',
-      path: 'configs.valueCode',
-    },
-    
-    {
-      id: 'configs.childrenCode.actions',
-      type: 'array',
-      label: 'Children Code Actions',
-      path: 'configs.childrenCode',
-      itemTemplate: {
-        type: { 
-          type: 'select', 
-          label: 'Action Type',
-          options: [
-            { value: 'render', label: 'Render Children' },
-            { value: 'transform', label: 'Transform' },
-            { value: 'filter', label: 'Filter' },
-            { value: 'custom', label: 'Custom' }
-          ]
-        },
-        target: { type: 'text', label: 'Target/Parameter' },
-        value: { type: 'text', label: 'Value' }
-      }
-    },
-    {
-      id: 'configs.childrenCode.code',
-      type: 'text',
-      label: 'Children Custom Code',
-      placeholder: 'return children;',
-      path: 'configs.childrenCode',
+      "id":"configs",
+      "type": "actions_config",
+      "path": "configs",
+      "label": "Actions"
     }
-  ],
+],
   
   // Section definitions
   sections: [
@@ -338,36 +141,9 @@ export const TemplateElementConfigFormSchema = {
       ]
     },
     {
-      id: 'click-events',
-      title: 'Click Events',
-      fieldIds: [
-        'configs.onClick.actions',
-        'configs.onClick.code',
-        'configs.onDoubleClick.actions',
-        'configs.onDoubleClick.code'
-      ]
-    },
-    {
-      id: 'hover-events',
-      title: 'Hover Events',
-      fieldIds: [
-        'configs.onHover.actions',
-        'configs.onHover.code',
-        'configs.onHoverEnter.actions',
-        'configs.onHoverEnter.code',
-        'configs.onHoverLeave.actions',
-        'configs.onHoverLeave.code'
-      ]
-    },
-    {
-      id: 'code-handlers',
-      title: 'Code Handlers',
-      fieldIds: [
-        'configs.valueCode.actions',
-        'configs.valueCode.code',
-        'configs.childrenCode.actions',
-        'configs.childrenCode.code'
-      ]
+      "id": "actions",
+      "title": "actions configs",
+      "fieldIds": ["configs"],
     }
   ],
   
@@ -379,15 +155,10 @@ export const TemplateElementConfigFormSchema = {
       sectionIds: ['basic', "options",'style-section']
     },
     {
-      id: 'events',
-      title: 'Events',
-      sectionIds: ['click-events', 'hover-events']
-    },
-    {
       id: 'advanced',
       title: 'Advanced',
-      sectionIds: ['code-handlers']
-    }
+      sectionIds: ['actions']
+    },
   ],
   
   // Buttons

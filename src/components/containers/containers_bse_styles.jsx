@@ -168,13 +168,15 @@ const carousel_base_style = {
         "border":"1px solid black",
         "borderRadius":"20px"
        },
-       onClick: "return {};",
-       onDoubleClick: "return {};",
-       onHover:"return {};",
-       onHoverEnter:"return {};",
-       onHoverLeave:"return {};",
-       valueCode: "return {};",
-       childrenCode:"return {};"
+    events: {
+        onClick: "return {};",
+        onDoubleClick: "return {};",
+        onHover:"return {};",
+        onHoverEnter:"return {};",
+        onHoverLeave:"return {};",
+        valueCode: "return {};",
+        childrenCode:"return {};"
+    },
    }
 };
 
