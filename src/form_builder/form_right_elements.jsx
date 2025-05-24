@@ -33,7 +33,6 @@ function HandleDataChange(data) {
 export function FormBuilderRightPanel() {
     let activeElementID = formActiveElement.value;
     let config = GetActiveElementConifg(activeElementID);
-    console.log("form right panel config:",JSON.stringify(config), config);
     return (
         <div>
            <ConfigFormV3 initialValues={{...config}} schema={formFieldSchema} onChange=
