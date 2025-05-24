@@ -100,6 +100,8 @@ function EditArea() {
          border: "1px solid #e0e0e0",
          scrollbarWidth: "none",
          msOverflowStyle: "none",
+         "display": "flex",
+         "flexDirection": "column"
        }}
        className="scrollable-div"
      >
