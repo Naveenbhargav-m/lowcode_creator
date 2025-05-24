@@ -11,7 +11,6 @@ import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
 import { variableMap } from "../states/global_state";
 import { useAuthCheck } from "../hooks/hooks";
-import { ScreenComponentPage } from "../screen_components/screen_component_page";
 
 let config = {
   paths: ["id", "tabs", "tab"],
@@ -35,8 +34,7 @@ function ScreenPage() {
     <div className="min-h-screen h-screen w-full bg-white flex">
       {activeTab.value == "Screen" ? 
       <ScreenView /> :activeTab.value == "Template" ?
-       <TemplatepageView /> : activeTab.value == "Components" ?
-        <ScreenComponentPage /> : activeTab.value === "Themes" ? <ThemePage /> : <VariableView /> }
+       <TemplatepageView /> : activeTab.value === "Themes" ? <ThemePage /> : <VariableView /> }
     </div>
   );
 }
