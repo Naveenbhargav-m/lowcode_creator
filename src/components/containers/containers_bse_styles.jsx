@@ -11,13 +11,16 @@ const card_base_style = {
         borderRadius: "8px",
         border: "1px solid #ddd",
     },
-    onClick: "return {};",
-    onDoubleClick: "return {};",
-    onHover:"return {};",
-    onHoverEnter:"return {};",
-    onHoverLeave:"return {};",
-    valueCode: "return {};",
-    childrenCode:"return {};"
+    data_source: {},
+    events: {
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 }
 };
 
@@ -33,13 +36,16 @@ const container_base_style = {
         "border":"1px solid black",
         "borderRadius":"20px"
     },
-    onClick: "return {};",
-    onDoubleClick: "return {};",
-    onHover:"return {};",
-    onHoverEnter:"return {};",
-    onHoverLeave:"return {};",
-    valueCode: "return {};",
-    childrenCode:"return {};"
+    data_source: {},
+      events: {
+        onClick: {"actions": [], "code": ""},
+        onDoubleClick:  {"actions": [], "code": ""},
+        onHover:  {"actions": [], "code": ""},
+        onHoverEnter:  {"actions": [], "code": ""},
+        onHoverLeave: {"actions": [], "code": ""},
+        valueCode:  {"actions": [], "code": ""},
+        childrenCode: {"actions": [], "code": ""},
+      }
 }
 };
 
@@ -55,13 +61,16 @@ const row_base_style = {
         "borderRadius":"20px",
         margin: "8px", // Adjust for gutters
     },
-    onClick: "return {};",
-    onDoubleClick: "return {};",
-    onHover:"return {};",
-    onHoverEnter:"return {};",
-    onHoverLeave:"return {};",
-    valueCode: "return {};",
-    childrenCode:"return {};"
+    data_source: {},
+    events: {
+      onClick: {"actions": [], "code": ""},
+      onDoubleClick:  {"actions": [], "code": ""},
+      onHover:  {"actions": [], "code": ""},
+      onHoverEnter:  {"actions": [], "code": ""},
+      onHoverLeave: {"actions": [], "code": ""},
+      valueCode:  {"actions": [], "code": ""},
+      childrenCode: {"actions": [], "code": ""},
+    }
 }
 };
 
@@ -78,13 +87,16 @@ const column_base_style = {
     "border":"1px solid black",
     "borderRadius":"20px"
    },
-   onClick: "return {};",
-   onDoubleClick: "return {};",
-   onHover:"return {};",
-   onHoverEnter:"return {};",
-   onHoverLeave:"return {};",
-   valueCode: "return {};",
-   childrenCode:"return {};"
+   data_source: {},
+   events: {
+     onClick: {"actions": [], "code": ""},
+     onDoubleClick:  {"actions": [], "code": ""},
+     onHover:  {"actions": [], "code": ""},
+     onHoverEnter:  {"actions": [], "code": ""},
+     onHoverLeave: {"actions": [], "code": ""},
+     valueCode:  {"actions": [], "code": ""},
+     childrenCode: {"actions": [], "code": ""},
+   }
 }
 };
 
@@ -101,13 +113,16 @@ const grid_view_base_style = {
         "border":"1px solid black",
         "borderRadius":"20px"
     },
-    onClick: "return {};",
-    onDoubleClick: "return {};",
-    onHover:"return {};",
-    onHoverEnter:"return {};",
-    onHoverLeave:"return {};",
-    valueCode: "return {};",
-    childrenCode:"return {};"
+    data_source: {},
+      events: {
+        onClick: {"actions": [], "code": ""},
+        onDoubleClick:  {"actions": [], "code": ""},
+        onHover:  {"actions": [], "code": ""},
+        onHoverEnter:  {"actions": [], "code": ""},
+        onHoverLeave: {"actions": [], "code": ""},
+        valueCode:  {"actions": [], "code": ""},
+        childrenCode: {"actions": [], "code": ""},
+      }
 }
 };
 
@@ -124,13 +139,16 @@ const list_view_base_style = {
         "border":"1px solid black",
         "borderRadius":"20px"
        },
-       onClick: "return {};",
-       onDoubleClick: "return {};",
-       onHover:"return {};",
-       onHoverEnter:"return {};",
-       onHoverLeave:"return {};",
-       valueCode: "return {};",
-       childrenCode:"return {};"
+    data_source: {},
+    events: {
+        onClick: {"actions": [], "code": ""},
+        onDoubleClick:  {"actions": [], "code": ""},
+        onHover:  {"actions": [], "code": ""},
+        onHoverEnter:  {"actions": [], "code": ""},
+        onHoverLeave: {"actions": [], "code": ""},
+        valueCode:  {"actions": [], "code": ""},
+        childrenCode: {"actions": [], "code": ""},
+      }
    }
 };
 
@@ -147,13 +165,16 @@ const scroll_area_base_style = {
         height:"400px",
         width:"100%",
     },
-    onClick: "return {};",
-    onDoubleClick: "return {};",
-    onHover:"return {};",
-    onHoverEnter:"return {};",
-    onHoverLeave:"return {};",
-    valueCode: "return {};",
-    childrenCode:"return {};"
+    data_source: {},
+      events: {
+        onClick: {"actions": [], "code": ""},
+        onDoubleClick:  {"actions": [], "code": ""},
+        onHover:  {"actions": [], "code": ""},
+        onHoverEnter:  {"actions": [], "code": ""},
+        onHoverLeave: {"actions": [], "code": ""},
+        valueCode:  {"actions": [], "code": ""},
+        childrenCode: {"actions": [], "code": ""},
+      }
 }
 };
 
@@ -168,15 +189,16 @@ const carousel_base_style = {
         "border":"1px solid black",
         "borderRadius":"20px"
        },
-    events: {
-        onClick: "return {};",
-        onDoubleClick: "return {};",
-        onHover:"return {};",
-        onHoverEnter:"return {};",
-        onHoverLeave:"return {};",
-        valueCode: "return {};",
-        childrenCode:"return {};"
-    },
+       data_source: {},
+       events: {
+         onClick: {"actions": [], "code": ""},
+         onDoubleClick:  {"actions": [], "code": ""},
+         onHover:  {"actions": [], "code": ""},
+         onHoverEnter:  {"actions": [], "code": ""},
+         onHoverLeave: {"actions": [], "code": ""},
+         valueCode:  {"actions": [], "code": ""},
+         childrenCode: {"actions": [], "code": ""},
+       }
    }
 };
 

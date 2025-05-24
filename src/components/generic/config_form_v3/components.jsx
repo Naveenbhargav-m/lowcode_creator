@@ -1461,6 +1461,7 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
 
   // Initialize and sync selectedItems with value prop
   useEffect(() => {
+    console.log("Valur to be set:",value);
     if (Array.isArray(value)) {
       setSelectedItems(value);
     } else if (value === null || value === undefined) {
@@ -1469,7 +1470,7 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
       // Handle case where value might be a single item
       setSelectedItems([value]);
     }
-  }, [value]);
+  }, [value, field]);
 
   const handleSelectionComplete = (selectedData) => {
     console.log("Selected fields:", selectedData);
@@ -1730,6 +1731,7 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
       {isOpen && (
         <GlobalSignalsPopup
           initialOpen={isOpen}
+          // @ts-ignore
           fields={data_map}
           selectedItems={selectedItems}
           onClose={(e, newdata) => {
@@ -1768,7 +1770,7 @@ const ACTION_CONFIGS = {
   show_form: {
     label: 'Show Form',
     fields: [
-      { key: 'formId', label: 'Form ID', type: 'text', placeholder: 'user-form' },
+      { key: 'formId', label: 'Form ID', type: 'global_map', placeholder: 'user-form' },
       { key: 'modal', label: 'Modal', type: 'select', options: [
         { value: false, label: 'Inline' },
         { value: true, label: 'Modal' }
@@ -1911,6 +1913,11 @@ const CompactActionItem = ({ item = {}, index, onUpdate, onRemove, onDuplicate, 
         return <CompactSelectField field={fieldConfig} value={fieldValue} onChange={handleFieldChange} />;
       case 'json':
         return <CompactJsonField field={fieldConfig} value={fieldValue} onChange={handleFieldChange} />;
+      case 'global_map':
+        let val1 = item["value"] || [];
+        return <GlobalSelectField field={fieldConfig} value={val1} onChange={(id, val) => {
+          handleFieldChange("value",val);
+        }}/>
       default:
         return <CompactTextField field={fieldConfig} value={fieldValue} onChange={handleFieldChange} />;
     }
@@ -2114,7 +2121,7 @@ export const ActionsConfig = ({ configs = {}, onChange }) => {
           valueCode: { actions: [], code: '' }
         };
     setInternalConfigs(initialConfigs);
-  }, []);
+  }, [configs]);
 
   // Sync JSON view with internal state
   useEffect(() => {

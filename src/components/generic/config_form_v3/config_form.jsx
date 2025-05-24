@@ -48,23 +48,34 @@ const setNestedValue = (obj, path, value) => {
   return result;
 };
 
-// Clean empty objects recursively
 const cleanEmptyObjects = (obj) => {
   if (obj === null || typeof obj !== 'object') return obj;
   
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    return obj
+      .map(item => cleanEmptyObjects(item))
+      .filter(item => {
+        if (typeof item === 'object' && item !== null) {
+          return Object.keys(item).length > 0;
+        }
+        return item !== undefined;
+      });
+  }
+  
+  // Handle objects
   const result = { ...obj };
   
   Object.keys(result).forEach(key => {
     if (typeof result[key] === 'object' && result[key] !== null) {
-      // Clean nested objects
       result[key] = cleanEmptyObjects(result[key]);
       
-      // Remove empty objects
-      if (Object.keys(result[key]).length === 0) {
+      if (Array.isArray(result[key])) {
+        // Keep arrays even if empty, or remove based on your needs
+      } else if (Object.keys(result[key]).length === 0) {
         delete result[key];
       }
     } else if (result[key] === undefined) {
-      // Remove undefined values
       delete result[key];
     }
   });
@@ -184,7 +195,6 @@ export  function ConfigFormV3({
   const handleFieldChange = (fieldId, value) => {
     setFormValues(prev => {
       // Support for nested paths
-      console.log("handle change:", value, fieldId);
       const updatedValues = setNestedValue(prev, fieldId, value);
       console.log("handle change:", updatedValues, fieldId);
       if (onChange) {
@@ -276,7 +286,10 @@ export  function ConfigFormV3({
     switch (dynamicField.type) {
       case 'actions_config': 
         console.log("field value :",fieldValue, dynamicField, formValues, field);
-        fieldComponent = <ActionsConfig configs={fieldValue} onChange={(id, value) => {console.log("actions config onchage:",id, value);}}/>
+        fieldComponent = <ActionsConfig configs={fieldValue} onChange={(value) => {
+          console.log("value to be updated:",value, dynamicField.id);
+          handleFieldChange(dynamicField.id, value);
+        }}/>
         break;
       case 'data_picker':
         fieldComponent = <GlobalSelectField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>

@@ -107,9 +107,9 @@ export const TemplateElementConfigFormSchema = {
               }
     },
     {
-      "id":"configs",
+      "id":"configs.events",
       "type": "actions_config",
-      "path": "configs",
+      "path": "configs.events",
       "label": "Actions"
     }
 ],
@@ -143,7 +143,7 @@ export const TemplateElementConfigFormSchema = {
     {
       "id": "actions",
       "title": "actions configs",
-      "fieldIds": ["configs"],
+      "fieldIds": ["configs.events"],
     }
   ],
   
