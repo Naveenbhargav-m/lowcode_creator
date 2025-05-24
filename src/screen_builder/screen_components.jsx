@@ -31,7 +31,6 @@ const TabComponent = () => {
       {[
         { name: 'Screen', Icon: "laptop-minimal" },
         { name: 'Template', Icon: "layout-template" },
-        { name: 'Components', Icon: "component" },
         { name: 'GlobalVars', Icon: "braces" },
         {name:"Themes", Icon:"palette"}
       ].map(({ name, Icon }) => (
