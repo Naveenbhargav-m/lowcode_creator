@@ -2,27 +2,6 @@ import WorkflowConfigForm from "../components/generic/workflow_config_form/examp
 import { GetWorkflowFormConfig } from "./workflow_helpers";
 import { activeWorkFlow, activeworkFlowBlock, SetWorkflowDataBack } from "./workflow_state";
 
-/*
-
-   sections : [
-       id: "",
-       "title": "",
-       groups: [
-           id: "",
-          "title": "",
-          "fields": [
-                {
-                  "id": "",
-                  "type": "",
-                  "description": "",
-                  "label": ""
-                }
-          ],
-       ],
-   ],
- */
-
-
 export function WorkflowConfigFormPanel() {
     let activeblock = activeworkFlowBlock.value;
     let activeworkflow = activeWorkFlow.value;
