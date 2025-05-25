@@ -8,7 +8,7 @@ import { UsersPage } from "./users/users_page";
 import { SettingsPage } from "./settings/settings_page";
 import {  sideBarEnable } from "./states/global_state";
 import AppCreatorPage from "./app_creator/app_creator";
-import { FormBuilderTest } from "./form_builder/form_edit_area";
+import { FormBuilderPage } from "./form_builder/form_edit_area";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
@@ -54,7 +54,7 @@ export function App() {
         <main className="flex-grow bg-white h-full w-full overflow-hidden" style={{color:"black"}}>
           <Router>
             <Route path="/home" component={AppHomeScreen} />
-            <Route path="/forms" component={FormBuilderTest} />
+            <Route path="/forms" component={FormBuilderPage} />
             <Route path="/screens" component={ScreenPage} />
             <Route path="/containers" component={TablesPage} />
             <Route path="/secrets" component={SecretsManager} />

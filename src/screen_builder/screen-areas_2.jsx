@@ -47,7 +47,7 @@ function RenderElement(item , dropCallBack, activeSignal, viewType, ElementsMap)
 
 
 
-function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHolder , buttonLabel, buttonCallBack }) {
+function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHolder , buttonLabel, buttonCallBack, showCreateButton = true }) {
   return (
     <div style={{
       display: "flex",
@@ -62,13 +62,17 @@ function CreateAndbuttonbar({ iconNames = [], onIconChange, formLabel , placeHol
       </div>
   
       {/* Right-Aligned Button Component */}
-      <div style={{ marginLeft: "auto" }}>
-      <CreateFormButton 
-        formLabel={formLabel} 
-        placeHolder={placeHolder} 
-        buttonLabel={buttonLabel} 
-        callback={buttonCallBack}/>
-      </div>
+     {
+      showCreateButton ? (
+        <div style={{ marginLeft: "auto" }}>
+        <CreateFormButton 
+          formLabel={formLabel} 
+          placeHolder={placeHolder} 
+          buttonLabel={buttonLabel} 
+          callback={buttonCallBack}/>
+        </div>
+      ) : <div></div>
+     }
     </div>
   );
 }
