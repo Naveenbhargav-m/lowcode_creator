@@ -38,7 +38,6 @@ export function CreateQueryBar() {
 
 export function TablesView({ prefilData }) {
   let style = {
-    "paddingTop": "50px"
   };
   const activeQuery = activeQueryData.value;
   const [activeTab, setActiveTab] = useState("select");
@@ -94,8 +93,8 @@ export function TablesView({ prefilData }) {
       </div>
       
       {/* Main Content */}
-      <div className="flex h-screen max-h-[calc(100vh-100px)] overflow-hidden" 
-      style={{ maxWidth: "95vw", ...style }}>
+      <div className="flex h-screen max-h-[calc(95vh-100px)] overflow-hidden" 
+      style={{ maxWidth: "75vw", ...style }}>
         {/* Vertical Tab Navigation */}
         <div 
           className="w-48 flex-shrink-0 bg-gray-50 border-r border-gray-200"

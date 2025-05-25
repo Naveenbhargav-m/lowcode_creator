@@ -54,69 +54,75 @@ function QueryBuilderPage() {
 
     return (
         <div style={{
-            display: "flex", 
-            flexDirection: "column", 
-            height: "100vh", 
+            display: "flex",
+            height: "100vh",
             width: "100vw",
+            overflow: "hidden", // Prevent scrollbars on main container
             ...globalStyle
         }}>
-            {/* Modern Sync Controls */}
-            <div style={{ 
-                borderBottom: "1px solid #e5e7eb",
-                backgroundColor: "#ffffff",
-                zIndex: 10
-            }}>
-                <ModernSyncControls
-                    onDismissError={handleDismissError}
-                    syncMode={syncMode}
-                    setSyncMode={setSyncMode}
-                    isSyncing={isSyncing}
-                    isLoading={isLoading?.value}
-                    activeScreen={activeQuery.value}
-                    screenNamesList={queryNamesList.value}
-                    unsavedCount={unsavedCount}
-                    activeScreenHasChanges={activeQueryHasChanges}
-                    canSyncActive={canSyncActive}
-                    canSyncAll={canSyncAll}
-                    handleSync={handleSync}
-                    apiError={apiError?.value}
-                    showLegacySync={true}
-                    showProgressBar={true}
-                    compact={true}
-                />
-            </div>
-
-            {/* Main Content */}
+            {/* Left Panel - Full height from top */}
             <div style={{
-                display: "flex", 
-                flexDirection: "row", 
-                justifyContent: "flex-start", 
-                alignItems: "flex-start",
-                flex: 1,
+                width: "300px",
+                minWidth: "300px",
+                height: "100vh",
+                borderRight: "1px solid #e5e7eb",
+                backgroundColor: "#ffffff",
+                boxShadow: "2px 0 4px rgba(0, 0, 0, 0.05)", // Subtle shadow for depth
+                zIndex: 10,
                 overflow: "hidden"
             }}>
-                {/* Left Panel - Queries List */}
+                <QueriesList />
+            </div>
+
+            {/* Right Panel - Contains sync controls and main content */}
+            <div style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                height: "100vh",
+                width:"50vw",
+                overflow: "hidden",
+                minWidth: 0 // Important: allows flex item to shrink below content size
+            }}>
+                {/* Sync Controls Bar */}
                 <div style={{
-                    width: "300px",
-                    minWidth: "300px",
-                    height: "100%",
-                    borderRight: "1px solid #e5e7eb",
-                    backgroundColor: "#ffffff"
+                    flexShrink: 0, // Prevent shrinking
+                    borderBottom: "1px solid #e5e7eb",
+                    backgroundColor: "#ffffff",
+                    width:"75vw",
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)", // Subtle shadow
+                    zIndex: 5
                 }}>
-                    <QueriesList />
+                    <ModernSyncControls
+                        onDismissError={handleDismissError}
+                        syncMode={syncMode}
+                        setSyncMode={setSyncMode}
+                        isSyncing={isSyncing}
+                        isLoading={isLoading?.value}
+                        activeScreen={activeQuery.value}
+                        screenNamesList={queryNamesList.value}
+                        unsavedCount={unsavedCount}
+                        activeScreenHasChanges={activeQueryHasChanges}
+                        canSyncActive={canSyncActive}
+                        canSyncAll={canSyncAll}
+                        handleSync={handleSync}
+                        apiError={apiError?.value}
+                        showLegacySync={true}
+                        showProgressBar={true}
+                        compact={true}
+                    />
                 </div>
 
-                {/* Main Content - Tables View */}
+                {/* Main Content Area - Tables View */}
                 <div style={{
-                    flex: 1,
-                    height: "100%",
-                    overflow: "auto"
+                    overflow: "auto",
+                    backgroundColor: "#f8fafc", // Light background for better contrast
                 }}>
                     <TablesView prefilData={{}} />
                 </div>
             </div>
 
-            {/* Loading Overlay */}
+            {/* Enhanced Loading Overlay */}
             {isLoading.value && (
                 <div style={{
                     position: "fixed",
@@ -124,32 +130,64 @@ function QueryBuilderPage() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    backgroundColor: "rgba(0, 0, 0, 0.6)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    zIndex: 1000
+                    zIndex: 1000,
+                    backdropFilter: "blur(2px)" // Modern blur effect
                 }}>
                     <div style={{
                         backgroundColor: "white",
-                        padding: "20px",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+                        padding: "32px 40px",
+                        borderRadius: "12px",
+                        boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
+                        maxWidth: "300px",
+                        textAlign: "center"
                     }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ 
+                            display: "flex", 
+                            flexDirection: "column",
+                            alignItems: "center", 
+                            gap: "16px" 
+                        }}>
+                            {/* Enhanced Loading Spinner */}
                             <div style={{
-                                width: "20px",
-                                height: "20px",
-                                border: "2px solid #f3f3f3",
-                                borderTop: "2px solid #3498db",
+                                width: "32px",
+                                height: "32px",
+                                border: "3px solid #e5e7eb",
+                                borderTop: "3px solid #3b82f6",
                                 borderRadius: "50%",
                                 animation: "spin 1s linear infinite"
                             }}></div>
-                            <span>Loading queries...</span>
+                            <div>
+                                <div style={{ 
+                                    fontSize: "16px", 
+                                    fontWeight: "600",
+                                    color: "#1f2937",
+                                    marginBottom: "4px"
+                                }}>
+                                    Loading Queries
+                                </div>
+                                <div style={{ 
+                                    fontSize: "14px", 
+                                    color: "#6b7280" 
+                                }}>
+                                    Please wait...
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* CSS Animation for spinner */}
+            <style>{`
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }
