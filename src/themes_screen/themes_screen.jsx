@@ -1,7 +1,7 @@
 
+
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import { ActiveTheme, AddTheme, currentThemes, SetCurrentTheme, themeNameAndIDSList, themes, UpdateDefaultTheme } from "./theme_state";
-import { TabComponent } from "../screen_builder/screen_components";
+import { ActiveTheme, AddTheme, currentThemes, SetCurrentTheme, themeNameAndIDSList, themes, UpdateDefaultTheme } from "./themes_state";
 import { ScreensList } from "../screen_builder/screen_page";
 import { useComputed, useSignal } from "@preact/signals";
 import { DefaultMode, DefaultThemeID } from "../states/global_state";
@@ -147,7 +147,6 @@ function ThemePage() {
 
       <div className="w-10/12 h-screen bg-background scrollable-div">
       <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
-                <TabComponent />
                 <SyncButton title={"sync"} onClick={(e) => {SyncData("_themes", themes);}} style={{marginRight:"40px"}}/>
             </div>
         <ThemeCreator />
