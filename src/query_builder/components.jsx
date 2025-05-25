@@ -1,7 +1,7 @@
 import { useSignal } from "@preact/signals";
 import GlobalSignalsPopup  from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import { ActiveQueryData, CreateQueryBlock, SyncQueries, UpdateQueryPart } from "./query_signal";
+import { activeQueryData, CreateQueryBlock, SyncActiveQuery, UpdateQueryPart } from "./query_signal";
 import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye, ArrowUp, ArrowDown, Code2Icon, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
@@ -40,7 +40,7 @@ export function TablesView({ prefilData }) {
   let style = {
     "paddingTop": "50px"
   };
-  const activeQuery = ActiveQueryData.value;
+  const activeQuery = activeQueryData.value;
   const [activeTab, setActiveTab] = useState("select");
   const [showAdvanced, setShowAdvanced] = useState(false);
   
@@ -54,7 +54,7 @@ export function TablesView({ prefilData }) {
 
   const handleSync = () => {
     // Add your sync functionality here
-    SyncQueries();
+    SyncActiveQuery();
     console.log("Sync button clicked");
   };
   
@@ -654,6 +654,7 @@ function SelectBlock({ select, Aggregations, updateCallBack }) {
         initialOpen={isOpen.value}
         // @ts-ignore
         fields={data_map["tables"]}
+        selectedItems={selectedItems}
         onClose={(e, data) => {
           console.log("Selected fields:", data);
           if (data) {
