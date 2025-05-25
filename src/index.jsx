@@ -15,6 +15,9 @@ import { QueryBuilderPage } from "./query_builder/query_builder_page";
 import WorkflowBuilder from "./tests/reactflow1";
 import SecretsManager from "./secret_store/secret_store";
 import TemplateRegistrationPage from "./external_templates/external_templates";
+import { TemplatePage } from "./template_builder/templates_page";
+import { VariablesPage } from "./global_state_screen/global_state_page";
+import { ThemePage } from "./themes_screen/themes_screen";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -55,6 +58,9 @@ export function App() {
             <Route path="/screens" component={ScreenPage} />
             <Route path="/containers" component={TablesPage} />
             <Route path="/secrets" component={SecretsManager} />
+            <Route path="/view_templates" component={TemplatePage} />
+            <Route path="/ui_states" component={VariablesPage} />
+            <Route path="/themes" component={ThemePage} />
             <Route path="/templates" component={TemplateRegistrationPage} />
             <Route path="/workflows" component={WorkFlowPage} />
             <Route path="/users" component={UsersPage} />

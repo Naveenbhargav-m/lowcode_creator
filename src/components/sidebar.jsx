@@ -1,11 +1,32 @@
-import { useState, useEffect, useRef } from 'react';
-import { Home, Database, Braces, BookText, Frame, Workflow, User, Settings, BookTemplate, KeySquare } from 'lucide-react';
-import { AppLogo } from '../branding/logo';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Home, 
+  Database, 
+  Braces, 
+  BookText, 
+  Frame, 
+  Squircle, 
+  Signal, 
+  Palette, 
+  Workflow, 
+  User, 
+  Settings, 
+  BookTemplate, 
+  KeySquare 
+} from 'lucide-react';
+import { useLocation } from 'preact-iso';
+
+const AppLogo = () => (
+  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+  </div>
+);
 
 const Sidebar = () => {
   const [expanded, setExpanded] = useState(false);
   const [selected, setSelected] = useState('home');
   const sidebarRef = useRef(null);
+  const router = useLocation();
 
   // Handle outside clicks to collapse sidebar
   useEffect(() => {
@@ -20,9 +41,16 @@ const Sidebar = () => {
     };
   }, []);
 
+  // Update selected state based on current route
+  useEffect(() => {
+    const currentPath = router.path.replace('/', '') || 'home';
+    setSelected(currentPath);
+  }, [router.path]);
+
   const handleItemClick = (item) => {
     setSelected(item);
     setExpanded(false);
+    router.route(item);
   };
 
   // Menu items configuration
@@ -32,141 +60,73 @@ const Sidebar = () => {
     { name: "Queries", value: "queries", icon: <Braces size={20} /> },
     { name: "Forms", value: "forms", icon: <BookText size={20} /> },
     { name: "Screens", value: "screens", icon: <Frame size={20} /> },
+    { name: "UITemplates", value: "view_templates", icon: <Squircle size={20} /> },
+    { name: "UIStates", value: "ui_states", icon: <Signal size={20} /> },
+    { name: "Themes", value: "themes", icon: <Palette size={20} /> },
     { name: "Workflows", value: "workflows", icon: <Workflow size={20} /> },
     { name: "Users", value: "users", icon: <User size={20} /> },
     { name: "Settings", value: "settings", icon: <Settings size={20} /> },
-    {name: "Templates", value: "templates", icon: <BookTemplate size={20} />},
-    {name: "Secrets", value: "secrets", icon: <KeySquare size={20} />}
-
+    { name: "Templates", value: "templates", icon: <BookTemplate size={20} /> },
+    { name: "Secrets", value: "secrets", icon: <KeySquare size={20} /> }
   ];
 
-  // CSS styles as objects
-  const styles = {
-    container: {
-      display: 'flex',
-      minHeight: '100vh',
-      height: '100%'
-    },
-    sidebar: {
-      backgroundColor: 'white',
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '16px 8px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      width: expanded ? '200px' : '64px',
-      transition: 'width 0.3s ease-in-out',
-      overflow: 'hidden'
-    },
-    logoContainer: {
-      marginTop: '24px',
-      marginBottom: '32px',
-      display: 'flex',
-      justifyContent: 'center'
-    },
-    logo: {
-      height: '32px',
-      width: '32px',
-      backgroundColor: '#10b981', // Green color
-      borderRadius: '50%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    menuList: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      paddingTop: "100px",
-      gap: '8px'
-    },
-    menuItem: (isSelected) => ({
-      cursor: 'pointer',
-      borderRadius: '6px',
-      backgroundColor: isSelected ? '#10b981' : 'transparent',
-      transition: 'background-color 0.2s ease',
-      ':hover': {
-        backgroundColor: isSelected ? '#10b981' : '#e6f7f1' // Light green on hover
-      }
-    }),
-    menuLink: (isSelected, isExpanded) => ({
-      display: 'flex',
-      alignItems: 'center',
-      padding: '10px',
-      textDecoration: 'none',
-      justifyContent: isExpanded ? 'flex-start' : 'center',
-      height: '40px'
-    }),
-    iconContainer: (isSelected) => ({
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: isSelected ? 'white' : '#374151'
-    }),
-    menuText: (isSelected) => ({
-      marginLeft: '12px',
-      transition: 'opacity 0.2s ease',
-      fontWeight: 500,
-      color: isSelected ? 'white' : '#374151',
-      whiteSpace: 'nowrap'
-    })
-  };
-
   return (
-    <div style={styles.container}>
+    <div className="flex min-h-screen h-full">
       <div
         ref={sidebarRef}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
-        style={styles.sidebar}
+        className={`bg-white h-screen flex flex-col items-center py-4 px-2 shadow-lg overflow-hidden
+          transition-[width] duration-300 ease-in-out ${
+            expanded ? 'w-52' : 'w-16'
+          }`}
+        
       >
-        <div style={styles.logoContainer}>
-          <div style={styles.logo}>
+        {/* Logo */}
+        <div className="mt-6 mb-8 flex justify-center">
+          <div className="h-8 w-8 bg-emerald-500 rounded-full flex justify-center items-center">
             <AppLogo />
-           </div>
+          </div>
         </div>
         
-        <div style={styles.menuList}>
+        {/* Menu Items */}
+        <div className="w-full flex flex-col pt-2 gap-2">
           {menuItems.map((item) => {
             const isSelected = selected === item.value;
             
             return (
               <div
                 key={item.value}
-                style={{
-                  ...styles.menuItem(isSelected),
-                  backgroundColor: isSelected ? '#10b981' : 'transparent',
-                  ':hover': undefined // Can't use pseudo-classes in inline styles
-                }}
-                onMouseOver={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = '#e6f7f1';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
+                className={`cursor-pointer rounded-md transition-all duration-300 ease-out transform ${
+                  isSelected 
+                    ? 'bg-emerald-500 scale-105' 
+                    : 'hover:bg-emerald-50 hover:scale-102'
+                }`}
+                onClick={() => handleItemClick(item.value)}
               >
-                <a
-                  href={`/${item.value}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleItemClick(item.value);
-                  }}
-                  style={styles.menuLink(isSelected, expanded)}
+                <div 
+                  className={`flex items-center h-8 ${
+                    expanded ? 'justify-start' : 'justify-center'
+                  }`}
                 >
-                  <div style={styles.iconContainer(isSelected)}>
+                  <div className={`flex items-center justify-center transition-all duration-300 ease-out ${
+                    isSelected ? 'text-white transform scale-110' : 'text-gray-700'
+                  }`}>
                     {item.icon}
                   </div>
                   {expanded && (
-                    <span style={styles.menuText(isSelected)}>
+                    <span 
+                      className={`ml-3 font-medium whitespace-nowrap transition-all duration-400 ease-out ${
+                        isSelected ? 'text-white' : 'text-gray-700'
+                      } ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`}
+                      style={{
+                        transitionDelay: expanded ? '150ms' : '0ms'
+                      }}
+                    >
                       {item.name}
                     </span>
                   )}
-                </a>
+                </div>
               </div>
             );
           })}

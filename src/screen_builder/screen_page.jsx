@@ -1,12 +1,10 @@
 import { useEffect } from "preact/hooks";
 import { TemplateView } from "../template_builder/template_builder_view";
-import {TabComponent , VariableCreator} from "./screen_components";
 import { ScreenRightPanel } from "./screen_config_panel";
 import { ScreenLeftPanel } from "./screen_left_panel";
 import { activeScreen, activeTab, LoadScreens, screenLeftnamesAndIds, screenLeftTabSignal, screens, SetCurrentScreen } from "./screen_state";
 import {ScreenBuilderArea} from "./screen-areas_2";
 import { TemplateOptionTabs, TemplatePage } from "../template_builder/templates_page";
-import { ThemePage } from "../theme_creator/theme_config_area";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
 import { variableMap } from "../states/global_state";
@@ -32,43 +30,11 @@ function ScreenPage() {
 
   return (
     <div className="min-h-screen h-screen w-full bg-white flex">
-      {activeTab.value == "Screen" ? 
-      <ScreenView /> :activeTab.value == "Template" ?
-       <TemplatepageView /> : activeTab.value === "Themes" ? <ThemePage /> : <VariableView /> }
+      <ScreenView />
     </div>
   );
 }
 
-
-function TemplatepageView() {
-  return (
-    <TemplatePage />
-  );
-}
-
-
-function VariableView() {
-  return (
-    <div className="min-h-screen h-screen w-full bg-white flex">
-      <div className="w-2/12 bg-white p-4 h-screen">
-        <ScreenLeftPanel config={{ tabs_path: config["paths"], views_path: config["views_path"] }}
-          value={{}}
-          actions={{}}/>
-      </div>
-
-      <div className="w-10/12 h-screen bg-background scrollable-div">
-      <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
-                <TabComponent />
-                <SyncButton title={"sync"} onClick={(e) => {SyncData("_global_states", variableMap);}} style={{marginRight:"40px"}}/>
-            </div>
-      <VariableCreator />
-      </div>
-      <div className="w-2/12 bg-white h-screen scrollable-div">
-        <ScreenRightPanel />
-      </div>
-    </div>
-  );
-}
 function ScreenView() {
 
   useEffect(()=> {LoadScreens()}, []);
@@ -88,7 +54,6 @@ function ScreenView() {
 
     <div className="w-7/12 h-screen bg-background scrollable-div">
     <div style={{display:"flex", "flexDirection": "row", "justifyContent": "space-between", alignItems:"center"}}>
-    <TabComponent />
     <SyncButton title={"sync"} onClick={(e) => {SyncData("_screens", screens);}} style={{marginRight:"40px"}}/>
     </div>
     <ScreenBuilderArea />
