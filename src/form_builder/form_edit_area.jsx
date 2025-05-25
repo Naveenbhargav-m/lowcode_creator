@@ -6,7 +6,6 @@ import { SwapChildrenBasedonView, AddtoElements, CreateNewForm, currentForm, cur
 import MobileMockup from "../components/custom/mobile_mockup";
 import { CreateAndbuttonbar } from "../screen_builder/screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
-import { ScreensList } from "../screen_builder/screen_page";
 import { useEffect } from "preact/hooks";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
@@ -131,7 +130,7 @@ function EditArea() {
             </div>
             {
                 formActiveLeftTab.value === "forms" ?
-                <ScreensList elementsList={formLeftNamesList.value} signal={currentForm} callBack={(id) => setCurrentForm(id)}/> :
+                <div></div> :
                 <FormBuilderLeftPanel />
             }
     </div>

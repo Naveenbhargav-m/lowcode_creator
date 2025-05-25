@@ -97,7 +97,7 @@ async function LoadScreens() {
     isLoading.value = true;
     apiError.value = null;
     
-    let url = `${AppID}/_screens`;
+    let url = `${AppID}/public/_screens`;
     const response = await GetDataFromAPi(url);
     console.log("Loaded screens:", response);
 
@@ -162,7 +162,7 @@ async function CreatenewScreen(formData) {
     };
 
     // Make API call to create screen
-    let url = `${AppID}/_screens`;
+    let url = `${AppID}/public/_screens`;
     const response = await CreateDataToAPI(url, screenData);
     
     if (response && response.id) {
@@ -226,7 +226,7 @@ async function UpdateScreen(screenId) {
       }
     };
 
-    let url = `${AppID}/_screens?where=id=${screenId}`;
+    let url = `${AppID}/public/_screens?where=id=${screenId}`;
     await UpdateDataToAPI(url, updateData);
     
     // Remove from unsaved changes
@@ -254,7 +254,7 @@ async function DeleteScreen(screenId) {
     isLoading.value = true;
     apiError.value = null;
     
-    let url = `${AppID}/_screens?where=id=${screenId}`;
+    let url = `${AppID}/public/_screens?where=id=${screenId}`;
     await DeleteDataFromAPI(url);
     
     // Remove from local state
