@@ -2,7 +2,6 @@
 
 import { CreateFormButton } from "../template_builder/template_builder_view";
 import { ActiveTheme, AddTheme, currentThemes, SetCurrentTheme, themeNameAndIDSList, themes, UpdateDefaultTheme } from "./themes_state";
-import { ScreensList } from "../screen_builder/screen_page";
 import { useComputed, useSignal } from "@preact/signals";
 import { DefaultMode, DefaultThemeID } from "../states/global_state";
 import { SyncData } from "../api/api_syncer";
@@ -142,7 +141,6 @@ function ThemePage() {
     return (
     <div className="min-h-screen h-screen w-full bg-white flex">
       <div className="w-2/12 bg-white p-4 h-screen">
-        <ScreensList elementsList={themeNameAndIDSList.value} signal={ActiveTheme} callBack={(id) => { ActiveTheme.value = id; SetCurrentTheme();}}/>
       </div>
 
       <div className="w-10/12 h-screen bg-background scrollable-div">

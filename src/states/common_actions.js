@@ -1,4 +1,4 @@
-import { activeElement, screenElements } from "../screen_builder/screen_state";
+import { activeElement } from "../screen_builder/screen_state";
 import { variableKeys, variableMap } from "./global_state";
 
 function FunctionExecutor(signals, functionStr) {
@@ -20,14 +20,7 @@ function FunctionExecutor(signals, functionStr) {
 
 
 function ActionExecutor( i , action) {
-    let scrElement = screenElements[i];
-    if(scrElement === undefined) {
-        return;
-    }
-    const element = scrElement.peek();
-    if (action === "onClick") {
-        activeElement.value = i;
-    }
+    let element = {};
     return;
     const actionStr = element["configs"][action];
     let myfunc;

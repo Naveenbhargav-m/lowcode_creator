@@ -105,16 +105,6 @@
         label: 'Reset',
         type: 'button',
         variant: 'secondary',
-        onClick: () => setValues({
-          name: 'Workflow 1',
-          type: 'sequential',
-          maxRetries: 3,
-          timeout: 60,
-          enableLogging: true,
-          description: 'This is a sample workflow',
-          notification: false,
-          notificationEmail: '',
-        }),
       },
     ],
   };
