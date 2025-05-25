@@ -1,35 +1,48 @@
-// Signals for state management
+// screen_state.js
 import { effect, signal } from "@preact/signals";
-import { actionsmap } from "./helper_methods";
 import { generateUID, sortObjectByOrder } from "../utils/helpers";
 import { PrimitivesStylesMap } from "../components/primitives/primitives_base_styles";
 import { ContainersStylesMap } from "../components/containers/containers_bse_styles";
-import { GetDataFromAPi } from "../api/api_syncer";
-import { LoadUserTemplates } from "./data_functions";
+import { GetDataFromAPi, CreateDataToAPI, UpdateDataToAPI, DeleteDataFromAPI } from "../api/api_syncerv2";
+import { AppID } from "../states/global_state";
 import { global_templates } from "../states/global_repo";
 
+// Constants
+const DEFAULT_SCREEN_STYLE = { 
+  display: "flex", 
+  flexDirection: "column", 
+  minHeight: "200px", 
+  minWidth: "150px", 
+  height: "100%", 
+  width: "100%" 
+};
 
-const screenStyle = {"display":"flex","flexDirection":"column","minHeight":"200px", "minWidth":"150px","height":"100%", "width":"100%"};
+const DESIGN_VIEWS = {
+  SMARTPHONE: "smartphone",
+  DESKTOP: "desktop"
+};
 
-const tabSignal = signal("primitives");
+const CONTAINER_BOUNDS = { height: 0, width: 0 };
+
+// Tab Data for Left Panel
 const tabDataSignal = signal({
-  "tabs": ["primitives", "containers", "templates", "my_templates"],
-  "tab": "primitives",
+  tabs: ["primitives", "containers", "templates", "my_templates"],
+  tab: "primitives",
   primitives: [
-      { icon: "text-cursor", title: "Text", value: "text", type: "primitive" },
-      { icon: "hash", title: "Number", value: "number", type: "primitive" },
-      { icon: "align-left", title: "Text Area", value: "text_area", type: "primitive" },
-      { icon: "bar-chart-2", title: "Progress Bar", value: "progress_bar", type: "primitive" },
-      { icon: "user", title: "Avatar", value: "avatar", type: "primitive" },
-      { icon: "users", title: "Avatar Group", value: "avatar_group", type: "primitive" },
-      { icon: "chevron-down", title: "Dropdown", value: "drop_down", type: "primitive" },
-      { icon: "square", title: "Button", value: "button", type: "primitive" },
-      { icon: "image", title: "Image", value: "image", type: "primitive" },
-      { icon: "badge-check", title: "Badge", value: "badge", type: "primitive" },
-      { icon: "smile", title: "Icon", value: "icon", type: "primitive" },
-      { icon: "mouse-pointer", title: "Icon Button", value: "icon_button", type: "primitive" },
-    ],
-  containers:  [
+    { icon: "text-cursor", title: "Text", value: "text", type: "primitive" },
+    { icon: "hash", title: "Number", value: "number", type: "primitive" },
+    { icon: "align-left", title: "Text Area", value: "text_area", type: "primitive" },
+    { icon: "bar-chart-2", title: "Progress Bar", value: "progress_bar", type: "primitive" },
+    { icon: "user", title: "Avatar", value: "avatar", type: "primitive" },
+    { icon: "users", title: "Avatar Group", value: "avatar_group", type: "primitive" },
+    { icon: "chevron-down", title: "Dropdown", value: "drop_down", type: "primitive" },
+    { icon: "square", title: "Button", value: "button", type: "primitive" },
+    { icon: "image", title: "Image", value: "image", type: "primitive" },
+    { icon: "badge-check", title: "Badge", value: "badge", type: "primitive" },
+    { icon: "smile", title: "Icon", value: "icon", type: "primitive" },
+    { icon: "mouse-pointer", title: "Icon Button", value: "icon_button", type: "primitive" },
+  ],
+  containers: [
     { icon: "square", title: "Card", value: "card", type: "container" },
     { icon: "layout", title: "Container", value: "container", type: "container" },
     { icon: "grid", title: "Grid View", value: "grid_view", type: "container" },
@@ -38,8 +51,8 @@ const tabDataSignal = signal({
     { icon: "columns", title: "Column", value: "column", type: "container" },
     { icon: "scroll", title: "Scroll Area", value: "scroll_area", type: "container" },
     { icon: "chevrons-right", title: "Carousel", value: "carousel", type: "container" },
-],
-  templates:  [
+  ],
+  templates: [
     { icon: "table", title: "Table", value: "table", type: "template" },
     { icon: "bar-chart", title: "Charts", value: "charts", type: "template" },
     { icon: "grid", title: "Grid", value: "grid", type: "template" },
@@ -51,280 +64,554 @@ const tabDataSignal = signal({
     { icon: "columns-2", title: "SideDrawer", value: "side_drawer", type: "modal" },
     { icon: "picture-in-picture-2", title: "Modal", value: "modal", type: "modal" },
     { icon: "picture-in-picture-2", title: "HoverCard", value: "hover_card", type: "modal" },
-],
-"my_templates": [],
+  ],
+  my_templates: [],
 });
 
-const containerBounds = {"height":0, "width":0};
+// State Management
+let screens = {};
+const screenNamesList = signal([]);
+const tabSignal = signal("primitives");
 const activeTab = signal('Screen');
 const activeConfigTab = signal("Basic");
 const isHoveredSignal = signal(false);
 const activeElement = signal("");
 const activeScreen = signal("");
-const screenView = signal("smartphone");
-let screenLeftnamesAndIds = signal([]);
+const screenViewKey = signal(DESIGN_VIEWS.SMARTPHONE);
 const screenLeftTabSignal = signal("");
-let screens = {};
-let screenElements = { };
+let activeScreenElements = {};
 const screenElementAdded = signal("");
-screenElementAdded.value = "NA";
-let screenElementsSorted = signal("");
-let screenViewKey = "mobile_children";
+const screenElementsSorted = signal("");
+const isScreenChanged = signal("");
 
+// Track which screens have unsaved changes
+const unsavedScreens = signal(new Set());
+const isLoading = signal(false);
+const apiError = signal(null);
 
-function LoadScreens() {
+/**
+ * Load all screens from API
+ */
+async function LoadScreens() {
+  try {
+    isLoading.value = true;
+    apiError.value = null;
+    
+    let url = `${AppID}/_screens`;
+    const response = await GetDataFromAPi(url);
+    console.log("Loaded screens:", response);
 
-  GetDataFromAPi("_screens").then((myscreens) => {
-      console.log("my screens:", myscreens);
+    if (!response || response.length === 0) {
+      console.log("No screens found");
+      screens = {};
+      screenNamesList.value = [];
+      return;
+    }
 
-      if (!myscreens || myscreens.length === 0) {
-          console.log("my screens is null:", myscreens);
-          screens = {};
-          return;
-      }
+    const tempNames = [];
+    const screensMap = {};
 
-      let tempnames = [];
-      let screensmap = {};
+    response.forEach(screen => {
+      screensMap[screen.id] = {
+        ...screen.configs,
+        id: screen.id,
+        screen_name: screen.screen_name
+      };
+      tempNames.push({
+        name: screen.screen_name,
+        id: screen.id,
+        order: screen.configs?.order || 0
+      });
+    });
 
-      for (let i = 0; i < myscreens.length; i++) {
-          let curScreen = myscreens[i];
-          screensmap[curScreen["id"]] = { ...curScreen["configs"],"id": curScreen["id"] };
-          tempnames.push({ "name": curScreen["screen_name"],"id": curScreen["id"], });
-      }
-
-      screenLeftnamesAndIds.value = [...tempnames];
-
-      console.log("my screens is finally:", myscreens);
-      screens = screensmap;
-  }).catch(error => {
-      console.error("Error loading screens:", error);
-  });
-
-  LoadUserTemplates();
+    // Sort by order
+    tempNames.sort((a, b) => a.order - b.order);
+    
+    screenNamesList.value = tempNames;
+    screens = screensMap;
+    
+    // Clear unsaved changes after successful load
+    unsavedScreens.value = new Set();
+    
+  } catch (error) {
+    console.error("Error loading screens:", error);
+    apiError.value = "Failed to load screens";
+  } finally {
+    isLoading.value = false;
+  }
 }
 
+/**
+ * Create a new screen via API
+ */
+async function CreatenewScreen(formData) {
+  try {
+    isLoading.value = true;
+    apiError.value = null;
+    
+    const screenData = {
+      screen_name: formData.name,
+      configs: {
+        screen_name: formData.name,
+        order: Object.keys(screens).length + 1,
+        mobile_style: { ...DEFAULT_SCREEN_STYLE },
+        desktop_style: { ...DEFAULT_SCREEN_STYLE },
+        mobile_children: {},
+        desktop_children: {}
+      }
+    };
 
+    // Make API call to create screen
+    let url = `${AppID}/_screens`;
+    const response = await CreateDataToAPI(url, screenData);
+    
+    if (response && response.id) {
+      // Add to local state with server-generated ID
+      const newScreen = {
+        ...screenData.configs,
+        id: response.id,
+        screen_name: formData.name
+      };
+      
+      screens[response.id] = newScreen;
+      
+      // Update screen names list
+      const existingList = screenNamesList.peek();
+      screenNamesList.value = [
+        ...existingList,
+        { name: formData.name, id: response.id, order: newScreen.order }
+      ];
+      
+      // Set as active screen
+      activeScreen.value = response.id;
+      SetCurrentScreen();
+      
+      console.log("Screen created successfully:", response.id);
+      return response.id;
+    } else {
+      throw new Error("Invalid response from server");
+    }
+    
+  } catch (error) {
+    console.error("Error creating screen:", error);
+    apiError.value = "Failed to create screen";
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+}
 
-function SetCurrentScreen() {
-  let id = activeScreen.value;
-  if (screens[id] === undefined) {
+/**
+ * Update a specific screen via API
+ */
+async function UpdateScreen(screenId) {
+  try {
+    isLoading.value = true;
+    apiError.value = null;
+    
+    const screen = screens[screenId];
+    if (!screen) {
+      throw new Error("Screen not found");
+    }
+
+    const updateData = {
+      screen_name: screen.screen_name,
+      configs: {
+        ...screen,
+        // Ensure we're saving the current active elements if this is the active screen
+        ...(screenId === activeScreen.value && {
+          [screenViewKey.value === DESIGN_VIEWS.SMARTPHONE ? 'mobile_children' : 'desktop_children']: 
+            SerializeActiveElements()
+        })
+      }
+    };
+
+    let url = `${AppID}/_screens?where=id=${screenId}`;
+    await UpdateDataToAPI(url, updateData);
+    
+    // Remove from unsaved changes
+    const currentUnsaved = new Set(unsavedScreens.value);
+    currentUnsaved.delete(screenId);
+    unsavedScreens.value = currentUnsaved;
+    
+    console.log("Screen updated successfully:", screenId);
+    return true;
+    
+  } catch (error) {
+    console.error("Error updating screen:", error);
+    apiError.value = "Failed to update screen";
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+/**
+ * Delete a screen via API
+ */
+async function DeleteScreen(screenId) {
+  try {
+    isLoading.value = true;
+    apiError.value = null;
+    
+    let url = `${AppID}/_screens?where=id=${screenId}`;
+    await DeleteDataFromAPI(url);
+    
+    // Remove from local state
+    delete screens[screenId];
+    
+    // Update screen names list
+    const updatedList = screenNamesList.value.filter(item => item.id !== screenId);
+    screenNamesList.value = updatedList;
+    
+    // Remove from unsaved changes
+    const currentUnsaved = new Set(unsavedScreens.value);
+    currentUnsaved.delete(screenId);
+    unsavedScreens.value = currentUnsaved;
+    
+    // If this was the active screen, clear it
+    if (activeScreen.value === screenId) {
+      activeScreen.value = "";
+      activeScreenElements = {};
+      activeElement.value = "";
+    }
+    
+    console.log("Screen deleted successfully:", screenId);
+    return true;
+    
+  } catch (error) {
+    console.error("Error deleting screen:", error);
+    apiError.value = "Failed to delete screen";
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+/**
+ * Update only the currently active screen
+ */
+async function SyncActiveScreen() {
+  const activeId = activeScreen.value;
+  if (!activeId) {
+    console.warn("No active screen to sync");
     return;
   }
-  let key = "mobile_children";
-  let otherkey = "desktop_children";
-  if(screenView.value !== "smartphone") {
-    key = "desktop_children";
-    otherkey = "mobile_children"
+  
+  try {
+    await UpdateScreen(activeId);
+    console.log("Active screen synced successfully");
+  } catch (error) {
+    console.error("Failed to sync active screen:", error);
+    throw error;
   }
-  let elements = JSON.parse(JSON.stringify(screens[id][key]));
-  if(IsEmptyMap(elements)) {
+}
 
-    let elements = JSON.parse(JSON.stringify(screens[id][otherkey]));
-    if(!IsEmptyMap(elements)) {
-      screens[id]["_change_type"] = screens[id]["_change_type"] || "update";
-      screens[id][key] = JSON.parse(JSON.stringify(elements));
+/**
+ * Sync all screens that have unsaved changes
+ */
+async function SyncAllUnsavedScreens() {
+  const unsavedIds = Array.from(unsavedScreens.value);
+  if (unsavedIds.length === 0) {
+    console.log("No unsaved screens to sync");
+    return;
+  }
+  
+  try {
+    const promises = unsavedIds.map(id => UpdateScreen(id));
+    await Promise.all(promises);
+    console.log("All unsaved screens synced successfully");
+  } catch (error) {
+    console.error("Failed to sync some screens:", error);
+    throw error;
+  }
+}
+
+/**
+ * Set active screen elements based on current screen and design view
+ */
+function SetCurrentScreen() {
+  const screenId = activeScreen.peek();
+  const curScreen = screens[screenId];
+  const designView = screenViewKey.peek();
+  
+  if (!curScreen) {
+    activeScreenElements = {};
+    return;
+  }
+
+  let elements = {};
+  const mobileKey = 'mobile_children';
+  const desktopKey = 'desktop_children';
+  
+  if (designView === DESIGN_VIEWS.SMARTPHONE) {
+    elements = JSON.parse(JSON.stringify(curScreen[mobileKey] || {}));
+    // Fallback to desktop if mobile is empty
+    if (IsObjectEmpty(elements) && !IsObjectEmpty(curScreen[desktopKey])) {
+      elements = JSON.parse(JSON.stringify(curScreen[desktopKey]));
+      curScreen[mobileKey] = JSON.parse(JSON.stringify(elements));
+      MarkScreenAsChanged(screenId);
+    }
+  } else {
+    elements = JSON.parse(JSON.stringify(curScreen[desktopKey] || {}));
+    // Fallback to mobile if desktop is empty
+    if (IsObjectEmpty(elements) && !IsObjectEmpty(curScreen[mobileKey])) {
+      elements = JSON.parse(JSON.stringify(curScreen[mobileKey]));
+      curScreen[desktopKey] = JSON.parse(JSON.stringify(elements));
+      MarkScreenAsChanged(screenId);
     }
   }
-  let newElements = {};
-  for(const key in elements) {
-    newElements[key] = signal({...elements[key]});
-  }
-  localStorage.setItem("screen_config",JSON.stringify(screens));
-  screenElements = {...newElements};
-  screenElementAdded.value = id;
+
+  // Convert to signals
+  activeScreenElements = {};
+  Object.entries(elements).forEach(([key, value]) => {
+    activeScreenElements[key] = signal({ ...value });
+  });
+
+  screenElementAdded.value = screenId;
+  screenElementsSorted.value = generateUID();
 }
-const handleDrop = (data, parentId = null) => {
-  console.log("called handle drop:",data, parentId);
-  let i = generateUID();
-  let myconfig = {};
-  let type = data.data.type;
-  let title = data.data.value;
-  if(type === "user_template") {
-    handleUserTemplateDrop(data);
+
+/**
+ * Handle dropping elements into screen
+ */
+function handleDrop(data, parentId = null) {
+  console.log("Called handle drop:", data, parentId);
+  
+  const elementId = generateUID();
+  const { type, value: title } = data.data;
+  
+  if (type === "user_template") {
+    HandleUserTemplateDrop(data);
     return;
   }
-  if(type === "primitive") {
-    myconfig = JSON.parse(JSON.stringify(PrimitivesStylesMap[title]));
-  } else if(type === "container") {
-    myconfig = JSON.parse(JSON.stringify(ContainersStylesMap[title]));
+  
+  let config = {};
+  
+  // Get element configuration
+  if (type === "primitive") {
+    config = JSON.parse(JSON.stringify(PrimitivesStylesMap[title] || {}));
+  } else if (type === "container") {
+    config = JSON.parse(JSON.stringify(ContainersStylesMap[title] || {}));
   }
-    const newItem = {
-    id: i,
+
+  const newItem = {
+    id: elementId,
     type: type,
     template: "element",
     title: title,
-    "parent_container":{...containerBounds},
+    parent_container: { ...CONTAINER_BOUNDS },
     parent: parentId,
     children: [],
-    ...myconfig,
+    ...config,
   };
-  AddChildrensToScreenElements([newItem], parentId);
-};
 
-
-function AddChildrensToScreenElements( newitems, parentId) {
-  if(newitems === undefined) {
-    return;
-  }
-  for(var i=0;i<newitems.length;i++) {
-    let newItem = newitems[i];
-    if (parentId !== null && parentId !== "screen") {
-        let parentElement = screenElements[parentId];
-        parentElement.value.children.push(newItem.id);
-        newItem.parent = parentId;
-        screenElements[newItem.id] = signal(newItem);
-        screenElements[newItem.id].value = {...newItem}; 
-        screenElements[parentId].value = {...parentElement.value};
-    } else {
-      let curLength = Object.keys(screenElements).length + 1;
-      newItem["order"] = curLength;
-      screenElements[newItem.id] = signal(newItem);
-      screenElements[newItem.id].value = {...newItem}; 
-    }
-  }
-let temp = screens[activeScreen.value];
-console.log("temp screens after drop:",temp);
-if(temp !== undefined) {
-  let key = "mobile_children";
-  if(screenView.peek() !== "smartphone") {
-    key = "desktop_children";
-  }
-  temp[key] = JSON.parse(JSON.stringify(screenElements));
-  screenViewKey = key;
-  screens[activeScreen.value] = temp;
-  screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
-}
-screenElementAdded.value = generateUID();
-screenElementsSorted.value = generateUID();
-console.log("new screens after drop:",screens);
-localStorage.setItem("screen_config", JSON.stringify(screens));
+  AddChildrenToScreenElements([newItem], parentId);
 }
 
-function handleUserTemplateDrop(data) {
-  console.log("called handle User Template Drop:",data);
-  let innerdata = data.data;
-  let tempID = innerdata["id"];
-  let mytemplate = JSON.parse(JSON.stringify(global_templates[tempID]));
-  let myelement = data["dropElementData"]["element"];
-  let currentView = screenView.value;
-  let key = "desktop_children";
-  if(currentView === "smartphone") {
-    key = "mobile_children";
-  }
-  let elements = mytemplate[key] || {};
-  let myelementArray = sortObjectByOrder(elements);
-  let newelements = [];
-  var idlist = [];
-  let newtempID = generateUID();
-  for(var i=0;i<myelementArray.length;i++) {
-    var curelement = myelementArray[i];
-    let newid = generateUID();
-
-    curelement["id"] = newid;
-    console.log("current element:", curelement);
-    if(curelement["parent"] === undefined || curelement["parent"] === null || curelement["parent"] === "screen" || curelement["parent"] === "") {
-      curelement["parent"] = newtempID;
+/**
+ * Handle user template drop
+ */
+function HandleUserTemplateDrop(data) {
+  console.log("Called handle User Template Drop:", data);
+  
+  const innerData = data.data;
+  const tempID = innerData.id;
+  const myTemplate = JSON.parse(JSON.stringify(global_templates[tempID]));
+  const myElement = data.dropElementData?.element;
+  const currentView = screenViewKey.value;
+  const key = currentView === DESIGN_VIEWS.SMARTPHONE ? "mobile_children" : "desktop_children";
+  const elements = myTemplate[key] || {};
+  const myElementArray = sortObjectByOrder(elements);
+  const newElements = [];
+  const idList = [];
+  const newTempID = generateUID();
+  
+  myElementArray.forEach(curElement => {
+    const newId = generateUID();
+    curElement.id = newId;
+    
+    if (!curElement.parent || curElement.parent === "screen" || curElement.parent === "") {
+      curElement.parent = newTempID;
     }
-    idlist.push(newid);
-    newelements.push(curelement);
-  }
-  let parent = null;
-  if(myelement !== "screen") {
-    parent = myelement;
-  }
-  var newtemplateObj = {
-    "id": newtempID,
+    
+    idList.push(newId);
+    newElements.push(curElement);
+  });
+  
+  const parent = myElement !== "screen" ? myElement : null;
+  
+  const newTemplateObj = {
+    id: newTempID,
     type: "user_template",
     template: "user_template",
     title: "user_template",
-    "parent_container":{...containerBounds},
+    parent_container: { ...CONTAINER_BOUNDS },
     parent: parent,
-    children: [...idlist],
+    children: [...idList],
     configs: {
       style: {},
       data_source: {},
-      onClick: {"actions": [], "code": ""},
-      onDoubleClick:  {"actions": [], "code": ""},
-      onHover:  {"actions": [], "code": ""},
-      onHoverEnter:  {"actions": [], "code": ""},
-      onHoverLeave: {"actions": [], "code": ""},
-      valueCode:  {"actions": [], "code": ""},
-      childrenCode: {"actions": [], "code": ""},
+      onClick: { actions: [], code: "" },
+      onDoubleClick: { actions: [], code: "" },
+      onHover: { actions: [], code: "" },
+      onHoverEnter: { actions: [], code: "" },
+      onHoverLeave: { actions: [], code: "" },
+      valueCode: { actions: [], code: "" },
+      childrenCode: { actions: [], code: "" },
     },
-
   };
 
-  let newarr = [newtemplateObj, ...newelements];
-  console.log("new array:", newarr);
-  AddChildrensToScreenElements([...newarr], myelement);
+  const newArray = [newTemplateObj, ...newElements];
+  console.log("New array:", newArray);
+  AddChildrenToScreenElements(newArray, myElement);
 }
 
-function CreatenewScreen(data) {
-  let name = data["name"];
-  let length = Object.keys(screens).length;
-  let id = generateUID();
-  let newScreenData = {"id": id, 
-    "_change_type": "add","screen_name": name, "mobile_style": {...screenStyle}, 
-    "desktop_style": {...screenStyle},"mobile_children": {}, "desktop_children": {},
-    "order":length};
-  screens[id] = newScreenData;
-  screenElements = {};
-  let existingnames = screenLeftnamesAndIds.peek();
-  existingnames.push({"name": name, "id":id});
-  screenLeftnamesAndIds.value = [...existingnames];
-  localStorage.setItem("screen_config",JSON.stringify(screens));
-  screenElementAdded.value = id;
-}
-
-
-function DeleteScreenElement(id) {
-  console.log("existing:",screenElements[id]);
-  delete screenElements[id];
-  let keys = Object.keys(screenElements);
-  for(var i=0;i<keys.length;i++) {
-    let currentElement = screenElements[keys[i]].value;
-    let children = currentElement["children"];
-    let newChildren = [];
-    for(var j=0;j<children.length;j++) {
-      if(children[j] === id) {
-        continue
+/**
+ * Add children to screen elements
+ */
+function AddChildrenToScreenElements(newItems, parentId) {
+  if (!newItems) return;
+  
+  newItems.forEach(newItem => {
+    if (parentId !== null && parentId !== "screen") {
+      const parentElement = activeScreenElements[parentId];
+      if (parentElement) {
+        parentElement.value.children.push(newItem.id);
+        newItem.parent = parentId;
+        activeScreenElements[newItem.id] = signal(newItem);
+        // Trigger reactivity
+        activeScreenElements[parentId].value = { ...parentElement.value };
       }
-      newChildren.push(children[j]);
+    } else {
+      const curLength = Object.keys(activeScreenElements).length + 1;
+      newItem.order = curLength;
+      activeScreenElements[newItem.id] = signal(newItem);
     }
-    if(newChildren.length > 0) {
-      currentElement["children"] = newChildren;
-      screenElements[keys[i]].value = currentElement;
-    } 
-    if(children.length > 0) {
-      currentElement["children"] = newChildren;
-      screenElements[keys[i]].value = currentElement;
-    }
+  });
+
+  // Update screen and mark as changed
+  const screenId = activeScreen.value;
+  if (screenId && screens[screenId]) {
+    const key = screenViewKey.peek() === DESIGN_VIEWS.SMARTPHONE ? 'mobile_children' : 'desktop_children';
+    screens[screenId][key] = SerializeActiveElements();
+    MarkScreenAsChanged(screenId);
   }
-  screens[activeScreen.value][screenViewKey] = JSON.parse(JSON.stringify(screenElements));
-  screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
+
+  screenElementAdded.value = generateUID();
+  screenElementsSorted.value = generateUID();
+  
+  console.log("Elements added to screen");
+}
+
+/**
+ * Delete screen element
+ */
+function DeleteScreenElement(elementId) {
+  console.log("Deleting element:", elementId);
+  
+  if (!activeScreenElements[elementId]) {
+    console.warn("Element not found:", elementId);
+    return;
+  }
+
+  // Remove element
+  delete activeScreenElements[elementId];
+
+  // Remove from parent's children arrays
+  Object.values(activeScreenElements).forEach(elementSignal => {
+    const element = elementSignal.value;
+    if (element.children && element.children.includes(elementId)) {
+      element.children = element.children.filter(childId => childId !== elementId);
+      elementSignal.value = { ...element };
+    }
+  });
+
+  // Update screen and mark as changed
+  const screenId = activeScreen.value;
+  if (screenId && screens[screenId]) {
+    const key = screenViewKey.value === DESIGN_VIEWS.SMARTPHONE ? 'mobile_children' : 'desktop_children';
+    screens[screenId][key] = SerializeActiveElements();
+    MarkScreenAsChanged(screenId);
+  }
+
   screenElementAdded.value = generateUID();
   screenElementsSorted.value = generateUID();
 }
 
-
-function CallbackExecutor(key , input) {
-  actionsmap[key](input);
+/**
+ * Mark screen as having unsaved changes
+ */
+function MarkScreenAsChanged(screenId) {
+  const currentUnsaved = new Set(unsavedScreens.value);
+  currentUnsaved.add(screenId);
+  unsavedScreens.value = currentUnsaved;
 }
 
-function IsEmptyMap(curmap) {
-  if(curmap === undefined || curmap === null) {
-    return true;
-  }
-  if(Object.keys(curmap).length === 0) {
-    return true;
-  }
-  return false;
+/**
+ * Check if screen has unsaved changes
+ */
+function HasUnsavedChanges(screenId) {
+  return unsavedScreens.value.has(screenId);
 }
 
-export {tabDataSignal , tabSignal, 
-  isHoveredSignal,screenElements ,activeTab,
-  activeConfigTab,handleDrop,activeElement,
-  CallbackExecutor, screenElementAdded,
-  activeScreen, screenView,screenLeftTabSignal,screenLeftnamesAndIds,
-   SetCurrentScreen, CreatenewScreen, screens, LoadScreens, screenViewKey, DeleteScreenElement, screenElementsSorted
+/**
+ * Serialize active elements to plain objects
+ */
+function SerializeActiveElements() {
+  const serialized = {};
+  Object.entries(activeScreenElements).forEach(([key, signal]) => {
+    serialized[key] = signal.value;
+  });
+  return serialized;
+}
+
+/**
+ * Utility function to check if object is empty
+ */
+function IsObjectEmpty(object) {
+  return !object || Object.keys(object).length === 0;
+}
+
+// Export all functions and signals
+export {
+  // State
+  screens,
+  screenNamesList,
+  tabDataSignal,
+  tabSignal,
+  activeTab,
+  activeConfigTab,
+  isHoveredSignal,
+  activeElement,
+  activeScreen,
+  screenViewKey,
+  screenLeftTabSignal,
+  activeScreenElements,
+  screenElementAdded,
+  screenElementsSorted,
+  isScreenChanged,
+  unsavedScreens,
+  isLoading,
+  apiError,
+  
+  // CRUD Operations
+  LoadScreens,
+  UpdateScreen,
+  DeleteScreen,
+  SyncActiveScreen,
+  SyncAllUnsavedScreens,
+  
+  // Screen Management
+  SetCurrentScreen,
+  HandleUserTemplateDrop,
+  AddChildrenToScreenElements,
+  DeleteScreenElement,
+  MarkScreenAsChanged,
+  HasUnsavedChanges,
+  handleDrop,
+  CreatenewScreen,
+
+  // Constants
+  DESIGN_VIEWS
 };

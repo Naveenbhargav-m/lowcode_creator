@@ -1,14 +1,13 @@
 import { useEffect } from "preact/hooks";
-import { TemplateView } from "../template_builder/template_builder_view";
 import { ScreenRightPanel } from "./screen_config_panel";
 import { ScreenLeftPanel } from "./screen_left_panel";
-import { activeScreen, activeTab, LoadScreens, screenLeftnamesAndIds, screenLeftTabSignal, screens, SetCurrentScreen } from "./screen_state";
+import { LoadScreens, screenNamesList, screenLeftTabSignal, screens } from "./screen_state";
 import {ScreenBuilderArea} from "./screen-areas_2";
 import { TemplateOptionTabs, TemplatePage } from "../template_builder/templates_page";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncData } from "../api/api_syncer";
-import { variableMap } from "../states/global_state";
 import { useAuthCheck } from "../hooks/hooks";
+import { ScreensListPanels } from "./screens_list";
 
 let config = {
   paths: ["id", "tabs", "tab"],
@@ -45,7 +44,7 @@ function ScreenView() {
             </div>
             {
                 screenLeftTabSignal.value === "screens" ?
-                <ScreensList elementsList={screenLeftnamesAndIds.value} signal={activeScreen} callBack={(id) => SetCurrentScreen()}/> :
+                <ScreensListPanels elementsList={screenNamesList.value}/>                :
                 <ScreenLeftPanel config={{ tabs_path: config["paths"], views_path: config["views_path"] }}
                 value={{}}
                 actions={{}}/>
@@ -65,46 +64,4 @@ function ScreenView() {
 }
 
 
-
-function ScreensList({elementsList, signal, callBack = (id) => {}}) {
-  return (
-  <div class="scrollable-div pt-4">
-      {elementsList.map((item) => {
-          console.log("item:",item);
-          return (
-              <ScreenNameTile name={item["name"]} id={item["id"]} signal={signal} callBack={callBack}/>
-          );
-      })}
-  </div>);
-}
-
-
-function ScreenNameTile({ name, id , signal, callBack = (id) => {}}) {
-
-  const tileStyle = {
-      padding: "10px",
-      borderStyle: "solid",
-      borderWidth: "1px",
-      color:  signal.value == id ? "white":"black",
-      backgroundColor :signal.value == id ? "black":"white",
-      borderRadius: "20px",
-      fontSize: "0.8em",
-      margin: "8px 4px",
-      borderColor: "#ccc", // Default border color
-      transition: "border-color 0.3s ease-in-out", // Smooth transition
-  };
-
-  return (
-      <div
-          style={tileStyle}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#555")} // Darker on hover
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")} // Back to default
-          onClick={(e)=> {e.stopPropagation(); signal.value = id; callBack(id)}}
-      >
-          <p>{name}</p>
-      </div>
-  );
-}
-
-
-export {ScreenPage, ScreensList, ScreenNameTile};
+export {ScreenPage};

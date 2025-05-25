@@ -1,7 +1,7 @@
 import { effect, signal } from "@preact/signals";
 import { FunctionExecutor } from "../../states/common_actions";
 import { variableKeys, variableMap } from "../../states/global_state";
-import { activeElement, handleDrop, screenElements } from "../../screen_builder/screen_state";
+import { activeElement, activeScreenElements, handleDrop } from "../../screen_builder/screen_state";
 import { Drop } from "../custom/Drop";
 import { renderPrimitiveElement } from "../primitives/primitiveMapper";
 import { renderContainer } from "../containers/containers_mapper";
@@ -29,7 +29,7 @@ export function renderTemplate(layoutItem, dropCallBack, activeSignal) {
         childrenSignal.value = newValue.children;
       }
     });
-    let childElements = childrenSignal.value.map(childId => screenElements[childId]?.value);
+    let childElements = childrenSignal.value.map(childId => activeScreenElements[childId]?.value);
     const renderChildren = (children) =>
       children.map((child, ind) => (
           <div style={{ display: "contents" }} onClick={() => { activeElement.value = child.i }}>

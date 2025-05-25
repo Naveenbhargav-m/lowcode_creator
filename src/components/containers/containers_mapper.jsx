@@ -1,6 +1,6 @@
 import { renderPrimitiveElement } from "../primitives/primitiveMapper";
 import { Card, GridView, Row, Column, Container, ListView, ScrollArea, Carousel } from "./container_components";
-import { activeScreen, DeleteScreenElement, screenElements, screens, screenViewKey } from "../../screen_builder/screen_state";
+import { activeScreen, DeleteScreenElement, activeScreenElements, screens, screenViewKey } from "../../screen_builder/screen_state";
 import { Drop } from "../custom/Drop";
 import { Drawer, HoverModal, PopupModal } from "../model_containers/model_components";
 import { variableKeys, variableMap } from '../../states/global_state';
@@ -13,7 +13,7 @@ import { SelectableComponent } from "../custom/selectAble";
 
 
 function UpdateScreenElementChildren(newchildren, elementID) {
-  let element = screenElements[elementID];
+  let element = activeScreenElements[elementID];
   if(element === undefined) {
     return;
   }
@@ -37,8 +37,8 @@ function UpdateScreenElementChildren(newchildren, elementID) {
   let curScreen = activeScreen.value;
   elementVal["children"] = childrenSorted;
   element.value = {...elementVal};
-  screenElements[elementID] = element;
-  screens[curScreen][screenViewKey] = screenElements;
+  activeScreenElements[elementID] = element;
+  screens[curScreen][screenViewKey.value] = activeScreenElements;
   screens[curScreen]["_change_type"] = "update";
 }
 

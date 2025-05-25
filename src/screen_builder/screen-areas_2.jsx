@@ -1,7 +1,7 @@
 import { Drop } from "../components/custom/Drop";
 import { renderPrimitiveElement } from "../components/primitives/primitiveMapper";
 import { renderContainer } from "../components/containers/containers_mapper";
-import { screenElements, handleDrop, screenElementAdded, screenView, CreatenewScreen, activeElement, SetCurrentScreen, activeScreen, screens, screenViewKey, DeleteScreenElement, screenElementsSorted  } from "./screen_state";
+import { activeScreenElements, handleDrop, screenElementAdded, screenViewKey, CreatenewScreen, activeElement, SetCurrentScreen, activeScreen, screens, DeleteScreenElement, screenElementsSorted  } from "./screen_state";
 import { DesktopMockup } from "./screen_components";
 import { renderTemplate } from "../components/templates/template_mapper";
 import { IconGroup } from "../components/primitives/general_components";
@@ -79,14 +79,14 @@ function ScreenBuilderArea() {
   <div>
     <CreateAndbuttonbar 
     iconNames={["smartphone", "app-window-mac"]} 
-    onIconChange={(name) => {screenView.value = name; SetCurrentScreen();}}
+    onIconChange={(name) => {screenViewKey.value = name; SetCurrentScreen();}}
     formLabel={"Create New Screen"}
     placeHolder={"Screen Name:"}
     buttonLabel={"Create Screen"}
     buttonCallBack={(data) => {CreatenewScreen(data);}}
      />
   <div className="p-4 flex justify-center" style={{height:"94vh"}}>
-      {screenView.value == "smartphone" ? <MobileView /> : <DesktopView />}
+      {screenViewKey.value == "smartphone" ? <MobileView /> : <DesktopView />}
     </div>
     </div>
     );
@@ -117,7 +117,7 @@ function MobileView() {
  const items = useSignal([]);
  useEffect(() => {
     console.log("rerendering:");
-    const elementsArray = Object.values(screenElements);
+    const elementsArray = Object.values(activeScreenElements);
     const filteredItems = elementsArray.filter((item) => !item.value.parent);
     const sortedItems = filteredItems.sort((a, b) => {
                           const orderA = a.value.order ?? Infinity;
@@ -126,7 +126,7 @@ function MobileView() {
     console.log("sorted Items before rendering:",sortedItems);
     items.value = sortedItems;
     screenElementAdded.value = generateUID();
- }, [screenElements, screenElementsSorted.value]);
+ }, [activeScreenElements, screenElementsSorted.value]);
 
 
  let sortableItems = useComputed(() => items.value.map((item) => ({
@@ -150,8 +150,8 @@ function MobileView() {
       let cur = sortedItems[i];
       let id = cur.value["id"]
       cur.value["order"] = i;
-      screenElements[id].value = {...cur.value};
-      screens[curScreen][screenViewKey] = screenElements;
+      activeScreenElements[id].value = {...cur.value};
+      screens[curScreen][screenViewKey.value] = activeScreenElements;
       screens[curScreen]["_change_type"] = screens[curScreen]["_change_type"] || "update";;
       updatedItems.push(cur);
     }
@@ -193,7 +193,7 @@ function MobileView() {
                           id={item.value["id"]}
                           isSelected={activeElement.value === item.value.id}
                           >
-                      {RenderElement(item.peek(), handleDrop, activeElement, "screen", screenElements)}
+                      {RenderElement(item.peek(), handleDrop, activeElement, "screen", activeScreenElements)}
                       </SelectableComponent>
                       </div>);
                   }
@@ -231,7 +231,7 @@ function DesktopView() {
   const items = useSignal([]);
   useEffect(() => {
     console.log("Desktop rerendering:");
-    const elementsArray = Object.values(screenElements);
+    const elementsArray = Object.values(activeScreenElements);
     const filteredItems = elementsArray.filter((item) => !item.value.parent);
     const sortedItems = filteredItems.sort((a, b) => {
                           const orderA = a.value.order ?? Infinity;
@@ -240,7 +240,7 @@ function DesktopView() {
     console.log("Desktop sorted Items before rendering:", sortedItems);
     items.value = sortedItems;
     screenElementAdded.value = generateUID();
-  }, [screenElements, screenElementsSorted.value]);
+  }, [activeScreenElements, screenElementsSorted.value]);
 
   let sortableItems = useComputed(() => items.value.map((item) => ({
     id: item.value.id,
@@ -262,8 +262,8 @@ function DesktopView() {
       let cur = sortedItems[i];
       let id = cur.value["id"]
       cur.value["order"] = i;
-      screenElements[id].value = {...cur.value};
-      screens[curScreen][screenViewKey] = screenElements;
+      activeScreenElements[id].value = {...cur.value};
+      screens[curScreen][screenViewKey.value] = activeScreenElements;
       screens[curScreen]["_change_type"] = screens[curScreen]["_change_type"] || "update";
       updatedItems.push(cur);
     }
@@ -302,7 +302,7 @@ function DesktopView() {
                           id={item.value["id"]}
                           isSelected={activeElement.value === item.value.id}
                           >
-                      {RenderElement(item.peek(), handleDrop, activeElement, "screen", screenElements)}
+                      {RenderElement(item.peek(), handleDrop, activeElement, "screen", activeScreenElements)}
                       </SelectableComponent>
                       </div>);
                   }
