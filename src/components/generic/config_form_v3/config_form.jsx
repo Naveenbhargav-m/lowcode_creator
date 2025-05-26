@@ -2,6 +2,7 @@ import "./config_form.css";
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Code, Eye } from 'lucide-react';
 import Demo, { Accordion, ActionsConfig, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, GlobalSelectField, NumberField, OptionsListField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
+import DataMappingComponent from "../dynamic_data_picker/data_picker";
 
 
 // Helper functions for handling nested objects
@@ -291,6 +292,9 @@ export  function ConfigFormV3({
           handleFieldChange(dynamicField.id, value);
         }}/>
         break;
+      case "field_mapper":
+          fieldComponent = <DataMappingComponent />
+          break;
       case 'data_picker':
         fieldComponent = <GlobalSelectField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>
         break;
