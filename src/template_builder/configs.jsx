@@ -111,6 +111,12 @@ export const TemplateElementConfigFormSchema = {
       "type": "actions_config",
       "path": "configs.events",
       "label": "Actions"
+    },
+    {
+      "id": "configs.datasource",
+      "type": "field_mapper",
+      "path": "configs.datasource",
+      "label": "Data Mapping"
     }
 ],
   
@@ -144,6 +150,13 @@ export const TemplateElementConfigFormSchema = {
       "id": "actions",
       "title": "actions configs",
       "fieldIds": ["configs.events"],
+    },
+    {
+      "id": "datasource",
+      "title": "data_source",
+      "fieldIds": [
+        "configs.datasource"
+      ],
     }
   ],
   
@@ -158,6 +171,11 @@ export const TemplateElementConfigFormSchema = {
       id: 'advanced',
       title: 'Advanced',
       sectionIds: ['actions']
+    },
+    {
+      id: 'Data',
+      title: 'Data',
+      sectionIds: ['datasource']
     },
   ],
   
