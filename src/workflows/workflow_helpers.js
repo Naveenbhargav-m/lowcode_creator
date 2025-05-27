@@ -1,4 +1,4 @@
-import { blockFormRequirements, blocksRequirements } from "./blocks_requirements";
+import { blockFormRequirementsV2, blocksRequirements } from "./blocks_requirements";
 import { workflowsData } from "./workflow_state";
 
 
@@ -16,7 +16,7 @@ function GetWorkflowFormConfig(activeworkflow, activeblock) {
     response["data"] = currentBlockData;
     let blockType = activeblock["type"];
     let requirements = blocksRequirements[blockType];
-    let formRequirements = blockFormRequirements[blockType]; 
+    let formRequirements = blockFormRequirementsV2[blockType]; 
     response["config"] = requirements;
     response["form_requirements"] = formRequirements;
     return response;
@@ -68,6 +68,7 @@ function generateWorkflowSchema(reactFlowConfig) {
     });
     
     // Set start block (first node connected to the start node)
+    // @ts-ignore
     if (startNodeId && connections[startNodeId] && connections[startNodeId].length > 0) {
       schema.start_block = connections[startNodeId][0];
     }
