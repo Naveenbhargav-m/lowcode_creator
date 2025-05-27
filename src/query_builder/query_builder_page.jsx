@@ -109,7 +109,7 @@ function QueryBuilderPage() {
                         apiError={apiError?.value}
                         showLegacySync={true}
                         showProgressBar={true}
-                        compact={true}
+                        compact={false}
                     />
                 </div>
 

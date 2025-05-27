@@ -1,6 +1,22 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
 import { ChevronRight, Settings, X, Link, MapPin, Check, Workflow, Search, Filter, User, Database, Type, Hash } from 'lucide-react';
 
+
+
+
+/*
+
+  What are all the blocks that used across each other.
+  forms, workflows.
+  queries, forms.
+  workflows , queries.
+  queries , templates. 
+  queries , tables.
+  forms , tables.
+  workflow state, tables.
+
+  forms , workflows, queries, tables, templates, global state 
+*/
 // Constants and Data
 const generateFormFields = (count) => {
   const types = ['text', 'email', 'tel', 'number', 'select', 'textarea', 'date', 'checkbox'];

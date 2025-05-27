@@ -1,10 +1,11 @@
 import { addEdge, ConnectionLineType, ConnectionMode, ReactFlow, useEdgesState, useNodesState, Controls, Background, Panel } from "@xyflow/react";
-import { activeFloweUpdated, activeWorkFlow, HandleWorkFlowBlockDrop, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflows, workflowsData } from "./workflow_state";
+import { activeFloweUpdated, activeWorkFlow, apiError, HandleWorkFlowBlockDrop, HasUnsavedChanges, isLoading, LoadWorkflows, SyncActiveWorkflow, SyncAllUnsavedWorkflows, unsavedWorkflows, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflownames, workflows, workflowsData } from "./workflow_state";
 import { useCallback, useEffect, useState, useRef } from "preact/hooks";
 import { CodeBlock, Condition, CreateTopic, DeleteRow, DeleteTopic, End, HttpCall, InsertRow, Loop, ReadRow, Start, SubscribeTopic, UnsubscribeTopic, UpdateRow } from "./block_ components";
 import { Drop } from "../components/custom/Drop";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncWorkflowData } from "./workflow_api";
+import { ModernSyncControls } from "../screen_builder/screen_components";
 
 let nodeTypes = {
   "insert_row": InsertRow,
@@ -124,15 +125,60 @@ function FlowBuilder() {
     },
   };
 
+  const [syncMode, setSyncMode] = useState("active"); // "active" or "all"
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    useEffect(() => {
+        LoadWorkflows();
+    }, []);
+
+    const handleSync = async () => {
+        setIsSyncing(true);
+        try {
+            if (syncMode === "active") {
+                await SyncActiveWorkflow();
+            } else {
+                await SyncAllUnsavedWorkflows();
+            }
+        } catch (error) {
+            console.error("Sync failed:", error);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+    const handleDismissError = () => {
+        // You might want to implement a way to clear the error in your state
+        console.log("Error dismissed");
+    };
+
+    const unsavedCount = unsavedWorkflows.value.size;
+    const activeQueryHasChanges = activeWorkFlow.value && HasUnsavedChanges(activeWorkFlow.value);
+    const canSyncActive = activeWorkFlow.value && activeQueryHasChanges;
+    const canSyncAll = unsavedCount > 0;
+
   console.log("rendering the flow builder", nodes);
   return (
     <>
       <div style={{display:"flex", "flexDirection": "row-reverse", "justifyContent": "space-between", alignItems:"center"}}>
-        <SyncButton 
-          title={"sync"} 
-          onClick={(e) => {SyncWorkflowData();}} 
-          style={{marginRight:"40px", "marginTop":"10px"}}
-        />
+                      <ModernSyncControls
+                        onDismissError={handleDismissError}
+                        syncMode={syncMode}
+                        setSyncMode={setSyncMode}
+                        isSyncing={isSyncing}
+                        isLoading={isLoading?.value}
+                        activeScreen={activeWorkFlow.value.id}
+                        screenNamesList={workflownames.value}
+                        unsavedCount={unsavedCount}
+                        activeScreenHasChanges={activeQueryHasChanges}
+                        canSyncActive={canSyncActive}
+                        canSyncAll={canSyncAll}
+                        handleSync={handleSync}
+                        apiError={apiError?.value}
+                        showLegacySync={true}
+                        showProgressBar={true}
+                        compact={false}
+                      />
       </div>
       <Drop onDrop={(data) => {HandleWorkFlowBlockDrop(data)}} dropElementData={{"element":"screen"}} wrapParent={true}>
         <div style={{height:"90vh", width:"70vw"}}>
@@ -157,7 +203,7 @@ function FlowBuilder() {
             onSelectionChange={onSelectionChange}
             deleteKeyCode={['Delete', 'Backspace']}
             selectionOnDrag
-            selectionMode="partial"
+            selectionKeyCode="partial"
             multiSelectionKeyCode="Control"
           >
             {/* Controls for zoom, fit view */}

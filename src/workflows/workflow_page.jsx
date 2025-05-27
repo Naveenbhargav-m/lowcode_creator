@@ -24,7 +24,7 @@ function WorkFlowPage() {
         overflow: "hidden" // Prevent scrollbars at the page level
       }}>
         {/* Left panel - workflow list */}
-        <div style={{ width: "15vw", backgroundColor: "white", padding: "1rem", height: "100%" }}>
+        <div style={{ width: "20vw", backgroundColor: "white", padding: "1rem", height: "100%" }}>
           <WorkflowsList />
         </div>
         
