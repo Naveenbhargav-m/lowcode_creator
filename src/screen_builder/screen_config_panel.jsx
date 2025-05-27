@@ -1,7 +1,5 @@
-import { signal } from "@preact/signals"; // Assuming you have this import in your file
 import {activeElement, activeScreen, screenElementAdded, activeScreenElements, screens, screenViewKey } from "./screen_state";
 import { generateUID } from "../utils/helpers";
-import ConfigUpdater from "../components/generic/config_form";
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { TemplateElementConfigFormSchema } from "../template_builder/configs";
 import { data } from "autoprefixer";
