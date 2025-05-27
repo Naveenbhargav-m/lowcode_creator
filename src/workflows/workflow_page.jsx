@@ -43,7 +43,6 @@ function WorkFlowPage() {
           maxWidth: "calc(30vw)" // Ensure it doesn't grow beyond expected width
         }}>
           <WorkflowConfigFormPanel />
-          {/* <DynamicConfigForm blockConfig={blocksRequirements.insert_row} globalData={["table1", "table2"]} blockData={{}}/> */}
         </div>
       </div>
     );
