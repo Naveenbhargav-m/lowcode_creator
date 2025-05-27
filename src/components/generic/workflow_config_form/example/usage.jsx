@@ -36,13 +36,6 @@ const WorkflowConfigForm = ({ formConfigint, initialValuesInp, changeCallBack })
           <div>Pick a block</div>
         )
       }
-      
-      {/* <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-2">Current Configuration:</h2>
-        <pre className="bg-gray-100 p-4 rounded-md overflow-auto">
-          {JSON.stringify(formValues, null, 2)}
-        </pre>
-      </div> */}
     </div>
   );
 };
