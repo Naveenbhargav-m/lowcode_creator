@@ -167,6 +167,7 @@ function FlowBuilder() {
                         setSyncMode={setSyncMode}
                         isSyncing={isSyncing}
                         isLoading={isLoading?.value}
+                        // @ts-ignore
                         activeScreen={activeWorkFlow.value.id}
                         screenNamesList={workflownames.value}
                         unsavedCount={unsavedCount}
