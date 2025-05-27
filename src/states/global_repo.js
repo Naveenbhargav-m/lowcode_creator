@@ -19,7 +19,7 @@ let global_groups = {};
 let global_user_fields = {};
 
 let data_map = {};
-
+let data_map_v2 = {};
 // APPROACH 1: Using Promise.all (Recommended)
 async function InitGlobalData() {
     try {
@@ -34,36 +34,12 @@ async function InitGlobalData() {
         ]);
         
         // Now all data is loaded, create the data map
-        CreateDataMap();
+        CreateDataMapV2();
         console.log("All global data loaded and data map created:", data_map);
     } catch (error) {
         console.error("Error loading global data:", error);
     }
 }
-
-// APPROACH 2: Using a counter (Alternative)
-/*
-let loadingCounter = 0;
-const totalLoaders = 7; // Number of loading functions
-
-function InitGlobalData() {
-    LoadGlobalTemplates();
-    LoadGlobalScreens();
-    LoadGlobalForms();
-    LoadGlobalTables();
-    LoadGlobalViews();
-    LoadGlobalWorkflows();
-    LoadQueries();
-}
-
-function onLoadComplete() {
-    loadingCounter++;
-    if (loadingCounter === totalLoaders) {
-        CreateDataMap();
-        console.log("All global data loaded and data map created:", data_map);
-    }
-}
-*/
 
 async function LoadQueries() {
     try {
@@ -266,7 +242,8 @@ async function LoadGlobalWorkflows() {
     }
 }
 
-function CreateDataMap() {
+function CreateDataMapV2() {
+    // Original data map structure
     let tempmap = {
         "queries": [],
         "screens": [],
@@ -276,64 +253,241 @@ function CreateDataMap() {
         "templates": [],
     };
     
-    let mykeys = Object.keys(global_queries);
-    for(var i = 0; i < mykeys.length; i++) {
-        let name = global_queries[mykeys[i]]["name"]
-        var obj = {"id": mykeys[i], "name": name};
-        tempmap["queries"].push(obj); 
+    // Additional copy with enhanced structure and error handling
+    let enhanced_data_map = {
+        "queries": {
+            list: [],
+            map: {},
+            count: 0
+        },
+        "screens": {
+            list: [],
+            map: {},
+            count: 0
+        },
+        "forms": {
+            list: [],
+            map: {},
+            count: 0
+        },
+        "tables": {
+            list: [],
+            map: {},
+            fields_map: {},
+            count: 0
+        },
+        "workflows": {
+            list: [],
+            map: {},
+            count: 0
+        },
+        "templates": {
+            list: [],
+            map: {},
+            count: 0
+        },
+        "views": {
+            list: [],
+            map: {},
+            count: 0
+        }
+    };
+        // Helper function to safely get property
+        const safeGet = (obj, key, defaultValue = null) => {
+            try {
+                return obj && obj[key] !== undefined ? obj[key] : defaultValue;
+            } catch (e) {
+                return defaultValue;
+            }
+        };
+
+    // Process Queries
+    try {
+        let mykeys = Object.keys(global_queries || {});
+        for(var i = 0; i < mykeys.length; i++) {
+            let key = mykeys[i];
+            let query = global_queries[key];
+            let name = safeGet(query, "name", `Query ${i + 1}`);
+            
+            var obj = {"id": key, "name": name};
+            tempmap["queries"].push(obj);
+            
+            // Enhanced version
+            enhanced_data_map.queries.list.push(obj);
+            enhanced_data_map.queries.map[key] = {
+                ...obj,
+                raw_data: query
+            };
+        }
+        enhanced_data_map.queries.count = mykeys.length;
+    } catch (error) {
+        console.error("Error processing queries:", error);
     }
     
-    mykeys = Object.keys(global_screens);
-    console.log("global screens:", global_screens);
-    for(var i = 0; i < mykeys.length; i++) {
-        let name = global_screens[mykeys[i]]["name"]
-        var obj = {"id": mykeys[i], "name": name};
-        tempmap["screens"].push(obj); 
+    // Process Screens
+    try {
+        let mykeys = Object.keys(global_screens || {});
+        console.log("global screens:", global_screens);
+        for(var i = 0; i < mykeys.length; i++) {
+            let key = mykeys[i];
+            let screen = global_screens[key];
+            let name = safeGet(screen, "name", `Screen ${i + 1}`);
+            
+            var obj = {"id": key, "name": name};
+            tempmap["screens"].push(obj);
+            
+            // Enhanced version
+            enhanced_data_map.screens.list.push(obj);
+            enhanced_data_map.screens.map[key] = {
+                ...obj,
+                raw_data: screen
+            };
+        }
+        enhanced_data_map.screens.count = mykeys.length;
+    } catch (error) {
+        console.error("Error processing screens:", error);
     }
     
-    mykeys = Object.keys(global_forms);
-    console.log("global forms:", global_forms);
-    for(var i = 0; i < mykeys.length; i++) {
-        let name = global_forms[mykeys[i]]["name"]
-        var obj = {"id": mykeys[i], "name": name};
-        tempmap["forms"].push(obj); 
+    // Process Forms
+    try {
+        let mykeys = Object.keys(global_forms || {});
+        console.log("global forms:", global_forms);
+        for(var i = 0; i < mykeys.length; i++) {
+            let key = mykeys[i];
+            let form = global_forms[key];
+            let name = safeGet(form, "name", `Form ${i + 1}`);
+            
+            var obj = {"id": key, "name": name};
+            tempmap["forms"].push(obj);
+            
+            // Enhanced version
+            enhanced_data_map.forms.list.push(obj);
+            enhanced_data_map.forms.map[key] = {
+                ...obj,
+                raw_data: form
+            };
+        }
+        enhanced_data_map.forms.count = mykeys.length;
+    } catch (error) {
+        console.error("Error processing forms:", error);
     }
 
-    mykeys = Object.keys(global_tables);
-    for(var i = 0; i < mykeys.length; i++) {
-        let curtable = global_tables[mykeys[i]];
-        let tableName = curtable["name"];
-        
-        // Create array of field objects with name and id
-        let fieldsArray = curtable["fields"].map(field => ({
-            "name": field.name || field, // assuming field might be string or object
-            "id": field.name || field // assuming field might have id property
-        }));
-        tempmap["tables"][tableName] = fieldsArray;
+    // Process Tables
+    try {
+        let mykeys = Object.keys(global_tables || {});
+        for(var i = 0; i < mykeys.length; i++) {
+            let key = mykeys[i];
+            let curtable = global_tables[key];
+            let tableName = safeGet(curtable, "name", key);
+            
+            // Create array of field objects with name and id (original logic)
+            let fieldsArray = [];
+            try {
+                let fields = safeGet(curtable, "fields", []);
+                if (Array.isArray(fields)) {
+                    fieldsArray = fields.map(field => ({
+                        "name": field?.name || field || "unknown_field",
+                        "id": field?.name || field?.id || field || "unknown_field"
+                    }));
+                }
+            } catch (e) {
+                console.error("Error processing table fields:", e);
+                fieldsArray = [];
+            }
+            
+            tempmap["tables"][tableName] = fieldsArray;
+            
+            // Enhanced version
+            let tableObj = {"id": key, "name": tableName};
+            enhanced_data_map.tables.list.push(tableObj);
+            enhanced_data_map.tables.map[key] = {
+                ...tableObj,
+                fields: fieldsArray,
+                raw_data: curtable
+            };
+            enhanced_data_map.tables.fields_map[tableName] = fieldsArray;
+        }
+        enhanced_data_map.tables.count = mykeys.length;
+    } catch (error) {
+        console.error("Error processing tables:", error);
     }
 
-    mykeys = Object.keys(global_workflows);
-    for(var i = 0; i < mykeys.length; i++) {
-        let curtable = global_workflows[mykeys[i]];
-        let name = global_workflows[mykeys[i]]["name"];
-        var obj = {"id": mykeys[i], "name": name};
-        tempmap["workflows"].push(obj); 
+    // Process Workflows
+    try {
+        let mykeys = Object.keys(global_workflows || {});
+        for(var i = 0; i < mykeys.length; i++) {
+            let key = mykeys[i];
+            let workflow = global_workflows[key];
+            let name = safeGet(workflow, "name", `Workflow ${i + 1}`);
+            
+            var obj = {"id": key, "name": name};
+            tempmap["workflows"].push(obj);
+            
+            // Enhanced version
+            enhanced_data_map.workflows.list.push(obj);
+            enhanced_data_map.workflows.map[key] = {
+                ...obj,
+                raw_data: workflow
+            };
+        }
+        enhanced_data_map.workflows.count = mykeys.length;
+    } catch (error) {
+        console.error("Error processing workflows:", error);
     }
 
-    mykeys = Object.keys(global_templates);
-    for(var i = 0; i < mykeys.length; i++) {
-        let curtable = global_templates[mykeys[i]];
-        let name = global_templates[mykeys[i]]["name"];
-        var obj = {"id": mykeys[i], "name": name};
-        tempmap["templates"].push(obj); 
+    // Process Templates
+    try {
+        let mykeys = Object.keys(global_templates || {});
+        for(var i = 0; i < mykeys.length; i++) {
+            let key = mykeys[i];
+            let template = global_templates[key];
+            let name = safeGet(template, "name", `Template ${i + 1}`);
+            
+            var obj = {"id": key, "name": name};
+            tempmap["templates"].push(obj);
+            
+            // Enhanced version
+            enhanced_data_map.templates.list.push(obj);
+            enhanced_data_map.templates.map[key] = {
+                ...obj,
+                raw_data: template
+            };
+        }
+        enhanced_data_map.templates.count = mykeys.length;
+    } catch (error) {
+        console.error("Error processing templates:", error);
     }
 
+    // Process Views (enhanced version only since it's not in original)
+    try {
+        let mykeys = Object.keys(global_views || {});
+        for(var i = 0; i < mykeys.length; i++) {
+            let key = mykeys[i];
+            let view = global_views[key];
+            let name = safeGet(view, "name", `View ${i + 1}`);
+            
+            var obj = {"id": key, "name": name};
+            enhanced_data_map.views.list.push(obj);
+            enhanced_data_map.views.map[key] = {
+                ...obj,
+                raw_data: view
+            };
+        }
+        enhanced_data_map.views.count = mykeys.length;
+    } catch (error) {
+        console.error("Error processing views:", error);
+    }
+
+    // Set both data maps
     data_map = tempmap;
+    data_map_v2 = enhanced_data_map;
+    console.log("Original data map:", data_map);
+    console.log("Enhanced data map:", enhanced_data_map);
 }
 export {
     InitGlobalData, 
     global_components, global_data_templates, global_forms,
     global_screens, global_queries, global_templates,
     global_tables, global_views, global_states, global_groups, global_user_fields,
-    global_secrets, global_workflows, data_map
+    global_secrets, global_workflows, data_map, data_map_v2
 };

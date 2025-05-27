@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
 import { ChevronRight, Settings, X, Link, MapPin, Check, Workflow, Search, Filter, User, Database, Type, Hash } from 'lucide-react';
+import { data_map_v2 } from '../../../states/global_repo';
 
 
 
@@ -18,27 +19,6 @@ import { ChevronRight, Settings, X, Link, MapPin, Check, Workflow, Search, Filte
   forms , workflows, queries, tables, templates, global state 
 */
 // Constants and Data
-const generateFormFields = (count) => {
-  const types = ['text', 'email', 'tel', 'number', 'select', 'textarea', 'date', 'checkbox'];
-  const categories = ['Personal', 'Contact', 'Business', 'Address', 'Payment', 'Preferences'];
-  
-  return Array.from({ length: count }, (_, i) => ({
-    id: `field_${i + 1}`,
-    label: `Field ${i + 1}`,
-    type: types[i % types.length],
-    category: categories[i % categories.length],
-    description: `Description for field ${i + 1}`
-  }));
-};
-
-const WORKFLOWS = [
-  { id: 'wf1', name: 'User Registration Flow', description: 'Handle new user signups', category: 'Authentication' },
-  { id: 'wf2', name: 'Order Processing', description: 'Process customer orders', category: 'Commerce' },
-  { id: 'wf3', name: 'Email Notification', description: 'Send automated emails', category: 'Communication' },
-  { id: 'wf4', name: 'Data Sync', description: 'Synchronize data across systems', category: 'Integration' }
-];
-
-const FORM_FIELDS = generateFormFields(100);
 
 const USER_ATTRIBUTES = [
   { id: 'user.id', label: 'User ID', type: 'text', description: 'Unique user identifier' },
@@ -68,27 +48,6 @@ const GLOBAL_STATE_FIELDS = [
   { id: 'cart.total', label: 'Cart Total', type: 'number', description: 'Total cart value' }
 ];
 
-const WORKFLOW_INPUTS = {
-  'wf1': [
-    { id: 'username', label: 'Username', type: 'text', required: true },
-    { id: 'user_email', label: 'User Email', type: 'email', required: true },
-    { id: 'user_phone', label: 'Phone', type: 'tel', required: false },
-    { id: 'full_name', label: 'Full Name', type: 'text', required: true },
-    { id: 'company', label: 'Company', type: 'text', required: false }
-  ],
-  'wf2': [
-    { id: 'customer_name', label: 'Customer Name', type: 'text', required: true },
-    { id: 'order_email', label: 'Order Email', type: 'email', required: true },
-    { id: 'amount', label: 'Amount', type: 'number', required: true },
-    { id: 'billing_address', label: 'Billing Address', type: 'textarea', required: true }
-  ],
-  'wf3': [
-    { id: 'recipient', label: 'Recipient Email', type: 'email', required: true },
-    { id: 'subject', label: 'Email Subject', type: 'text', required: true },
-    { id: 'sender_name', label: 'Sender Name', type: 'text', required: false }
-  ]
-};
-
 const MAPPING_TYPES = [
   { id: 'form', label: 'Form Fields', icon: Database, color: 'blue', description: 'Map to form input fields' },
   { id: 'user', label: 'User Attributes', icon: User, color: 'green', description: 'Map to user profile data' },
@@ -99,7 +58,7 @@ const MAPPING_TYPES = [
 // Utility Hooks
 const useFieldData = () => {
   return useMemo(() => ({
-    form: FORM_FIELDS,
+    form: data_map_v2["forms"],
     user: USER_ATTRIBUTES,
     global: GLOBAL_STATE_FIELDS
   }), []);
@@ -367,7 +326,7 @@ const HardcodedValueInput = memo(({ onSave, onCancel, initialValue = '' }) => {
 });
 
 // 9. Workflow Picker Component
-const WorkflowPicker = memo(({ workflows = WORKFLOWS, onSelect, isOpen, onClose }) => (
+const WorkflowPicker = memo(({ workflows = data_map_v2["workflows"]["list"], onSelect, isOpen, onClose }) => (
   <Modal isOpen={isOpen} onClose={onClose} title="Select Workflow">
     <div className="p-6">
       <div className="space-y-3">
@@ -605,7 +564,7 @@ const DataMappingComponent = () => {
   }, [selectedInput]);
 
   const { mappedCount, totalInputs } = useMemo(() => {
-    const workflowInputs = WORKFLOW_INPUTS[selectedWorkflow?.id] || [];
+    const workflowInputs = data_map_v2["workflows"]["list"][selectedWorkflow?.id] || [];
     return {
       mappedCount: Object.keys(mappings).length,
       totalInputs: workflowInputs.length
@@ -613,7 +572,7 @@ const DataMappingComponent = () => {
   }, [mappings, selectedWorkflow]);
 
   const workflowInputs = useMemo(() => {
-    return WORKFLOW_INPUTS[selectedWorkflow?.id] || [];
+    return data_map_v2["workflows"]["list"][selectedWorkflow?.id] || [];
   }, [selectedWorkflow]);
 
   return (
