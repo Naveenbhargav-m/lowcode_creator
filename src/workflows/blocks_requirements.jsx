@@ -29,70 +29,76 @@ let blocksRequirements = {
     }
 };
 
-let blockFormRequirements = {
+var blockFormRequirementsV2 = {
   "start": {
-    "sections": [{
-       "id": "workflow Config",
-       "title": "Workflow Config",
-       "groups": [
-          {
-            "id": "global_data",
-            "title": "global_data",
-            "fields": [
-              {
-                "id": "workflow_state",
-                "label": "workflow_state",
-                "type": "mapping",
-                "description": "global state for the workflow, all the subsequent blocks will have access."
-              },
-            ],
-          },
-       ],
-    }],
+    "fields": [
+      {
+        "id": "input_mapping",
+        "label": "inputs",
+        "type": "array",
+      },
+    ],
+    "sections": [
+      {
+        "id": "inputs",
+        "title": "inputs",
+        "fieldIds": ["input_mapping"],
+      }
+    ],
+    "tabs": [
+      {
+        "id": "configs",
+        "title": "Configs",
+        "sectionIds": ["inputs"],
+      }
+    ],
   },
   "end": {
+    "fields": [
+      {
+        "id": "output_mapping",
+        "label": "outputs",
+        "type": "array",
+      },
+    ],
     "sections": [
       {
-       "id": "output Config",
-       "title": "output Config",
-       "groups": [
-          {
-            "id": "output_data",
-            "title": "output_data",
-            "fields": [
-              {
-                "id": "output_mapping",
-                "label": "output_mapping",
-                "type": "mapping",
-                "description": "output mapping from the workflow."
-              },
-            ],
-          },
-       ],
+        "id": "outputs",
+        "title": "outputs",
+        "fieldIds": ["output_mapping"],
       }
-      ],
+    ],
+    "tabs": [
+      {
+        "id": "configs",
+        "title": "Configs",
+        "sectionIds": ["outputs"],
+      }
+    ],
   },
   "code_block": {
+    "fields": [
+      {
+        "id": "js_code",
+        "label": "js_code",
+        "type": "code",
+        "description": "Can write js code here."
+      },
+    ],
     "sections": [
       {
-       "id": "code_block",
-       "title": "Code Config",
-       "groups": [
-          {
-            "id": "code_block",
-            "title": "js_code",
-            "fields": [
-              {
-                "id": "js_code",
-                "label": "js_code",
-                "type": "code",
-                "description": "Can write js code here."
-              },
-            ],
-          },
-       ],
+        "id": "inputs",
+        "title": "inputs",
+        "fieldIds": ["js_code"],
       }
-      ],
-  },
+    ],
+    "tabs": [
+      {
+        "id": "configs",
+        "title": "Configs",
+        "sectionIds": ["inputs"],
+      }
+    ],
+  }
 };
-export {blocksRequirements, blockFormRequirements};
+export {blocksRequirements, blockFormRequirementsV2};
