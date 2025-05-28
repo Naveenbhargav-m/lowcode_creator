@@ -6,6 +6,8 @@ import { Drop } from "../components/custom/Drop";
 import { SyncButton } from "../components/generic/sync_button";
 import { SyncWorkflowData } from "./workflow_api";
 import { ModernSyncControls } from "../screen_builder/screen_components";
+import { signal } from "@preact/signals";
+import { useConditionalDelete } from "./hooks";
 
 let nodeTypes = {
   "insert_row": InsertRow,
@@ -24,6 +26,7 @@ let nodeTypes = {
   "delete_topic": DeleteTopic,
 };
 
+let formFocusKey = signal(false);
 function FlowBuilder() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -157,6 +160,8 @@ function FlowBuilder() {
     const canSyncActive = activeWorkFlow.value && activeQueryHasChanges;
     const canSyncAll = unsavedCount > 0;
 
+  let conditionsKey = useConditionalDelete();
+
   console.log("rendering the flow builder", nodes);
   return (
     <>
@@ -202,7 +207,7 @@ function FlowBuilder() {
             selectNodesOnDrag={false}
             onInit={onInit}
             onSelectionChange={onSelectionChange}
-            deleteKeyCode={['Delete', 'Backspace']}
+            deleteKeyCode={conditionsKey}
             selectionOnDrag
             selectionKeyCode="partial"
             multiSelectionKeyCode="Control"
@@ -216,4 +221,4 @@ function FlowBuilder() {
   );
 }
 
-export {FlowBuilder};
+export {FlowBuilder, formFocusKey};
