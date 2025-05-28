@@ -6,13 +6,9 @@ import { workflowsData } from "./workflow_state";
 function GetWorkflowFormConfig(activeworkflow, activeblock) {
     console.log("active workflow, active block:",activeworkflow, activeblock);
     let response = {};
-    let flowdata = workflowsData.value;
-    let id = activeworkflow["id"] || "";
-    console.log("flowdata:",flowdata, workflowsData.value,activeblock, id);
+    let flowdata = activeworkflow["flow_data"] || {};
     let blockID = activeblock["id"] || "";
-    let currentWorkflowData = flowdata[id] || {};
-    let currentBlockData = currentWorkflowData[blockID] || {};
-    console.log("current workflow and block data:",currentWorkflowData, currentBlockData);
+    let currentBlockData = flowdata[blockID] || {};
     response["data"] = currentBlockData;
     let blockType = activeblock["type"];
     let requirements = blocksRequirements[blockType];

@@ -124,7 +124,7 @@ function ModernSyncControls({
   ...props
 }) {
   const activeScreenData = screenNamesList?.find(s => s.id === activeScreen);
-  
+  console.log("in the button:",isSyncing,isLoading, canSyncAll, syncMode,canSyncActive);
   return (
     <div className={`bg-white border-b border-gray-200 ${className}`} {...props}>
       {/* Main Controls */}
