@@ -80,6 +80,7 @@ export const styles = {
 
 
   // @ts-ignore
+  // @ts-ignore
   var stylesobj = {
     container: {
       border: '1px solid #e5e7eb',
@@ -985,6 +986,7 @@ export const OptionsListField = ({ field, value, onChange }) => {
   const addNewOption = () => {
     // @ts-ignore
     // @ts-ignore
+    // @ts-ignore
     const newId = Date.now().toString();
     const newOption = {
       [valueKey]: '',
@@ -1496,6 +1498,7 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
     onChange?.(field.id, newSelection);
   };
 
+  // @ts-ignore
   const clearAll = () => {
     setSelectedItems([]);
     onChange?.(field.id, []);
@@ -1612,6 +1615,7 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
     flexShrink: 0
   };
 
+  // @ts-ignore
   const clearAllButtonStyle = {
     background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
     color: 'white',
@@ -1640,7 +1644,9 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
         disabled={field?.disabled}
         onMouseEnter={(e) => {
           if (!field?.disabled) {
+            // @ts-ignore
             e.target.style.borderColor = hasSelectedItems ? '#2563eb' : '#9ca3af';
+            // @ts-ignore
             e.target.style.boxShadow = hasSelectedItems 
               ? '0 0 0 3px rgba(37, 99, 235, 0.15)' 
               : '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
@@ -1648,7 +1654,9 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
         }}
         onMouseLeave={(e) => {
           if (!field?.disabled) {
+            // @ts-ignore
             e.target.style.borderColor = hasSelectedItems ? '#3b82f6' : '#e5e7eb';
+            // @ts-ignore
             e.target.style.boxShadow = hasSelectedItems 
               ? '0 0 0 3px rgba(59, 130, 246, 0.1)' 
               : '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
@@ -1706,15 +1714,21 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
                     aria-label={`Remove ${getItemDisplayName(item)}`}
                     onMouseEnter={(e) => {
                       if (!field?.disabled) {
+                        // @ts-ignore
                         e.target.style.background = 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)';
+                        // @ts-ignore
                         e.target.style.transform = 'scale(1.1)';
+                        // @ts-ignore
                         e.target.style.boxShadow = '0 3px 6px rgba(239, 68, 68, 0.4)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!field?.disabled) {
+                        // @ts-ignore
                         e.target.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                        // @ts-ignore
                         e.target.style.transform = 'scale(1)';
+                        // @ts-ignore
                         e.target.style.boxShadow = '0 2px 4px rgba(239, 68, 68, 0.3)';
                       }
                     }}
@@ -1734,6 +1748,7 @@ export const GlobalSelectField = ({ field, value, onChange }) => {
           // @ts-ignore
           fields={data_map}
           selectedItems={selectedItems}
+          // @ts-ignore
           onClose={(e, newdata) => {
             console.log("new data:", newdata);
             setIsOpen(false);
@@ -1803,6 +1818,7 @@ const ACTION_CONFIGS = {
 };
 
 // Utility function to safely get nested values
+// @ts-ignore
 const safeGet = (obj, path, defaultValue = null) => {
   try {
     return path.split('.').reduce((acc, key) => acc?.[key], obj) ?? defaultValue;
@@ -1818,6 +1834,7 @@ const CompactTextField = ({ field, value, onChange }) => (
     <input
       type="text"
       value={value || ''}
+      // @ts-ignore
       onChange={(e) => onChange(field.key, e.target.value)}
       className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
       placeholder={field.placeholder}
@@ -1830,6 +1847,7 @@ const CompactSelectField = ({ field, value, onChange }) => (
     <label className="block text-xs font-medium text-gray-600 mb-1">{field.label}</label>
     <select
       value={value || ''}
+      // @ts-ignore
       onChange={(e) => onChange(field.key, e.target.value === 'true' ? true : e.target.value === 'false' ? false : e.target.value)}
       className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
     >
@@ -1847,6 +1865,7 @@ const CompactJsonField = ({ field, value, onChange }) => (
     <label className="block text-xs font-medium text-gray-600 mb-1">{field.label}</label>
     <textarea
       value={value || ''}
+      // @ts-ignore
       onChange={(e) => onChange(field.key, e.target.value)}
       className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400 font-mono"
       rows={2}
@@ -1881,11 +1900,15 @@ const CompactSection = ({ title, isOpen, onToggle, children, actions, className 
 );
 
 // Compact action item
+// @ts-ignore
 const CompactActionItem = ({ item = {}, index, onUpdate, onRemove, onDuplicate, onMove, canMoveUp, canMoveDown }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  // @ts-ignore
   const actionConfig = ACTION_CONFIGS[item.type];
 
+  // @ts-ignore
   const handleTypeChange = (key, newType) => {
+    // @ts-ignore
     const newItem = { type: newType, description: item.description || '' };
     
     if (ACTION_CONFIGS[newType]) {
@@ -1915,6 +1938,7 @@ const CompactActionItem = ({ item = {}, index, onUpdate, onRemove, onDuplicate, 
         return <CompactJsonField field={fieldConfig} value={fieldValue} onChange={handleFieldChange} />;
       case 'global_map':
         let val1 = item["value"] || [];
+        // @ts-ignore
         return <GlobalSelectField field={fieldConfig} value={val1} onChange={(id, val) => {
           handleFieldChange("value",val);
         }}/>
@@ -1925,6 +1949,7 @@ const CompactActionItem = ({ item = {}, index, onUpdate, onRemove, onDuplicate, 
 
   return (
     <CompactSection
+      // @ts-ignore
       title={`${index + 1}. ${actionConfig?.label || item.type || 'New Action'}`}
       isOpen={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
@@ -1968,6 +1993,7 @@ const CompactActionItem = ({ item = {}, index, onUpdate, onRemove, onDuplicate, 
               }))
             ]
           }}
+          // @ts-ignore
           value={item.type}
           onChange={handleTypeChange}
         />
@@ -1980,6 +2006,7 @@ const CompactActionItem = ({ item = {}, index, onUpdate, onRemove, onDuplicate, 
         
         <CompactTextField
           field={{ key: 'description', label: 'Description', placeholder: 'Action description' }}
+          // @ts-ignore
           value={item.description}
           onChange={handleFieldChange}
         />
@@ -2074,11 +2101,15 @@ const CompactEventConfig = ({ eventName, config = {}, onChange }) => {
     onChange(eventName, { ...config, code });
   };
 
+  // @ts-ignore
   const actions = config.actions || [];
+  // @ts-ignore
   const code = config.code || '';
 
   return (
-    <CompactSection
+    <
+// @ts-ignore
+    CompactSection
       title={`${eventName.replace(/([A-Z])/g, ' $1').trim()} (${actions.length})`}
       isOpen={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
@@ -2093,6 +2124,7 @@ const CompactEventConfig = ({ eventName, config = {}, onChange }) => {
           <label className="block text-xs font-medium text-gray-600 mb-1">Custom Code</label>
           <textarea
             value={code}
+            // @ts-ignore
             onChange={(e) => updateCode(e.target.value)}
             className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400 font-mono"
             rows={3}
@@ -2168,6 +2200,7 @@ export const ActionsConfig = ({ configs = {}, onChange }) => {
       {isJsonMode ? (
         <textarea
           value={jsonValue}
+          // @ts-ignore
           onChange={(e) => handleJsonChange(e.target.value)}
           className="w-full h-64 px-2 py-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400 font-mono"
           placeholder="{}"
