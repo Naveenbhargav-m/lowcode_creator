@@ -1,7 +1,7 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { formFocusKey } from "./flow_builder";
 import { GetWorkflowFormConfig } from "./workflow_helpers";
-import { activeWorkFlow, activeworkFlowBlock, SetWorkflowDataBack, workflowsData } from "./workflow_state";
+import { activeWorkFlow, activeworkFlowBlock, MarkWorkflowAsChanged, SetWorkflowDataBack, workflowsData } from "./workflow_state";
 
 
 
@@ -30,7 +30,9 @@ function SetBlockData(newdata) {
     workflowData[activeBlockID] = currentBlockData;
     let copy = activeWorkFlow.value;
     copy["flow_data"] = workflowData;
+    copy["_change_type"] = "update";
     activeWorkFlow.value = {...copy};
+    MarkWorkflowAsChanged(activeWorkFlow.value["id"]);
 }   
 
 export function WorkflowConfigFormPanel() {
@@ -55,7 +57,7 @@ export function WorkflowConfigFormPanel() {
             onBlur={(e) => {e.stopPropagation();;formFocusKey.value = false}}
             onKeyDown={(e) => {handleFormKeyDown(e)}}
         >
-        <ConfigFormV3 schema={formRequirements} initialValues={{}} 
+        <ConfigFormV3 schema={formRequirements} initialValues={{...blockData}} 
             onChange={(data) => {SetBlockData(data)}}
             onSubmit={(data) => {SetBlockData(data)}}
         />

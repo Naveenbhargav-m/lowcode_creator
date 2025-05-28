@@ -156,7 +156,7 @@ function FlowBuilder() {
     };
 
     const unsavedCount = unsavedWorkflows.value.size;
-    const activeQueryHasChanges = activeWorkFlow.value && HasUnsavedChanges(activeWorkFlow.value);
+    const activeQueryHasChanges = activeWorkFlow.value && HasUnsavedChanges(activeWorkFlow.value["id"]);
     const canSyncActive = activeWorkFlow.value && activeQueryHasChanges;
     const canSyncAll = unsavedCount > 0;
 
