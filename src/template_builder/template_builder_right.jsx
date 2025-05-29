@@ -1,6 +1,6 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { TemplateElementConfigFormSchema } from "./configs";
-import { activeTamplate, activeTemplateElement, activeTemplateElements, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
+import { activeTamplate, activeTemplateElement, activeTemplateElements, MarkTemplateAsChanged, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
 
 
@@ -18,6 +18,7 @@ export function TemplateBuilderRightView() {
       if(activeElement !== undefined) {
         activeElement = {...activeElement,...data};
         activeTemplateElements[activeElementID].value = {...activeElement};
+        MarkTemplateAsChanged(activeTamplate.value);
       }
     };
   
@@ -35,6 +36,7 @@ export function TemplateBuilderRightView() {
 
         }
         templates[activeTamplate.peek()] = mytemp;
+        MarkTemplateAsChanged(activeTamplate.value);
         localStorage.setItem("templates",JSON.stringify(templates));
       }
     };

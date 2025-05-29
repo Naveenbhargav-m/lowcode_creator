@@ -1,4 +1,4 @@
-import {activeElement, activeScreen, screenElementAdded, activeScreenElements, screens, screenViewKey } from "./screen_state";
+import {activeElement, activeScreen, screenElementAdded, activeScreenElements, screens, screenViewKey, MarkScreenAsChanged } from "./screen_state";
 import { generateUID } from "../utils/helpers";
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { TemplateElementConfigFormSchema } from "../template_builder/configs";
@@ -35,6 +35,7 @@ function ScreenRightPanel() {
             screens[activeScreen.value]["_change_type"] = screens[activeScreen.value]["_change_type"] || "update";
 
         }
+        MarkScreenAsChanged(activeScreen.value);
         localStorage.setItem("screen_config", JSON.stringify(screens));
         screenElementAdded.value = generateUID();
     }
