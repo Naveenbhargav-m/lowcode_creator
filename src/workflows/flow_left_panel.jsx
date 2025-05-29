@@ -24,8 +24,8 @@ const NODE_COLORS = {
   "code_block": COLORS.code,
   "condition": COLORS.insert,
   "loop": COLORS.condition,
-  "insert_row": COLORS.insert,
-  "update_row": COLORS.update,
+  "insert_rows": COLORS.insert,
+  "update_rows": COLORS.update,
   "read_rows": COLORS.active,
   "delete_rows": COLORS.condition,
   "http_request": COLORS.code,
@@ -524,8 +524,8 @@ function WorkflowNameTile({
 function DragComponent() {  
   let registerNodes = [
     {"name": "Code", "type": "code_block", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
-    {"name": "Insert Row", "type": "insert_row", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
-    {"name": "Update Row", "type": "update_row", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
+    {"name": "Insert Row", "type": "insert_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
+    {"name": "Update Row", "type": "update_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
     {"name": "Condition", "type": "condition", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
     {"name": "Read Rows", "type": "read_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
     {"name": "Delete Rows", "type": "delete_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},

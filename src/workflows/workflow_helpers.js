@@ -1,5 +1,4 @@
-import { blockFormRequirementsV2, blocksRequirements } from "./blocks_requirements";
-import { workflowsData } from "./workflow_state";
+import { blockFormRequirementsV2 } from "./blocks_requirements";
 
 
 
@@ -11,9 +10,7 @@ function GetWorkflowFormConfig(activeworkflow, activeblock) {
     let currentBlockData = flowdata[blockID] || {};
     response["data"] = currentBlockData;
     let blockType = activeblock["type"];
-    let requirements = blocksRequirements[blockType];
     let formRequirements = blockFormRequirementsV2[blockType]; 
-    response["config"] = requirements;
     response["form_requirements"] = formRequirements;
     return response;
 }

@@ -10,8 +10,8 @@ import { signal } from "@preact/signals";
 import { useConditionalDelete } from "./hooks";
 
 let nodeTypes = {
-  "insert_row": InsertRow,
-  "update_row": UpdateRow,
+  "insert_rows": InsertRow,
+  "update_rows": UpdateRow,
   "code_block": CodeBlock,
   "condition": Condition,
   "start": Start,

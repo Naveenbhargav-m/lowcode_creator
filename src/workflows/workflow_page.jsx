@@ -37,10 +37,11 @@ function WorkFlowPage() {
         <div style={{ 
           flex: 1, 
           height: "100%", 
+          "width": "40vw",
           zIndex: 10, 
           position: "relative", 
           overflow: "auto",
-          maxWidth: "calc(30vw)" // Ensure it doesn't grow beyond expected width
+          maxWidth: "calc(40vw)" // Ensure it doesn't grow beyond expected width
         }}>
           <WorkflowConfigFormPanel />
         </div>
