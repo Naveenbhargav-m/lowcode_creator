@@ -1,32 +1,181 @@
-
-let blocksRequirements = {
-   "start": {
-    "label": "start",
-    "description": "This is the start of workflow, that also take global state for workflow",
-    "data": {
-      "workflow_state": "mapping",
-      "is_background": "toggle",
-      "name": "text"
+const insert_row_fields = {
+  "fields": [
+    {
+      "id": "input_mapping.table",
+      "type": "text",
+      "label": "table",
+      "description": "table to insert",
+      "path": "input_mapping.table"
     },
-   },
-   "end": {
-    "label": "End",
-    "description": "This is the end of the workflow",
-    "data": {
-      "output_mapping": "mapping",
-      "call_flow": "dropdown",
-      "name": "text"
+    {
+      "id": "input_mapping.schema",
+      "type": "text",
+      "label": "schema",
+      "description": "table schema",
+      "path": "input_mapping.schema"
     },
-   },
-   "code_block": {
-      "label": "Code",
-      "description": "Code block for you customization with more control",
-      "data": {
-        "input_map": "mapping",
-        "is_background": "toggle",
-        "max_time": "text"
-      },
+    {
+      "id": "input_mapping.fields",
+      "type": "static_key_value",
+      "label": "fields",
+      "keys": ["name", "age", "gender", "others", "objectmap"],
+      "description": "",
+      "path": "input_mapping.fields"
     }
+  ],
+  "sections": [
+    {
+      "id": "insert_config",
+      "title": "insert_config",
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+    },
+  ],
+  "tabs": [
+    {
+      "id": "Configs",
+      "title": "configs",
+      "sectionIds": ["insert_config"],
+    }
+  ],
+};
+
+
+const update_rows = {
+  "fields": [
+    {
+      "id": "input_mapping.table",
+      "type": "text",
+      "label": "table",
+      "description": "table to insert",
+      "path": "input_mapping.table"
+    },
+    {
+      "id": "input_mapping.schema",
+      "type": "text",
+      "label": "schema",
+      "description": "table schema",
+      "path": "input_mapping.schema"
+    },
+    {
+      "id": "input_mapping.query_block",
+      "type": "text",
+      "label": "query_block",
+      "description": "query_block",
+      "path": "input_mapping.query_block"
+    },
+    {
+      "id": "input_mapping.fields",
+      "type": "mapping",
+      "label": "fields",
+      "description": "fields to add",
+      "path": "input_mapping.fields"
+    }
+  ],
+  "sections": [
+    {
+      "id": "update_configs",
+      "title": "update_configs",
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+    },
+  ],
+  "tabs": [
+    {
+      "id": "Configs",
+      "title": "configs",
+      "sectionIds": ["update_configs"],
+    }
+  ],
+};
+
+
+
+const read_rows = {
+  "fields": [
+    {
+      "id": "input_mapping.table",
+      "type": "text",
+      "label": "table",
+      "description": "table to insert",
+      "path": "input_mapping.table"
+    },
+    {
+      "id": "input_mapping.schema",
+      "type": "text",
+      "label": "schema",
+      "description": "table schema",
+      "path": "input_mapping.schema"
+    },
+    {
+      "id": "input_mapping.query_block",
+      "type": "text",
+      "label": "query_block",
+      "description": "query_block",
+      "path": "input_mapping.query_block"
+    },
+    {
+      "id": "input_mapping.fields",
+      "type": "mapping",
+      "label": "fields",
+      "description": "fields to add",
+      "path": "input_mapping.fields"
+    }
+  ],
+  "sections": [
+    {
+      "id": "read_configs",
+      "title": "read_configs",
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+    },
+  ],
+  "tabs": [
+    {
+      "id": "Configs",
+      "title": "configs",
+      "sectionIds": ["read_configs"],
+    }
+  ],
+};
+
+
+
+const delete_rows = {
+  "fields": [
+    {
+      "id": "input_mapping.table",
+      "type": "text",
+      "label": "table",
+      "description": "table to insert",
+      "path": "input_mapping.table"
+    },
+    {
+      "id": "input_mapping.schema",
+      "type": "text",
+      "label": "schema",
+      "description": "table schema",
+      "path": "input_mapping.schema"
+    },
+    {
+      "id": "input_mapping.query_block",
+      "type": "text",
+      "label": "query_block",
+      "description": "query_block",
+      "path": "input_mapping.query_block"
+    }
+  ],
+  "sections": [
+    {
+      "id": "delete_config",
+      "title": "delete configs",
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+    },
+  ],
+  "tabs": [
+    {
+      "id": "Configs",
+      "title": "configs",
+      "sectionIds": ["delete_configs"],
+    }
+  ],
 };
 
 var blockFormRequirementsV2 = {
@@ -79,17 +228,18 @@ var blockFormRequirementsV2 = {
   "code_block": {
     "fields": [
       {
-        "id": "js_code",
+        "id": "input_mapping.js_code",
         "label": "js_code",
         "type": "code",
-        "description": "Can write js code here."
+        "description": "Can write js code here.",
+        "path": "input_mapping.js_code"
       },
     ],
     "sections": [
       {
         "id": "inputs",
         "title": "inputs",
-        "fieldIds": ["js_code"],
+        "fieldIds": ["input_mapping.js_code"],
       }
     ],
     "tabs": [
@@ -99,6 +249,10 @@ var blockFormRequirementsV2 = {
         "sectionIds": ["inputs"],
       }
     ],
-  }
+  },
+  "insert_rows": {...insert_row_fields},
+  "update_rows": {...update_rows},
+  "read_rows": {...read_rows},
+  "delete_rows": {...delete_rows},
 };
-export {blocksRequirements, blockFormRequirementsV2};
+export { blockFormRequirementsV2};
