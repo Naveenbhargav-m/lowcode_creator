@@ -1,6 +1,6 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { formFieldSchema } from "./configs/form_options";
-import { currentFormConfig, formActiveElement } from "./form_builder_state";
+import { currentForm, currentFormConfig, formActiveElement, MarkFormAsChanged } from "./form_builder_state";
 import { GetFormField, UpdateFormField } from "./utilities";
 
 
@@ -27,7 +27,7 @@ function HandleDataChange(data) {
     let curconfig = currentFormConfig.value;
     curconfig["fields"] = newarr;
     currentFormConfig.value = {...curconfig};
-    
+    MarkFormAsChanged(currentForm.value);
 }
 
 export function FormBuilderRightPanel() {

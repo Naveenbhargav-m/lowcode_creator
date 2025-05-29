@@ -270,6 +270,7 @@ function FormBuilderPage() {
         minWidth: "320px",
         height: "100vh",
         borderLeft: "1px solid #e5e7eb",
+        marginRight: "100px",
         backgroundColor: "#ffffff",
         boxShadow: "-2px 0 4px rgba(0, 0, 0, 0.05)",
         overflow: "auto"
