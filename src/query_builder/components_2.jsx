@@ -146,7 +146,7 @@ export function JSEditorWithInputFields({
               value={code}
               onChange={handleCodeChange}
               className={styles.codeEditor}
-              spellCheck={false}
+              spellcheck={false}
             />
           </div>
           <div className={styles.buttonBar}>
@@ -192,6 +192,7 @@ export function JSEditorWithInputFields({
                   <input
                     type="text"
                     value={field}
+                    // @ts-ignore
                     onChange={(e) => handleFieldChange(index, e.target.value)}
                     className={styles.fieldInput}
                     placeholder="Enter input value"
