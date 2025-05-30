@@ -56,12 +56,12 @@ const dummyData = {
 };
 
 export default function GlobalSignalsPopup({ initialOpen = true, fields = dummyData, selectedItems = [], onClose = (e, data) => {} }) {
+ console.log("selected items:",selectedItems); 
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [pickedItems, setPickedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedSections, setExpandedSections] = useState({});
   const [filteredSections, setFilteredSections] = useState(fields);
-
   useEffect(() => {
     setIsOpen(initialOpen);
   }, [initialOpen]);

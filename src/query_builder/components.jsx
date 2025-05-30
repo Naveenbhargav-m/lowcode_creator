@@ -222,18 +222,34 @@ function AdvancedJsonView({ queryData }) {
   );
 }
 
-function JoinBlock( {initalData, updateCallBack}) {
+
+function JoinBlock({ initalData, updateCallBack }) {
   let isOpen = useSignal(false);
   let popupField = useSignal("");
   let popupInd = useSignal(-1);
   let joinsData = useSignal([]);
   
-  useEffect((() => {
+  useEffect(() => {
     joinsData.value = [...initalData];
-  }),[initalData]);
+  }, [initalData]);
+
+  // Extract selected field IDs from joinsData for GlobalSignalsPopup
+  const getSelectedItems = () => {
+    const selectedFields = [];
+    joinsData.value.forEach(join => {
+      // Extract all field values from the join object (excluding non-field properties like 'join')
+      Object.keys(join).forEach(key => {
+        if (key !== 'join' && join[key]) {
+          selectedFields.push(join[key]);
+        }
+      });
+    });
+    return selectedFields;
+  };
+
   // Handle popup close
   const handlePopupClose = (e, data) => {
-    if(data === undefined) {
+    if (data === undefined) {
       isOpen.value = false;
       return;
     }
@@ -250,11 +266,12 @@ function JoinBlock( {initalData, updateCallBack}) {
     joinsData.value = [...newjoins];
     updateCallBack(joinsData.value);
   }
+
   // Update join data
   function updateJoinData(obj, index, updateJoinCallback) {
     var existing = joinsData.value;
     let cur = existing[index];
-    cur = {...cur, ...obj};
+    cur = { ...cur, ...obj };
     existing[index] = cur;
     joinsData.value = [...existing];
     updateCallBack(joinsData.value);
@@ -289,7 +306,7 @@ function JoinBlock( {initalData, updateCallBack}) {
         className="mt-4 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         onClick={() => {
           let cur = joinsData.value;
-          cur.push({join: "left join"});
+          cur.push({ join: "left join" });
           joinsData.value = [...cur];
         }}
       >
@@ -300,8 +317,9 @@ function JoinBlock( {initalData, updateCallBack}) {
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
         // @ts-ignore
-        fields={fieldsGlobalSignals.value}
-        onClose={handlePopupClose}
+        fields={data_map["tables"]}
+        selectedItems={getSelectedItems()}
+        onClose={(e, data) => { handlePopupClose(e, data) }}
       />
     </div>
   );
@@ -489,14 +507,17 @@ function ConditionGroupTile({
 //     </button>
 //   );
 // }
+
 function GroupByBlock({initalgroups, updateCallBack}) {
   let keys = [];
+  console.log("active query:",activeQueryData);
   let isOpen = useSignal(false);
   const [selectedItems, setSelectedItems] = useState([]);
   
-  useEffect((() => {
+  useEffect(() => {
     setSelectedItems(initalgroups);
-  }), [initalgroups]);
+  }, [initalgroups]);
+  
   const removeTag = (itemToRemove) => {
     setSelectedItems(prev => {
       const updatedItems = prev.filter(item => item !== itemToRemove);
@@ -531,12 +552,15 @@ function GroupByBlock({initalgroups, updateCallBack}) {
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
         // @ts-ignore
-        fields={fieldsGlobalSignals.value}
+        fields={data_map["tables"]}
+        selectedItems={selectedItems}
         onClose={(e, data) => {
           console.log("Group By selection:", data);
-          if (data) setSelectedItems(data);
+          if (data) {
+            setSelectedItems(data);
+            updateCallBack(data); // Call with the actual data, not selectedItems
+          }
           isOpen.value = false;
-          updateCallBack(selectedItems);
         }}
       />
     </div>
@@ -594,7 +618,8 @@ function OrderByBlock( {selectInput, aggregationInput , updateCallback}) {
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
         // @ts-ignore
-        fields={fieldsGlobalSignals.value}
+        selectedItems={selectedItems}
+        fields={data_map["tables"]}
         onClose={(e, data) => {
           console.log("Order By selection:", data);
           if (data) setSelectedItems(data);
@@ -1351,8 +1376,9 @@ function AggregationPopup({ position, item, aggregations, setAggregations, onClo
         
         <GlobalSignalsPopup 
           initialOpen={isOpen.value}
+          selectedItems={items.value}
           // @ts-ignore
-          fields={fieldsGlobalSignals.value}
+          fields={data_map["tables"]}
           onClose={handlePopupClose}
         />
       </div>
