@@ -156,12 +156,14 @@ const applyDynamicConfig = (field, formValues) => {
 };
 
 // Enhanced main form component with nested object support and dynamic field configuration
-export  function ConfigFormV3({ 
+
+
+export function ConfigFormV3({ 
   schema, 
   initialValues = {}, 
   onChange, 
   onSubmit 
-}){
+}) {
   const [activeTab, setActiveTab] = useState(schema.tabs && schema.tabs.length > 0 ? schema.tabs[0].id : null);
   const [formValues, setFormValues] = useState(initialValues);
   const [openSections, setOpenSections] = useState({});
@@ -169,11 +171,22 @@ export  function ConfigFormV3({
   const [jsonError, setJsonError] = useState(null);
   const [jsonValue, setJsonValue] = useState(JSON.stringify(initialValues, null, 2));
 
-  // Initialize open sections
+  // Reset component state when schema changes (new block type)
   useEffect(() => {
-    // First section of each tab is open by default
-    const initialOpenSections = {};
+    // Reset active tab
+    const newActiveTab = schema.tabs && schema.tabs.length > 0 ? schema.tabs[0].id : null;
+    setActiveTab(newActiveTab);
     
+    // Reset JSON mode
+    setIsJsonMode(false);
+    setJsonError(null);
+    
+    // Reset form values
+    setFormValues({...initialValues});
+    setJsonValue(JSON.stringify(initialValues, null, 2));
+    
+    // Reset open sections
+    const initialOpenSections = {};
     if (schema.tabs) {
       schema.tabs.forEach(tab => {
         if (tab.sectionIds && tab.sectionIds.length > 0) {
@@ -185,13 +198,8 @@ export  function ConfigFormV3({
         initialOpenSections[schema.sections[0].id] = true;
       }
     }
-    
     setOpenSections(initialOpenSections);
-  }, [schema]);
-
-  useEffect(() => {
-    setFormValues({...initialValues});
-  }, [initialValues]);
+  }, [schema, initialValues]); // Add both schema and initialValues as dependencies
 
   // Handle value changes with support for nested paths
   const handleFieldChange = (fieldId, value) => {
@@ -365,10 +373,10 @@ export  function ConfigFormV3({
   const renderSectionFields = (fields) => {
     // If fields is an array of field objects, render them directly
     if (fields && typeof fields[0] === 'object') {
-      return fields.map(field => renderField(field));
+      return fields.map((field, index) => renderField({...field, key: `field-${field.id || index}`}));
     }
     // If fields is an array of field IDs, look up fields and render them
-    return fields.map(fieldId => renderFieldById(fieldId));
+    return fields.map((fieldId, index) => renderFieldById(fieldId));
   };
 
   // Get section by ID
@@ -383,7 +391,7 @@ export  function ConfigFormV3({
     if (sections && typeof sections[0] === 'object') {
       return sections.map(section => (
         <Accordion
-          key={section.id}
+          key={`section-${section.id}`}
           title={section.title}
           isOpen={!!openSections[section.id]}
           toggle={() => toggleSection(section.id)}
@@ -400,7 +408,7 @@ export  function ConfigFormV3({
       
       return (
         <Accordion
-          key={section.id}
+          key={`section-${section.id}`}
           title={section.title}
           isOpen={!!openSections[section.id]}
           toggle={() => toggleSection(section.id)}
@@ -415,7 +423,7 @@ export  function ConfigFormV3({
   // Render a tab's content
   const renderTabContent = (tab) => {
     return (
-      <div>
+      <div key={`tab-content-${tab.id}`}>
         {tab.sections && renderSections(tab.sections)}
         {tab.sectionIds && renderSections(tab.sectionIds)}
         {tab.fields && renderSectionFields(tab.fields)}
@@ -455,7 +463,7 @@ export  function ConfigFormV3({
          <div className="flex whitespace-nowrap">
               {schema.tabs.map((tab) => (
                 <div
-                  key={tab.id}
+                  key={`tab-${tab.id}`}
                   className={`${styles.tab} ${
                     activeTab === tab.id ? styles.activeTab : styles.inactiveTab
                   }`}
@@ -470,7 +478,7 @@ export  function ConfigFormV3({
           <div className={styles.tabContent}>
             {schema.tabs.map((tab) => (
               <div
-                key={tab.id}
+                key={`tab-content-wrapper-${tab.id}`}
                 style={{ display: activeTab === tab.id ? 'block' : 'none' }}
               >
                 {renderTabContent(tab)}
@@ -526,7 +534,7 @@ export  function ConfigFormV3({
         <div className={styles.buttonGroup}>
           {schema.buttons?.map((button) => (
             <button
-              key={button.id}
+              key={`button-${button.id}`}
               type="button"
               className={`${styles.button} ${
                 button.variant === 'primary' ? styles.primaryButton : styles.secondaryButton
@@ -549,7 +557,41 @@ export  function ConfigFormV3({
       </div>
     </div>
   );
-};
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 USAGE EXAMPLES:

@@ -417,12 +417,49 @@ export const ColorField = ({ field, value, onChange }) => (
   
   // 3. Static Key-Value Pair Field - Modernized
   export const StaticKeyValueField = ({ field, value, onChange }) => {
-    const pairs = value || {};
-    const keys = field.keys || [];
+    const [pairs, setPairs] = useState({});
+    const [keys, setKeys] = useState([]);    
+    
+    useEffect(() => {
+      const data = value || {};
+      const myKeys = field?.keys || [];
+      
+      // Debug logs
+      console.log("StaticKeyValueField - Field:", field);
+      console.log("StaticKeyValueField - Value:", value);
+      console.log("StaticKeyValueField - Keys:", myKeys);
+      console.log("StaticKeyValueField - Data:", data);
+      
+      setPairs({...data});
+      setKeys([...myKeys]);
+      
+      // Ensure parent state is initialized if empty
+      if (Object.keys(data).length === 0 && myKeys.length > 0) {
+        const initialPairs = {};
+        myKeys.forEach(key => {
+          initialPairs[key] = '';
+        });
+        onChange?.(field.id, initialPairs);
+      }
+    }, [field, value]);
   
     const handleValueChange = (key, newValue) => {
-      onChange(field.id, { ...pairs, [key]: newValue });
+      const updatedPairs = { ...pairs, [key]: newValue };
+      setPairs(updatedPairs);
+      onChange?.(field.id, updatedPairs);
     };
+  
+    // Debug render
+    console.log("Rendering StaticKeyValueField - Keys:", keys, "Pairs:", pairs);
+  
+    // Early return if no keys
+    if (!keys || keys.length === 0) {
+      return (
+        <div className={styles.staticKeyValueContainer}>
+          <div>No keys defined for this field</div>
+        </div>
+      );
+    }
   
     return (
       <div className={styles.staticKeyValueContainer}>
@@ -433,7 +470,8 @@ export const ColorField = ({ field, value, onChange }) => (
               <input
                 type="text"
                 value={pairs[key] || ''}
-                onChange={(e) => handleValueChange(key, e.target["value"])}
+                // @ts-ignore
+                onChange={(e) => handleValueChange(key, e.target.value)}
                 placeholder={field.valuePlaceholder || 'Enter value'}
                 className={styles.keyValueInput}
                 disabled={field.disabled}
@@ -444,7 +482,6 @@ export const ColorField = ({ field, value, onChange }) => (
       </div>
     );
   };
-  
   // 4. Dynamic Key-Value Pairs Field - Modernized
   export const DynamicKeyValueField = ({ field, value, onChange }) => {
     const pairs = value || {};

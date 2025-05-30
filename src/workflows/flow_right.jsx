@@ -37,6 +37,8 @@ function SetBlockData(newdata) {
 
 export function WorkflowConfigFormPanel() {
     let activeblock = activeworkFlowBlock.value;
+    let blockType = activeblock["type"];
+    let blockId = activeblock["id"];
     let activeworkflow = activeWorkFlow.value;
     let activeBlockKeys = Object.keys(activeblock);
     let activeWorkFlowKeys = Object.keys(activeworkflow);
@@ -52,15 +54,18 @@ export function WorkflowConfigFormPanel() {
 
 
     return (
-        <div 
-            onFocus={(e) => {formFocusKey.value = true; e.stopPropagation();}}
-            onBlur={(e) => {e.stopPropagation();;formFocusKey.value = false}}
-            onKeyDown={(e) => {handleFormKeyDown(e)}}
-        >
-        <ConfigFormV3 schema={formRequirements} initialValues={{...blockData}} 
-            onChange={(data) => {SetBlockData(data)}}
-            onSubmit={(data) => {SetBlockData(data)}}
-        />
-    </div>
+            <div 
+                onFocus={(e) => {formFocusKey.value = true; e.stopPropagation();}}
+                onBlur={(e) => {e.stopPropagation();formFocusKey.value = false}}
+                onKeyDown={(e) => {handleFormKeyDown(e)}}
+            >
+            <ConfigFormV3 
+                key={`config-form-${blockType}-${blockId}`} // Add unique key here
+                schema={formRequirements} 
+                initialValues={{...blockData}} 
+                onChange={(data) => {SetBlockData(data)}}
+                onSubmit={(data) => {SetBlockData(data)}}
+            />
+            </div>
     );
 }

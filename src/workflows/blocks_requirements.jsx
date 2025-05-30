@@ -13,27 +13,19 @@ const insert_row_fields = {
       "label": "schema",
       "description": "table schema",
       "path": "input_mapping.schema"
-    },
-    {
-      "id": "input_mapping.fields",
-      "type": "static_key_value",
-      "label": "fields",
-      "keys": ["name", "age", "gender", "others", "objectmap"],
-      "description": "",
-      "path": "input_mapping.fields"
     }
   ],
   "sections": [
     {
       "id": "insert_config",
       "title": "insert_config",
-      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+      "fieldIds": ["input_mapping.table", "input_mapping.schema"]
     },
   ],
   "tabs": [
     {
       "id": "Configs",
-      "title": "configs",
+      "title": "insert configs",
       "sectionIds": ["insert_config"],
     }
   ],
@@ -185,6 +177,7 @@ var blockFormRequirementsV2 = {
         "id": "input_mapping",
         "label": "inputs",
         "type": "array",
+        "path": "input_mapping"
       },
     ],
     "sections": [
@@ -208,6 +201,7 @@ var blockFormRequirementsV2 = {
         "id": "output_mapping",
         "label": "outputs",
         "type": "array",
+        "path": "output_mapping"
       },
     ],
     "sections": [

@@ -1,4 +1,5 @@
 import { NodeResizer } from "@xyflow/react";
+// @ts-ignore
 import { Handle, Position } from '@xyflow/react';
 import DynamicIcon from "../components/custom/dynamic_icon";
 import { activeworkFlowBlock } from "./workflow_state";
