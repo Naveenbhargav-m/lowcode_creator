@@ -365,17 +365,20 @@ function CreateDataMapV2() {
             var obj = {"id": key, "name": name};
             tempmap["forms"].push(obj);
             let fields = form["mobile_children"];
-            let desktopfields = form["desktop_children"];
-            formsmap[key] = {"mobile_children": fields, "desktop_children": desktopfields};
-            // Enhanced version
-            enhanced_data_map.forms.list.push(obj);
-            enhanced_data_map.forms.map[key] = {
-                ...obj,
-                raw_data: form
-            };
+            // let desktopfields = form["desktop_children"];
+            // formsmap[key] = {"mobile_children": fields, "desktop_children": desktopfields};
+            // formsmap[key] = [...fields];
+            // // Enhanced version
+            // enhanced_data_map.forms.list.push(obj);
+            // enhanced_data_map.forms.map[key] = {
+            //     ...obj,
+            //     raw_data: form
+            // };
+            // enhanced_data_map["forms"] = [...fields];
         }
         fieldsMap["forms"] = formsmap;
-        enhanced_data_map.forms.count = mykeys.length;
+        // enhanced_data_map.forms.count = mykeys.length;
+        enhanced_data_map["forms"] = [{"id": "name", "name": "naveeb", "label": "test"}];
     } catch (error) {
         console.error("Error processing forms:", error);
     }
@@ -433,8 +436,13 @@ function CreateDataMapV2() {
             
             var obj = {"id": key, "name": name};
             tempmap["workflows"].push(obj);
-            let inputs = workflow["inputs"] || {};
-            workflowsmap[key] = inputs;
+            let inputs = workflow["inputs"] || [];
+            let inputmaps = [];
+            for(var j=0;j<inputs.length;j++) {
+                let map1 = {"id": inputs[j], "name": inputs[j], "required": false, "label": inputs[j]};
+                inputmaps.push(map1);
+            }
+            workflowsmap[key] = inputmaps;
             // Enhanced version
             enhanced_data_map.workflows.list.push(obj);
             enhanced_data_map.workflows.map[key] = {

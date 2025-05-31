@@ -305,7 +305,7 @@ export function ConfigFormV3({
           fieldComponent = <GlobalJavaScriptField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>;
           break;
       case "field_mapper":
-          fieldComponent = <DataMappingComponent />
+          fieldComponent = <DataMappingComponent field={dynamicField} value={fieldValue} onChange={(id,value) => handleFieldChange(dynamicField.id, value)} />
           break;
       case 'data_picker':
         fieldComponent = <GlobalSelectField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>
