@@ -602,9 +602,10 @@ const DataMappingComponent = ({field , value, onChange}) => {
 
   const workflowInputs = useMemo(() => {
     if(selectedWorkflow !== null) {
+      console.log("selected workflow:",selectedWorkflow, fieldsMap);
       let id = selectedWorkflow["id"] || "";
-      let workflowdata = fieldsMap["workflows"][id] || {};
-      return workflowdata["inputs"] || [];
+      let workflowdata = fieldsMap["workflows"][id] || [];
+      return workflowdata;
     }
     return [];
   }, [selectedWorkflow]);
