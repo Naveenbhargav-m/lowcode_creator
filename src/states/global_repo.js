@@ -503,5 +503,5 @@ export {
     global_components, global_data_templates, global_forms,
     global_screens, global_queries, global_templates,
     global_tables, global_views, global_states, global_groups, global_user_fields,
-    global_secrets, global_workflows, data_map, data_map_v2
+    global_secrets, global_workflows, data_map, data_map_v2, fieldsMap
 };

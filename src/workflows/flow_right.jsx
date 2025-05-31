@@ -1,7 +1,7 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { formFocusKey } from "./flow_builder";
 import { GetWorkflowFormConfig } from "./workflow_helpers";
-import { activeWorkFlow, activeworkFlowBlock, MarkWorkflowAsChanged, SetWorkflowDataBack, workflowsData } from "./workflow_state";
+import { activeWorkFlow, activeworkFlowBlock, MarkWorkflowAsChanged } from "./workflow_state";
 
 
 
@@ -23,6 +23,7 @@ const handleFormKeyDown = (e) => {
 
 function SetBlockData(newdata) {
     let workflowData = activeWorkFlow.value["flow_data"];
+    debugger;
     let activeBlockID = activeworkFlowBlock.value["id"] || "";
     let currentBlockData = workflowData[activeBlockID] || {};
     let blocktype = activeworkFlowBlock.value["type"] || "";
@@ -32,6 +33,7 @@ function SetBlockData(newdata) {
     workflowData[activeBlockID] = currentBlockData;
     let copy = activeWorkFlow.value;
     if(blocktype === "start") {
+        debugger;
         let input_mapping = updatedData["input_mapping"] || {};
         copy["inputs"] = input_mapping;   
     }
