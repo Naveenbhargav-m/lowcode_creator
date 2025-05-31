@@ -101,7 +101,7 @@ const handleSync = async () => {
   var bodyjson = configs;
   try {
     const result = await SaveTablesData(bodyjson);
-    if (result.relatons !== undefined && result.tables !== undefined) {
+    if ((result.relatons !== undefined && result.tables !== undefined) || result !== undefined) {
       // Update original data after successful sync
       setOriginalData({ 
         tables: JSON.parse(JSON.stringify(tables)), 
