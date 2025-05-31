@@ -2,19 +2,10 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, ChevronDown, ChevronUp, Database, Plus, X, Save, Trash2, Table, Settings, ChevronRight } from 'lucide-react';
 import TransactionModal from './transactions_modal';
 import  { createChangeDetector,TransactionValidator } from './change_tracker';
+import { LoadTables, SaveTablesData } from './table_builder_state';
 
 // Mock functions - replace with your actual implementations
 const generateUID = () => Math.random().toString(36).substr(2, 9);
-
-const LoadTables = async () => {
-  return [];
-};
-
-const SaveTablesData = async (config) => {
-  console.log('Saving:', config);
-  return { success: true };
-};
-
 const DATA_TYPES = [
   'VARCHAR', 'TEXT', 'INTEGER', 'BIGINT', 'SMALLINT', 
   'BOOLEAN', 'DATE', 'TIME', 'TIMESTAMP', 'DECIMAL', 
@@ -62,6 +53,30 @@ export default function TableBuilderV7() {
 const [lastGeneratedTransactions, setLastGeneratedTransactions] = useState([]);
 const [showTransactionModal, setShowTransactionModal] = useState(false);
 
+
+const [changeCount, setChangeCount] = useState(0);
+
+// Track changes and update count
+useEffect(() => {
+  const transactions = generateTransactions();
+  setChangeCount(transactions.length);
+}, [tables, relations, originalData]);
+
+
+// Add this useEffect to monitor state changes
+useEffect(() => {
+  // console.log('=== STATE CHANGED ===');
+  // console.log('Tables:', tables);
+  // console.log('Relations:', relations);
+  // console.log('Original data:', originalData);
+  
+  // Check if we have meaningful data to compare
+  if (originalData.tables.length > 0 || originalData.relations.length > 0) {
+    const transactions = generateTransactions();
+    console.log('Detected changes:', transactions.length);
+    console.log('Change details:', transactions);
+  }
+}, [tables, relations, originalData]);
 // Modify your sync handler to generate transactions
 const handleSync = async () => {
   const transactions = generateTransactions();
@@ -78,16 +93,15 @@ const handleSync = async () => {
     alert('Invalid transactions detected. Please check console for details.');
     return;
   }
-
-  const config = { 
-    tables, 
-    relations, 
-    transactions // Send transactions instead of full data
+  var configs = {
+    "tables": tables,
+    "relations": relations,
+    "transactions": transactions
   };
-  
+  var bodyjson = configs;
   try {
-    const result = await SaveTablesData(config);
-    if (result.success) {
+    const result = await SaveTablesData(bodyjson);
+    if (result.relatons !== undefined && result.tables !== undefined) {
       // Update original data after successful sync
       setOriginalData({ 
         tables: JSON.parse(JSON.stringify(tables)), 
@@ -100,10 +114,64 @@ const handleSync = async () => {
   }
 };
 
-// New function to generate transactions
+
+
+// Enhanced updateField function with debugging
+const updateField = (tableId, fieldId, property, value) => {
+  // console.log('=== UPDATING FIELD ===');
+  // console.log('tableId:', tableId);
+  // console.log('fieldId:', fieldId);
+  // console.log('property:', property);
+  // console.log('value:', value);
+  
+  setTables(prev => {
+    const updated = prev.map(table => 
+      table.fid === tableId 
+        ? {
+            ...table,
+            fields: table.fields.map(field => {
+              if (field.fid === fieldId) {
+                const updatedField = { ...field, [property]: value };
+                
+                console.log('Original field:', field);
+                console.log('Updated field:', updatedField);
+                
+                // If type changed, reset type-specific properties
+                if (property === 'type') {
+                  const defaultConfig = getDefaultFieldConfig(value);
+                  const finalField = {
+                    ...updatedField,
+                    length: defaultConfig.length,
+                    defaultValue: defaultConfig.defaultValue
+                  };
+                  console.log('Final field (after type change):', finalField);
+                  return finalField;
+                }
+                
+                return updatedField;
+              }
+              return field;
+            })
+          }
+        : table
+    );
+    
+    // console.log('Tables after update:', updated);
+    return updated;
+  });
+};
+
+// Enhanced generateTransactions with debugging
 const generateTransactions = () => {
   const currentData = { tables, relations };
-  return transactionGenerator.detectChanges(originalData, currentData);
+  // console.log('=== GENERATING TRANSACTIONS ===');
+  // console.log('Original data:', originalData);
+  // console.log('Current data:', currentData);
+  
+  const transactions = transactionGenerator.detectChanges(originalData, currentData);
+  console.log('Generated transactions:', transactions);
+  
+  return transactions;
 };
 
 // New function to view transactions without syncing
@@ -113,23 +181,57 @@ const handleViewTransactions = () => {
   setShowTransactionModal(true);
 };
 
-
-  // Load initial data
-  useEffect(() => {
-    LoadTables().then((data) => {
-      if (!data?.[0]?.tables_data) return;
-      
-      const { tables = [], relations = [] } = data[0].tables_data;
-      setTables(tables);
-      setRelations(relations);
-      setOriginalData({ tables: JSON.parse(JSON.stringify(tables)), relations: JSON.parse(JSON.stringify(relations)) });
-      
-      if (tables.length > 0 && !activeTable) {
-        setActiveTable(tables[0].fid);
-      }
+// Enhanced data loading with better debugging
+useEffect(() => {
+  console.log('=== LOADING INITIAL DATA ===');
+  
+  LoadTables().then((data) => {
+    console.log('Raw loaded data:', data);
+    
+    if (!data?.[0]?.tables_data) {
+      console.log('No tables_data found');
+      return;
+    }
+    
+    const { tables: loadedTables = [], relations: loadedRelations = [] } = data[0].tables_data;
+    
+    console.log('Loaded tables:', loadedTables);
+    console.log('Loaded relations:', loadedRelations);
+    
+    // Set current state
+    setTables(loadedTables);
+    setRelations(loadedRelations);
+    
+    // IMPORTANT: Create deep copies for original data
+    const originalTablesData = JSON.parse(JSON.stringify(loadedTables));
+    const originalRelationsData = JSON.parse(JSON.stringify(loadedRelations));
+    
+    console.log('Setting original data:', {
+      tables: originalTablesData,
+      relations: originalRelationsData
     });
-  }, []);
+    
+    // Set original data from loaded data (not from state)
+    setOriginalData({ 
+      tables: originalTablesData, 
+      relations: originalRelationsData 
+    });
+    
+    if (loadedTables.length > 0 && !activeTable) {
+      setActiveTable(loadedTables[0].fid);
+    }
+    
+    console.log('Data loading complete');
+  }).catch(error => {
+    console.error('Error loading data:', error);
+  });
+}, []); // Make sure this only runs once
 
+// Also add a separate effect to monitor originalData changes
+useEffect(() => {
+  console.log('=== ORIGINAL DATA UPDATED ===');
+  console.log('Original data:', originalData);
+}, [originalData]);
   // Close drawer when activeField changes
   useEffect(() => {
     if (activeField) {
@@ -202,33 +304,6 @@ const handleViewTransactions = () => {
     setActiveField(newField.fid);
   };
 
-  const updateField = (tableId, fieldId, property, value) => {
-    setTables(prev => prev.map(table => 
-      table.fid === tableId 
-        ? {
-            ...table,
-            fields: table.fields.map(field => {
-              if (field.fid === fieldId) {
-                const updatedField = { ...field, [property]: value };
-                
-                // If type changed, reset type-specific properties
-                if (property === 'type') {
-                  const defaultConfig = getDefaultFieldConfig(value);
-                  return {
-                    ...updatedField,
-                    length: defaultConfig.length,
-                    defaultValue: defaultConfig.defaultValue
-                  };
-                }
-                
-                return updatedField;
-              }
-              return field;
-            })
-          }
-        : table
-    ));
-  };
 
   const deleteField = (tableId, fieldId) => {
     setTables(prev => prev.map(table => 
@@ -289,7 +364,7 @@ const handleViewTransactions = () => {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Sync ({generateTransactions().length})
+            Sync ({changeCount})
           </button>
         </div>
       </div>

@@ -1,29 +1,31 @@
 // Enhanced Database Change Tracker with improved rename detection and validation
 
+// Add this to your TRANSACTION_TYPES
 export const TRANSACTION_TYPES = {
-    // Table operations
-    CREATE_TABLE: 'CREATE_TABLE',
-    DROP_TABLE: 'DROP_TABLE',
-    RENAME_TABLE: 'RENAME_TABLE',
-    
-    // Field operations
-    ADD_FIELD: 'ADD_FIELD',
-    DROP_FIELD: 'DROP_FIELD',
-    RENAME_FIELD: 'RENAME_FIELD',
-    CHANGE_FIELD_TYPE: 'CHANGE_FIELD_TYPE',
-    CHANGE_FIELD_NULLABLE: 'CHANGE_FIELD_NULLABLE',
-    CHANGE_FIELD_DEFAULT: 'CHANGE_FIELD_DEFAULT',
-    ADD_PRIMARY_KEY: 'ADD_PRIMARY_KEY',
-    DROP_PRIMARY_KEY: 'DROP_PRIMARY_KEY',
-    
-    // Relation operations
-    ADD_RELATION: 'ADD_RELATION',
-    DROP_RELATION: 'DROP_RELATION',
-    
-    // Composite operations
-    RECREATE_TABLE: 'RECREATE_TABLE' // For complex changes requiring table recreation
-  };
+  // Table operations
+  CREATE_TABLE: 'CREATE_TABLE',
+  DROP_TABLE: 'DROP_TABLE',
+  RENAME_TABLE: 'RENAME_TABLE',
   
+  // Field operations
+  ADD_FIELD: 'ADD_FIELD',
+  DROP_FIELD: 'DROP_FIELD',
+  RENAME_FIELD: 'RENAME_FIELD',
+  CHANGE_FIELD_TYPE: 'CHANGE_FIELD_TYPE',
+  CHANGE_FIELD_LENGTH: 'CHANGE_FIELD_LENGTH', // Add this line
+  CHANGE_FIELD_NULLABLE: 'CHANGE_FIELD_NULLABLE',
+  CHANGE_FIELD_DEFAULT: 'CHANGE_FIELD_DEFAULT',
+  ADD_PRIMARY_KEY: 'ADD_PRIMARY_KEY',
+  DROP_PRIMARY_KEY: 'DROP_PRIMARY_KEY',
+  
+  // Relation operations
+  ADD_RELATION: 'ADD_RELATION',
+  DROP_RELATION: 'DROP_RELATION',
+  
+  // Composite operations
+  RECREATE_TABLE: 'RECREATE_TABLE'
+};
+
   // Enhanced change detection with rename inference
   class ChangeDetector {
     constructor(options = {}) {
@@ -420,76 +422,184 @@ export const TRANSACTION_TYPES = {
       );
     }
   
-    _detectFieldPropertyChanges(tableName, originalField, currentField) {
-      const changes = [];
+    // _detectFieldPropertyChanges(tableName, originalField, currentField) {
+    //   const changes = [];
       
-      // Type or length changes
-      const originalFullType = this._getFullType(originalField);
-      const currentFullType = this._getFullType(currentField);
+    //   // Type or length changes
+    //   const originalFullType = this._getFullType(originalField);
+    //   const currentFullType = this._getFullType(currentField);
       
-      if (originalFullType !== currentFullType) {
-        changes.push({
-          type: TRANSACTION_TYPES.CHANGE_FIELD_TYPE,
-          priority: 30,
-          tableName,
-          fieldName: currentField.name,
-          oldType: originalFullType,
-          newType: currentFullType,
-          metadata: {
-            potentialDataLoss: this._isDataLossyChange(originalFullType, currentFullType),
-            requiresTableRecreation: this._requiresTableRecreation(originalField, currentField)
-          }
-        });
+    //   if (originalFullType !== currentFullType) {
+    //     changes.push({
+    //       type: TRANSACTION_TYPES.CHANGE_FIELD_TYPE,
+    //       priority: 30,
+    //       tableName,
+    //       fieldName: currentField.name,
+    //       oldType: originalFullType,
+    //       newType: currentFullType,
+    //       metadata: {
+    //         potentialDataLoss: this._isDataLossyChange(originalFullType, currentFullType),
+    //         requiresTableRecreation: this._requiresTableRecreation(originalField, currentField)
+    //       }
+    //     });
+    //   }
+      
+    //   // Nullable change
+    //   if (originalField.nullable !== currentField.nullable) {
+    //     changes.push({
+    //       type: TRANSACTION_TYPES.CHANGE_FIELD_NULLABLE,
+    //       priority: 40,
+    //       tableName,
+    //       fieldName: currentField.name,
+    //       oldNullable: originalField.nullable,
+    //       newNullable: currentField.nullable,
+    //       metadata: {
+    //         requiresValidation: !currentField.nullable // Making field required
+    //       }
+    //     });
+    //   }
+      
+    //   // Default value change
+    //   if (originalField.defaultValue !== currentField.defaultValue) {
+    //     changes.push({
+    //       type: TRANSACTION_TYPES.CHANGE_FIELD_DEFAULT,
+    //       priority: 50,
+    //       tableName,
+    //       fieldName: currentField.name,
+    //       oldDefault: originalField.defaultValue,
+    //       newDefault: currentField.defaultValue
+    //     });
+    //   }
+      
+    //   // Primary key changes
+    //   if (originalField.primaryKey !== currentField.primaryKey) {
+    //     if (currentField.primaryKey) {
+    //       changes.push({
+    //         type: TRANSACTION_TYPES.ADD_PRIMARY_KEY,
+    //         priority: 60,
+    //         tableName,
+    //         fieldName: currentField.name
+    //       });
+    //     } else {
+    //       changes.push({
+    //         type: TRANSACTION_TYPES.DROP_PRIMARY_KEY,
+    //         priority: 80,
+    //         tableName,
+    //         fieldName: originalField.name
+    //       });
+    //     }
+    //   }
+      
+    //   return changes;
+    // }
+
+
+
+    // Enhanced _detectFieldPropertyChanges method to properly capture all field changes
+_detectFieldPropertyChanges(tableName, originalField, currentField) {
+  const changes = [];
+  
+  // NAME CHANGE - This was missing!
+  if (originalField.name !== currentField.name) {
+    changes.push({
+      type: TRANSACTION_TYPES.RENAME_FIELD,
+      priority: 20,
+      tableName,
+      fieldFid: currentField.fid,
+      oldName: originalField.name,
+      newName: currentField.name,
+      metadata: { 
+        confidence: 1.0,
+        directEdit: true
       }
-      
-      // Nullable change
-      if (originalField.nullable !== currentField.nullable) {
-        changes.push({
-          type: TRANSACTION_TYPES.CHANGE_FIELD_NULLABLE,
-          priority: 40,
-          tableName,
-          fieldName: currentField.name,
-          oldNullable: originalField.nullable,
-          newNullable: currentField.nullable,
-          metadata: {
-            requiresValidation: !currentField.nullable // Making field required
-          }
-        });
+    });
+  }
+  
+  // Type or length changes
+  const originalFullType = this._getFullType(originalField);
+  const currentFullType = this._getFullType(currentField);
+  
+  if (originalFullType !== currentFullType) {
+    changes.push({
+      type: TRANSACTION_TYPES.CHANGE_FIELD_TYPE,
+      priority: 30,
+      tableName,
+      fieldName: currentField.name, // Use current name
+      fieldFid: currentField.fid,   // Add FID for better tracking
+      oldType: originalFullType,
+      newType: currentFullType,
+      metadata: {
+        potentialDataLoss: this._isDataLossyChange(originalFullType, currentFullType),
+        requiresTableRecreation: this._requiresTableRecreation(originalField, currentField)
       }
-      
-      // Default value change
-      if (originalField.defaultValue !== currentField.defaultValue) {
-        changes.push({
-          type: TRANSACTION_TYPES.CHANGE_FIELD_DEFAULT,
-          priority: 50,
-          tableName,
-          fieldName: currentField.name,
-          oldDefault: originalField.defaultValue,
-          newDefault: currentField.defaultValue
-        });
+    });
+  }
+  
+  // Nullable change
+  if (originalField.nullable !== currentField.nullable) {
+    changes.push({
+      type: TRANSACTION_TYPES.CHANGE_FIELD_NULLABLE,
+      priority: 40,
+      tableName,
+      fieldName: currentField.name,
+      fieldFid: currentField.fid,
+      oldNullable: originalField.nullable,
+      newNullable: currentField.nullable,
+      metadata: {
+        requiresValidation: !currentField.nullable
       }
-      
-      // Primary key changes
-      if (originalField.primaryKey !== currentField.primaryKey) {
-        if (currentField.primaryKey) {
-          changes.push({
-            type: TRANSACTION_TYPES.ADD_PRIMARY_KEY,
-            priority: 60,
-            tableName,
-            fieldName: currentField.name
-          });
-        } else {
-          changes.push({
-            type: TRANSACTION_TYPES.DROP_PRIMARY_KEY,
-            priority: 80,
-            tableName,
-            fieldName: originalField.name
-          });
-        }
-      }
-      
-      return changes;
+    });
+  }
+  
+  // Default value change
+  if (originalField.defaultValue !== currentField.defaultValue) {
+    changes.push({
+      type: TRANSACTION_TYPES.CHANGE_FIELD_DEFAULT,
+      priority: 50,
+      tableName,
+      fieldName: currentField.name,
+      fieldFid: currentField.fid,
+      oldDefault: originalField.defaultValue,
+      newDefault: currentField.defaultValue
+    });
+  }
+  
+  // Primary key changes
+  if (originalField.primaryKey !== currentField.primaryKey) {
+    if (currentField.primaryKey) {
+      changes.push({
+        type: TRANSACTION_TYPES.ADD_PRIMARY_KEY,
+        priority: 60,
+        tableName,
+        fieldName: currentField.name,
+        fieldFid: currentField.fid
+      });
+    } else {
+      changes.push({
+        type: TRANSACTION_TYPES.DROP_PRIMARY_KEY,
+        priority: 80,
+        tableName,
+        fieldName: originalField.name,
+        fieldFid: originalField.fid
+      });
     }
+  }
+  
+  // Length/precision changes (separate from type changes)
+  if (originalField.length !== currentField.length && originalFullType === currentFullType) {
+    changes.push({
+      type: TRANSACTION_TYPES.CHANGE_FIELD_LENGTH,
+      priority: 35,
+      tableName,
+      fieldName: currentField.name,
+      fieldFid: currentField.fid,
+      oldLength: originalField.length,
+      newLength: currentField.length
+    });
+  }
+  
+  return changes;
+}
   
     _detectRelationChanges(originalRelations, currentRelations) {
       const changes = [];
