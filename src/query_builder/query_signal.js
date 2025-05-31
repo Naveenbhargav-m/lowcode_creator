@@ -10,6 +10,7 @@ const queryNamesList = signal([]);
 const activeQuery = signal("");
 const activeQueryData = signal({});
 const isQueryChanged = signal("");
+const currentInputs = signal({"inputs": []});
 
 // Track which queries have unsaved changes
 const unsavedQueries = signal(new Set());
@@ -286,6 +287,10 @@ function SetActiveQuery(queryId) {
   
   activeQuery.value = queryId;
   activeQueryData.value = { ...queries[queryId] };
+  let inputs = activeQueryData.value["input_params"];
+  let existing = currentInputs.value["inputs"];
+  existing = [...inputs];
+  currentInputs.value = {"inputs": existing};
   isQueryChanged.value = queryId;
   
   console.log("Active query set:", queryId);
@@ -302,7 +307,11 @@ function UpdateQueryPart(part, data) {
     console.warn("No active query to update");
     return;
   }
-  
+  if(part === "input_params") {
+    let existing = currentInputs.value["inputs"];
+    existing = [...data];
+    currentInputs.value = {"inputs": existing};
+  }
   // Update local query data
   queries[activeId][part] = data;
   
@@ -402,6 +411,7 @@ export {
   unsavedQueries,
   isLoading,
   apiError,
+  currentInputs,
   
   // CRUD Operations
   LoadQueries,

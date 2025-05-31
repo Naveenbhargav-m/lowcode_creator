@@ -1,7 +1,7 @@
 import { useSignal } from "@preact/signals";
 import GlobalSignalsPopup  from "../state_components/global_popup";
 import { CreateFormButton } from "../template_builder/template_builder_view";
-import { activeQueryData, CreateQueryBlock, SyncActiveQuery, UpdateQueryPart } from "./query_signal";
+import { activeQueryData, CreateQueryBlock, currentInputs, SyncActiveQuery, UpdateQueryPart } from "./query_signal";
 import { Pipette, X, ChevronRight, Code, Settings, Database, Filter, SortDesc, Group, Table, Eye, ArrowUp, ArrowDown, Code2Icon, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "preact/hooks";
 import { SelectComponent } from "../components/general/general_components";
@@ -317,7 +317,7 @@ function JoinBlock({ initalData, updateCallBack }) {
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
         // @ts-ignore
-        fields={data_map["tables"]}
+        fields={{...data_map["tables"], ...currentInputs.value}}
         selectedItems={getSelectedItems()}
         onClose={(e, data) => { handlePopupClose(e, data) }}
       />
@@ -552,7 +552,7 @@ function GroupByBlock({initalgroups, updateCallBack}) {
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
         // @ts-ignore
-        fields={data_map["tables"]}
+        fields={{...data_map["tables"], ...currentInputs.value}}
         selectedItems={selectedItems}
         onClose={(e, data) => {
           console.log("Group By selection:", data);
@@ -619,7 +619,7 @@ function OrderByBlock( {selectInput, aggregationInput , updateCallback}) {
         initialOpen={isOpen.value}
         // @ts-ignore
         selectedItems={selectedItems}
-        fields={data_map["tables"]}
+        fields={{...data_map["tables"], ...currentInputs.value}}
         onClose={(e, data) => {
           console.log("Order By selection:", data);
           if (data) setSelectedItems(data);
@@ -677,7 +677,7 @@ function SelectBlock({ select, Aggregations, updateCallBack }) {
       <GlobalSignalsPopup 
         initialOpen={isOpen.value}
         // @ts-ignore
-        fields={data_map["tables"]}
+        fields={{...data_map["tables"], ...currentInputs.value}}
         selectedItems={selectedItems}
         onClose={(e, data) => {
           console.log("Selected fields:", data);
@@ -1378,7 +1378,7 @@ function AggregationPopup({ position, item, aggregations, setAggregations, onClo
           initialOpen={isOpen.value}
           selectedItems={items.value}
           // @ts-ignore
-          fields={data_map["tables"]}
+          fields={{...data_map["tables"], ...currentInputs.value}}
           onClose={handlePopupClose}
         />
       </div>
