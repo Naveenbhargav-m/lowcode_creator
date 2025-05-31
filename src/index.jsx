@@ -18,6 +18,7 @@ import TemplateRegistrationPage from "./external_templates/external_templates";
 import { TemplatePage } from "./template_builder/templates_page";
 import { VariablesPage } from "./global_state_screen/global_state_page";
 import { ThemeEditor } from "./themes_screen/themes_screen";
+import DataMapperDemo from "./components/tests/mapper_test";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -67,7 +68,7 @@ export function App() {
             <Route path="/settings" component={SettingsPage} />
             <Route path="/" component={AppCreatorPage} />
             <Route path="/queries" component={QueryBuilderPage} />
-            <Route path="/test" component={WorkflowBuilder} />
+            <Route path="/test" component={DataMapperDemo} />
             <Route default component={() => <div>Not Found</div>} />
           </Router>
         </main>
