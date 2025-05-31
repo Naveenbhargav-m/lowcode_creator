@@ -25,10 +25,16 @@ function SetBlockData(newdata) {
     let workflowData = activeWorkFlow.value["flow_data"];
     let activeBlockID = activeworkFlowBlock.value["id"] || "";
     let currentBlockData = workflowData[activeBlockID] || {};
+    let blocktype = activeworkFlowBlock.value["type"] || "";
+
     let updatedData = {...currentBlockData, ...newdata};
     currentBlockData = updatedData;
     workflowData[activeBlockID] = currentBlockData;
     let copy = activeWorkFlow.value;
+    if(blocktype === "start") {
+        let input_mapping = updatedData["input_mapping"] || {};
+        copy["inputs"] = input_mapping;   
+    }
     copy["flow_data"] = workflowData;
     copy["_change_type"] = "update";
     activeWorkFlow.value = {...copy};

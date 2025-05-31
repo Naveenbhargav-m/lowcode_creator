@@ -20,6 +20,7 @@ let global_user_fields = {};
 
 let data_map = {};
 let data_map_v2 = {};
+let fieldsMap = {};
 // APPROACH 1: Using Promise.all (Recommended)
 async function InitGlobalData() {
     try {
@@ -304,6 +305,7 @@ function CreateDataMapV2() {
     // Process Queries
     try {
         let mykeys = Object.keys(global_queries || {});
+        let queriesmap = {};
         for(var i = 0; i < mykeys.length; i++) {
             let key = mykeys[i];
             let query = global_queries[key];
@@ -311,7 +313,8 @@ function CreateDataMapV2() {
             
             var obj = {"id": key, "name": name};
             tempmap["queries"].push(obj);
-            
+            let inputParams = query["input_params"] || [];
+            queriesmap[key] = inputParams;
             // Enhanced version
             enhanced_data_map.queries.list.push(obj);
             enhanced_data_map.queries.map[key] = {
@@ -319,6 +322,7 @@ function CreateDataMapV2() {
                 raw_data: query
             };
         }
+        fieldsMap["queries"] = queriesmap;
         enhanced_data_map.queries.count = mykeys.length;
     } catch (error) {
         console.error("Error processing queries:", error);
@@ -352,6 +356,7 @@ function CreateDataMapV2() {
     try {
         let mykeys = Object.keys(global_forms || {});
         console.log("global forms:", global_forms);
+        let formsmap = {};
         for(var i = 0; i < mykeys.length; i++) {
             let key = mykeys[i];
             let form = global_forms[key];
@@ -359,7 +364,9 @@ function CreateDataMapV2() {
             
             var obj = {"id": key, "name": name};
             tempmap["forms"].push(obj);
-            
+            let fields = form["mobile_children"];
+            let desktopfields = form["desktop_children"];
+            formsmap[key] = {"mobile_children": fields, "desktop_children": desktopfields};
             // Enhanced version
             enhanced_data_map.forms.list.push(obj);
             enhanced_data_map.forms.map[key] = {
@@ -367,6 +374,7 @@ function CreateDataMapV2() {
                 raw_data: form
             };
         }
+        fieldsMap["forms"] = formsmap;
         enhanced_data_map.forms.count = mykeys.length;
     } catch (error) {
         console.error("Error processing forms:", error);
@@ -375,6 +383,7 @@ function CreateDataMapV2() {
     // Process Tables
     try {
         let mykeys = Object.keys(global_tables || {});
+        let tablesmap = {};
         for(var i = 0; i < mykeys.length; i++) {
             let key = mykeys[i];
             let curtable = global_tables[key];
@@ -394,7 +403,7 @@ function CreateDataMapV2() {
                 console.error("Error processing table fields:", e);
                 fieldsArray = [];
             }
-            
+            tablesmap[tableName] = fieldsArray;
             tempmap["tables"][tableName] = fieldsArray;
             
             // Enhanced version
@@ -407,6 +416,7 @@ function CreateDataMapV2() {
             };
             enhanced_data_map.tables.fields_map[tableName] = fieldsArray;
         }
+        fieldsMap["tables"] = tablesmap;
         enhanced_data_map.tables.count = mykeys.length;
     } catch (error) {
         console.error("Error processing tables:", error);
@@ -415,6 +425,7 @@ function CreateDataMapV2() {
     // Process Workflows
     try {
         let mykeys = Object.keys(global_workflows || {});
+        let workflowsmap = {};
         for(var i = 0; i < mykeys.length; i++) {
             let key = mykeys[i];
             let workflow = global_workflows[key];
@@ -422,7 +433,8 @@ function CreateDataMapV2() {
             
             var obj = {"id": key, "name": name};
             tempmap["workflows"].push(obj);
-            
+            let inputs = workflow["inputs"] || {};
+            workflowsmap[key] = inputs;
             // Enhanced version
             enhanced_data_map.workflows.list.push(obj);
             enhanced_data_map.workflows.map[key] = {
@@ -430,6 +442,7 @@ function CreateDataMapV2() {
                 raw_data: workflow
             };
         }
+        fieldsMap["workflows"] = workflowsmap;
         enhanced_data_map.workflows.count = mykeys.length;
     } catch (error) {
         console.error("Error processing workflows:", error);
@@ -481,6 +494,7 @@ function CreateDataMapV2() {
     // Set both data maps
     data_map = tempmap;
     data_map_v2 = enhanced_data_map;
+    console.log("fields map:",fieldsMap);
     console.log("Original data map:", data_map);
     console.log("Enhanced data map:", enhanced_data_map);
 }

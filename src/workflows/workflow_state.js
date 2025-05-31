@@ -146,7 +146,8 @@ async function CreateWorkflow(data) {
             ],
             edges: [],
             flow_data: {},
-            workflow_schema: {}
+            workflow_schema: {},
+            inputs: {}
         };
 
         // Make API call to create workflow
@@ -210,7 +211,8 @@ async function UpdateWorkflow(workflowid) {
             nodes: workflow.nodes,
             edges: workflow.edges,
             flow_data: workflow.flow_data,
-            workflow_schema: workflow.workflow_schema
+            workflow_schema: workflow.workflow_schemam,
+            inputs: workflow.inputs
         };
         
         let url = `${AppID.value}/public/_workflows?where=id=${workflowid}`;
