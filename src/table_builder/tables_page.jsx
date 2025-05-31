@@ -3,10 +3,9 @@ import React, { useState } from "react";
 import { dbViewSignal } from "./table_builder_state";
 import { DatabaseViewManager} from "../view_creator/view_page";
 import { DatabaseQueryRunner } from "../view_creator/advnaced_views";
-import { globalStyle } from "../styles/globalStyle";
-import TableBuilderV6 from "./table_builder";
 import { TriggerManagementUI } from "../triggers/triggers_page";
 import { useAuthCheck } from "../hooks/hooks";
+import TableBuilderV7 from "./table_builder";
 
 
 function TablesTab({ onTableSelect , style={} , buttonStyle ={}}) {
@@ -42,7 +41,7 @@ function TablesPage() {
   return (
     <>
       {
-      dbViewSignal.value == "Tables" ? <TableBuilderV6 /> : 
+      dbViewSignal.value == "Tables" ? <TableBuilderV7 /> : 
       dbViewSignal.value == "Views" ? <DatabaseViewManager /> :
       dbViewSignal.value == "Triggers" ? <TriggerManagementUI/> :
       <DatabaseQueryRunner />
