@@ -3,17 +3,12 @@ import { useAuthCheck } from "../hooks/hooks";
 import { FlowBuilder } from "./flow_builder";
 import { WorkflowsList } from "./flow_left_panel";
 import { WorkflowConfigFormPanel } from "./flow_right";
-import { GetWorkflowDataFromAPI } from "./workflow_api";
 
 
 
 
 function WorkFlowPage() {
     useAuthCheck();
-    
-    useEffect(() => {
-      GetWorkflowDataFromAPI();
-    }, []);
     
     return (
       <div style={{ 

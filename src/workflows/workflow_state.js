@@ -6,7 +6,6 @@ import { AppID } from "../states/global_state";
 // Core workflow state signals
 const activeWorkFlow = signal({});
 const workflows = signal([]);
-const workflowsData = signal({});
 const workflownames = signal([]);
 const activeworkFlowBlock = signal({});
 const flowTab = signal("blocks");
@@ -24,7 +23,8 @@ const DEFAULT_WORKFLOW_STRUCTURE = {
     nodes: [],
     edges: [],
     flow_data: {},
-    workflow_schema: {}
+    workflow_schema: {},
+    inputs: [],
 };
 
 /**
@@ -57,7 +57,8 @@ async function LoadWorkflows() {
                 nodes: workflow.nodes || [],
                 edges: workflow.edges || [],
                 flow_data: workflow.flow_data || {},
-                workflow_schema: workflow.workflow_schema || {}
+                workflow_schema: workflow.workflow_schema || {},
+                inputs: workflow.inputs || [],
             };
             
             workflowsList.push(workflowData);
@@ -147,7 +148,7 @@ async function CreateWorkflow(data) {
             edges: [],
             flow_data: {},
             workflow_schema: {},
-            inputs: {}
+            inputs: []
         };
 
         // Make API call to create workflow
@@ -192,9 +193,7 @@ async function CreateWorkflow(data) {
     }
 }
 
-/**
- * Update a specific workflow via API
- */
+// Fix 1: Correct the typo in UpdateWorkflow function
 async function UpdateWorkflow(workflowid) {
     try {
         isLoading.value = true;
@@ -211,7 +210,7 @@ async function UpdateWorkflow(workflowid) {
             nodes: workflow.nodes,
             edges: workflow.edges,
             flow_data: workflow.flow_data,
-            workflow_schema: workflow.workflow_schemam,
+            workflow_schema: workflow.workflow_schema, // ← FIXED: removed extra 'm'
             inputs: workflow.inputs
         };
         
@@ -459,7 +458,6 @@ function UpdateWorkflowsWithLatest(existingFlow) {
     const updatedWorkflows = currentWorkflows.map((flow) => 
         flow && flow.id === activeFid ? activeWorkFlow.peek() : flow
     );
-    
     workflows.value = [...updatedWorkflows];
 }
 
@@ -520,38 +518,6 @@ function HandleWorkFlowBlockDrop(data) {
     UpdateWorkflowsWithLatest(curFlow);
 }
 
-function SetWorkflowDataBack(newData, workflowID, blockID) {
-    console.log("called set workflow data back:", newData, workflowID, blockID);
-    if (!newData || typeof newData !== 'object') {
-        console.warn("SetWorkflowDataBack: Invalid data provided");
-        return;
-    }
-    
-    if (!workflowID || !blockID) {
-        console.warn("SetWorkflowDataBack: Missing workflow ID or block ID");
-        return;
-    }
-    
-    const existingData = workflowsData.value || {};
-    const currentflowData = existingData[workflowID] || {};
-    const currentBlockData = currentflowData[blockID] || {};
-    const data = currentBlockData.data || {};
-    
-    const newBlockData = {
-        ...currentBlockData,
-        ...data,
-        ...newData   
-    };
-    
-    currentflowData[blockID] = newBlockData;
-    currentflowData["_change_type"] = currentflowData["_change_type"] || "update";
-    console.log("current flow data:", currentflowData, workflowID, blockID);
-    existingData[workflowID] = currentflowData;
-    workflowsData.value = {...existingData};
-    
-    // Mark workflow as changed
-    MarkWorkflowAsChanged(workflowID);
-}
 
 function SetWorkFlowActive(id) {
     if (!id) {
@@ -582,7 +548,6 @@ export {
     activeWorkFlow, 
     workflows, 
     workflownames, 
-    workflowsData,
     activeworkFlowBlock, 
     flowTab,
     activeFloweUpdated,
@@ -604,7 +569,6 @@ export {
     UpdateActiveWorkflowNodes, 
     HandleWorkFlowBlockDrop,
     UpdateActiveWorkflowEdges,
-    SetWorkflowDataBack,
     MarkWorkflowAsChanged,
     HasUnsavedChanges
 };

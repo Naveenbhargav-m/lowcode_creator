@@ -1,8 +1,8 @@
 // @ts-ignore
 import React, { useState, useMemo, useCallback, memo } from 'react';
 // @ts-ignore
-import { ChevronRight, Settings, X, Link, MapPin, Check, Workflow, Search, Filter, User, Database, Type, Hash } from 'lucide-react';
-import { data_map_v2 } from '../../../states/global_repo';
+import { ChevronRight, Settings, X, Link, MapPin, Check, Workflow, Search, Filter, User, Database, Type, Hash, Slash } from 'lucide-react';
+import { data_map_v2, fieldsMap } from '../../../states/global_repo';
 
 
 
@@ -548,7 +548,7 @@ const FieldMappingInput = memo(({
 });
 
 // 11. Main Data Mapping Component
-const DataMappingComponent = () => {
+const DataMappingComponent = ({field , value, onChange}) => {
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [showWorkflowPicker, setShowWorkflowPicker] = useState(false);
   const [showMapper, setShowMapper] = useState(false);
@@ -601,7 +601,12 @@ const DataMappingComponent = () => {
   }, [mappings, selectedWorkflow]);
 
   const workflowInputs = useMemo(() => {
-    return data_map_v2["workflows"]["list"][selectedWorkflow?.id] || [];
+    if(selectedWorkflow !== null) {
+      let id = selectedWorkflow["id"] || "";
+      let workflowdata = fieldsMap["workflows"][id] || {};
+      return workflowdata["inputs"] || [];
+    }
+    return [];
   }, [selectedWorkflow]);
 
   return (
