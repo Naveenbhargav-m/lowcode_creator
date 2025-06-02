@@ -113,10 +113,30 @@ export const TemplateElementConfigFormSchema = {
       "label": "Actions"
     },
     {
-      "id": "configs.datasource",
-      "type": "field_mapper",
-      "path": "configs.datasource",
-      "label": "Data Mapping"
+      "id": "configs.data_source.data_query",
+      "type": "dropdown",
+      "path": "configs.data_source.data_query",
+      "options": [
+        {"label": "option1", "value": "option1"},
+        {"label": "option2","value": "option2"}
+      ],
+      "label": "Pick a Query"
+    },
+    {
+      "id": "configs.data_source.field_mapping",
+      "type": "data_mapper",
+      "path": "configs.data_source.field_mapping",
+      "label": "Data Mapping",
+      "dynamicConfig": [
+        {
+          "condition": {"field": "configs.data_source.data_query", "operator": "not_empty"},
+          "callback": "get_query_field_map",
+          "assignTo": [
+            {"key": "source_fields", "transform": (data) => data.inputs},
+            {"key": "target_fields", "transform": (data) => data.query_fields},
+          ],
+        }
+      ],
     }
 ],
   
@@ -155,7 +175,8 @@ export const TemplateElementConfigFormSchema = {
       "id": "datasource",
       "title": "data_source",
       "fieldIds": [
-        "configs.datasource"
+        "configs.data_source.data_query",
+        "configs.data_source.field_mapping"
       ],
     }
   ],

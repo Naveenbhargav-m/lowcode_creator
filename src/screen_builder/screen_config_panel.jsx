@@ -3,7 +3,17 @@ import { generateUID } from "../utils/helpers";
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { TemplateElementConfigFormSchema } from "../template_builder/configs";
 import { data } from "autoprefixer";
+import { fieldsMap } from "../states/global_repo";
 
+
+function get_query_field_map(fieldconfig, formValues, context) {
+    let id = fieldconfig["id"] || "";
+    let screenelement = activeScreenElements[id] || {};
+    let inputs = screenelement["inputs"] || [];
+    let queryid = formValues["configs.data_source.data_query"] || "";
+    let queryFields = fieldsMap["queries"][queryid] || [];
+    return {"inputs": inputs, "query_fields": queryFields};
+}
 
 function ScreenRightPanel() {
     let actElem = activeElement.value;
@@ -41,7 +51,11 @@ function ScreenRightPanel() {
     }
 
     return (
-        <ConfigFormV3 schema={TemplateElementConfigFormSchema} initialValues={myelement} 
+        <ConfigFormV3 schema={TemplateElementConfigFormSchema}
+         context={{
+            "get_query_field_map": get_query_field_map,
+         }}
+         initialValues={myelement} 
         onChange={(data) => {
             updateDataback(data);
         }} onSubmit={

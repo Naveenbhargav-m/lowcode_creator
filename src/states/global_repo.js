@@ -42,6 +42,8 @@ async function InitGlobalData() {
     }
 }
 
+
+
 async function LoadQueries() {
     try {
         let url = `${AppID.value}/public/_queries`;
@@ -313,8 +315,17 @@ function CreateDataMapV2() {
             
             var obj = {"id": key, "name": name};
             tempmap["queries"].push(obj);
-            let inputParams = query["input_params"] || [];
-            queriesmap[key] = inputParams;
+            let inputs = query["input_params"] || [];
+            var inpusarr = [];
+            for(var j=0;j<inputs.length;j++) {
+                let obj1 = {
+                    "id": inputs[j],
+                    "label": inputs[j],
+                    "value": inputs[j]
+                };
+                inpusarr.push(obj1);
+            }
+            queriesmap[key] = inpusarr;
             // Enhanced version
             enhanced_data_map.queries.list.push(obj);
             enhanced_data_map.queries.map[key] = {

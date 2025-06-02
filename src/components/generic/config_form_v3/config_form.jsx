@@ -116,44 +116,180 @@ const evaluateCondition = (condition, formValues) => {
   }
 };
 
-// Helper function to apply dynamic configuration to a field
-const applyDynamicConfig = (field, formValues) => {
+
+// Helper function to safely set nested properties
+const setNestedProperty = (obj, path, value) => {
+  const keys = path.split('.');
+  let current = obj;
+  
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    if (!(key in current) || typeof current[key] !== 'object') {
+      current[key] = {};
+    }
+    current = current[key];
+  }
+  
+  current[keys[keys.length - 1]] = value;
+};
+
+// Helper function to get nested property value
+const getNestedProperty = (obj, path) => {
+  return path.split('.').reduce((current, key) => current?.[key], obj);
+};
+
+// Helper function to merge arrays based on merge mode
+const mergeArrays = (original = [], newData = [], mergeMode = 'replace', filterCondition = null) => {
+  switch (mergeMode) {
+    case 'append':
+      return [...original, ...newData];
+    case 'prepend':
+      return [...newData, ...original];
+    case 'filter':
+      return filterCondition 
+        ? original.filter(filterCondition)
+        : original.filter(item => newData.includes(item.value || item));
+    case 'merge':
+      // Merge objects in arrays, or combine unique primitives
+      if (original.length && typeof original[0] === 'object') {
+        const merged = [...original];
+        newData.forEach(newItem => {
+          const existingIndex = merged.findIndex(item => item.id === newItem.id || item.value === newItem.value);
+          if (existingIndex >= 0) {
+            merged[existingIndex] = { ...merged[existingIndex], ...newItem };
+          } else {
+            merged.push(newItem);
+          }
+        });
+        return merged;
+      }
+      return [...new Set([...original, ...newData])];
+    case 'replace':
+    default:
+      return newData;
+  }
+};
+
+// Enhanced dynamic configuration function
+const applyDynamicConfig = (field, formValues, context = {}) => {
   if (!field.dynamicConfig) return field;
   
   let dynamicField = { ...field };
   
   // Process each dynamic configuration rule
-  field.dynamicConfig.forEach(config => {
+  for (const config of field.dynamicConfig) {
     if (evaluateCondition(config.condition, formValues)) {
-      // Apply the configuration changes
-      dynamicField = { ...dynamicField, ...config.changes };
       
-      // Handle special cases for merging arrays (like options)
-      if (config.changes.options) {
-        if (config.mergeMode === 'replace') {
-          dynamicField.options = config.changes.options;
-        } else if (config.mergeMode === 'append') {
-          dynamicField.options = [...(field.options || []), ...config.changes.options];
-        } else if (config.mergeMode === 'filter') {
-          // Filter existing options based on a condition
-          dynamicField.options = (field.options || []).filter(option => {
-            return config.changes.options.includes(option.value);
-          });
+      // Handle callback-based changes
+      if (config.callback) {
+        try {
+          let callbackResult;
+          
+          if (typeof config.callback === 'function') {
+            // Direct function callback
+            callbackResult = config.callback(formValues, field, context);
+          } else if (typeof config.callback === 'string') {
+            // Named callback from context
+            const callbackFn = context.callbacks?.[config.callback];
+            if (callbackFn) {
+              callbackResult = callbackFn(formValues, field, context);
+            }
+          } else if (typeof config.callback === 'object') {
+            // Callback configuration object
+            const { fn, params = {} } = config.callback;
+            const callbackFn = typeof fn === 'string' ? context.callbacks?.[fn] : fn;
+            if (callbackFn) {
+              callbackResult = callbackFn(formValues, field, context, params);
+            }
+          }
+          
+          // Process callback result
+          if (callbackResult) {
+            if (config.assignTo) {
+              // Assign callback result to specific key(s)
+              if (Array.isArray(config.assignTo)) {
+                // Multiple assignments
+                config.assignTo.forEach(assignment => {
+                  const { key, transform } = typeof assignment === 'string' 
+                    ? { key: assignment, transform: null }
+                    : assignment;
+                  
+                  let value = callbackResult;
+                  if (transform && typeof transform === 'function') {
+                    value = transform(value, formValues, field);
+                  }
+                  
+                  setNestedProperty(dynamicField, key, value);
+                });
+              } else if (typeof config.assignTo === 'string') {
+                // Single assignment
+                setNestedProperty(dynamicField, config.assignTo, callbackResult);
+              } else if (typeof config.assignTo === 'object') {
+                // Object-based assignment with transformations
+                Object.entries(config.assignTo).forEach(([key, transform]) => {
+                  let value = callbackResult;
+                  if (typeof transform === 'function') {
+                    value = transform(value, formValues, field);
+                  } else if (typeof transform === 'string') {
+                    // JSONPath-like selector for nested callback result
+                    value = getNestedProperty(callbackResult, transform);
+                  }
+                  setNestedProperty(dynamicField, key, value);
+                });
+              }
+            } else {
+              // Default: merge callback result into field
+              dynamicField = { ...dynamicField, ...callbackResult };
+            }
+          }
+        } catch (error) {
+          console.error('Dynamic config callback error:', error);
+          // Continue processing other configs
         }
       }
       
-      // Handle dynamic validation rules
-      if (config.changes.validation) {
-        dynamicField.validation = {
-          ...(dynamicField.validation || {}),
-          ...config.changes.validation
-        };
+      // Handle static changes
+      if (config.changes) {
+        Object.entries(config.changes).forEach(([key, value]) => {
+          const currentValue = getNestedProperty(dynamicField, key);
+          
+          // Special handling for arrays
+          if (Array.isArray(currentValue) || Array.isArray(value)) {
+            const mergeMode = config.mergeMode || 'replace';
+            const mergedValue = mergeArrays(
+              currentValue, 
+              value, 
+              mergeMode,
+              config.filterCondition
+            );
+            setNestedProperty(dynamicField, key, mergedValue);
+          }
+          // Special handling for objects (like validation rules)
+          else if (currentValue && typeof currentValue === 'object' && typeof value === 'object') {
+            const mergeMode = config.mergeMode || 'merge';
+            if (mergeMode === 'replace') {
+              setNestedProperty(dynamicField, key, value);
+            } else {
+              setNestedProperty(dynamicField, key, { ...currentValue, ...value });
+            }
+          }
+          // Primitive values
+          else {
+            setNestedProperty(dynamicField, key, value);
+          }
+        });
+      }
+      
+      // Handle conditional field transformations
+      if (config.transform && typeof config.transform === 'function') {
+        dynamicField = config.transform(dynamicField, formValues, context);
       }
     }
-  });
+  }
   
   return dynamicField;
 };
+
 
 // Enhanced main form component with nested object support and dynamic field configuration
 
@@ -161,6 +297,7 @@ const applyDynamicConfig = (field, formValues) => {
 export function ConfigFormV3({ 
   schema, 
   initialValues = {}, 
+  context = {},
   onChange, 
   onSubmit 
 }) {
@@ -263,7 +400,7 @@ export function ConfigFormV3({
     if (!field) return null;
     
     // Apply dynamic configuration based on current form values
-    return applyDynamicConfig(field, formValues);
+    return applyDynamicConfig(field, formValues, context);
   };
 
   // Determine if a field should be visible based on conditions
@@ -287,7 +424,7 @@ export function ConfigFormV3({
     if (!field || !isFieldVisible(field)) return null;
 
     // Apply dynamic configuration to the field
-    const dynamicField = applyDynamicConfig(field, formValues);
+    const dynamicField = applyDynamicConfig(field, formValues, context);
     
     // Get the actual field value using the path
     const fieldValue = getNestedValue(formValues, dynamicField.id);
@@ -322,6 +459,7 @@ export function ConfigFormV3({
       case 'number':
         fieldComponent = <NumberField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
+      case 'dropdown':
       case 'select':
         fieldComponent = <SelectField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)} />;
         break;
