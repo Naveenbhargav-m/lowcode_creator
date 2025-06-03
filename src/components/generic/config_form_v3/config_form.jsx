@@ -440,7 +440,7 @@ export function ConfigFormV3({
         }}/>
         break;
       case "data_mapper":
-          fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,Value) => handleFieldChange(Value)}/>;
+          fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,Value) => handleFieldChange(dynamicField.id,Value)}/>;
           break;
       case "code":
           fieldComponent = <GlobalJavaScriptField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>;
