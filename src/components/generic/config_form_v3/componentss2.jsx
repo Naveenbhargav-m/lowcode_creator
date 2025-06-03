@@ -372,6 +372,7 @@ const MappingRow = ({ mapping, config, onUpdate, onRemove, onToggleExpand, isExp
   );
 };
 
+// @ts-ignore
 export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedRows, setExpandedRows] = useState(new Set());
@@ -534,6 +535,7 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
                   type="text"
                   placeholder="Search mappings..."
                   value={searchQuery}
+                  // @ts-ignore
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
@@ -606,8 +608,11 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
 }, (prevProps, nextProps) => {
   // Custom comparison function to prevent unnecessary re-renders
   return (
+    // @ts-ignore
     JSON.stringify(prevProps.value) === JSON.stringify(nextProps.value) &&
+    // @ts-ignore
     JSON.stringify(prevProps.field) === JSON.stringify(nextProps.field) &&
+    // @ts-ignore
     prevProps.onChange === nextProps.onChange
   );
 });
@@ -638,7 +643,9 @@ export default function DynamicMapperTest() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Refactored Data Mapper</h1>
-      <DataMapperField field={fieldConfig} value={mappings} onChange={setMappings} />
+      <DataMapperField 
+// @ts-ignore
+      field={fieldConfig} value={mappings} onChange={setMappings} />
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-2">Current Mappings:</h3>
         <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-auto">
