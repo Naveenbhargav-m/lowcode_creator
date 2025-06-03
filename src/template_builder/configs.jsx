@@ -120,6 +120,13 @@ export const TemplateElementConfigFormSchema = {
         {"label": "option1", "value": "option1"},
         {"label": "option2","value": "option2"}
       ],
+      "dynamicConfig": [
+        {
+          "condition": {"field": "test", "operator": "non_empty"},
+          "callback": "get_query_names",
+          "assignTo": "options"
+        }
+      ],
       "label": "Pick a Query"
     },
     {
