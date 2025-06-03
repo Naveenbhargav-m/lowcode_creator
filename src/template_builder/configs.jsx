@@ -134,6 +134,11 @@ export const TemplateElementConfigFormSchema = {
       "type": "data_mapper",
       "path": "configs.data_source.field_mapping",
       "label": "Data Mapping",
+      enableStaticValues: true,
+      enableSourceFields: true,
+      enableUserFields: false,
+      "target_fields": [],
+      "source_fields": [],
       "dynamicConfig": [
         {
           "condition": {"field": "configs.data_source.data_query", "operator": "not_empty"},

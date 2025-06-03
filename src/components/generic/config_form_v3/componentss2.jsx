@@ -165,715 +165,324 @@ export function Toggle() {
   );
 }
 
-
-
-// export const DataMapperField = ({ field, value = [], onChange }) => {
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [expandedRows, setExpandedRows] = useState(new Set());
-//   const [searchQuery, setSearchQuery] = useState('');
+// Mapping Type Button Component
+const MappingTypeButton = ({ type, isSelected, onClick, enabled }) => {
+  if (!enabled) return null;
   
-//   // Internal state for mappings - this is the key fix
-//   const [internalMappings, setInternalMappings] = useState(() => 
-//     Array.isArray(value) ? value : []
-//   );
+  return (
+    <button
+      onClick={() => onClick(type.id)}
+      className={`flex-1 px-2 py-1.5 rounded-md border text-xs font-medium transition-colors ${
+        isSelected
+          ? 'border-blue-500 bg-blue-50 text-blue-700'
+          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+      }`}
+    >
+      {type.label}
+    </button>
+  );
+};
 
-//   // Sync internal state when value prop changes
-//   useEffect(() => {
-//     setInternalMappings(Array.isArray(value) ? value : []);
-//   }, [value]);
+// Value Input Component
+const ValueInput = ({ mapping, onUpdate, config }) => {
+  const { type } = mapping;
+  const { source_fields = [], userFields = [], enableSourceFields, enableUserFields } = config;
 
-//   // Force re-render when field configuration changes
-//   useEffect(() => {
-//     // This effect ensures the component re-renders when field options change
-//     // The dependency on field will trigger re-evaluation of all derived values
-//   }, [field]);
+  if (type === 'static') {
+    return (
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Value</label>
+        <input
+          type="text"
+          value={mapping.value || ''}
+          // @ts-ignore
+          onChange={(e) => onUpdate({ value: e.target.value })}
+          placeholder="Enter static value..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+        />
+      </div>
+    );
+  }
 
-//   // Extract configuration from field object with memoization for performance
-//   const {
-//     target_fields = [],
-//     source_fields = [],
-//     userFields = [],
-//     enableStaticValues = true,
-//     enableUserFields = true,
-//     enableSourceFields = true,
-//     className = "",
-//     label = "Field Mapping",
-//     placeholder = "Configure field mappings"
-//   } = field;
+  if (type === 'source' && enableSourceFields) {
+    return (
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Source Field</label>
+        <select
+          value={mapping.sourceField || ''}
+          // @ts-ignore
+          onChange={(e) => onUpdate({ sourceField: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+        >
+          <option value="">Select source field...</option>
+          {source_fields.map(field => (
+            <option key={field.value} value={field.value}>{field.label}</option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
-//   // Memoize field arrays to prevent unnecessary re-renders
-//   const memoizedTargetFields = useMemo(() => target_fields, [target_fields]);
-//   const memoizedSourceFields = useMemo(() => source_fields, [source_fields]);
-//   const memoizedUserFields = useMemo(() => userFields, [userFields]);
+  if (type === 'user' && enableUserFields) {
+    return (
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">User Field</label>
+        <select
+          value={mapping.userField || ''}
+          // @ts-ignore
+          onChange={(e) => onUpdate({ userField: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+        >
+          <option value="">Select user field...</option>
+          {userFields.map(field => (
+            <option key={field.value} value={field.value}>{field.label}</option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
-//   // Use internal mappings instead of value prop
-//   const mappings = internalMappings;
+  return null;
+};
+
+// Toggle Switch Component
+const ToggleSwitch = ({ enabled, onChange, label }) => (
+  <div className="flex items-center justify-between">
+    <span className="text-sm font-medium text-gray-700">{label}</span>
+    <button
+      onClick={() => onChange(!enabled)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+        enabled ? 'bg-blue-600' : 'bg-gray-200'
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+          enabled ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
+  </div>
+);
+
+// Mapping Row Component
+const MappingRow = ({ mapping, config, onUpdate, onRemove, onToggleExpand, isExpanded }) => {
+  const { target_fields = [], source_fields = [], userFields = [] } = config;
   
-//   // Debug logging
-//   console.log('DataMapperField render:', {
-//     internalMappingsLength: internalMappings.length,
-//     valueLength: Array.isArray(value) ? value.length : 0,
-//     mappingsLength: mappings.length
-//   });
+  const isValid = mapping.targetField && 
+    ((mapping.type === 'static' && mapping.value) || 
+     (mapping.type === 'source' && mapping.sourceField) || 
+     (mapping.type === 'user' && mapping.userField));
 
-//   const mappingTypes = [
-//     { 
-//       id: 'static', 
-//       label: 'Static', 
-//       icon: Type, 
-//       enabled: enableStaticValues,
-//     },
-//     { 
-//       id: 'source', 
-//       label: 'Source', 
-//       icon: Database, 
-//       enabled: enableSourceFields,
-//     },
-//     { 
-//       id: 'user', 
-//       label: 'User', 
-//       icon: User, 
-//       enabled: enableUserFields,
-//     }
-//   ];
+  const targetField = target_fields.find(f => f.value === mapping.targetField);
+  
+  const getPreview = () => {
+    if (!mapping.targetField) return 'No target selected';
+    switch (mapping.type) {
+      case 'static': return mapping.value ? `"${mapping.value}"` : 'No value';
+      case 'source': 
+        const sourceField = source_fields.find(f => f.value === mapping.sourceField);
+        return sourceField ? sourceField.label : 'No source selected';
+      case 'user':
+        const userField = userFields.find(f => f.value === mapping.userField);
+        return userField ? userField.label : 'No user field selected';
+      default: return 'Not configured';
+    }
+  };
 
-//   // Calculate mapped count
-//   const mappedCount = useMemo(() => {
-//     return mappings.filter(m => m.targetField && 
-//       ((m.type === 'static' && m.value) || 
-//        (m.type === 'source' && m.sourceField) || 
-//        (m.type === 'user' && m.userField))
-//     ).length;
-//   }, [mappings]);
+  const mappingTypes = [
+    { id: 'static', label: 'Static', enabled: config.enableStaticValues ?? true },
+    { id: 'source', label: 'Source', enabled: config.enableSourceFields ?? true },
+    { id: 'user', label: 'User', enabled: config.enableUserFields ?? true }
+  ].filter(type => type.enabled);
 
-//   const addMapping = () => {
-//     console.log('addMapping called - current mappings:', mappings);
-//     const newMapping = {
-//       id: Date.now().toString(),
-//       targetField: '',
-//       type: 'static',
-//       value: '',
-//       sourceField: '',
-//       userField: ''
-//     };
-    
-//     // Use functional update to ensure we get the latest state
-//     setInternalMappings(prevMappings => {
-//       const updatedMappings = [...prevMappings, newMapping];
-//       console.log('addMapping - new mappings:', updatedMappings);
-//       return updatedMappings;
-//     });
-    
-//     setExpandedRows(prev => {
-//       const newExpanded = new Set([...prev, newMapping.id]);
-//       console.log('addMapping - expanded rows:', newExpanded);
-//       return newExpanded;
-//     });
-//   };
+  return (
+    <div className={`border rounded-lg overflow-hidden ${isValid ? 'border-green-200 bg-green-50' : 'border-gray-200'}`}>
+      {/* Collapsed View */}
+      <div className="p-3 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => onToggleExpand(mapping.id)}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-medium text-gray-900 truncate">
+                {targetField?.label || 'Select target field'}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <ArrowRight className="w-3 h-3" />
+                <span className="truncate">{getPreview()}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+              {mappingTypes.find(t => t.id === mapping.type)?.label}
+            </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); onRemove(mapping.id); }}
+              className="p-1 hover:bg-red-100 rounded text-gray-400 hover:text-red-600 transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </div>
 
-//   const updateMapping = (id, updates) => {
-//     console.log('updateMapping called:', id, updates);
-//     setInternalMappings(prevMappings => {
-//       const updated = prevMappings.map(mapping => 
-//         mapping.id === id ? { ...mapping, ...updates } : mapping
-//       );
-//       console.log('updateMapping - updated mappings:', updated);
-//       return updated;
-//     });
-//   };
+      {/* Expanded View */}
+      {isExpanded && (
+        <div className="px-4 pb-4 bg-white border-t border-gray-100 space-y-3">
+          {/* Target Field */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Target Field</label>
+            <select
+              value={mapping.targetField}
+              // @ts-ignore
+              onChange={(e) => onUpdate(mapping.id, { targetField: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            >
+              <option value="">Select target field...</option>
+              {target_fields.map(field => (
+                <option key={field.value} value={field.value}>{field.label}</option>
+              ))}
+            </select>
+          </div>
 
-//   const removeMapping = (id) => {
-//     const newExpanded = new Set(expandedRows);
-//     newExpanded.delete(id);
-//     setExpandedRows(newExpanded);
-//     const updatedMappings = mappings.filter(mapping => mapping.id !== id);
-//     setInternalMappings(updatedMappings); // Update internal state
-//   };
+          {/* Mapping Type */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+            <div className="flex gap-1">
+              {mappingTypes.map(type => (
+                <MappingTypeButton
+                  key={type.id}
+                  type={type}
+                  isSelected={mapping.type === type.id}
+                  onClick={(typeId) => onUpdate(mapping.id, { type: typeId })}
+                  enabled={type.enabled}
+                />
+              ))}
+            </div>
+          </div>
 
-//   // Save function to call onChange
-//   const handleSave = () => {
-//     onChange(internalMappings);
-//     setIsOpen(false);
-//   };
+          <ValueInput
+            mapping={mapping}
+            onUpdate={(updates) => onUpdate(mapping.id, updates)}
+            config={config}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
-//   // Check if there are unsaved changes
-//   const hasUnsavedChanges = useMemo(() => {
-//     return JSON.stringify(internalMappings) !== JSON.stringify(value);
-//   }, [internalMappings, value]);
-
-//   const toggleExpanded = (id) => {
-//     const newExpanded = new Set(expandedRows);
-//     if (newExpanded.has(id)) {
-//       newExpanded.delete(id);
-//     } else {
-//       newExpanded.add(id);
-//     }
-//     setExpandedRows(newExpanded);
-//   };
-
-//   const getMappingPreview = (mapping) => {
-//     if (!mapping.targetField) return 'No target selected';
-    
-//     switch (mapping.type) {
-//       case 'static':
-//         return mapping.value ? `"${mapping.value}"` : 'No value';
-//       case 'source':
-//         if (mapping.sourceField) {
-//           const field = memoizedSourceFields.find(f => f.value === mapping.sourceField);
-//           return field ? field.label : mapping.sourceField;
-//         }
-//         return 'No source selected';
-//       case 'user':
-//         if (mapping.userField) {
-//           const field = memoizedUserFields.find(f => f.value === mapping.userField);
-//           return field ? field.label : mapping.userField;
-//         }
-//         return 'No user field selected';
-//       default:
-//         return 'Not configured';
-//     }
-//   };
-
-//   const isValidMapping = (mapping) => {
-//     return mapping.targetField && 
-//       ((mapping.type === 'static' && mapping.value) || 
-//        (mapping.type === 'source' && mapping.sourceField) || 
-//        (mapping.type === 'user' && mapping.userField));
-//   };
-
-//   const filteredMappings = mappings.filter(mapping => {
-//     if (!searchQuery) return true;
-//     const query = searchQuery.toLowerCase();
-//     const targetField = memoizedTargetFields.find(f => f.value === mapping.targetField);
-//     return (targetField?.label?.toLowerCase().includes(query)) ||
-//            (mapping.value?.toLowerCase().includes(query)) ||
-//            (mapping.sourceField?.toLowerCase().includes(query)) ||
-//            (mapping.userField?.toLowerCase().includes(query));
-//   });
-
-//   return (
-//     <div className={className}>
-//       {/* Label */}
-//       {field.label && (
-//         <label className="block text-sm font-medium text-gray-700 mb-2">
-//           {field.label}
-//           {field.required && <span className="text-red-500 ml-1">*</span>}
-//         </label>
-//       )}
-
-//       {/* Config Button */}
-//       <button
-//         onClick={() => setIsOpen(true)}
-//         className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full justify-between"
-//       >
-//         <div className="flex items-center gap-2">
-//           <Settings className="w-4 h-4" />
-//           <span>{mappedCount > 0 ? `${mappedCount} mapping(s) configured` : placeholder}</span>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           {mappedCount > 0 && (
-//             <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
-//               {mappedCount}
-//             </span>
-//           )}
-//           {hasUnsavedChanges && (
-//             <span className="w-2 h-2 bg-orange-500 rounded-full" title="Unsaved changes"></span>
-//           )}
-//         </div>
-//       </button>
-
-//       {/* Help text */}
-//       {field.helpText && (
-//         <p className="mt-1 text-xs text-gray-500">{field.helpText}</p>
-//       )}
-
-//       {/* Side Drawer Overlay */}
-//       {isOpen && (
-//         <div className="fixed inset-0 z-50 overflow-hidden">
-//           <div className="absolute inset-0 bg-black bg-opacity-25" onClick={() => setIsOpen(false)} />
-          
-//           {/* Drawer */}
-//           <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-xl flex flex-col">
-//             {/* Header */}
-//             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-//               <h3 className="text-lg font-semibold text-gray-900">{label}</h3>
-//               <div className="flex items-center gap-2">
-//                 <button
-//                   onClick={addMapping}
-//                   className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-//                 >
-//                   Add Mapping
-//                 </button>
-//                 <button
-//                   onClick={() => setIsOpen(false)}
-//                   className="p-2 hover:bg-gray-200 rounded-md transition-colors"
-//                 >
-//                   <X className="w-4 h-4" />
-//                 </button>
-//               </div>
-//             </div>
-
-//             {/* Search */}
-//             <div className="p-4 border-b border-gray-200">
-//               <div className="relative">
-//                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-//                 <input
-//                   type="text"
-//                   placeholder="Search mappings..."
-//                   value={searchQuery}
-//                   onChange={(e) => setSearchQuery(e.target.value)}
-//                   className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-//                 />
-//               </div>
-//             </div>
-
-//             {/* Mappings List */}
-//             <div className="flex-1 overflow-y-auto">
-//               {/* Debug info */}
-//               {process.env.NODE_ENV === 'development' && (
-//                 <div className="p-2 bg-yellow-50 text-xs">
-//                   <div>Internal mappings: {internalMappings.length}</div>
-//                   <div>Filtered mappings: {filteredMappings.length}</div>
-//                   <div>Search query: "{searchQuery}"</div>
-//                 </div>
-//               )}
-              
-//               {filteredMappings.length === 0 ? (
-//                 <div className="p-8 text-center">
-//                   <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-//                     <Database className="w-6 h-6 text-gray-400" />
-//                   </div>
-//                   <p className="text-sm text-gray-500 mb-3">No mappings configured</p>
-//                   <button
-//                     onClick={addMapping}
-//                     className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-//                   >
-//                     <Plus className="w-4 h-4" />
-//                     Add Mapping
-//                   </button>
-//                 </div>
-//               ) : (
-//                 <div className="p-4 space-y-3">
-//                   {filteredMappings.map((mapping) => {
-//                     const isExpanded = expandedRows.has(mapping.id);
-//                     const isValid = isValidMapping(mapping);
-//                     const targetField = memoizedTargetFields.find(f => f.value === mapping.targetField);
-                    
-//                     return (
-//                       <div key={mapping.id} className={`border rounded-lg overflow-hidden ${
-//                         isValid ? 'border-green-200 bg-green-50' : 'border-gray-200'
-//                       }`}>
-//                         {/* Collapsed View */}
-//                         <div 
-//                           className="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-//                           onClick={() => toggleExpanded(mapping.id)}
-//                         >
-//                           <div className="flex items-center justify-between">
-//                             <div className="flex items-center gap-2 flex-1 min-w-0">
-//                               {isExpanded ? (
-//                                 <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
-//                               ) : (
-//                                 <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-//                               )}
-//                               <div className="min-w-0 flex-1">
-//                                 <div className="text-sm font-medium text-gray-900 truncate">
-//                                   {targetField?.label || 'Select target field'}
-//                                 </div>
-//                                 <div className="flex items-center gap-1 text-xs text-gray-500">
-//                                   <ArrowRight className="w-3 h-3" />
-//                                   <span className="truncate">{getMappingPreview(mapping)}</span>
-//                                 </div>
-//                               </div>
-//                             </div>
-                            
-//                             <div className="flex items-center gap-1">
-//                               <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-//                                 {mappingTypes.find(t => t.id === mapping.type)?.label}
-//                               </span>
-//                               <button
-//                                 onClick={(e) => {
-//                                   e.stopPropagation();
-//                                   removeMapping(mapping.id);
-//                                 }}
-//                                 className="p-1 hover:bg-red-100 rounded text-gray-400 hover:text-red-600 transition-colors"
-//                               >
-//                                 <X className="w-3 h-3" />
-//                               </button>
-//                             </div>
-//                           </div>
-//                         </div>
-
-//                         {/* Expanded View */}
-//                         {isExpanded && (
-//                           <div className="px-4 pb-4 bg-white border-t border-gray-100">
-//                             <div className="space-y-3">
-//                               {/* Target Field */}
-//                               <div>
-//                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-//                                   Target Field
-//                                 </label>
-//                                 <select
-//                                   value={mapping.targetField}
-//                                   onChange={(e) => updateMapping(mapping.id, { targetField: e.target.value })}
-//                                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-//                                 >
-//                                   <option value="">Select target field...</option>
-//                                   {memoizedTargetFields.map(field => (
-//                                     <option key={field.value} value={field.value}>
-//                                       {field.label}
-//                                     </option>
-//                                   ))}
-//                                 </select>
-//                               </div>
-
-//                               {/* Mapping Type */}
-//                               <div>
-//                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-//                                   Type
-//                                 </label>
-//                                 <div className="flex gap-1">
-//                                   {mappingTypes.filter(type => type.enabled).map(type => {
-//                                     const isSelected = mapping.type === type.id;
-//                                     return (
-//                                       <button
-//                                         key={type.id}
-//                                         onClick={() => updateMapping(mapping.id, { type: type.id })}
-//                                         className={`flex-1 px-2 py-1.5 rounded-md border text-xs font-medium transition-colors ${
-//                                           isSelected
-//                                             ? 'border-blue-500 bg-blue-50 text-blue-700'
-//                                             : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-//                                         }`}
-//                                       >
-//                                         {type.label}
-//                                       </button>
-//                                     );
-//                                   })}
-//                                 </div>
-//                               </div>
-
-//                               {/* Value Input */}
-//                               {mapping.type === 'static' && (
-//                                 <div>
-//                                   <label className="block text-xs font-medium text-gray-700 mb-1">
-//                                     Value
-//                                   </label>
-//                                   <input
-//                                     type="text"
-//                                     value={mapping.value || ''}
-//                                     onChange={(e) => updateMapping(mapping.id, { value: e.target.value })}
-//                                     placeholder="Enter static value..."
-//                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-//                                   />
-//                                 </div>
-//                               )}
-
-//                               {mapping.type === 'source' && enableSourceFields && (
-//                                 <div>
-//                                   <label className="block text-xs font-medium text-gray-700 mb-1">
-//                                     Source Field
-//                                   </label>
-//                                   <select
-//                                     value={mapping.sourceField || ''}
-//                                     onChange={(e) => updateMapping(mapping.id, { sourceField: e.target.value })}
-//                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-//                                   >
-//                                     <option value="">Select source field...</option>
-//                                     {memoizedSourceFields.map(field => (
-//                                       <option key={field.value} value={field.value}>
-//                                         {field.label}
-//                                       </option>
-//                                     ))}
-//                                   </select>
-//                                 </div>
-//                               )}
-
-//                               {mapping.type === 'user' && enableUserFields && (
-//                                 <div>
-//                                   <label className="block text-xs font-medium text-gray-700 mb-1">
-//                                     User Field
-//                                   </label>
-//                                   <select
-//                                     value={mapping.userField || ''}
-//                                     onChange={(e) => updateMapping(mapping.id, { userField: e.target.value })}
-//                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-//                                   >
-//                                     <option value="">Select user field...</option>
-//                                     {memoizedUserFields.map(field => (
-//                                       <option key={field.value} value={field.value}>
-//                                         {field.label}
-//                                       </option>
-//                                     ))}
-//                                   </select>
-//                                 </div>
-//                               )}
-//                             </div>
-//                           </div>
-//                         )}
-//                       </div>
-//                     );
-//                   })}
-//                 </div>
-//               )}
-//             </div>
-
-//             {/* Footer with Save Button */}
-//             <div className="border-t border-gray-200 p-4 bg-gray-50">
-//               <div className="flex items-center justify-between">
-//                 <div className="text-sm text-gray-600">
-//                   {hasUnsavedChanges ? (
-//                     <span className="flex items-center gap-1 text-orange-600">
-//                       <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-//                       Unsaved changes
-//                     </span>
-//                   ) : (
-//                     <span className="text-green-600">All changes saved</span>
-//                   )}
-//                 </div>
-//                 <button
-//                   onClick={handleSave}
-//                   disabled={!hasUnsavedChanges}
-//                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-//                     hasUnsavedChanges
-//                       ? 'bg-blue-600 text-white hover:bg-blue-700'
-//                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-//                   }`}
-//                 >
-//                   Save Changes
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-
-
-
-export const DataMapperField = ({ field, value = [], onChange }) => {
+export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Internal state for mappings - this is the key fix
-  const [internalMappings, setInternalMappings] = useState(() => 
-    Array.isArray(value) ? value : []
-  );
+  const [mappings, setMappings] = useState([]);
+  const [autoMap, setAutoMap] = useState(false);
 
-  // Sync internal state when value prop changes
-  useEffect(() => {
-    setInternalMappings(Array.isArray(value) ? value : []);
-  }, [value]);
-
-  // REMOVED: The problematic useEffect that was causing infinite re-renders
-  // useEffect(() => {
-  //   // This effect ensures the component re-renders when field options change
-  //   // The dependency on field will trigger re-evaluation of all derived values
-  // }, [field]);
-
-  // Extract configuration from field object with memoization for performance
-  // Use useMemo to prevent re-extraction on every render
-  const fieldConfig = useMemo(() => ({
-    target_fields: field.target_fields || [],
-    source_fields: field.source_fields || [],
-    userFields: field.userFields || [],
-    enableStaticValues: field.enableStaticValues ?? true,
-    enableUserFields: field.enableUserFields ?? true,
-    enableSourceFields: field.enableSourceFields ?? true,
-    className: field.className || "",
-    label: field.label || "Field Mapping",
-    placeholder: field.placeholder || "Configure field mappings"
-  }), [
-    field.target_fields, 
-    field.source_fields, 
-    field.userFields,
+  const config = useMemo(() => {
+    return {
+      target_fields: field.target_fields || [],
+      source_fields: field.source_fields || [],
+      userFields: field.userFields || [],
+      enableStaticValues: field.enableStaticValues ?? true,
+      enableUserFields: field.enableUserFields ?? true,
+      enableSourceFields: field.enableSourceFields ?? true,
+      label: field.label || "Field Mapping",
+      placeholder: field.placeholder || "Configure field mappings"
+    };
+  }, [
+    field.target_fields?.length,
+    field.source_fields?.length,
+    field.userFields?.length,
     field.enableStaticValues,
     field.enableUserFields,
     field.enableSourceFields,
-    field.className,
     field.label,
     field.placeholder
   ]);
-
-  const {
-    target_fields,
-    source_fields,
-    userFields,
-    enableStaticValues,
-    enableUserFields,
-    enableSourceFields,
-    className,
-    label,
-    placeholder
-  } = fieldConfig;
-
-  // Memoize field arrays to prevent unnecessary re-renders
-  const memoizedTargetFields = useMemo(() => target_fields, [target_fields]);
-  const memoizedSourceFields = useMemo(() => source_fields, [source_fields]);
-  const memoizedUserFields = useMemo(() => userFields, [userFields]);
-
-  // Use internal mappings instead of value prop
   
+  // Use a more stable value comparison to prevent unnecessary re-renders
+  const stableValue = useMemo(() => {
+    return Array.isArray(value) ? value : [];
+  }, [value]);
   
-  // Debug logging - wrap in useMemo to prevent logging on every render
-  const debugInfo = useMemo(() => {
-    const info = {
-      internalMappingsLength: internalMappings.length,
-      valueLength: Array.isArray(value) ? value.length : 0,
-      mappingsLength: internalMappings.length
-    };
-    console.log('DataMapperField render:', info);
-    return info;
-  }, [internalMappings.length, value?.length, internalMappings.length]);
-
-  // Memoize mapping types to prevent recreation
-  const mappingTypes = useMemo(() => [
-    { 
-      id: 'static', 
-      label: 'Static', 
-      icon: Type, 
-      enabled: enableStaticValues,
-    },
-    { 
-      id: 'source', 
-      label: 'Source', 
-      icon: Database, 
-      enabled: enableSourceFields,
-    },
-    { 
-      id: 'user', 
-      label: 'User', 
-      icon: User, 
-      enabled: enableUserFields,
+  useEffect(() => {
+    // Only update if the values are actually different
+    const currentMappingsString = JSON.stringify(mappings);
+    const newValueString = JSON.stringify(stableValue);
+    
+    if (currentMappingsString !== newValueString) {
+      setMappings(JSON.parse(JSON.stringify(stableValue)));
     }
-  ], [enableStaticValues, enableSourceFields, enableUserFields]);
+  }, [stableValue]); // Use stableValue instead of value
 
-  // Calculate mapped count
   const mappedCount = useMemo(() => {
-    return internalMappings.filter(m => m.targetField && 
+    console.log("called mapping count filtering mapping", mappings);
+    return mappings.filter(m => m.targetField && 
       ((m.type === 'static' && m.value) || 
        (m.type === 'source' && m.sourceField) || 
        (m.type === 'user' && m.userField))
     ).length;
-  }, [internalMappings]);
+  }, [mappings]);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return JSON.stringify(mappings) !== JSON.stringify(stableValue);
+  }, [mappings, stableValue]);
 
   const addMapping = useCallback(() => {
-    console.log('addMapping called - current mappings:', internalMappings);
     const newMapping = {
       id: Date.now().toString(),
       targetField: '',
       type: 'static',
-      value: '',
-      sourceField: '',
-      userField: ''
+      value: '', sourceField: '', userField: ''
     };
-    
-    // Use functional update to ensure we get the latest state
-    setInternalMappings(prevMappings => {
-      const updatedMappings = [...prevMappings, newMapping];
-      console.log('addMapping - new mappings:', updatedMappings);
-      return updatedMappings;
-    });
-    
-    setExpandedRows(prev => {
-      const newExpanded = new Set([...prev, newMapping.id]);
-      console.log('addMapping - expanded rows:', newExpanded);
-      return newExpanded;
-    });
-  }, [internalMappings]);
+    console.log("adding mapping", newMapping);
+    setMappings(prev => [...prev, newMapping]);
+    setExpandedRows(prev => new Set([...prev, newMapping.id]));
+  }, []);
 
   const updateMapping = useCallback((id, updates) => {
-    console.log('updateMapping called:', id, updates);
-    setInternalMappings(prevMappings => {
-      const updated = prevMappings.map(mapping => 
-        mapping.id === id ? { ...mapping, ...updates } : mapping
-      );
-      console.log('updateMapping - updated mappings:', updated);
-      return updated;
-    });
+    setMappings(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
   }, []);
 
   const removeMapping = useCallback((id) => {
-    setExpandedRows(prev => {
-      const newExpanded = new Set(prev);
-      newExpanded.delete(id);
-      return newExpanded;
-    });
-    setInternalMappings(prevMappings => 
-      prevMappings.filter(mapping => mapping.id !== id)
-    );
+    setExpandedRows(prev => { const newSet = new Set(prev); newSet.delete(id); return newSet; });
+    setMappings(prev => prev.filter(m => m.id !== id));
   }, []);
-
-  // Save function to call onChange
-  const handleSave = useCallback(() => {
-    onChange(internalMappings);
-    setIsOpen(false);
-  }, [internalMappings, onChange]);
-
-  // Check if there are unsaved changes
-  const hasUnsavedChanges = useMemo(() => {
-    return JSON.stringify(internalMappings) !== JSON.stringify(value);
-  }, [internalMappings, value]);
 
   const toggleExpanded = useCallback((id) => {
     setExpandedRows(prev => {
-      const newExpanded = new Set(prev);
-      if (newExpanded.has(id)) {
-        newExpanded.delete(id);
-      } else {
-        newExpanded.add(id);
-      }
-      return newExpanded;
+      const newSet = new Set(prev);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      return newSet;
     });
   }, []);
 
-  const getMappingPreview = useCallback((mapping) => {
-    if (!mapping.targetField) return 'No target selected';
-    
-    switch (mapping.type) {
-      case 'static':
-        return mapping.value ? `"${mapping.value}"` : 'No value';
-      case 'source':
-        if (mapping.sourceField) {
-          const field = memoizedSourceFields.find(f => f.value === mapping.sourceField);
-          return field ? field.label : mapping.sourceField;
-        }
-        return 'No source selected';
-      case 'user':
-        if (mapping.userField) {
-          const field = memoizedUserFields.find(f => f.value === mapping.userField);
-          return field ? field.label : mapping.userField;
-        }
-        return 'No user field selected';
-      default:
-        return 'Not configured';
+  const handleSave = useCallback(() => {
+    console.log("called handle save callback", mappings);
+    // Only call onChange if there are actual changes
+    if (JSON.stringify(mappings) !== JSON.stringify(stableValue)) {
+      onChange(field["id"], mappings);
     }
-  }, [memoizedSourceFields, memoizedUserFields]);
-
-  const isValidMapping = useCallback((mapping) => {
-    return mapping.targetField && 
-      ((mapping.type === 'static' && mapping.value) || 
-       (mapping.type === 'source' && mapping.sourceField) || 
-       (mapping.type === 'user' && mapping.userField));
-  }, []);
+    setIsOpen(false);
+  }, [mappings, onChange, field, stableValue]);
 
   const filteredMappings = useMemo(() => {
-    return internalMappings.filter(mapping => {
-      if (!searchQuery) return true;
-      const query = searchQuery.toLowerCase();
-      const targetField = memoizedTargetFields.find(f => f.value === mapping.targetField);
-      return (targetField?.label?.toLowerCase().includes(query)) ||
-             (mapping.value?.toLowerCase().includes(query)) ||
-             (mapping.sourceField?.toLowerCase().includes(query)) ||
-             (mapping.userField?.toLowerCase().includes(query));
+    if (!searchQuery) return mappings;
+    const query = searchQuery.toLowerCase();
+    return mappings.filter(mapping => {
+      const targetField = config.target_fields.find(f => f.value === mapping.targetField);
+      return targetField?.label?.toLowerCase().includes(query) ||
+             mapping.value?.toLowerCase().includes(query) ||
+             mapping.sourceField?.toLowerCase().includes(query) ||
+             mapping.userField?.toLowerCase().includes(query);
     });
-  }, [internalMappings, searchQuery, memoizedTargetFields]);
+  }, [mappings, searchQuery, config.target_fields]);
 
+  console.log("rendering the datamapperfield");
+  
   return (
-    <div className={className}>
-      {/* Label */}
+    <div className={field.className || ""}>
       {field.label && (
         <label className="block text-sm font-medium text-gray-700 mb-2">
           {field.label}
@@ -881,53 +490,37 @@ export const DataMapperField = ({ field, value = [], onChange }) => {
         </label>
       )}
 
-      {/* Config Button */}
       <button
         onClick={() => setIsOpen(true)}
         className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full justify-between"
       >
         <div className="flex items-center gap-2">
           <Settings className="w-4 h-4" />
-          <span>{mappedCount > 0 ? `${mappedCount} mapping(s) configured` : placeholder}</span>
+          <span>{mappedCount > 0 ? `${mappedCount} mapping(s) configured` : config.placeholder}</span>
         </div>
         <div className="flex items-center gap-2">
           {mappedCount > 0 && (
-            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
-              {mappedCount}
-            </span>
+            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">{mappedCount}</span>
           )}
-          {hasUnsavedChanges && (
-            <span className="w-2 h-2 bg-orange-500 rounded-full" title="Unsaved changes"></span>
-          )}
+          {hasUnsavedChanges && <span className="w-2 h-2 bg-orange-500 rounded-full" />}
         </div>
       </button>
 
-      {/* Help text */}
-      {field.helpText && (
-        <p className="mt-1 text-xs text-gray-500">{field.helpText}</p>
-      )}
+      {field.helpText && <p className="mt-1 text-xs text-gray-500">{field.helpText}</p>}
 
-      {/* Side Drawer Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div className="absolute inset-0 bg-black bg-opacity-25" onClick={() => setIsOpen(false)} />
-          
-          {/* Drawer */}
           <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-xl flex flex-col">
+            
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-              <h3 className="text-lg font-semibold text-gray-900">{label}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{config.label}</h3>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={addMapping}
-                  className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                >
+                <button onClick={addMapping} className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
                   Add Mapping
                 </button>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-2 hover:bg-gray-200 rounded-md transition-colors"
-                >
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-200 rounded-md">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -941,7 +534,6 @@ export const DataMapperField = ({ field, value = [], onChange }) => {
                   type="text"
                   placeholder="Search mappings..."
                   value={searchQuery}
-                  // @ts-ignore
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
@@ -950,199 +542,40 @@ export const DataMapperField = ({ field, value = [], onChange }) => {
 
             {/* Mappings List */}
             <div className="flex-1 overflow-y-auto">
-              {/* Debug info */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="p-2 bg-yellow-50 text-xs">
-                  <div>Internal mappings: {internalMappings.length}</div>
-                  <div>Filtered mappings: {filteredMappings.length}</div>
-                  <div>Search query: "{searchQuery}"</div>
-                </div>
-              )}
-              
               {filteredMappings.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
                     <Database className="w-6 h-6 text-gray-400" />
                   </div>
                   <p className="text-sm text-gray-500 mb-3">No mappings configured</p>
-                  <button
-                    onClick={addMapping}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Mapping
+                  <button onClick={addMapping} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
+                    <Plus className="w-4 h-4" />Add Mapping
                   </button>
                 </div>
               ) : (
                 <div className="p-4 space-y-3">
-                  {filteredMappings.map((mapping) => {
-                    const isExpanded = expandedRows.has(mapping.id);
-                    const isValid = isValidMapping(mapping);
-                    const targetField = memoizedTargetFields.find(f => f.value === mapping.targetField);
-                    
-                    return (
-                      <div key={mapping.id} className={`border rounded-lg overflow-hidden ${
-                        isValid ? 'border-green-200 bg-green-50' : 'border-gray-200'
-                      }`}>
-                        {/* Collapsed View */}
-                        <div 
-                          className="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                          onClick={() => toggleExpanded(mapping.id)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              {isExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                              ) : (
-                                <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                              )}
-                              <div className="min-w-0 flex-1">
-                                <div className="text-sm font-medium text-gray-900 truncate">
-                                  {targetField?.label || 'Select target field'}
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                  <ArrowRight className="w-3 h-3" />
-                                  <span className="truncate">{getMappingPreview(mapping)}</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-1">
-                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                                {mappingTypes.find(t => t.id === mapping.type)?.label}
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeMapping(mapping.id);
-                                }}
-                                className="p-1 hover:bg-red-100 rounded text-gray-400 hover:text-red-600 transition-colors"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Expanded View */}
-                        {isExpanded && (
-                          <div className="px-4 pb-4 bg-white border-t border-gray-100">
-                            <div className="space-y-3">
-                              {/* Target Field */}
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  Target Field
-                                </label>
-                                <select
-                                  value={mapping.targetField}
-                                  // @ts-ignore
-                                  onChange={(e) => updateMapping(mapping.id, { targetField: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                >
-                                  <option value="">Select target field...</option>
-                                  {memoizedTargetFields.map(field => (
-                                    <option key={field.value} value={field.value}>
-                                      {field.label}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              {/* Mapping Type */}
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  Type
-                                </label>
-                                <div className="flex gap-1">
-                                  {mappingTypes.filter(type => type.enabled).map(type => {
-                                    const isSelected = mapping.type === type.id;
-                                    return (
-                                      <button
-                                        key={type.id}
-                                        onClick={() => updateMapping(mapping.id, { type: type.id })}
-                                        className={`flex-1 px-2 py-1.5 rounded-md border text-xs font-medium transition-colors ${
-                                          isSelected
-                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                            : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                                        }`}
-                                      >
-                                        {type.label}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-
-                              {/* Value Input */}
-                              {mapping.type === 'static' && (
-                                <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    Value
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={mapping.value || ''}
-                                    // @ts-ignore
-                                    onChange={(e) => updateMapping(mapping.id, { value: e.target.value })}
-                                    placeholder="Enter static value..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                  />
-                                </div>
-                              )}
-
-                              {mapping.type === 'source' && enableSourceFields && (
-                                <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    Source Field
-                                  </label>
-                                  <select
-                                    value={mapping.sourceField || ''}
-                                    // @ts-ignore
-                                    onChange={(e) => updateMapping(mapping.id, { sourceField: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                  >
-                                    <option value="">Select source field...</option>
-                                    {memoizedSourceFields.map(field => (
-                                      <option key={field.value} value={field.value}>
-                                        {field.label}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
-
-                              {mapping.type === 'user' && enableUserFields && (
-                                <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    User Field
-                                  </label>
-                                  <select
-                                    value={mapping.userField || ''}
-                                    // @ts-ignore
-                                    onChange={(e) => updateMapping(mapping.id, { userField: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                  >
-                                    <option value="">Select user field...</option>
-                                    {memoizedUserFields.map(field => (
-                                      <option key={field.value} value={field.value}>
-                                        {field.label}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {filteredMappings.map((mapping) => (
+                    <MappingRow
+                      key={mapping.id}
+                      mapping={mapping}
+                      config={config}
+                      onUpdate={updateMapping}
+                      onRemove={removeMapping}
+                      onToggleExpand={toggleExpanded}
+                      isExpanded={expandedRows.has(mapping.id)}
+                    />
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Footer with Save Button */}
-            <div className="border-t border-gray-200 p-4 bg-gray-50">
+            {/* Footer */}
+            <div className="border-t border-gray-200 p-4 bg-gray-50 space-y-3">
+              <ToggleSwitch
+                enabled={autoMap}
+                onChange={setAutoMap}
+                label="Auto Map"
+              />
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
                   {hasUnsavedChanges ? (
@@ -1158,9 +591,7 @@ export const DataMapperField = ({ field, value = [], onChange }) => {
                   onClick={handleSave}
                   disabled={!hasUnsavedChanges}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    hasUnsavedChanges
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    hasUnsavedChanges ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
                   Save Changes
@@ -1172,5 +603,50 @@ export const DataMapperField = ({ field, value = [], onChange }) => {
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison function to prevent unnecessary re-renders
+  return (
+    JSON.stringify(prevProps.value) === JSON.stringify(nextProps.value) &&
+    JSON.stringify(prevProps.field) === JSON.stringify(nextProps.field) &&
+    prevProps.onChange === nextProps.onChange
+  );
+});
+// Demo Component
+export default function DynamicMapperTest() {
+  const [mappings, setMappings] = useState([]);
+
+  const fieldConfig = {
+    label: "Data Field Mapping",
+    placeholder: "Configure your field mappings",
+    helpText: "Map your data fields to target fields.",
+    required: true,
+    target_fields: [
+      { value: 'name', label: 'Full Name' },
+      { value: 'email', label: 'Email Address' },
+      { value: 'phone', label: 'Phone Number' }
+    ],
+    source_fields: [
+      { value: 'first_name', label: 'First Name' },
+      { value: 'email_addr', label: 'Email' },
+      { value: 'phone_num', label: 'Phone' }
+    ],
+    enableStaticValues: true,
+    enableSourceFields: true,
+    enableUserFields: false
+  };
+
+  return (
+    <div className="p-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Refactored Data Mapper</h1>
+      <DataMapperField field={fieldConfig} value={mappings} onChange={setMappings} />
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-2">Current Mappings:</h3>
+        <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-auto">
+          {JSON.stringify(mappings, null, 2)}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
 export {GlobalJavaScriptField, JavaScriptEditor};
