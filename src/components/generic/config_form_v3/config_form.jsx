@@ -192,6 +192,7 @@ const applyDynamicConfig = (field, formValues, context = {}) => {
             // Named callback from context
             const callbackFn = context.callbacks?.[config.callback];
             if (callbackFn) {
+              console.log("in config form context:", formValues, field);
               callbackResult = callbackFn(formValues, field, context);
             }
           } else if (typeof config.callback === 'object') {

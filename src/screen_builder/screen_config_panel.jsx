@@ -3,16 +3,46 @@ import { generateUID } from "../utils/helpers";
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { TemplateElementConfigFormSchema } from "../template_builder/configs";
 import { data } from "autoprefixer";
-import { fieldsMap } from "../states/global_repo";
+import { fieldsMap, global_queries, global_user_fields } from "../states/global_repo";
 
 
-function get_query_field_map(fieldconfig, formValues, context) {
-    let id = fieldconfig["id"] || "";
-    let screenelement = activeScreenElements[id] || {};
-    let inputs = screenelement["inputs"] || [];
-    let queryid = formValues["configs.data_source.data_query"] || "";
-    let queryFields = fieldsMap["queries"][queryid] || [];
-    return {"inputs": inputs, "query_fields": queryFields};
+function get_query_field_map(formValues, fieldconfig, context) {
+    let id = activeElement?.value;
+    let screenelement = activeScreenElements?.[id] || {};
+    let elementval = screenelement?.value || {};
+    let inputs = screenelement?.inputs || [];
+    if(inputs.length === 0) {
+        for(var i=0;i<5;i++) {
+            var temp = {
+                "label": `inputs ${i}`,
+                "id": `inputs ${i}`,
+                "value": `inputs ${i}`
+            };
+            inputs.push(temp);
+        }
+    }
+
+    let queryid = formValues?.configs?.data_source?.data_query ?? "";
+
+    let queryFields = fieldsMap?.queries?.[queryid] || [];
+    console.log("get query field map is called:", queryFields, inputs);
+
+    return {
+        "inputs": inputs,
+        "query_fields": queryFields
+    };
+}
+
+function get_query_names( formValues, fieldconfig, context) {
+    let queries = Object.keys(global_queries);
+    let query_options = [];
+    for(var i=0;i<queries.length;i++) {
+        let name = global_queries[queries[i]]["name"] || queries[i];
+        let obj = {"value": queries[i], "label": name};
+        query_options.push(obj);
+    }
+    console.log("get query names called:",query_options);
+    return query_options;
 }
 
 function ScreenRightPanel() {
@@ -53,7 +83,10 @@ function ScreenRightPanel() {
     return (
         <ConfigFormV3 schema={TemplateElementConfigFormSchema}
          context={{
-            "get_query_field_map": get_query_field_map,
+            "callbacks": {
+                "get_query_field_map": get_query_field_map,
+                "get_query_names": get_query_names
+            }
          }}
          initialValues={myelement} 
         onChange={(data) => {
