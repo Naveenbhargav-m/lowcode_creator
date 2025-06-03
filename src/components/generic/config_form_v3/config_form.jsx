@@ -440,6 +440,7 @@ export function ConfigFormV3({
         }}/>
         break;
       case "data_mapper":
+          // @ts-ignore
           fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,Value) => handleFieldChange(dynamicField.id,Value)}/>;
           break;
       case "code":
