@@ -494,4 +494,69 @@ const formFieldSchema = {
     ],
   };
 
-  export { formFieldSchema };
+
+
+  const FormButtonSchema = {
+    "fields": [
+      {
+        "id":"submit_actions.action",
+        "path": "submit_actions.action",
+        "label": "Action",
+        "type": "dropdown",
+        "options": [
+          {"label": "trigger_workflow", "value": "workflow"},
+          {"label": "write to global", "value": "global"},
+        ]
+      },
+      {
+        "id": "submit_actions.worflow_id",
+        "path": "submit_actions.worflow_id",
+        "labal": "pick a workflow",
+        "type": "dropdown",
+        "options": [],
+        "dynamicConfig": [
+          {
+            "condition": {"field": "submit_actions.action", "operator": "equals", "value": "workflow"},
+            "callback": "get_workflow_names",
+            "assignTo": "options"
+          }
+        ],
+      },
+      {
+        "id": "submit_actions.field_mapping",
+        "type": "data_mapper",
+        "path": "submit_actions.field_mapping",
+        "label": "Data Mapping",
+        enableStaticValues: true,
+        enableSourceFields: true,
+        enableUserFields: false,
+        "target_fields": [],
+        "source_fields": [],
+        "dynamicConfig": [
+          {
+            "condition": {"field": "submit_actions.worflow_id", "operator": "not_empty"},
+            "callback": "get_workflow_fields",
+            "assignTo": [
+              {"key": "source_fields", "transform": (data) => data.inputs},
+              {"key": "target_fields", "transform": (data) => data.workflow_fields},
+            ],
+          }
+        ],
+      }
+    ],
+
+    "sections": [
+      {"id": "triggers", "title": "triggers", 
+      "fieldIds": ["submit_actions.action", "submit_actions.worflow_id", "submit_actions.field_mapping"],
+      }
+    ],
+    "tabs": [
+      {
+        "id": "form_actions",
+        "title": "Form Actions",
+        "sectionIds": ["triggers"],
+      }
+    ]
+  };
+
+  export { formFieldSchema , FormButtonSchema};

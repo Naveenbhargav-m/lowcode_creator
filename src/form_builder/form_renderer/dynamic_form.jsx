@@ -538,7 +538,9 @@ function DynamicForm({ formConfig }) {
                   Next
                 </button>
               ) : (
-                <div style={{display:'flex', "flexDirection": "row-reverse"}}>
+                <div style={{display:'flex', "flexDirection": "row-reverse"}} 
+                onClick={(e) => {e.stopPropagation();formActiveElement.value = "submit"
+                }}>
                 <button
                   type="submit"
                   style={{...styles.base.button, ...styles.base.primaryButton}}

@@ -46,7 +46,10 @@ const DEFAULT_FORM_STRUCTURE = {
   },
   mobile_children: {},
   desktop_children: {},
-  fields: []
+  fields: [],
+  "submit_actions": {},
+  "next_actions": {},
+  "previous_actions": {},
 };
 
 /**
