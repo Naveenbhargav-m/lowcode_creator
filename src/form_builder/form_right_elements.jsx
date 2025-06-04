@@ -1,5 +1,5 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
-import { formFieldSchema } from "./configs/form_options";
+import { FormButtonSchema, formFieldSchema } from "./configs/form_options";
 import { currentForm, currentFormConfig, formActiveElement, MarkFormAsChanged } from "./form_builder_state";
 import { GetFormField, UpdateFormField } from "./utilities";
 
@@ -7,6 +7,14 @@ import { GetFormField, UpdateFormField } from "./utilities";
 
 function GetActiveElementConifg(id) {
     console.log("id , current form config:",id, currentFormConfig.value);
+    if(id === "submit" || id === "form") {
+        let config = currentFormConfig.value["submit_actions"] || {};
+        let schema = FormButtonSchema;
+        return {
+            "config": config,
+            "schema": schema,
+        };
+    }
     let fields = currentFormConfig.value["fields"] || [];
     console.log("fields : ", fields);
     let config = GetFormField(fields, id);
@@ -14,12 +22,23 @@ function GetActiveElementConifg(id) {
     if (config === undefined) {
         config = {};
     }
-    return config;
+    return {
+        "config": config,
+        "schema": formFieldSchema
+    };
 }
 
 
 function HandleDataChange(data) {
     let activeID = formActiveElement.value;
+    if(activeID === "submit") {
+        let existing = currentFormConfig.value;
+        let submitActions = existing["submit_actions"] || {};
+        let newdata = {...submitActions, ...data};
+        existing["submit_actions"] = newdata;
+        currentFormConfig.value = {...existing};
+        MarkFormAsChanged(currentForm.value);
+    }
     let fields = currentFormConfig.value["fields"] || [];
     let currfield = GetFormField(fields, activeID);
     let newfield = {...currfield, ...data};
@@ -32,10 +51,12 @@ function HandleDataChange(data) {
 
 export function FormBuilderRightPanel() {
     let activeElementID = formActiveElement.value;
-    let config = GetActiveElementConifg(activeElementID);
+    let resp = GetActiveElementConifg(activeElementID);
+    let config = resp["config"];
+    let schema = resp["schema"];
     return (
         <div>
-           <ConfigFormV3 initialValues={{...config}} schema={formFieldSchema} onChange=
+           <ConfigFormV3 initialValues={{...config}} schema={{...schema}} onChange=
            {
             (data) => {
             HandleDataChange(data);

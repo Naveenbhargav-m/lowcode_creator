@@ -67,7 +67,7 @@ function EditArea() {
           onDrop={(data) => {AddtoElements(data)}}
           dropElementData={{ "id":"screen" }}
        >
-        <div style={style} onClick={(e) => {formActiveElement.value = "form" }}>
+        <div style={style} onClick={(e) => {e.stopPropagation();formActiveElement.value = "form" }}>
           {formRenderSignal.value && <DynamicForm formConfig={values}/>}
           </div>
       </Drop>
