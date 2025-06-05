@@ -1,7 +1,7 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { fieldsMap, global_workflows } from "../states/global_repo";
 import { FormButtonSchema, formFieldSchema } from "./configs/form_options";
-import { currentForm, currentFormConfig, formActiveElement, MarkFormAsChanged } from "./form_builder_state";
+import { currentForm, currentFormConfig, formActiveElement, formBuilderView, MarkFormAsChanged } from "./form_builder_state";
 import { GetFormField, UpdateFormField } from "./utilities";
 
 function get_workflow_fields(formValues, fieldconfig, context) {
@@ -62,7 +62,16 @@ function get_workflow_names( formValues, fieldconfig, context) {
 function GetActiveElementConifg(id) {
     console.log("id , current form config:",id, currentFormConfig.value);
     if(id === "submit" || id === "form") {
-        let config = currentFormConfig.value["submit_actions"] || {};
+        let submitactions = currentFormConfig.value["submit_actions"] || {};
+        let activeView = formBuilderView.value;
+        let config = {
+            "submit_actions": submitactions,
+        };
+        if(activeView === "smartphone") {
+            config["style"] = currentFormConfig.value["mobile_style"];
+        } else if(activeView === "smartphone") {
+            config["style"] = currentFormConfig.value["desktop_style"];
+        }
         let schema = FormButtonSchema;
         return {
             "config": config,
