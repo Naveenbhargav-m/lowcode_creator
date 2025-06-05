@@ -1,7 +1,7 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { fieldsMap, global_workflows } from "../states/global_repo";
 import { FormButtonSchema, formFieldSchema } from "./configs/form_options";
-import { currentForm, currentFormConfig, formActiveElement, formBuilderView, MarkFormAsChanged } from "./form_builder_state";
+import { currentForm, currentFormConfig, formActiveElement, formBuilderView, forms, MarkFormAsChanged } from "./form_builder_state";
 import { GetFormField, UpdateFormField } from "./utilities";
 
 function get_workflow_fields(formValues, fieldconfig, context) {
@@ -62,15 +62,17 @@ function get_workflow_names( formValues, fieldconfig, context) {
 function GetActiveElementConifg(id) {
     console.log("id , current form config:",id, currentFormConfig.value);
     if(id === "submit" || id === "form") {
-        let submitactions = currentFormConfig.value["submit_actions"] || {};
+        let curform = currentForm.value;
+        let formdata = forms[curform];
+        let submitactions = formdata["submit_actions"] || {};
         let activeView = formBuilderView.value;
         let config = {
             "submit_actions": submitactions,
         };
         if(activeView === "smartphone") {
-            config["style"] = currentFormConfig.value["mobile_style"];
+            config["style"] = formdata["mobile_style"];
         } else if(activeView === "smartphone") {
-            config["style"] = currentFormConfig.value["desktop_style"];
+            config["style"] = formdata["desktop_style"];
         }
         let schema = FormButtonSchema;
         return {
@@ -95,11 +97,13 @@ function GetActiveElementConifg(id) {
 function HandleDataChange(data) {
     let activeID = formActiveElement.value;
     if(activeID === "submit" || activeID === "form") {
-        let existing = currentFormConfig.value;
+        let curformid = currentForm.value;
+        let formdata = forms[curformid];
+        let existing = formdata;
         let submitActions = existing["submit_actions"] || {};
-        let newdata = {...submitActions, ...data};
+        let newdata = {...submitActions, ...data["submit_actions"]};
         existing["submit_actions"] = newdata;
-        currentFormConfig.value = {...existing};
+        forms[curformid] = {...existing};
         MarkFormAsChanged(currentForm.value);
     }
     let fields = currentFormConfig.value["fields"] || [];
