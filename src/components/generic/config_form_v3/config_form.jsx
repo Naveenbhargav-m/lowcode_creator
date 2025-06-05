@@ -440,7 +440,7 @@ export function ConfigFormV3({
         break;
       case "data_mapper":
           // @ts-ignore
-          fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,Value) => {console.log("dynamic field value:",Value)}}/>;
+          fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,value) => {console.log("dynamic field value:",value);handleFieldChange(dynamicField.id, value)}}/>;
           break;
       case "code":
           fieldComponent = <GlobalJavaScriptField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>;

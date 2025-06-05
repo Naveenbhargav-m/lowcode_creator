@@ -43,7 +43,7 @@ function get_workflow_fields(formValues, fieldconfig, context) {
 
     return {
         "inputs": inputs,
-        "query_fields": queryFields
+        "workflow_fields": queryFields
     };
 }
 
