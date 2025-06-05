@@ -404,6 +404,7 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
   
   // Use a more stable value comparison to prevent unnecessary re-renders
   const stableValue = useMemo(() => {
+    debugger;
     return Array.isArray(value) ? value : [];
   }, [value]);
   

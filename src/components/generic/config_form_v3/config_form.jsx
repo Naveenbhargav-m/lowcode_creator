@@ -91,7 +91,6 @@ const evaluateCondition = (condition, formValues) => {
   
   const { dependsOn, operator, value } = condition;
   const dependentValue = getNestedValue(formValues, dependsOn);
-  
   switch (operator) {
     case 'equals':
       return dependentValue === value;
@@ -441,7 +440,7 @@ export function ConfigFormV3({
         break;
       case "data_mapper":
           // @ts-ignore
-          fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,Value) => handleFieldChange(dynamicField.id,Value)}/>;
+          fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,Value) => {console.log("dynamic field value:",Value)}}/>;
           break;
       case "code":
           fieldComponent = <GlobalJavaScriptField field={dynamicField} value={fieldValue} onChange={(id, value) => handleFieldChange(dynamicField.id, value)}/>;
