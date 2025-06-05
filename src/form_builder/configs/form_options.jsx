@@ -516,7 +516,7 @@ const formFieldSchema = {
         "options": [],
         "dynamicConfig": [
           {
-            "condition": {"field": "submit_actions.action", "operator": "equals", "value": "workflow"},
+            "condition": {"dependsOn": "submit_actions.action", "operator": "equals", "value": "workflow"},
             "callback": "get_workflow_names",
             "assignTo": "options"
           }
@@ -534,7 +534,7 @@ const formFieldSchema = {
         "source_fields": [],
         "dynamicConfig": [
           {
-            "condition": {"field": "submit_actions.worflow_id", "operator": "not_empty"},
+            "condition": {"dependsOn": "submit_actions.worflow_id", "operator": "not_empty"},
             "callback": "get_workflow_fields",
             "assignTo": [
               {"key": "source_fields", "transform": (data) => data.inputs},

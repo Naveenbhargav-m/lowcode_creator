@@ -402,20 +402,25 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
     field.placeholder
   ]);
   
-  // Use a more stable value comparison to prevent unnecessary re-renders
   const stableValue = useMemo(() => {
-    return Array.isArray(value) ? value : [];
+    const newValue = Array.isArray(value) ? value : [];
+    // Prevent unnecessary updates if the serialized content is the same
+    return newValue;
   }, [value]);
   
   useEffect(() => {
-    // Only update if the values are actually different
+    // Only update if the values are actually different AND not empty due to prop change
     const currentMappingsString = JSON.stringify(mappings);
     const newValueString = JSON.stringify(stableValue);
     
     if (currentMappingsString !== newValueString) {
-      setMappings(JSON.parse(JSON.stringify(stableValue)));
+      // Avoid resetting to empty array if we have local changes
+      if (stableValue.length > 0 || mappings.length === 0) {
+        setMappings([...stableValue]); // Create new array to avoid reference issues
+      }
     }
-  }, [stableValue]); // Use stableValue instead of value
+  }, [stableValue]);
+
 
   const mappedCount = useMemo(() => {
     console.log("called mapping count filtering mapping", mappings);
@@ -435,7 +440,7 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
       id: Date.now().toString(),
       targetField: '',
       type: 'static',
-      value: '', sourceField: '', userField: ''
+      "value": '', sourceField: '', userField: ''
     };
     console.log("adding mapping", newMapping);
     setMappings(prev => [...prev, newMapping]);
