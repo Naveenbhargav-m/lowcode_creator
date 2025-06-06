@@ -1,5 +1,4 @@
 // template_left_panel.jsx
-import { useState } from "preact/hooks";
 import { 
   activeTamplate, 
   SetTemplateActiveElements, 
@@ -9,242 +8,167 @@ import {
   isLoading,
   apiError
 } from "./templates_state";
+import { useState } from "react";
+import { Plus, FileText, Trash2 } from "lucide-react";
 
-function TemplatesListPanel({ elementsList }) {
+function TemplatesListPanel({ templatesObject }) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState('');
   const [deletingId, setDeletingId] = useState(null);
 
-  return (
-    <div class="scrollable-div pt-4">
-      {isLoading.value && (
-        <div class="flex items-center justify-center p-4">
-          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-          <span class="ml-2 text-sm text-gray-600">Loading...</span>
-        </div>
-      )}
-      
-      {apiError.value && (
-        <div class="mx-4 mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p class="text-sm text-red-600">{apiError.value}</p>
-        </div>
-      )}
-      
-      {elementsList.map((item) => (
-        <TemplateTile 
-          key={item.id}
-          name={item.name} 
-          id={item.id}
-          isDeleting={deletingId === item.id}
-          onDelete={async (id) => {
-            setDeletingId(id);
-            try {
-              await DeleteTemplate(id);
-            } catch (error) {
-              console.error("Failed to delete template:", error);
-            } finally {
-              setDeletingId(null);
-            }
-          }}
-        />
-      ))}
-      
-      {elementsList.length === 0 && !isLoading.value && (
-        <div class="text-center text-gray-500 p-8">
-          <p>No templates found</p>
-          <p class="text-sm mt-2">Create your first template to get started</p>
-        </div>
-      )}
-    </div>
-  );
-}
+  // Convert templates object to array for rendering
+  const templatesList = templatesObject ? Object.entries(templatesObject).map(([id, template]) => ({
+    id,
+    name: template.name || `Template ${id}`,
+    ...template
+  })) : [];
 
-function TemplateTile({ name, id, isDeleting, onDelete }) {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  
-  const isActive = activeTamplate.value === id;
-  const hasChanges = HasUnsavedChanges(id);
+  const handleCreate = () => {
+    if (newName.trim()) {
+      // You'll need to implement CreateTemplate function
+      // onCreateTemplate(newName);
+      setNewName('');
+      setIsCreating(false);
+    }
+  };
 
-  const handleSelect = (e) => {
-    e.stopPropagation();
+  const handleDelete = async (id) => {
+    setDeletingId(id);
+    try {
+      await DeleteTemplate(id);
+    } catch (error) {
+      console.error("Failed to delete template:", error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleSelect = (id) => {
     if (activeTamplate.value !== id) {
       activeTamplate.value = id;
       SetTemplateActiveElements();
     }
   };
 
-  const handleDeleteClick = (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(true);
-  };
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Templates</h2>
+        <button 
+          onClick={() => setIsCreating(true)}
+          className="bg-indigo-600 text-white p-1.5 rounded hover:bg-indigo-700 transition-colors"
+          disabled={isLoading.value}
+        >
+          <Plus size={18} />
+        </button>
+      </div>
 
-  const confirmDelete = async (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(false);
-    await onDelete(id);
-  };
-
-  const cancelDelete = (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(false);
-  };
-
-  const tileStyle = {
-    padding: "12px",
-    borderStyle: "solid",
-    borderWidth: "1px",
-    color: isActive ? "white" : "black",
-    backgroundColor: isActive ? "#2563eb" : "white",
-    borderRadius: "8px",
-    fontSize: "0.875rem",
-    margin: "8px 4px",
-    borderColor: isActive ? "#2563eb" : (isHovered ? "#6b7280" : "#d1d5db"),
-    transition: "all 0.2s ease-in-out",
-    cursor: "pointer",
-    position: "relative",
-    boxShadow: isActive ? "0 2px 4px rgba(37, 99, 235, 0.2)" : "none"
-  };
-
-  const deleteButtonStyle = {
-    position: "absolute",
-    top: "4px",
-    right: "4px",
-    width: "20px",
-    height: "20px",
-    borderRadius: "50%",
-    backgroundColor: isActive ? "rgba(255, 255, 255, 0.2)" : "rgba(239, 68, 68, 0.1)",
-    border: "none",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "12px",
-    color: isActive ? "white" : "#ef4444",
-    opacity: isHovered ? "1" : "0.7",
-    transition: "all 0.2s ease-in-out"
-  };
-
-  const confirmDialogStyle = {
-    position: "absolute",
-    top: "100%",
-    left: "0",
-    right: "0",
-    backgroundColor: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "6px",
-    padding: "12px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    zIndex: "10",
-    marginTop: "4px"
-  };
-
-  if (showDeleteConfirm) {
-    return (
-      <div style={{ ...tileStyle, position: "relative" }}>
-        <p style={{ marginBottom: "8px", fontSize: "0.8rem" }}>{name}</p>
-        <div style={confirmDialogStyle}>
-          <p style={{ fontSize: "0.75rem", marginBottom: "8px", color: "#374151" }}>
-            Delete "{name}"?
-          </p>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={confirmDelete}
-              disabled={isDeleting}
-              style={{
-                backgroundColor: "#ef4444",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                fontSize: "0.75rem",
-                cursor: isDeleting ? "not-allowed" : "pointer",
-                opacity: isDeleting ? "0.5" : "1"
-              }}
+      {isCreating && (
+        <div className="mb-4 space-y-2">
+          <input
+            type="text"
+            value={newName}
+            // @ts-ignore
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Template name"
+            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            autoFocus
+            onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
+          />
+          <div className="flex gap-2">
+            <button 
+              onClick={handleCreate} 
+              className="flex-1 bg-indigo-600 text-white py-1.5 rounded text-sm hover:bg-indigo-700 transition-colors"
             >
-              {isDeleting ? "..." : "Delete"}
+              Create
             </button>
-            <button
-              onClick={cancelDelete}
-              style={{
-                backgroundColor: "#f3f4f6",
-                color: "#374151",
-                border: "none",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                fontSize: "0.75rem",
-                cursor: "pointer"
-              }}
+            <button 
+              onClick={() => {
+                setIsCreating(false);
+                setNewName('');
+              }} 
+              className="flex-1 bg-gray-200 text-gray-700 py-1.5 rounded text-sm hover:bg-gray-300 transition-colors"
             >
               Cancel
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div
-      style={tileStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleSelect}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ flex: "1", paddingRight: "8px" }}>
-          <p style={{ margin: "0", fontWeight: isActive ? "600" : "400" }}>
-            {name}
-            {hasChanges && (
-              <span style={{ 
-                marginLeft: "6px", 
-                fontSize: "0.75rem", 
-                color: isActive ? "rgba(255, 255, 255, 0.8)" : "#f59e0b",
-                fontWeight: "500"
-              }}>
-                •
-              </span>
-            )}
-          </p>
-          {hasChanges && (
-            <p style={{ 
-              margin: "2px 0 0 0", 
-              fontSize: "0.7rem", 
-              color: isActive ? "rgba(255, 255, 255, 0.7)" : "#6b7280" 
-            }}>
-              Unsaved changes
-            </p>
-          )}
+      {isLoading.value && (
+        <div className="flex items-center justify-center p-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
+          <span className="ml-2 text-sm text-gray-600">Loading...</span>
         </div>
+      )}
+      
+      {apiError.value && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{apiError.value}</p>
+        </div>
+      )}
+
+      <div className="space-y-1 max-h-64 overflow-y-auto">
+        {templatesList.map(template => {
+          const isActive = activeTamplate.value === template.id;
+          const hasChanges = HasUnsavedChanges(template.id);
+          const isDeleting = deletingId === template.id;
+          
+          return (
+            <div 
+              key={template.id}
+              className={`flex items-center justify-between p-2.5 rounded-md cursor-pointer transition-colors ${
+                isActive 
+                  ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' 
+                  : 'hover:bg-gray-100'
+              }`}
+              onClick={() => handleSelect(template.id)}
+            >
+              <div className="flex items-center flex-1">
+                <FileText size={16} className="mr-2 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium">{template.name}</span>
+                    {hasChanges && (
+                      <span className="ml-2 text-xs text-amber-500 font-medium">
+                        •
+                      </span>
+                    )}
+                  </div>
+                  {hasChanges && (
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      Unsaved changes
+                    </div>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(template.id);
+                }}
+                disabled={isDeleting}
+                className="text-gray-400 hover:text-red-500 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Delete template"
+              >
+                {isDeleting ? (
+                  <div className="animate-spin rounded-full h-3.5 w-3.5 border border-gray-400 border-t-transparent"></div>
+                ) : (
+                  <Trash2 size={14} />
+                )}
+              </button>
+            </div>
+          );
+        })}
         
-        {(isHovered || isActive) && (
-          <button
-            onClick={handleDeleteClick}
-            style={deleteButtonStyle}
-            title="Delete template"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isActive ? "rgba(255, 255, 255, 0.3)" : "rgba(239, 68, 68, 0.2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isActive ? "rgba(255, 255, 255, 0.2)" : "rgba(239, 68, 68, 0.1)";
-            }}
-          >
-            ×
-          </button>
+        {templatesList.length === 0 && !isLoading.value && (
+          <div className="text-center text-gray-500 p-8">
+            <FileText size={32} className="mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No templates found</p>
+            <p className="text-xs mt-1 text-gray-400">Create your first template to get started</p>
+          </div>
         )}
       </div>
     </div>
   );
 }
-
-export { TemplateTile, TemplatesListPanel };
-
-
-/*
-    see i want to enhance the crud operations here.
-    perviously am keept tracing pased on _change_type flag to differentate insert and update one.
-    it is not properly working and delete option is not there.
-    let us do one thing on create will make create api call and get id back.
-    in the tamplate list panel or in edit view show a small delete icon to trigger delete.
-    on update when they hit sync we will update only current active template that are being edited.
-    is this a good or , if you know any better way please do that.
-
-*/

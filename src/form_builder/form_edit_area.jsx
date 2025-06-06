@@ -133,6 +133,7 @@ import {
   apiError,
   HasUnsavedChanges,
 } from "./form_builder_state";
+import { FileText, Plus, Trash2 } from "lucide-react";
 
 function FormBuilderPage() {
   useAuthCheck();
@@ -209,7 +210,10 @@ function FormBuilderPage() {
         <div style={{ flex: 1, overflow: "auto" }}>
           {formActiveLeftTab.value === "forms" ? (
             <div style={{ padding: "16px" }}>
-              <FormsList />
+              <FormsList
+              forms={forms} activeForm={currentForm.value} 
+              hasUnsavedChanges={HasUnsavedChanges}
+              onCreateForm={CreateNewForm} onDeleteForm={DeleteForm} onFormSelect={setCurrentForm} />
             </div>
           ) : (
             <FormBuilderLeftPanel />
@@ -348,211 +352,108 @@ function FormBuilderPage() {
   );
 }
 
-// Forms List Component for the left panel
-function FormsList() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newFormName, setNewFormName] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreateForm = async () => {
-    if (!newFormName.trim()) return;
-    
-    setIsCreating(true);
-    try {
-      await CreateNewForm({ name: newFormName.trim() });
-      setNewFormName("");
-      setShowCreateForm(false);
-    } catch (error) {
-      console.error("Failed to create form:", error);
-    } finally {
+// FormsList Component - Updated to match TablesList pattern
+function FormsList({ forms, activeForm, onFormSelect, onCreateForm, onDeleteForm, hasUnsavedChanges }) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+
+  const handleCreate = () => {
+    if (newName.trim()) {
+      onCreateForm(newName);
+      setNewName('');
       setIsCreating(false);
     }
   };
 
-  const handleDeleteForm = async (formId, formName) => {
-    if (confirm(`Are you sure you want to delete "${formName}"?`)) {
-      try {
-        await DeleteForm(formId);
-      } catch (error) {
-        console.error("Failed to delete form:", error);
-      }
-    }
-  };
+  // Convert forms object to array
+  const formsArray = Object.values(forms || {});
 
   return (
-    <div style={{ padding: "16px" }}>
-      {/* Header */}
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "16px"
-      }}>
-        <h3 style={{
-          fontSize: "18px",
-          fontWeight: "600",
-          color: "#1f2937",
-          margin: 0
-        }}>
-          Forms
-        </h3>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          style={{
-            padding: "6px 12px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "14px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px"
-          }}
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Forms</h2>
+        <button 
+          onClick={() => setIsCreating(true)}
+          className="bg-indigo-600 text-white p-1.5 rounded hover:bg-indigo-700 transition-colors"
         >
-          + New
+          <Plus size={18} />
         </button>
       </div>
 
-      {/* Create Form Modal/Inline */}
-      {showCreateForm && (
-        <div style={{
-          padding: "16px",
-          backgroundColor: "#f8fafc",
-          borderRadius: "8px",
-          border: "1px solid #e5e7eb",
-          marginBottom: "16px"
-        }}>
+      {isCreating && (
+        <div className="mb-4 space-y-2">
           <input
             type="text"
-            placeholder="Form name"
-            value={newFormName}
+            value={newName}
             // @ts-ignore
-            onChange={(e) => setNewFormName(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              marginBottom: "12px",
-              fontSize: "14px"
-            }}
-            disabled={isCreating}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Form name"
+            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            autoFocus
+            onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
           />
-          <div style={{
-            display: "flex",
-            gap: "8px",
-            justifyContent: "flex-end"
-          }}>
-            <button
-              onClick={() => {
-                setShowCreateForm(false);
-                setNewFormName("");
-              }}
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#6b7280",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "12px",
-                cursor: "pointer"
-              }}
-              disabled={isCreating}
+          <div className="flex gap-2">
+            <button 
+              onClick={handleCreate} 
+              className="flex-1 bg-indigo-600 text-white py-1.5 rounded text-sm hover:bg-indigo-700 transition-colors"
+            >
+              Create
+            </button>
+            <button 
+              onClick={() => setIsCreating(false)} 
+              className="flex-1 bg-gray-200 text-gray-700 py-1.5 rounded text-sm hover:bg-gray-300 transition-colors"
             >
               Cancel
-            </button>
-            <button
-              onClick={handleCreateForm}
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#10b981",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "12px",
-                cursor: "pointer"
-              }}
-              disabled={isCreating || !newFormName.trim()}
-            >
-              {isCreating ? "Creating..." : "Create"}
             </button>
           </div>
         </div>
       )}
 
-      {/* Forms List */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        {formLeftNamesList.value.map((form) => (
-          <div
+      <div className="space-y-1 max-h-64 overflow-y-auto">
+        {formsArray.map(form => (
+          <div 
             key={form.id}
-            style={{
-              padding: "12px",
-              backgroundColor: currentForm.value === form.id ? "#eff6ff" : "#ffffff",
-              border: `1px solid ${currentForm.value === form.id ? "#3b82f6" : "#e5e7eb"}`,
-              borderRadius: "8px",
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              transition: "all 0.2s ease"
-            }}
-            onClick={() => setCurrentForm(form.id)}
+            className={`flex items-center justify-between p-2.5 rounded-md cursor-pointer transition-colors ${
+              activeForm === form.id 
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' 
+                : 'hover:bg-gray-100'
+            }`}
+            onClick={() => onFormSelect(form.id)}
           >
-            <div style={{ flex: 1 }}>
-              <div style={{
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#1f2937",
-                marginBottom: "2px"
-              }}>
-                {form.name}
-                {HasUnsavedChanges(form.id) && (
-                  <span style={{
-                    marginLeft: "8px",
-                    fontSize: "12px",
-                    color: "#f59e0b",
-                    fontWeight: "400"
-                  }}>
-                    • Unsaved
-                  </span>
+            <div className="flex items-center">
+              <FileText size={16} className="mr-2 flex-shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{form.name}</span>
+                {hasUnsavedChanges(form.id) && (
+                  <span className="text-xs text-amber-600">• Unsaved</span>
                 )}
               </div>
             </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleDeleteForm(form.id, form.name);
+                onDeleteForm(form.id);
               }}
-              style={{
-                padding: "4px",
-                backgroundColor: "transparent",
-                border: "none",
-                color: "#ef4444",
-                cursor: "pointer",
-                borderRadius: "4px",
-                fontSize: "12px"
-              }}
+              className="text-gray-400 hover:text-red-500 transition-colors p-1"
             >
-              ×
+              <Trash2 size={14} />
             </button>
           </div>
         ))}
       </div>
 
-      {formLeftNamesList.value.length === 0 && (
-        <div style={{
-          textAlign: "center",
-          padding: "32px 16px",
-          color: "#6b7280",
-          fontSize: "14px"
-        }}>
-          No forms yet. Create your first form!
+      {formsArray.length === 0 && (
+        <div className="text-center text-gray-500 py-8">
+          <FileText size={24} className="mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No forms yet</p>
+          <p className="text-xs mt-1">Create your first form to get started</p>
         </div>
       )}
     </div>
   );
 }
+
+
 
 export { FormBuilderPage };

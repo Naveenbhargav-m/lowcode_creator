@@ -61,26 +61,28 @@ import {
   apiError,
 } from "./workflow_state";
 
+import { Plus, Search, Workflow, Copy, Trash2, Palette, Star } from "lucide-react";
+
+// Workflows Component
 function WorkflowsList() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newWorkflowName, setNewWorkflowName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
-  const handleCreateWorkflow = async (e) => {
-    e.preventDefault();
-    if (!newWorkflowName.trim()) return;
-
-    try {
-      await CreateWorkflow({ name: newWorkflowName.trim() });
-      setNewWorkflowName("");
-      setShowCreateForm(false);
-    } catch (error) {
-      console.error("Failed to create workflow:", error);
+  const handleCreate = async () => {
+    if (newName.trim()) {
+      try {
+        await CreateWorkflow({ name: newName.trim() });
+        setNewName("");
+        setIsCreating(false);
+      } catch (error) {
+        console.error("Failed to create workflow:", error);
+      }
     }
   };
 
-  const handleDeleteWorkflow = async (workflowId) => {
+  const handleDelete = async (workflowId) => {
     if (showDeleteConfirm !== workflowId) {
       setShowDeleteConfirm(workflowId);
       return;
@@ -94,7 +96,7 @@ function WorkflowsList() {
     }
   };
 
-  const handleDuplicateWorkflow = async (workflowId) => {
+  const handleDuplicate = async (workflowId) => {
     try {
       await DuplicateWorkflow(workflowId);
     } catch (error) {
@@ -107,146 +109,79 @@ function WorkflowsList() {
   );
 
   return (
-    <div style={{ 
-      height: "100%", 
-      display: "flex", 
-      flexDirection: "column",
-      padding: "16px"
-    }}>
-      {/* Header */}
-      <div style={{ marginBottom: "16px" }}>
-        <h3 style={{ 
-          fontSize: "18px", 
-          fontWeight: "600", 
-          margin: "0 0 12px 0",
-          color: "#1f2937"
-        }}>
-          Workflows
-        </h3>
+    <div className="h-full flex flex-col p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Workflows</h2>
+        <button 
+          onClick={() => setIsCreating(true)}
+          className="bg-blue-600 text-white p-1.5 rounded hover:bg-blue-700 transition-colors"
+          disabled={isLoading.value}
+        >
+          <Plus size={18} />
+        </button>
+      </div>
 
-        {/* API Error Display */}
-        {apiError.value && (
-          <div style={{
-            padding: "8px 12px",
-            backgroundColor: "#fef2f2",
-            border: "1px solid #fecaca",
-            borderRadius: "6px",
-            color: "#dc2626",
-            fontSize: "14px",
-            marginBottom: "12px"
-          }}>
-            {apiError.value}
-          </div>
-        )}
-        
-        {/* Search */}
+      {/* Search */}
+      <div className="mb-4 relative">
+        <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           placeholder="Search workflows..."
           value={searchTerm}
           // @ts-ignore
-          onInput={(e) => setSearchTerm(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "8px 12px",
-            border: "1px solid #d1d5db",
-            borderRadius: "6px",
-            fontSize: "14px",
-            marginBottom: "12px"
-          }}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
-
-        {/* Create New Button */}
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          disabled={isLoading.value}
-          style={{
-            width: "100%",
-            padding: "8px 16px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "14px",
-            fontWeight: "500",
-            cursor: isLoading.value ? "not-allowed" : "pointer",
-            opacity: isLoading.value ? 0.6 : 1
-          }}
-        >
-          {isLoading.value ? "Loading..." : "+ New Workflow"}
-        </button>
       </div>
 
-      {/* Create Form */}
-      {showCreateForm && (
-        <div style={{
-          padding: "12px",
-          backgroundColor: "#f9fafb",
-          borderRadius: "6px",
-          marginBottom: "16px",
-          border: "1px solid #e5e7eb"
-        }}>
-          <form onSubmit={handleCreateWorkflow}>
-            <input
-              type="text"
-              placeholder="Workflow name..."
-              value={newWorkflowName}
-              // @ts-ignore
-              onInput={(e) => setNewWorkflowName(e.target.value)}
-              autoFocus
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                border: "1px solid #d1d5db",
-                borderRadius: "4px",
-                fontSize: "14px",
-                marginBottom: "8px"
-              }}
-            />
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                type="submit"
-                disabled={!newWorkflowName.trim() || isLoading.value}
-                style={{
-                  flex: 1,
-                  padding: "6px 12px",
-                  backgroundColor: "#10b981",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  cursor: (!newWorkflowName.trim() || isLoading.value) ? "not-allowed" : "pointer",
-                  opacity: (!newWorkflowName.trim() || isLoading.value) ? 0.6 : 1
-                }}
-              >
-                Create
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreateForm(false);
-                  setNewWorkflowName("");
-                }}
-                style={{
-                  flex: 1,
-                  padding: "6px 12px",
-                  backgroundColor: "#6b7280",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  fontSize: "12px",
-                  cursor: "pointer"
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+      {isCreating && (
+        <div className="mb-4 space-y-2">
+          <input
+            type="text"
+            value={newName}
+            // @ts-ignore
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Workflow name"
+            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            autoFocus
+            onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
+          />
+          <div className="flex gap-2">
+            <button 
+              onClick={handleCreate} 
+              className="flex-1 bg-blue-600 text-white py-1.5 rounded text-sm hover:bg-blue-700 transition-colors"
+              disabled={!newName.trim() || isLoading.value}
+            >
+              Create
+            </button>
+            <button 
+              onClick={() => {
+                setIsCreating(false);
+                setNewName('');
+              }} 
+              className="flex-1 bg-gray-200 text-gray-700 py-1.5 rounded text-sm hover:bg-gray-300 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {apiError.value && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{apiError.value}</p>
+        </div>
+      )}
+
+      {isLoading.value && (
+        <div className="flex items-center justify-center p-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <span className="ml-2 text-sm text-gray-600">Loading...</span>
         </div>
       )}
 
       {/* Tab Navigation */}
-      <div className="scrollable-div" style={{ flex: "0 0 auto", marginTop: "16px" }}>
+      <div className="mb-4">
         <TemplateOptionTabs 
           tabs={["flows", "blocks"]} 
           onChange={(tab) => { 
@@ -257,262 +192,107 @@ function WorkflowsList() {
       </div>
 
       {/* Content */}
-      <div style={{ marginTop: "16px", flex: 1, overflow: "hidden" }}>
+      <div className="flex-1 overflow-hidden">
         {flowTab.value === "blocks" ? <DragComponent /> : (
-          <WorkflowsListPanel 
-            workflows={filteredWorkflows}
-            searchTerm={searchTerm}
-            showDeleteConfirm={showDeleteConfirm}
-            onDelete={handleDeleteWorkflow}
-            onDuplicate={handleDuplicateWorkflow}
-            onCancelDelete={() => setShowDeleteConfirm(null)}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function WorkflowsListPanel({ 
-  workflows, 
-  searchTerm, 
-  showDeleteConfirm, 
-  onDelete, 
-  onDuplicate, 
-  onCancelDelete 
-}) {
-  return (
-    <div style={{ 
-      height: "100%", 
-      overflow: "auto",
-      border: "1px solid #e5e7eb",
-      borderRadius: "6px"
-    }}>
-      {workflows.length === 0 ? (
-        <div style={{
-          padding: "24px",
-          textAlign: "center",
-          color: "#6b7280",
-          fontSize: "14px"
-        }}>
-          {searchTerm ? "No workflows match your search" : "No workflows found"}
-        </div>
-      ) : (
-        workflows.map((workflow, index) => (
-          <WorkflowNameTile 
-            key={workflow.id || index} 
-            workflow={workflow}
-            // @ts-ignore
-            isActive={workflow.id === activeWorkFlow.value?.id}
-            hasUnsavedChanges={HasUnsavedChanges(workflow.id)}
-            showDeleteConfirm={showDeleteConfirm === workflow.id}
-            onSelect={() => SetWorkFlowActive(workflow.id)}
-            onDelete={() => onDelete(workflow.id)}
-            onDuplicate={() => onDuplicate(workflow.id)}
-            onCancelDelete={onCancelDelete}
-            isLoading={isLoading.value}
-          />
-        ))
-      )}
-    </div>
-  );
-}
-
-function WorkflowNameTile({ 
-  workflow,
-  isActive, 
-  hasUnsavedChanges,
-  showDeleteConfirm,
-  onSelect, 
-  onDelete, 
-  onDuplicate,
-  onCancelDelete,
-  isLoading
-}) {
-  const [showActions, setShowActions] = useState(false);
-
-  return (
-    <div
-      style={{
-        padding: "12px",
-        borderBottom: "1px solid #e5e7eb",
-        backgroundColor: isActive ? "#eff6ff" : "white",
-        cursor: "pointer",
-        position: "relative"
-      }}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
-      onClick={onSelect}
-    >
-      {/* Colored bar indicating active state */}
-      <div style={{ 
-        position: "absolute",
-        left: 0,
-        top: 0,
-        width: "4px",
-        height: "100%",
-        backgroundColor: isActive ? (COLORS?.active || "#3b82f6") : "transparent",
-      }}></div>
-      
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between"
-      }}>
-        <div style={{ 
-          display: "flex", 
-          alignItems: "center",
-          flex: 1,
-          minWidth: 0,
-          marginLeft: "8px"
-        }}>
-          <div style={{ 
-            backgroundColor: isActive ? (COLORS?.active || "#3b82f6") : "#f1f5f9",
-            borderRadius: "50%",
-            width: "28px",
-            height: "28px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginRight: "12px",
-            flexShrink: 0
-          }}>
-            {DynamicIcon ? (
-              <DynamicIcon 
-                name="workflow" 
-                size={16} 
-                style={{color: isActive ? "white" : (COLORS?.text || "#374151") }}
-              />
+          <div className="space-y-1 max-h-full overflow-y-auto border border-gray-200 rounded-md">
+            {filteredWorkflows.length === 0 ? (
+              <div className="text-center text-gray-500 p-8">
+                <Workflow size={32} className="mx-auto mb-2 opacity-50" />
+                <p className="text-sm">
+                  {searchTerm ? "No workflows match your search" : "No workflows found"}
+                </p>
+                <p className="text-xs mt-1 text-gray-400">Create your first workflow to get started</p>
+              </div>
             ) : (
-              <span style={{ fontSize: "16px" }}>⚡</span>
-            )}
-          </div>
-          
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{
-              fontSize: "14px",
-              fontWeight: isActive ? "600" : "500",
-              color: isActive ? "#1d4ed8" : "#1f2937",
-              marginBottom: "2px",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px"
-            }}>
-              <span style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-              }}>
-                {workflow.name}
-              </span>
-              {hasUnsavedChanges && (
-                <span style={{
-                  width: "8px",
-                  height: "8px",
-                  backgroundColor: "#f59e0b",
-                  borderRadius: "50%",
-                  flexShrink: 0
-                }} />
-              )}
-            </div>
-            <div style={{
-              fontSize: "12px",
-              color: "#6b7280"
-            }}>
-              ID: {workflow.id}
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        {(showActions || showDeleteConfirm) && (
-          <div style={{
-            display: "flex",
-            gap: "4px",
-            marginLeft: "8px"
-          }}>
-            {showDeleteConfirm ? (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                  disabled={isLoading}
-                  style={{
-                    padding: "4px 8px",
-                    backgroundColor: "#dc2626",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                    cursor: isLoading ? "not-allowed" : "pointer",
-                    opacity: isLoading ? 0.6 : 1
-                  }}
-                >
-                  Confirm
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCancelDelete();
-                  }}
-                  style={{
-                    padding: "4px 8px",
-                    backgroundColor: "#6b7280",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                    cursor: "pointer"
-                  }}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDuplicate();
-                  }}
-                  disabled={isLoading}
-                  title="Duplicate workflow"
-                  style={{
-                    padding: "4px 6px",
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                    cursor: isLoading ? "not-allowed" : "pointer",
-                    opacity: isLoading ? 0.6 : 1
-                  }}
-                >
-                  📋
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                  disabled={isLoading}
-                  title="Delete workflow"
-                  style={{
-                    padding: "4px 6px",
-                    backgroundColor: "#dc2626",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                    cursor: isLoading ? "not-allowed" : "pointer",
-                    opacity: isLoading ? 0.6 : 1
-                  }}
-                >
-                  🗑️
-                </button>
-              </>
+              filteredWorkflows.map((workflow, index) => {
+                // @ts-ignore
+                const isActive = workflow.id === activeWorkFlow.value?.id;
+                const hasChanges = HasUnsavedChanges(workflow.id);
+                const isDeleting = showDeleteConfirm === workflow.id;
+                
+                return (
+                  <div 
+                    key={workflow.id || index}
+                    className={`flex items-center justify-between p-2.5 border-b border-gray-100 cursor-pointer transition-colors ${
+                      isActive 
+                        ? 'bg-blue-100 text-blue-700' 
+                        : 'hover:bg-gray-50'
+                    }`}
+                    onClick={() => SetWorkFlowActive(workflow.id)}
+                  >
+                    <div className="flex items-center flex-1">
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center mr-3 ${
+                        isActive ? 'bg-blue-600' : 'bg-gray-200'
+                      }`}>
+                        <Workflow size={14} className={isActive ? 'text-white' : 'text-gray-600'} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium truncate">{workflow.name}</span>
+                          {hasChanges && (
+                            <span className="ml-2 w-2 h-2 bg-amber-500 rounded-full flex-shrink-0"></span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">ID: {workflow.id}</div>
+                        {hasChanges && (
+                          <div className="text-xs text-gray-500">Unsaved changes</div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      {isDeleting ? (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(workflow.id);
+                            }}
+                            disabled={isLoading.value}
+                            className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowDeleteConfirm(null);
+                            }}
+                            className="px-2 py-1 bg-gray-400 text-white text-xs rounded hover:bg-gray-500"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDuplicate(workflow.id);
+                            }}
+                            disabled={isLoading.value}
+                            className="text-gray-400 hover:text-blue-500 transition-colors p-1"
+                            title="Duplicate workflow"
+                          >
+                            <Copy size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(workflow.id);
+                            }}
+                            disabled={isLoading.value}
+                            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                            title="Delete workflow"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         )}
@@ -520,6 +300,8 @@ function WorkflowNameTile({
     </div>
   );
 }
+
+
 
 function DragComponent() {  
   let registerNodes = [

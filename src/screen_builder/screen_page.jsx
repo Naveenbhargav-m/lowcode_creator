@@ -12,7 +12,10 @@ import {
   unsavedScreens,
   isLoading,
   apiError,
-  HasUnsavedChanges
+  HasUnsavedChanges,
+  DeleteScreen,
+  CreatenewScreen,
+  SetCurrentScreen
 } from "./screen_state";
 import { ScreenBuilderArea } from "./screen-areas_2";
 import { TemplateOptionTabs } from "../template_builder/templates_page";
@@ -94,7 +97,14 @@ function ScreenPage() {
           </div>
           
           {screenLeftTabSignal.value === "screens" ? (
-            <ScreensListPanels elementsList={screenNamesList.value} />
+            <ScreensListPanels 
+              activeScreen={activeScreen.value}
+              screens={screens}
+              onDeleteScreen={DeleteScreen}
+              onCreateScreen={CreatenewScreen}
+              onScreenSelect={SetCurrentScreen}
+              hasUnsavedChanges={HasUnsavedChanges}
+             />
           ) : (
             <ScreenLeftPanel 
               config={{ 
@@ -166,7 +176,15 @@ function ScreenView() {
         </div>
         {
           screenLeftTabSignal.value === "screens" ?
-            <ScreensListPanels elementsList={screenNamesList.value} /> :
+          <ScreensListPanels 
+          activeScreen={activeScreen.value}
+          screens={screens}
+          onDeleteScreen={DeleteScreen}
+          onCreateScreen={CreatenewScreen}
+          onScreenSelect={SetCurrentScreen}
+          hasUnsavedChanges={HasUnsavedChanges}
+         />
+            :
             <ScreenLeftPanel 
               config={{ tabs_path: CONFIG["paths"], views_path: CONFIG["views_path"] }}
               value={{}}
