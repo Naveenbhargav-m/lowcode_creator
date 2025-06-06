@@ -2,8 +2,6 @@
 import { useState } from "preact/hooks";
 import { Copy, Plus, Search, Trash2 } from "lucide-react";
 
-
-// QueriesList Component - Updated to match TablesList pattern
 function QueriesList({ queries, activeQuery, onQuerySelect, onCreateQuery, onDeleteQuery, onDuplicateQuery, hasUnsavedChanges }) {
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
@@ -17,7 +15,9 @@ function QueriesList({ queries, activeQuery, onQuerySelect, onCreateQuery, onDel
     }
   };
 
-  const filteredQueries = queries.filter(query =>
+  // Convert queries object to array
+  const queriesArray = Object.values(queries || {});
+  const filteredQueries = queriesArray.filter(query =>
     query.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

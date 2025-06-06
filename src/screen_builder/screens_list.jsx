@@ -4,6 +4,7 @@ import { Monitor, Plus, Trash2 } from "lucide-react";
 
 
 function ScreensListPanels({ screens, activeScreen, onScreenSelect, onCreateScreen, onDeleteScreen, hasUnsavedChanges }) {
+  // ScreensList Component - Updated to match TablesList pattern
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
 
@@ -14,6 +15,9 @@ function ScreensListPanels({ screens, activeScreen, onScreenSelect, onCreateScre
       setIsCreating(false);
     }
   };
+
+  // Convert screens object to array
+  const screensArray = Object.values(screens || {});
 
   return (
     <div>
@@ -57,7 +61,7 @@ function ScreensListPanels({ screens, activeScreen, onScreenSelect, onCreateScre
       )}
 
       <div className="space-y-1 max-h-64 overflow-y-auto">
-        {screens.map(screen => (
+        {screensArray.map(screen => (
           <div 
             key={screen.id}
             className={`flex items-center justify-between p-2.5 rounded-md cursor-pointer transition-colors ${
@@ -89,7 +93,7 @@ function ScreensListPanels({ screens, activeScreen, onScreenSelect, onCreateScre
         ))}
       </div>
 
-      {screens.length === 0 && (
+      {screensArray.length === 0 && (
         <div className="text-center text-gray-500 py-8">
           <Monitor size={24} className="mx-auto mb-2 opacity-50" />
           <p className="text-sm">No templates found</p>
@@ -100,182 +104,5 @@ function ScreensListPanels({ screens, activeScreen, onScreenSelect, onCreateScre
   );
 }
 
-function ScreenTile({ name, id, isDeleting, onDelete }) {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  
-  const isActive = activeScreen.value === id;
-  const hasChanges = HasUnsavedChanges(id);
 
-  const handleSelect = (e) => {
-    e.stopPropagation();
-    if (activeScreen.value !== id) {
-      activeScreen.value = id;
-      SetCurrentScreen();
-    }
-  };
-
-  const handleDeleteClick = (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDelete = async (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(false);
-    await onDelete(id);
-  };
-
-  const cancelDelete = (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(false);
-  };
-
-  const tileStyle = {
-    padding: "12px",
-    borderStyle: "solid",
-    borderWidth: "1px",
-    color: isActive ? "white" : "black",
-    backgroundColor: isActive ? "#2563eb" : "white",
-    borderRadius: "8px",
-    fontSize: "0.875rem",
-    margin: "8px 4px",
-    borderColor: isActive ? "#2563eb" : (isHovered ? "#6b7280" : "#d1d5db"),
-    transition: "all 0.2s ease-in-out",
-    cursor: "pointer",
-    position: "relative",
-    boxShadow: isActive ? "0 2px 4px rgba(37, 99, 235, 0.2)" : "none"
-  };
-
-  const deleteButtonStyle = {
-    position: "absolute",
-    top: "4px",
-    right: "4px",
-    width: "20px",
-    height: "20px",
-    borderRadius: "50%",
-    backgroundColor: isActive ? "rgba(255, 255, 255, 0.2)" : "rgba(239, 68, 68, 0.1)",
-    border: "none",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "12px",
-    color: isActive ? "white" : "#ef4444",
-    opacity: isHovered ? "1" : "0.7",
-    transition: "all 0.2s ease-in-out"
-  };
-
-  const confirmDialogStyle = {
-    position: "absolute",
-    top: "100%",
-    left: "0",
-    right: "0",
-    backgroundColor: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "6px",
-    padding: "12px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    zIndex: "10",
-    marginTop: "4px"
-  };
-
-  if (showDeleteConfirm) {
-    return (
-      <div style={{ ...tileStyle, position: "relative" }}>
-        <p style={{ marginBottom: "8px", fontSize: "0.8rem" }}>{name}</p>
-        <div style={confirmDialogStyle}>
-          <p style={{ fontSize: "0.75rem", marginBottom: "8px", color: "#374151" }}>
-            Delete "{name}"?
-          </p>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={confirmDelete}
-              disabled={isDeleting}
-              style={{
-                backgroundColor: "#ef4444",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                fontSize: "0.75rem",
-                cursor: isDeleting ? "not-allowed" : "pointer",
-                opacity: isDeleting ? "0.5" : "1"
-              }}
-            >
-              {isDeleting ? "..." : "Delete"}
-            </button>
-            <button
-              onClick={cancelDelete}
-              style={{
-                backgroundColor: "#f3f4f6",
-                color: "#374151",
-                border: "none",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                fontSize: "0.75rem",
-                cursor: "pointer"
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={tileStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleSelect}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ flex: "1", paddingRight: "8px" }}>
-          <p style={{ margin: "0", fontWeight: isActive ? "600" : "400" }}>
-            {name}
-            {hasChanges && (
-              <span style={{ 
-                marginLeft: "6px", 
-                fontSize: "0.75rem", 
-                color: isActive ? "rgba(255, 255, 255, 0.8)" : "#f59e0b",
-                fontWeight: "500"
-              }}>
-                •
-              </span>
-            )}
-          </p>
-          {hasChanges && (
-            <p style={{ 
-              margin: "2px 0 0 0", 
-              fontSize: "0.7rem", 
-              color: isActive ? "rgba(255, 255, 255, 0.7)" : "#6b7280" 
-            }}>
-              Unsaved changes
-            </p>
-          )}
-        </div>
-        
-        {(isHovered || isActive) && (
-          <button
-            onClick={handleDeleteClick}
-            style={deleteButtonStyle}
-            title="Delete template"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isActive ? "rgba(255, 255, 255, 0.3)" : "rgba(239, 68, 68, 0.2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isActive ? "rgba(255, 255, 255, 0.2)" : "rgba(239, 68, 68, 0.1)";
-            }}
-          >
-            ×
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export { ScreenTile, ScreensListPanels };
+export {  ScreensListPanels };

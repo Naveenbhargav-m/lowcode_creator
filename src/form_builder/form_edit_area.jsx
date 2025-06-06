@@ -352,6 +352,7 @@ function FormBuilderPage() {
   );
 }
 
+
 // FormsList Component - Updated to match TablesList pattern
 function FormsList({ forms, activeForm, onFormSelect, onCreateForm, onDeleteForm, hasUnsavedChanges }) {
   const [isCreating, setIsCreating] = useState(false);
@@ -364,6 +365,9 @@ function FormsList({ forms, activeForm, onFormSelect, onCreateForm, onDeleteForm
       setIsCreating(false);
     }
   };
+
+  // Convert forms object to array
+  const formsArray = Object.values(forms || {});
 
   return (
     <div>
@@ -407,7 +411,7 @@ function FormsList({ forms, activeForm, onFormSelect, onCreateForm, onDeleteForm
       )}
 
       <div className="space-y-1 max-h-64 overflow-y-auto">
-        {forms.map(form => (
+        {formsArray.map(form => (
           <div 
             key={form.id}
             className={`flex items-center justify-between p-2.5 rounded-md cursor-pointer transition-colors ${
@@ -439,7 +443,7 @@ function FormsList({ forms, activeForm, onFormSelect, onCreateForm, onDeleteForm
         ))}
       </div>
 
-      {forms.length === 0 && (
+      {formsArray.length === 0 && (
         <div className="text-center text-gray-500 py-8">
           <FileText size={24} className="mx-auto mb-2 opacity-50" />
           <p className="text-sm">No forms yet</p>
@@ -449,6 +453,7 @@ function FormsList({ forms, activeForm, onFormSelect, onCreateForm, onDeleteForm
     </div>
   );
 }
+
 
 
 export { FormBuilderPage };
