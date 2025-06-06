@@ -71,7 +71,7 @@ function GetActiveElementConifg(id) {
         };
         if(activeView === "smartphone") {
             config["style"] = formdata["mobile_style"];
-        } else if(activeView === "smartphone") {
+        } else if(activeView === "desktop") {
             config["style"] = formdata["desktop_style"];
         }
         let schema = FormButtonSchema;
@@ -105,6 +105,7 @@ function HandleDataChange(data) {
         existing["submit_actions"] = newdata;
         forms[curformid] = {...existing};
         MarkFormAsChanged(currentForm.value);
+        return;
     }
     let fields = currentFormConfig.value["fields"] || [];
     let currfield = GetFormField(fields, activeID);
@@ -113,7 +114,16 @@ function HandleDataChange(data) {
     let curconfig = currentFormConfig.value;
     curconfig["fields"] = newarr;
     currentFormConfig.value = {...curconfig};
+    let curform = forms[currentForm.value];
+    let activeView = formBuilderView.value;
+    if(activeView === "smartphone") {
+        curform["mobile_children"] = currentFormConfig.value;
+    } else if(activeView === "desktop") {
+        curform["desktop_children"] = currentFormConfig.value;
+    }
+    forms[currentForm.value] = curform;
     MarkFormAsChanged(currentForm.value);
+    return;
 }
 
 

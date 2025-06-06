@@ -1,47 +1,99 @@
 import { useState } from "preact/hooks";
 import { activeScreen, apiError, DeleteScreen, HasUnsavedChanges, isLoading, SetCurrentScreen } from "./screen_state";
+import { Monitor, Plus, Trash2 } from "lucide-react";
 
-function ScreensListPanels({ elementsList }) {
-  const [deletingId, setDeletingId] = useState(null);
+
+function ScreensListPanels({ screens, activeScreen, onScreenSelect, onCreateScreen, onDeleteScreen, hasUnsavedChanges }) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+
+  const handleCreate = () => {
+    if (newName.trim()) {
+      onCreateScreen(newName);
+      setNewName('');
+      setIsCreating(false);
+    }
+  };
 
   return (
-    <div class="scrollable-div pt-4">
-      {isLoading.value && (
-        <div class="flex items-center justify-center p-4">
-          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-          <span class="ml-2 text-sm text-gray-600">Loading...</span>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Screens</h2>
+        <button 
+          onClick={() => setIsCreating(true)}
+          className="bg-indigo-600 text-white p-1.5 rounded hover:bg-indigo-700 transition-colors"
+        >
+          <Plus size={18} />
+        </button>
+      </div>
+
+      {isCreating && (
+        <div className="mb-4 space-y-2">
+          <input
+            type="text"
+            value={newName}
+            // @ts-ignore
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Screen name"
+            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            autoFocus
+            onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
+          />
+          <div className="flex gap-2">
+            <button 
+              onClick={handleCreate} 
+              className="flex-1 bg-indigo-600 text-white py-1.5 rounded text-sm hover:bg-indigo-700 transition-colors"
+            >
+              Create
+            </button>
+            <button 
+              onClick={() => setIsCreating(false)} 
+              className="flex-1 bg-gray-200 text-gray-700 py-1.5 rounded text-sm hover:bg-gray-300 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
-      
-      {apiError.value && (
-        <div class="mx-4 mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p class="text-sm text-red-600">{apiError.value}</p>
-        </div>
-      )}
-      
-      {elementsList.map((item) => (
-        <ScreenTile 
-          key={item.id}
-          name={item.name} 
-          id={item.id}
-          isDeleting={deletingId === item.id}
-          onDelete={async (id) => {
-            setDeletingId(id);
-            try {
-              await DeleteScreen(id);
-            } catch (error) {
-              console.error("Failed to delete template:", error);
-            } finally {
-              setDeletingId(null);
-            }
-          }}
-        />
-      ))}
-      
-      {elementsList.length === 0 && !isLoading.value && (
-        <div class="text-center text-gray-500 p-8">
-          <p>No templates found</p>
-          <p class="text-sm mt-2">Create your first template to get started</p>
+
+      <div className="space-y-1 max-h-64 overflow-y-auto">
+        {screens.map(screen => (
+          <div 
+            key={screen.id}
+            className={`flex items-center justify-between p-2.5 rounded-md cursor-pointer transition-colors ${
+              activeScreen === screen.id 
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' 
+                : 'hover:bg-gray-100'
+            }`}
+            onClick={() => onScreenSelect(screen.id)}
+          >
+            <div className="flex items-center">
+              <Monitor size={16} className="mr-2 flex-shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{screen.name}</span>
+                {hasUnsavedChanges(screen.id) && (
+                  <span className="text-xs text-amber-600">Unsaved changes</span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteScreen(screen.id);
+              }}
+              className="text-gray-400 hover:text-red-500 transition-colors p-1"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {screens.length === 0 && (
+        <div className="text-center text-gray-500 py-8">
+          <Monitor size={24} className="mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No templates found</p>
+          <p className="text-xs mt-1">Create your first template to get started</p>
         </div>
       )}
     </div>

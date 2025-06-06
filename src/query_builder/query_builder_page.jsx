@@ -11,7 +11,12 @@ import {
   apiError,
   activeQuery,
   HasUnsavedChanges,
-  queryNamesList
+  queryNamesList,
+  CreateQuery,
+  DeleteQuery,
+  DuplicateQuery,
+  SetActiveQuery,
+  queries
 } from "./query_signal";
 import { globalStyle } from "../styles/globalStyle";
 import { useAuthCheck } from "../hooks/hooks";
@@ -71,7 +76,12 @@ function QueryBuilderPage() {
                 zIndex: 10,
                 overflow: "hidden"
             }}>
-                <QueriesList />
+                <QueriesList
+                queries={queries}
+                activeQuery={activeQuery.value}
+                hasUnsavedChanges={HasUnsavedChanges}
+                onQuerySelect={SetActiveQuery}
+                 onCreateQuery={CreateQuery} onDeleteQuery={DeleteQuery} onDuplicateQuery={DuplicateQuery} />
             </div>
 
             {/* Right Panel - Contains sync controls and main content */}
