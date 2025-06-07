@@ -16,6 +16,7 @@ import {
   apiError,
   activeTamplate,
   HasUnsavedChanges,
+  templates,
 } from "./templates_state";
 import { ModernSyncControls } from "../screen_builder/screen_components";
 
@@ -74,7 +75,8 @@ function TemplatePage() {
           </div>
           
           {templatesPagesSignal.value === "templates" ? (
-            <TemplatesListPanel elementsList={templateNamesList.value} />
+            <TemplatesListPanel 
+            templatesObject={templates}/>
           ) : (
             <ScreenLeftPanel 
               config={{ 
