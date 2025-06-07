@@ -90,8 +90,6 @@ const mockFields = {
   ]
 };
 
-const getBlocks = (type) => mockData[type] || [];
-const getFields = (blockId) => mockFields[blockId] || [];
 
 const UniversalPicker = ({
   isOpen,
