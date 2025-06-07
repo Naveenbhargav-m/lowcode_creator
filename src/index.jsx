@@ -18,6 +18,7 @@ import TemplateRegistrationPage from "./external_templates/external_templates";
 import { TemplatePage } from "./template_builder/templates_page";
 import { VariablesPage } from "./global_state_screen/global_state_page";
 import { ThemeEditor } from "./themes_screen/themes_screen";
+import PickerDemo from "./tests/data_picker_demo";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -68,6 +69,7 @@ export function App() {
             <Route path="/" component={AppCreatorPage} />
             <Route path="/queries" component={QueryBuilderPage} />
             <Route default component={() => <div>Not Found</div>} />
+            <Route path="/test" component={PickerDemo} />
           </Router>
         </main>
       </div>
