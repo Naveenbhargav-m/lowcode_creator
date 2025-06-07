@@ -82,7 +82,6 @@ export function getBlockWithInputs(type, id) {
             default:
                 inputFields = [];
         }
-
         return {
             id: blockInfo.id,
             name: blockInfo.name,
@@ -181,6 +180,7 @@ function getWorkflowInputs(workflowId) {
         // Fallback to global_workflows
         const workflow = global_workflows[workflowId];
         if (workflow && workflow.inputs) {
+            debugger;
             return workflow.inputs.map(input => ({
                 id: input,
                 name: input,

@@ -1,62 +1,24 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { fieldsMap, global_workflows } from "../states/global_repo";
+import { getBlockNames, getBlockWithInputs } from "../states/helpers";
 import { FormButtonSchema, formFieldSchema } from "./configs/form_options";
 import { currentForm, currentFormConfig, formActiveElement, formBuilderView, forms, MarkFormAsChanged } from "./form_builder_state";
 import { GetFormField, UpdateFormField } from "./utilities";
 
 function get_workflow_fields(formValues, fieldconfig, context) {
 
-    let screenelement = currentFormConfig.value["fields"] || [];
-    let inputs = [];
-    // if(screenelement.length === 0) {
-    //     for(var i=0;i<5;i++) {
-    //         var temp = {
-    //             "label": `inputs ${i}`,
-    //             "id": `inputs ${i}`,
-    //             "value": `inputs ${i}`
-    //         };
-    //         inputs.push(temp);
-    //     }
-    // } else {
-    //     inputs = [...screenelement];
-    // }
-
-    // let queryid = formValues?.submit_actions?.worflow_id ?? "";
-
-    // let queryFields = fieldsMap?.workflows?.[queryid] || [];
-    let queryFields = [];
-    for(var i=0;i<5;i++) {
-        var temp = {
-            "label": `inputs ${i}`,
-            "id": `inputs ${i}`,
-            "value": `inputs ${i}`
-        };
-        var queryObj = {
-            "label": `query ${i}`,
-            "id": `query ${i}`,
-            "value": `query ${i}`
-        };
-        inputs.push(temp);
-        queryFields.push(queryObj);
-    }
-    console.log("get query field map is called:", queryFields, inputs);
-
+    let workflowID = formValues?.submit_actions?.worflow_id ?? "";
+    let fields = getBlockWithInputs("workflows", workflowID);
+    let inputs2 = fields["inputs"] || [];
     return {
-        "inputs": inputs,
-        "workflow_fields": queryFields
+        "inputs": inputs2,
+        "workflow_fields": inputs2
     };
 }
 
 function get_workflow_names( formValues, fieldconfig, context) {
-    let queries = Object.keys(global_workflows);
-    let query_options = [];
-    for(var i=0;i<queries.length;i++) {
-        let name = global_workflows[queries[i]]["name"] || queries[i];
-        let obj = {"value": queries[i], "label": name};
-        query_options.push(obj);
-    }
-    console.log("get workflows names called:",query_options);
-    return query_options;
+    let blocknames = getBlockNames("workflows");
+    return blocknames;
 }
 
 function GetActiveElementConifg(id) {
