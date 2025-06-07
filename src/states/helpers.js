@@ -46,7 +46,7 @@ export function getBlockNames(type) {
  * @param {string} id - ID of the specific block
  * @returns {Object} Object with block info and input fields
  */
-export function getBlockWithInputs(type, id) {
+export function getBlockWithInputs(type, id, device = "mobile_children") {
     try {
         if (!data_map_v2 || !data_map_v2[type] || !data_map_v2[type].map[id]) {
             console.warn(`Block '${id}' of type '${type}' not found`);
@@ -65,7 +65,7 @@ export function getBlockWithInputs(type, id) {
                 inputFields = getWorkflowInputs(id);
                 break;
             case 'forms':
-                inputFields = getFormFields(id);
+                inputFields = getFormFields(id, device);
                 break;
             case 'tables':
                 inputFields = getTableFields(id);
@@ -196,16 +196,18 @@ function getWorkflowInputs(workflowId) {
     }
 }
 
-function getFormFields(formId) {
+function getFormFields(formId, device = "mobile_children") {
     try {
         if (fieldsMap.forms && fieldsMap.forms[formId]) {
-            return fieldsMap.forms[formId];
+            let allformfields = fieldsMap.forms[formId];
+            let fields = allformfields[device] || [];
+            return fields;
         }
         
         // Fallback to global_forms
         const form = global_forms[formId];
-        if (form && form.mobile_children) {
-            return form.mobile_children.map(field => ({
+        if (form && form[device]) {
+            return form[device].map(field => ({
                 id: field.id || field.name || field,
                 name: field.name || field,
                 value: field.id || field.name || field,
