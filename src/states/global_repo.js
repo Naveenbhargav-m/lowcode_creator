@@ -1,5 +1,6 @@
 import { APIManager } from "../api/api_manager";
 import { GetDataFromAPi } from "../api/api_syncer";
+import { currentForm } from "../form_builder/form_builder_state";
 import { queries } from "../query_builder/query_signal";
 import { LoadTables } from "../table_builder/table_builder_state";
 import { ApiClient, AppID, PrestDBaseUrl } from "./global_state";
@@ -368,28 +369,32 @@ function CreateDataMapV2() {
         let mykeys = Object.keys(global_forms || {});
         console.log("global forms:", global_forms);
         let formsmap = {};
+        let formslist = [];
         for(var i = 0; i < mykeys.length; i++) {
             let key = mykeys[i];
             let form = global_forms[key];
-            let name = safeGet(form, "name", `Form ${i + 1}`);
-            
-            var obj = {"id": key, "name": name};
-            tempmap["forms"].push(obj);
-            let fields = form["mobile_children"];
-            // let desktopfields = form["desktop_children"];
-            // formsmap[key] = {"mobile_children": fields, "desktop_children": desktopfields};
-            // formsmap[key] = [...fields];
-            // // Enhanced version
-            // enhanced_data_map.forms.list.push(obj);
-            // enhanced_data_map.forms.map[key] = {
-            //     ...obj,
-            //     raw_data: form
-            // };
-            // enhanced_data_map["forms"] = [...fields];
+            let name = form["name"] || "";
+            var obj2 = {"id": key, "name": name, "value": key, "label": name};
+            tempmap["forms"].push(obj2);
+            let fields = form["mobile_children"] || [];
+            for(var j=0;j<fields.length;j++) {
+                let curfield = fields[j];
+                let extra = {"label": curfield["label"], "value": curfield["id"]};
+                fields[j] = {...extra, ...fields[j]};
+            }
+            let desktopChildren = form["desktop_children"] || [];
+            for(var k=0;i<desktopChildren.length;k++) {
+                let curfield = desktopChildren[k];
+                let extra = {"label": curfield["label"], "value": curfield["id"]};
+                desktopChildren[k] = {...extra, ...desktopChildren[k]};
+            }
+            formsmap[key] = {"mobile_children": fields, "desktop_children": desktopChildren};
+            formslist.push(obj);
+            enhanced_data_map.forms.map[key] = {...obj2, ...currentForm};
         }
         fieldsMap["forms"] = formsmap;
-        // enhanced_data_map.forms.count = mykeys.length;
-        enhanced_data_map["forms"] = [{"id": "name", "name": "naveeb", "label": "test"}];
+        enhanced_data_map.forms.count = mykeys.length;
+        enhanced_data_map.forms.list = [...formslist];
     } catch (error) {
         console.error("Error processing forms:", error);
     }

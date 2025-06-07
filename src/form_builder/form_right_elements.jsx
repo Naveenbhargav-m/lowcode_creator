@@ -8,10 +8,19 @@ import { GetFormField, UpdateFormField } from "./utilities";
 function get_workflow_fields(formValues, fieldconfig, context) {
 
     let workflowID = formValues?.submit_actions?.worflow_id ?? "";
+    let formID = currentForm.value;
     let fields = getBlockWithInputs("workflows", workflowID);
     let inputs2 = fields["inputs"] || [];
+    let view = formBuilderView.value;
+    let device = "mobile_children";
+    if (view === "desktop") {
+        device = "desktop_children"
+    }
+    let formfields = getBlockWithInputs("forms", formID, device);
+    let formfieldsinner = formfields.inputs || {};
+    let innerobj = formfieldsinner["fields"] || [];
     return {
-        "inputs": inputs2,
+        "inputs": innerobj,
         "workflow_fields": inputs2
     };
 }
