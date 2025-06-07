@@ -74,7 +74,7 @@ function ScreensListPanels({ screens, activeScreen, onScreenSelect, onCreateScre
             <div className="flex items-center">
               <Monitor size={16} className="mr-2 flex-shrink-0" />
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{screen.name}</span>
+                <span className="text-sm font-medium">{screen.screen_name}</span>
                 {hasUnsavedChanges(screen.id) && (
                   <span className="text-xs text-amber-600">Unsaved changes</span>
                 )}

@@ -330,8 +330,9 @@ async function SyncAllUnsavedScreens() {
 /**
  * Set active screen elements based on current screen and design view
  */
-function SetCurrentScreen() {
-  const screenId = activeScreen.peek();
+function SetCurrentScreen(id) {
+  const screenId = id
+  activeScreen.value = screenId;
   const curScreen = screens[screenId];
   const designView = screenViewKey.peek();
   

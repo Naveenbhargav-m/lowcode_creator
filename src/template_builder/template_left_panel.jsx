@@ -172,3 +172,5 @@ function TemplatesListPanel({ templatesObject }) {
     </div>
   );
 }
+
+export {TemplatesListPanel};
