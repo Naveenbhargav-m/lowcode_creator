@@ -20,14 +20,15 @@ const insert_row_fields = {
       "label": "Fields Mapping",
       "description": "columns mapping",
       "path": "input_mapping.fields",
-      "dynamicConfigs": [
+      enableStaticValues: true,
+      enableSourceFields: true,
+      enableUserFields: false,
+      "target_fields": [],
+      "source_fields": [],
+      "dynamicConfig": [
         {
             "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
-            "callback": "get_table_fields",
-            "assignTo": [
-              {"key": "source_fields", "transform": (data) => data.inputs},
-              {"key": "target_fields", "transform": (data) => data.table_fields},
-            ],
+            "callback": "get_tables_fields",
         },
       ],
     }

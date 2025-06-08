@@ -381,6 +381,7 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
   const [autoMap, setAutoMap] = useState(false);
 
   const config = useMemo(() => {
+    console.log("called config use memo:", field);
     return {
       target_fields: field.target_fields || [],
       source_fields: field.source_fields || [],

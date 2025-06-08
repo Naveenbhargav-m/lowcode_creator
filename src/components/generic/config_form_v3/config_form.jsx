@@ -178,7 +178,6 @@ const applyDynamicConfig = (field, formValues, context = {}) => {
   // Process each dynamic configuration rule
   for (const config of field.dynamicConfig) {
     if (evaluateCondition(config.condition, formValues)) {
-      
       // Handle callback-based changes
       if (config.callback) {
         try {
