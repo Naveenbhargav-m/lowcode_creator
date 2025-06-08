@@ -121,7 +121,7 @@ async function CreateNewForm(formData) {
     const newFormData = {
       configs: {
         ...DEFAULT_FORM_STRUCTURE,
-        form_name: formData.name,
+        form_name: formData,
         order: Object.keys(forms).length + 1
       }
     };
@@ -143,7 +143,7 @@ async function CreateNewForm(formData) {
       const existingList = formLeftNamesList.peek();
       formLeftNamesList.value = [
         ...existingList,
-        { name: formData.name, id: response.id, order: newForm.order }
+        { name: formData, id: response.id, order: newForm.order }
       ];
       
       // Set as active form

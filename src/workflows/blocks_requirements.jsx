@@ -13,13 +13,30 @@ const insert_row_fields = {
       "label": "schema",
       "description": "table schema",
       "path": "input_mapping.schema"
+    },
+    {
+      "id": "input_mapping.fields",
+      "type": "data_mapper",
+      "label": "Fields Mapping",
+      "description": "columns mapping",
+      "path": "input_mapping.fields",
+      "dynamicConfigs": [
+        {
+            "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
+            "callback": "get_table_fields",
+            "assignTo": [
+              {"key": "source_fields", "transform": (data) => data.inputs},
+              {"key": "target_fields", "transform": (data) => data.table_fields},
+            ],
+        },
+      ],
     }
   ],
   "sections": [
     {
       "id": "insert_config",
       "title": "insert_config",
-      "fieldIds": ["input_mapping.table", "input_mapping.schema"]
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
     },
   ],
   "tabs": [
