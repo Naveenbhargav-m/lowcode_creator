@@ -1,8 +1,49 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
+import { getBlockNames, getBlockWithInputs } from "../states/helpers";
 import { formFocusKey } from "./flow_builder";
 import { GetWorkflowFormConfig } from "./workflow_helpers";
 import { activeWorkFlow, activeworkFlowBlock, MarkWorkflowAsChanged } from "./workflow_state";
 
+
+function GetTablesList(formvalues, fieldConfig, context) {
+    let tables = getBlockNames("tables");
+    return tables;
+}
+
+function GetCurrentWorkflowInputs(formvalues, fieldConfig, context) {
+    let curflow = activeWorkFlow.value;
+    let inputs = curflow["inputs"];
+    return inputs;
+}
+function GetTableFields(formvalues, fieldConfig, context) {
+    let table = formvalues["inputs.table"] || "";
+    let fields = getBlockWithInputs("tables", table);
+    let inputs = GetCurrentWorkflowInputs(formvalues, fieldConfig, context);
+    return {
+        "inputs": inputs,
+        "table_fields": fields
+    };
+}
+
+function GetQueries() {
+    let queries = getBlockNames("queries");
+    return queries;
+}
+
+function GetQueryInputs(queryid) {
+    let queryfields = getBlockWithInputs("queries", queryid);
+    return queryfields;
+}
+
+function GetForms() {
+    let forms = getBlockNames("forms");
+    return forms;
+}
+
+function GetFormFields(formId, device) {
+    let formFields = getBlockWithInputs("forms", formId,device);
+    return formFields;
+}
 
 
 // This approach prevents the keydown event from reaching ReactFlow entirely
@@ -71,6 +112,11 @@ export function WorkflowConfigFormPanel() {
                 key={`config-form-${blockType}-${blockId}`} // Add unique key here
                 schema={formRequirements} 
                 initialValues={{...blockData}} 
+                context={{
+                    "callbacks": {
+                        "get_tables_fields": GetTableFields,
+                    },
+                }}
                 onChange={(data) => {SetBlockData(data)}}
                 onSubmit={(data) => {SetBlockData(data)}}
             />

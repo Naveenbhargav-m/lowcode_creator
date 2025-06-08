@@ -424,7 +424,7 @@ function FormsList({ forms, activeForm, onFormSelect, onCreateForm, onDeleteForm
             <div className="flex items-center">
               <FileText size={16} className="mr-2 flex-shrink-0" />
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{form.form_name}</span>
+                <span className="text-sm font-medium">{form.form_name || form.name}</span>
                 {hasUnsavedChanges(form.id) && (
                   <span className="text-xs text-amber-600">• Unsaved</span>
                 )}

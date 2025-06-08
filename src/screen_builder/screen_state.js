@@ -144,15 +144,15 @@ async function LoadScreens() {
 /**
  * Create a new screen via API
  */
-async function CreatenewScreen(formData) {
+async function CreatenewScreen(screen_name) {
   try {
     isLoading.value = true;
     apiError.value = null;
     
     const screenData = {
-      screen_name: formData.name,
+      screen_name: screen_name,
       configs: {
-        screen_name: formData.name,
+        screen_name: screen_name,
         order: Object.keys(screens).length + 1,
         mobile_style: { ...DEFAULT_SCREEN_STYLE },
         desktop_style: { ...DEFAULT_SCREEN_STYLE },
@@ -170,7 +170,7 @@ async function CreatenewScreen(formData) {
       const newScreen = {
         ...screenData.configs,
         id: response.id,
-        screen_name: formData.name
+        screen_name: screen_name
       };
       
       screens[response.id] = newScreen;
@@ -179,7 +179,7 @@ async function CreatenewScreen(formData) {
       const existingList = screenNamesList.peek();
       screenNamesList.value = [
         ...existingList,
-        { name: formData.name, id: response.id, order: newScreen.order }
+        { name: screen_name, id: response.id, order: newScreen.order }
       ];
       
       // Set as active screen
