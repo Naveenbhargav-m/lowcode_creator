@@ -570,5 +570,6 @@ export {
     HandleWorkFlowBlockDrop,
     UpdateActiveWorkflowEdges,
     MarkWorkflowAsChanged,
-    HasUnsavedChanges
+    HasUnsavedChanges,
+    UpdateWorkflowsWithLatest,
 };

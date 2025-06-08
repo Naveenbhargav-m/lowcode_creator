@@ -2,7 +2,7 @@ import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
 import { getBlockNames, getBlockWithInputs } from "../states/helpers";
 import { formFocusKey } from "./flow_builder";
 import { GetWorkflowFormConfig } from "./workflow_helpers";
-import { activeWorkFlow, activeworkFlowBlock, MarkWorkflowAsChanged } from "./workflow_state";
+import { activeWorkFlow, activeworkFlowBlock, MarkWorkflowAsChanged, UpdateWorkflowsWithLatest, workflows } from "./workflow_state";
 
 
 function GetTablesList(formvalues, fieldConfig, context) {
@@ -16,12 +16,29 @@ function GetCurrentWorkflowInputs(formvalues, fieldConfig, context) {
     return inputs;
 }
 function GetTableFields(formvalues, fieldConfig, context) {
-    let table = formvalues["inputs.table"] || "";
+    let table = formvalues["input_mapping"]["table"] || "";
     let fields = getBlockWithInputs("tables", table);
+    let table_fields = fields.inputs;
+    for(var i=0;i<table_fields.length;i++) {
+        let new1 = {...table_fields[i]};
+        new1["label"] = new1["name"];
+        new1["value"] = new1["id"];
+        table_fields[i] = new1;
+    }
     let inputs = GetCurrentWorkflowInputs(formvalues, fieldConfig, context);
+    let inputobjs = [];
+    for(var j=0;j<inputs.length;j++) {
+        let obj = {
+            "name": inputs[j],
+            "id": inputs[j],
+            "value": inputs[j],
+            "label": inputs[j]
+        };
+        inputobjs.push(obj);
+    }
     return {
-        "inputs": inputs,
-        "table_fields": fields
+        "source_fields": inputobjs,
+        "target_fields": table_fields
     };
 }
 
@@ -64,11 +81,9 @@ const handleFormKeyDown = (e) => {
 
 function SetBlockData(newdata) {
     let workflowData = activeWorkFlow.value["flow_data"];
-    debugger;
     let activeBlockID = activeworkFlowBlock.value["id"] || "";
     let currentBlockData = workflowData[activeBlockID] || {};
     let blocktype = activeworkFlowBlock.value["type"] || "";
-
     let updatedData = {...currentBlockData, ...newdata};
     currentBlockData = updatedData;
     workflowData[activeBlockID] = currentBlockData;
@@ -82,6 +97,7 @@ function SetBlockData(newdata) {
     copy["_change_type"] = "update";
     activeWorkFlow.value = {...copy};
     MarkWorkflowAsChanged(activeWorkFlow.value["id"]);
+    UpdateWorkflowsWithLatest(activeWorkFlow.value);
 }   
 
 export function WorkflowConfigFormPanel() {
@@ -100,8 +116,6 @@ export function WorkflowConfigFormPanel() {
     let blockData = data["data"];
     let formRequirements = data["form_requirements"];
     console.log("data for connfig:",data, formRequirements, blockData);
-
-
     return (
             <div 
                 onFocus={(e) => {formFocusKey.value = true; e.stopPropagation();}}
