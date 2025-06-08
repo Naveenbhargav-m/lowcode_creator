@@ -216,7 +216,9 @@ const ValueInput = ({ mapping, onUpdate, config }) => {
         >
           <option value="">Select source field...</option>
           {source_fields.map(field => (
-            <option key={field.value} value={field.value}>{field.label}</option>
+            <option key={field.id || field.value} value={field.id || field.value}>
+              {field.label || field.name}
+            </option>
           ))}
         </select>
       </div>
@@ -235,7 +237,9 @@ const ValueInput = ({ mapping, onUpdate, config }) => {
         >
           <option value="">Select user field...</option>
           {userFields.map(field => (
-            <option key={field.value} value={field.value}>{field.label}</option>
+            <option key={field.id || field.value} value={field.id || field.value}>
+              {field.label || field.name}
+            </option>
           ))}
         </select>
       </div>
@@ -268,24 +272,30 @@ const ToggleSwitch = ({ enabled, onChange, label }) => (
 const MappingRow = ({ mapping, config, onUpdate, onRemove, onToggleExpand, isExpanded }) => {
   const { target_fields = [], source_fields = [], userFields = [] } = config;
   
+  // Fixed validation logic - properly check for field selection
   const isValid = mapping.targetField && 
-    ((mapping.type === 'static' && mapping.value) || 
+    ((mapping.type === 'static' && mapping.value && mapping.value.trim()) || 
      (mapping.type === 'source' && mapping.sourceField) || 
      (mapping.type === 'user' && mapping.userField));
 
-  const targetField = target_fields.find(f => f.value === mapping.targetField);
+  // Fixed field lookup using id instead of value
+  const targetField = target_fields.find(f => (f.id || f.value) === mapping.targetField);
   
   const getPreview = () => {
     if (!mapping.targetField) return 'No target selected';
     switch (mapping.type) {
-      case 'static': return mapping.value ? `"${mapping.value}"` : 'No value';
+      case 'static': 
+        return mapping.value && mapping.value.trim() ? `"${mapping.value}"` : 'No value';
       case 'source': 
-        const sourceField = source_fields.find(f => f.value === mapping.sourceField);
-        return sourceField ? sourceField.label : 'No source selected';
+        // Fixed field lookup using id
+        const sourceField = source_fields.find(f => (f.id || f.value) === mapping.sourceField);
+        return sourceField ? (sourceField.label || sourceField.name) : 'No source selected';
       case 'user':
-        const userField = userFields.find(f => f.value === mapping.userField);
-        return userField ? userField.label : 'No user field selected';
-      default: return 'Not configured';
+        // Fixed field lookup using id
+        const userField = userFields.find(f => (f.id || f.value) === mapping.userField);
+        return userField ? (userField.label || userField.name) : 'No user field selected';
+      default: 
+        return 'Not configured';
     }
   };
 
@@ -304,7 +314,7 @@ const MappingRow = ({ mapping, config, onUpdate, onRemove, onToggleExpand, isExp
             {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-gray-900 truncate">
-                {targetField?.label || 'Select target field'}
+                {targetField ? (targetField.label || targetField.name) : 'Select target field'}
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <ArrowRight className="w-3 h-3" />
@@ -329,18 +339,20 @@ const MappingRow = ({ mapping, config, onUpdate, onRemove, onToggleExpand, isExp
       {/* Expanded View */}
       {isExpanded && (
         <div className="px-4 pb-4 bg-white border-t border-gray-100 space-y-3">
-          {/* Target Field */}
+          {/* Target Field - Fixed to use id for value, label/name for display */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Target Field</label>
             <select
-              value={mapping.targetField}
+              value={mapping.targetField || ''}
               // @ts-ignore
               onChange={(e) => onUpdate(mapping.id, { targetField: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
             >
               <option value="">Select target field...</option>
               {target_fields.map(field => (
-                <option key={field.value} value={field.value}>{field.label}</option>
+                <option key={field.id || field.value} value={field.id || field.value}>
+                  {field.label || field.name}
+                </option>
               ))}
             </select>
           </div>
@@ -354,7 +366,13 @@ const MappingRow = ({ mapping, config, onUpdate, onRemove, onToggleExpand, isExp
                   key={type.id}
                   type={type}
                   isSelected={mapping.type === type.id}
-                  onClick={(typeId) => onUpdate(mapping.id, { type: typeId })}
+                  onClick={(typeId) => onUpdate(mapping.id, { 
+                    type: typeId,
+                    // Clear other type values when switching types
+                    ...(typeId === 'static' ? { sourceField: '', userField: '' } : 
+                        typeId === 'source' ? { value: '', userField: '' } : 
+                        { value: '', sourceField: '' })
+                  })}
                   enabled={type.enabled}
                 />
               ))}
@@ -422,14 +440,23 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
     }
   }, [stableValue]);
 
-
+  // Fixed mappedCount calculation with better validation
   const mappedCount = useMemo(() => {
     console.log("called mapping count filtering mapping", mappings);
-    return mappings.filter(m => m.targetField && 
-      ((m.type === 'static' && m.value) || 
-       (m.type === 'source' && m.sourceField) || 
-       (m.type === 'user' && m.userField))
-    ).length;
+    return mappings.filter(m => {
+      if (!m.targetField) return false;
+      
+      switch (m.type) {
+        case 'static':
+          return m.value && m.value.trim();
+        case 'source':
+          return m.sourceField;
+        case 'user':
+          return m.userField;
+        default:
+          return false;
+      }
+    }).length;
   }, [mappings]);
 
   const hasUnsavedChanges = useMemo(() => {
@@ -441,7 +468,9 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
       id: Date.now().toString(),
       targetField: '',
       type: 'static',
-      "value": '', sourceField: '', userField: ''
+      value: '', 
+      sourceField: '', 
+      userField: ''
     };
     console.log("adding mapping", newMapping);
     setMappings(prev => [...prev, newMapping]);
@@ -474,17 +503,21 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
     setIsOpen(false);
   }, [mappings, onChange, field, stableValue]);
 
+  // Fixed filteredMappings to use proper field lookups
   const filteredMappings = useMemo(() => {
     if (!searchQuery) return mappings;
     const query = searchQuery.toLowerCase();
     return mappings.filter(mapping => {
-      const targetField = config.target_fields.find(f => f.value === mapping.targetField);
-      return targetField?.label?.toLowerCase().includes(query) ||
-             mapping.value?.toLowerCase().includes(query) ||
-             mapping.sourceField?.toLowerCase().includes(query) ||
-             mapping.userField?.toLowerCase().includes(query);
+      const targetField = config.target_fields.find(f => (f.id || f.value) === mapping.targetField);
+      const sourceField = config.source_fields.find(f => (f.id || f.value) === mapping.sourceField);
+      const userField = config.userFields.find(f => (f.id || f.value) === mapping.userField);
+      
+      return (targetField?.label || targetField?.name || '')?.toLowerCase().includes(query) ||
+             (mapping.value || '')?.toLowerCase().includes(query) ||
+             (sourceField?.label || sourceField?.name || '')?.toLowerCase().includes(query) ||
+             (userField?.label || userField?.name || '')?.toLowerCase().includes(query);
     });
-  }, [mappings, searchQuery, config.target_fields]);
+  }, [mappings, searchQuery, config.target_fields, config.source_fields, config.userFields]);
 
   console.log("rendering the datamapperfield");
   
@@ -622,6 +655,7 @@ export const DataMapperField = React.memo(({ field, value = [], onChange }) => {
     prevProps.onChange === nextProps.onChange
   );
 });
+
 // Demo Component
 export default function DynamicMapperTest() {
   const [mappings, setMappings] = useState([]);
