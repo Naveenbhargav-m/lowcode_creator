@@ -68,24 +68,43 @@ const update_rows = {
     },
     {
       "id": "input_mapping.query_block",
-      "type": "text",
+      "type": "dropdown",
       "label": "query_block",
       "description": "query_block",
-      "path": "input_mapping.query_block"
+      "path": "input_mapping.query_block",
+      "options": [],
+      "dynamicConfig": [
+        {
+          "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
+          "callback": "get_query_names",
+          "assignTo": "optons"
+        }
+      ],
     },
     {
       "id": "input_mapping.fields",
-      "type": "mapping",
-      "label": "fields",
-      "description": "fields to add",
-      "path": "input_mapping.fields"
+      "type": "data_mapper",
+      "label": "Fields Mapping",
+      "description": "columns mapping",
+      "path": "input_mapping.fields",
+      enableStaticValues: true,
+      enableSourceFields: true,
+      enableUserFields: false,
+      "target_fields": [],
+      "source_fields": [],
+      "dynamicConfig": [
+        {
+            "condition": {"dependsOn": "input_mapping.query_block", "operator": "not_empty"},
+            "callback": "get_query_fields",
+        },
+      ],
     }
   ],
   "sections": [
     {
       "id": "update_configs",
       "title": "update_configs",
-      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.query_block", "input_mapping.fields"]
     },
   ],
   "tabs": [
@@ -117,24 +136,43 @@ const read_rows = {
     },
     {
       "id": "input_mapping.query_block",
-      "type": "text",
+      "type": "dropdown",
       "label": "query_block",
       "description": "query_block",
-      "path": "input_mapping.query_block"
+      "path": "input_mapping.query_block",
+      "options": [],
+      "dynamicConfig": [
+        {
+          "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
+          "callback": "get_query_names",
+          "assignTo": "optons"
+        }
+      ],
     },
     {
       "id": "input_mapping.fields",
-      "type": "mapping",
-      "label": "fields",
-      "description": "fields to add",
-      "path": "input_mapping.fields"
+      "type": "data_mapper",
+      "label": "Fields Mapping",
+      "description": "columns mapping",
+      "path": "input_mapping.fields",
+      enableStaticValues: true,
+      enableSourceFields: true,
+      enableUserFields: false,
+      "target_fields": [],
+      "source_fields": [],
+      "dynamicConfig": [
+        {
+            "condition": {"dependsOn": "input_mapping.query_block", "operator": "not_empty"},
+            "callback": "get_query_fields",
+        },
+      ],
     }
   ],
   "sections": [
     {
-      "id": "read_configs",
-      "title": "read_configs",
-      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+      "id": "update_configs",
+      "title": "update_configs",
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.query_block", "input_mapping.fields"]
     },
   ],
   "tabs": [
@@ -166,17 +204,43 @@ const delete_rows = {
     },
     {
       "id": "input_mapping.query_block",
-      "type": "text",
+      "type": "dropdown",
       "label": "query_block",
       "description": "query_block",
-      "path": "input_mapping.query_block"
+      "path": "input_mapping.query_block",
+      "options": [],
+      "dynamicConfig": [
+        {
+          "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
+          "callback": "get_query_names",
+          "assignTo": "optons"
+        }
+      ],
+    },
+    {
+      "id": "input_mapping.fields",
+      "type": "data_mapper",
+      "label": "Fields Mapping",
+      "description": "columns mapping",
+      "path": "input_mapping.fields",
+      enableStaticValues: true,
+      enableSourceFields: true,
+      enableUserFields: false,
+      "target_fields": [],
+      "source_fields": [],
+      "dynamicConfig": [
+        {
+            "condition": {"dependsOn": "input_mapping.query_block", "operator": "not_empty"},
+            "callback": "get_query_fields",
+        },
+      ],
     }
   ],
   "sections": [
     {
-      "id": "delete_config",
-      "title": "delete configs",
-      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.fields"]
+      "id": "update_configs",
+      "title": "update_configs",
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.query_block", "input_mapping.fields"]
     },
   ],
   "tabs": [

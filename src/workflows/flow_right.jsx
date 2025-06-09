@@ -42,7 +42,7 @@ function GetTableFields(formvalues, fieldConfig, context) {
     };
 }
 
-function GetQueries() {
+function GetQueries(formValues, fieldConfig, context) {
     let queries = getBlockNames("queries");
     return queries;
 }
@@ -129,6 +129,8 @@ export function WorkflowConfigFormPanel() {
                 context={{
                     "callbacks": {
                         "get_tables_fields": GetTableFields,
+                        "get_query_names": GetQueries,
+                        "get_query_fields":  GetQueryInputs
                     },
                 }}
                 onChange={(data) => {SetBlockData(data)}}
