@@ -47,9 +47,28 @@ function GetQueries(formValues, fieldConfig, context) {
     return queries;
 }
 
-function GetQueryInputs(queryid) {
+function GetQueryInputs(formValues, fieldConfig, context) {
+    let queryid = formValues["input_mapping"]["query_block"] || "";
     let queryfields = getBlockWithInputs("queries", queryid);
-    return queryfields;
+    let inputsarr = queryfields["inputs"] || [];
+    for(var i=0;i<inputsarr.length;i++) {
+        let cur = inputsarr[i];
+        cur["name"] = cur["label"];
+        inputsarr[i] = cur;
+    }
+    let table = formValues["input_mapping"]["table"] || "";
+    let fields = getBlockWithInputs("tables", table);
+    let table_fields = fields.inputs;
+    for(var i=0;i<table_fields.length;i++) {
+        let new1 = {...table_fields[i]};
+        new1["label"] = new1["name"];
+        new1["value"] = new1["id"];
+        table_fields[i] = new1;
+    }
+    return {
+        "source_fields": inputsarr,
+        "target_fields": table_fields
+    };
 }
 
 function GetForms() {

@@ -77,7 +77,7 @@ const update_rows = {
         {
           "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
           "callback": "get_query_names",
-          "assignTo": "optons"
+          "assignTo": "options"
         }
       ],
     },
@@ -213,7 +213,7 @@ const delete_rows = {
         {
           "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
           "callback": "get_query_names",
-          "assignTo": "optons"
+          "assignTo": "options"
         }
       ],
     },
