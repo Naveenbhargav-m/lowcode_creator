@@ -42,6 +42,32 @@ function GetTableFields(formvalues, fieldConfig, context) {
     };
 }
 
+function GetQuerySelectFields(formvalues, fieldConfig, context) {
+    let table = formvalues["input_mapping"]["table"] || "";
+    let fields = getBlockWithInputs("tables", table);
+    let table_fields = fields.inputs;
+    for(var i=0;i<table_fields.length;i++) {
+        let new1 = {...table_fields[i]};
+        new1["label"] = new1["name"];
+        new1["value"] = new1["id"];
+        table_fields[i] = new1;
+    }
+    let inputs = GetCurrentWorkflowInputs(formvalues, fieldConfig, context);
+    let inputobjs = [];
+    for(var j=0;j<inputs.length;j++) {
+        let obj = {
+            "name": inputs[j],
+            "id": inputs[j],
+            "value": inputs[j],
+            "label": inputs[j]
+        };
+        inputobjs.push(obj);
+    }
+    return {
+        "source_fields": inputobjs,
+        "target_fields": table_fields
+    };
+}
 function GetQueries(formValues, fieldConfig, context) {
     let queries = getBlockNames("queries");
     return queries;
@@ -149,7 +175,8 @@ export function WorkflowConfigFormPanel() {
                     "callbacks": {
                         "get_tables_fields": GetTableFields,
                         "get_query_names": GetQueries,
-                        "get_query_fields":  GetQueryInputs
+                        "get_query_fields":  GetQueryInputs,
+                        "get_update_fields": GetQuerySelectFields,
                     },
                 }}
                 onChange={(data) => {SetBlockData(data)}}
