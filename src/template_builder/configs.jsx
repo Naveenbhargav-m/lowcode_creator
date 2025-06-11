@@ -223,74 +223,53 @@ export const TemplateElementConfigFormSchema = {
   ],
 };
 
+export const generaElementsSchema = {
+  ...TemplateElementConfigFormSchema
+};
 
-/**
- * Groups object values according to a specified grouping schema
- * @param {Object} values - The object containing key-value pairs to be grouped
- * @param {Object} grouping - Schema defining which keys belong to which groups
- * @returns {Object} - A new object with values organized into groups
- */
-export function groupObjectValues(values, grouping) {
-    // Initialize result object
-    const result = {};
-    
-    // Process each group in the grouping schema
-    for (const groupName in grouping) {
-      // Initialize group in result object
-      result[groupName] = {};
-      
-      // Get the list of keys for this group
-      const groupKeys = grouping[groupName];
-      
-      // Add each key-value pair to the group if it exists in values
-      groupKeys.forEach(key => {
-        if (values.hasOwnProperty(key)) {
-          result[groupName][key] = values[key];
-        }
-      });
-    }
-    
-    return result;
+let  RootElementSchema = {
+  ...TemplateElementConfigFormSchema,
+
+};
+
+let extrafields = [
+  {
+    "id": "configs.data_source.data_query",
+    "type": "dropdown",
+    "path": "configs.data_source.data_query",
+    "options": [
+      {"label": "option1", "value": "option1"},
+      {"label": "option2","value": "option2"}
+    ],
+    "dynamicConfig": [
+      {
+        "condition": {"field": "test", "operator": "non_empty"},
+        "callback": "get_query_names",
+        "assignTo": "options"
+      }
+    ],
+    "label": "Pick a Query"
+  },
+  {
+    "id": "configs.data_source.field_mapping",
+    "type": "data_mapper",
+    "path": "configs.data_source.field_mapping",
+    "label": "Data Mapping",
+    enableStaticValues: true,
+    enableSourceFields: true,
+    enableUserFields: false,
+    "target_fields": [],
+    "source_fields": [],
+    "dynamicConfig": [
+      {
+        "condition": {"field": "configs.data_source.data_query", "operator": "not_empty"},
+        "callback": "get_query_field_map",
+        "assignTo": [
+          {"key": "source_fields", "transform": (data) => data.inputs},
+          {"key": "target_fields", "transform": (data) => data.query_fields},
+        ],
+      }
+    ],
   }
-/**
- * Flattens a grouped object back to a single level and extracts the grouping schema
- * @param {Object} groupedValues - The object with values organized into groups
- * @returns {Object} - An object containing the flattened values and the extracted grouping schema
- */
-export function ungroupObjectValues(groupedValues) {
-  // Initialize result objects
-  const flattenedValues = {};
-  const extractedGrouping = {};
-  
-  // Process each group in the grouped values
-  for (const groupName in groupedValues) {
-    // Get the group object
-    const groupObj = groupedValues[groupName];
-    
-    // Check if this is a leaf value (not an object or null/array)
-    if (groupObj === null || 
-        typeof groupObj !== 'object' || 
-        Array.isArray(groupObj)) {
-      // Keep leaf values at the top level
-      flattenedValues[groupName] = groupObj;
-      continue;
-    }
-    
-    // Initialize the group in the extracted grouping schema
-    extractedGrouping[groupName] = [];
-    
-    // Process each key-value pair in the group
-    for (const key in groupObj) {
-      // Add the key-value pair to the flattened values
-      flattenedValues[key] = groupObj[key];
-      
-      // Add the key to the extracted grouping schema
-      extractedGrouping[groupName].push(key);
-    }
-  }
-  
-  return {
-    values: flattenedValues,
-    grouping: extractedGrouping
-  };
-}
+];
+
