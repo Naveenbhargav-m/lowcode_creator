@@ -98,13 +98,31 @@ const update_rows = {
             "callback": "get_query_fields",
         },
       ],
+    },
+    {
+      "id": "input_mapping.update_fields",
+      "type": "data_mapper",
+      "label": "Update Mapping",
+      "description": "update mapping",
+      "path": "input_mapping.update_fields",
+      enableStaticValues: true,
+      enableSourceFields: true,
+      enableUserFields: false,
+      "target_fields": [],
+      "source_fields": [],
+      "dynamicConfig": [
+        {
+            "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
+            "callback": "get_update_fields",
+        },
+      ],
     }
   ],
   "sections": [
     {
       "id": "update_configs",
       "title": "update_configs",
-      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.query_block", "input_mapping.fields"]
+      "fieldIds": ["input_mapping.table", "input_mapping.schema", "input_mapping.query_block", "input_mapping.fields", "input_mapping.update_fields"]
     },
   ],
   "tabs": [
