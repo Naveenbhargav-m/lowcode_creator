@@ -185,29 +185,34 @@ function QueryTabs({ activeTab, onTabChange }) {
     { id: "orderby", label: "Order By", icon: <SortDesc size={16} /> },
     { id: "preview", label: "Preview", icon: <Database size={16} /> },
     {id:"output", label: "Output", icon: <Code2Icon size={16}/>}
-
   ];
   
   return (
-    <div className="py-4" style={{borderRadius:"20px"}}>
+    <div className="py-4 space-y-1" style={{borderRadius:"20px"}}>
       {tabs.map(tab => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`w-full text-left flex items-center px-4 py-3 mb-1 text-sm ${
-            activeTab === tab.id 
-              ? `bg-${THEME.dark} bg-opacity-10 text-${THEME.white} border-l-4 border-${THEME.dark}` 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
+          className={`
+            w-full text-left flex items-center px-4 py-3 text-sm font-medium
+            rounded-lg transition-all duration-200 ease-in-out
+            ${activeTab === tab.id 
+              ? 'bg-violet-100 text-violet-900 border-l-4 border-violet-600 shadow-sm transform translate-x-1' 
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800 hover:translate-x-0.5'
+            }
+          `}
         >
-          <span className="mr-3">{tab.icon}</span>
+          <span className={`mr-3 transition-colors duration-200 ${
+            activeTab === tab.id ? 'text-violet-700' : 'text-gray-500'
+          }`}>
+            {tab.icon}
+          </span>
           {tab.label}
         </button>
       ))}
     </div>
   );
 }
-
 function AdvancedJsonView({ queryData }) {
   return (
     <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-auto max-h-60">
