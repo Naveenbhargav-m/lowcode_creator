@@ -484,30 +484,6 @@ function ConditionGroupTile({
   );
 }
 
-// Placeholder components that would be defined elsewhere in your actual code
-// function SectionHeader({ title }) {
-//   return <h2 className="text-lg font-medium text-gray-800">{title}</h2>;
-// }
-
-// function EmptyState({ message }) {
-//   return (
-//     <div className="p-6 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
-//       {message}
-//     </div>
-//   );
-// }
-
-// function FieldButton({ label, onClick, small }) {
-//   return (
-//     <button 
-//       className={`flex items-center ${small ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'} bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 border border-blue-200`}
-//       onClick={onClick}
-//     >
-//       <span className="mr-1">📋</span> {label}
-//     </button>
-//   );
-// }
-
 function GroupByBlock({initalgroups, updateCallBack}) {
   let keys = [];
   console.log("active query:",activeQueryData);
