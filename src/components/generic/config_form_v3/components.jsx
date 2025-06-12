@@ -354,67 +354,72 @@ export const ColorField = ({ field, value, onChange }) => (
       />
     </div>
   );
-  
-  // 2. Array Field - Modernized
-  export const ArrayField = ({ field, value, onChange }) => {
-    const items = value || [];
-  
-    const handleAddItem = () => {
-      onChange(field.id, [...items, '']);
-    };
-  
-    const handleRemoveItem = (index) => {
-      const newItems = [...items];
-      newItems.splice(index, 1);
-      onChange(field.id, newItems);
-    };
-  
-    const handleItemChange = (index, newValue) => {
-      const newItems = [...items];
-      newItems[index] = newValue;
-      onChange(field.id, newItems);
-    };
-  
-    return (
-      <div className={styles.arrayFieldContainer}>
-        {items.length === 0 && (
-          <div className="text-sm text-gray-500 italic mb-2">No items added yet</div>
-        )}
-        
+
+  // Modern ArrayField Component
+export const ArrayField = ({ field, value, onChange }) => {
+  const items = value || [];
+
+  const handleAddItem = () => {
+    onChange(field.id, [...items, '']);
+  };
+
+  const handleRemoveItem = (index) => {
+    const newItems = items.filter((_, i) => i !== index);
+    onChange(field.id, newItems);
+  };
+
+  const handleItemChange = (index, newValue) => {
+    const newItems = [...items];
+    newItems[index] = newValue;
+    onChange(field.id, newItems);
+  };
+
+  return (
+    <div className="w-full space-y-3 overflow-hidden">
+      {items.length === 0 && (
+        <div className="text-sm text-gray-500 italic py-2 px-2">No items added yet</div>
+      )}
+      
+      <div className="space-y-2">
         {items.map((item, index) => (
-          <div key={index} className={styles.arrayItemContainer}>
+          <div key={index} className="flex items-center gap-2 min-w-0">
             <input
               type="text"
               value={item}
-              onChange={(e) => handleItemChange(index, e.target["value"])}
+              // @ts-ignore
+              onChange={(e) => handleItemChange(index, e.target.value)}
               placeholder={field.itemPlaceholder || 'Enter value'}
-              className={styles.arrayItemInput}
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0"
               disabled={field.disabled}
             />
             <button
               type="button"
               onClick={() => handleRemoveItem(index)}
-              className={styles.arrayItemRemoveButton}
+              className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
               disabled={field.disabled}
               aria-label="Remove item"
+              title="Remove item"
             >
               <X size={16} />
             </button>
           </div>
         ))}
-        <button
-          type="button"
-          onClick={handleAddItem}
-          className={styles.arrayAddButton}
-          disabled={field.disabled}
-        >
-          <Plus size={16} />
-          <span>{field.addButtonText || 'Add Item'}</span>
-        </button>
       </div>
-    );
-  };
-  
+      
+      <button
+        type="button"
+        onClick={handleAddItem}
+        className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors min-w-0"
+        disabled={field.disabled}
+      >
+        <Plus size={16} className="flex-shrink-0" />
+        <span className="truncate">{field.addButtonText || 'Add Item'}</span>
+      </button>
+    </div>
+  );
+};
+
+
   // 3. Static Key-Value Pair Field - Modernized
   export const StaticKeyValueField = ({ field, value, onChange }) => {
     const [pairs, setPairs] = useState({});
@@ -975,13 +980,13 @@ export const ColorField = ({ field, value, onChange }) => (
     );
   };
   
-// @ts-ignore
+
+// Modern OptionsListField Component
 export const OptionsListField = ({ field, value, onChange }) => {
   const [options, setOptions] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editingValues, setEditingValues] = useState({});
 
-  // Configuration from field object
   const config = field.optionsConfig || {
     valueKey: 'value',
     labelKey: 'label',
@@ -991,18 +996,13 @@ export const OptionsListField = ({ field, value, onChange }) => {
 
   const { valueKey, labelKey, valueLabel, labelLabel } = config;
 
-  // Initialize options from value
   useEffect(() => {
     if (Array.isArray(value)) {
       setOptions(value);
     } else if (value) {
       try {
         const parsed = JSON.parse(value);
-        if (Array.isArray(parsed)) {
-          setOptions(parsed);
-        } else {
-          setOptions([]);
-        }
+        setOptions(Array.isArray(parsed) ? parsed : []);
       } catch {
         setOptions([]);
       }
@@ -1011,25 +1011,13 @@ export const OptionsListField = ({ field, value, onChange }) => {
     }
   }, [value]);
 
-  // Update parent when options change - always return array
   const updateParent = (newOptions) => {
     setOptions(newOptions);
-    // Ensure we always pass an array to the parent
-    const arrayToPass = Array.isArray(newOptions) ? newOptions : [];
-    console.log("array to pass:",arrayToPass);
-    onChange(field.id, arrayToPass);
+    onChange(field.id, newOptions);
   };
 
   const addNewOption = () => {
-    // @ts-ignore
-    // @ts-ignore
-    // @ts-ignore
-    const newId = Date.now().toString();
-    const newOption = {
-      [valueKey]: '',
-      [labelKey]: ''
-    };
-    
+    const newOption = { [valueKey]: '', [labelKey]: '' };
     const newOptions = [...options, newOption];
     updateParent(newOptions);
     setEditingId(newOptions.length - 1);
@@ -1066,423 +1054,113 @@ export const OptionsListField = ({ field, value, onChange }) => {
   };
 
   const updateEditingValue = (key, newValue) => {
-    setEditingValues(prev => ({
-      ...prev,
-      [key]: newValue
-    }));
-  };
-
-  // Responsive styles
-  const stylesobj = {
-    container: {
-      width: '100%',
-      maxWidth: '100%',
-      overflowX: 'auto',
-      padding: '16px',
-      boxSizing: 'border-box',
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
-      minWidth: '300px'
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '16px',
-      gap: '12px',
-      flexWrap: 'wrap',
-      minWidth: '280px'
-    },
-    title: {
-      margin: '0',
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#1f2937',
-      flexShrink: 0
-    },
-    addButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '8px 12px',
-      backgroundColor: '#3b82f6',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      transition: 'all 0.2s ease',
-      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-      whiteSpace: 'nowrap',
-      flexShrink: 0
-    },
-    addButtonHover: {
-      backgroundColor: '#2563eb',
-      transform: 'translateY(-1px)',
-      boxShadow: '0 4px 8px rgba(59, 130, 246, 0.3)'
-    },
-    emptyState: {
-      textAlign: 'center',
-      padding: '32px 16px',
-      color: '#6b7280',
-      fontSize: '14px',
-      backgroundColor: '#f9fafb',
-      borderRadius: '6px',
-      border: '2px dashed #d1d5db'
-    },
-    optionsList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-      minWidth: '280px'
-    },
-    optionItem: {
-      background: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
-      padding: '16px',
-      transition: 'all 0.2s ease',
-      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-      minWidth: '280px'
-    },
-    optionItemEditing: {
-      borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
-    },
-    optionItemHover: {
-      borderColor: '#d1d5db',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
-    },
-    optionContent: {
-      display: 'flex',
-      flexDirection: 'row',
-      gap: '16px',
-      alignItems: 'flex-start',
-      flexWrap: 'wrap'
-    },
-    optionField: {
-      flex: '1',
-      minWidth: '120px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px'
-    },
-    optionDisplay: {
-      flex: '1',
-      minWidth: '120px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px'
-    },
-    fieldLabel: {
-      fontSize: '12px',
-      fontWeight: '600',
-      color: '#374151',
-      textTransform: 'uppercase',
-      letterSpacing: '0.025em'
-    },
-    fieldValue: {
-      fontSize: '14px',
-      color: '#1f2937',
-      wordBreak: 'break-word'
-    },
-    input: {
-      width: '100%',
-      padding: '8px 12px',
-      border: '1px solid #d1d5db',
-      borderRadius: '6px',
-      fontSize: '14px',
-      transition: 'all 0.2s ease',
-      boxSizing: 'border-box',
-      backgroundColor: '#ffffff'
-    },
-    inputFocus: {
-      borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
-    },
-    buttonGroup: {
-      display: 'flex',
-      gap: '8px',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      flexShrink: 0,
-      marginTop: 'auto'
-    },
-    iconButton: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '32px',
-      height: '32px',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      backgroundColor: '#f3f4f6',
-      color: '#6b7280'
-    },
-    editButton: {
-      backgroundColor: '#f3f4f6',
-      color: '#6b7280'
-    },
-    editButtonHover: {
-      backgroundColor: '#3b82f6',
-      color: 'white',
-      transform: 'scale(1.05)'
-    },
-    deleteButton: {
-      backgroundColor: '#f3f4f6',
-      color: '#6b7280'
-    },
-    deleteButtonHover: {
-      backgroundColor: '#ef4444',
-      color: 'white',
-      transform: 'scale(1.05)'
-    },
-    saveButton: {
-      backgroundColor: '#f3f4f6',
-      color: '#6b7280'
-    },
-    saveButtonHover: {
-      backgroundColor: '#10b981',
-      color: 'white',
-      transform: 'scale(1.05)'
-    },
-    cancelButton: {
-      backgroundColor: '#f3f4f6',
-      color: '#6b7280'
-    },
-    cancelButtonHover: {
-      backgroundColor: '#f59e0b',
-      color: 'white',
-      transform: 'scale(1.05)'
-    }
+    setEditingValues(prev => ({ ...prev, [key]: newValue }));
   };
 
   return (
-    <div style={stylesobj.container}>
-      <div style={stylesobj.header}>
-        <h4 style={stylesobj.title}>{field.label || 'Options'}</h4>
-        <button
-          style={stylesobj.addButton}
+    <div className="w-full bg-white border border-gray-200 rounded-lg p-3 shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between mb-3 gap-3 min-w-0">
+        <h4 className="text-sm font-semibold text-gray-900 truncate flex-shrink-0">{field.label || 'Options'}</h4>
+        <button 
+          className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
           onClick={addNewOption}
-          onMouseEnter={(e) => {
-            // @ts-ignore
-            e.target.style.backgroundColor = stylesobj.addButtonHover.backgroundColor;
-            // @ts-ignore
-            e.target.style.transform = stylesobj.addButtonHover.transform;
-            // @ts-ignore
-            e.target.style.boxShadow = stylesobj.addButtonHover.boxShadow;
-          }}
-          onMouseLeave={(e) => {
-            // @ts-ignore
-            e.target.style.backgroundColor = stylesobj.addButton.backgroundColor;
-            // @ts-ignore
-            e.target.style.transform = 'none';
-            // @ts-ignore
-            e.target.style.boxShadow = stylesobj.addButton.boxShadow;
-          }}
         >
-          <Plus size={14} />
-          Add Option
+          <Plus size={12} />
+          <span className="hidden sm:inline">Add</span>
         </button>
       </div>
 
       {options.length === 0 ? (
-        <div style={stylesobj.emptyState}>
-          No options configured. Click "Add Option" to get started.
+        <div className="text-center py-6 text-gray-500 text-sm bg-gray-50 rounded border-2 border-dashed border-gray-200">
+          <div className="px-2">No options configured. Click "Add" to get started.</div>
         </div>
       ) : (
-        <div style={stylesobj.optionsList}>
+        <div className="space-y-2 overflow-x-auto">
           {options.map((option, index) => (
             <div 
               key={index} 
-              style={{
-                ...stylesobj.optionItem,
-                ...(editingId === index ? stylesobj.optionItemEditing : {})
-              }}
-              onMouseEnter={(e) => {
-                if (editingId !== index) {
-                  // @ts-ignore
-                  e.target.style.borderColor = stylesobj.optionItemHover.borderColor;
-                  // @ts-ignore
-                  e.target.style.boxShadow = stylesobj.optionItemHover.boxShadow;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (editingId !== index) {
-                  // @ts-ignore
-                  e.target.style.borderColor = stylesobj.optionItem.borderColor;
-                  // @ts-ignore
-                  e.target.style.boxShadow = stylesobj.optionItem.boxShadow;
-                }
-              }}
+              className={`bg-white border rounded-md p-2.5 transition-all hover:shadow-sm min-w-0 ${
+                editingId === index ? 'border-blue-300 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+              }`}
             >
-              <div style={stylesobj.optionContent}>
-                {editingId === index ? (
-                  <>
-                    <div style={stylesobj.optionField}>
-                      <div style={stylesobj.fieldLabel}>{valueLabel}</div>
-                      <input
-                        type="text"
-                        value={editingValues[valueKey] || ''}
-                        // @ts-ignore
-                        onChange={(e) => updateEditingValue(valueKey, e.target.value)}
-                        style={stylesobj.input}
-                        placeholder={`Enter ${valueLabel.toLowerCase()}`}
-                        onFocus={(e) => {
+              <div className="flex items-start gap-2 min-w-0">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  {editingId === index ? (
+                    <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-2">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-gray-600 mb-1">{valueLabel}</div>
+                        <input
+                          type="text"
+                          value={editingValues[valueKey] || ''}
                           // @ts-ignore
-                          e.target.style.borderColor = stylesobj.inputFocus.borderColor;
+                          onChange={(e) => updateEditingValue(valueKey, e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0"
+                          placeholder={`Enter ${valueLabel.toLowerCase()}`}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-gray-600 mb-1">{labelLabel}</div>
+                        <input
+                          type="text"
+                          value={editingValues[labelKey] || ''}
                           // @ts-ignore
-                          e.target.style.boxShadow = stylesobj.inputFocus.boxShadow;
-                        }}
-                        onBlur={(e) => {
-                          // @ts-ignore
-                          e.target.style.borderColor = stylesobj.input.borderColor;
-                          // @ts-ignore
-                          e.target.style.boxShadow = 'none';
-                        }}
-                      />
+                          onChange={(e) => updateEditingValue(labelKey, e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0"
+                          placeholder={`Enter ${labelLabel.toLowerCase()}`}
+                        />
+                      </div>
                     </div>
-                    <div style={stylesobj.optionField}>
-                      <div style={stylesobj.fieldLabel}>{labelLabel}</div>
-                      <input
-                        type="text"
-                        value={editingValues[labelKey] || ''}
-                        // @ts-ignore
-                        onChange={(e) => updateEditingValue(labelKey, e.target.value)}
-                        style={stylesobj.input}
-                        placeholder={`Enter ${labelLabel.toLowerCase()}`}
-                        onFocus={(e) => {
-                          // @ts-ignore
-                          e.target.style.borderColor = stylesobj.inputFocus.borderColor;
-                          // @ts-ignore
-                          e.target.style.boxShadow = stylesobj.inputFocus.boxShadow;
-                        }}
-                        onBlur={(e) => {
-                          // @ts-ignore
-                          e.target.style.borderColor = stylesobj.input.borderColor;
-                          // @ts-ignore
-                          e.target.style.boxShadow = 'none';
-                        }}
-                      />
+                  ) : (
+                    <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-2">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-gray-600 mb-0.5">{valueLabel}</div>
+                        <div className="text-sm text-gray-900 break-words">{option[valueKey] || '<empty>'}</div>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-gray-600 mb-0.5">{labelLabel}</div>
+                        <div className="text-sm text-gray-900 break-words">{option[labelKey] || '<empty>'}</div>
+                      </div>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={stylesobj.optionDisplay}>
-                      <div style={stylesobj.fieldLabel}>{valueLabel}</div>
-                      <div style={stylesobj.fieldValue}>{option[valueKey] || '<empty>'}</div>
-                    </div>
-                    <div style={stylesobj.optionDisplay}>
-                      <div style={stylesobj.fieldLabel}>{labelLabel}</div>
-                      <div style={stylesobj.fieldValue}>{option[labelKey] || '<empty>'}</div>
-                    </div>
-                  </>
-                )}
-              </div>
-              
-              <div style={stylesobj.buttonGroup}>
-                {editingId === index ? (
-                  <>
-                    <button
-                      style={stylesobj.iconButton}
-                      onClick={saveEditing}
-                      onMouseEnter={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.saveButtonHover.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.saveButtonHover.color;
-                        // @ts-ignore
-                        e.target.style.transform = stylesobj.saveButtonHover.transform;
-                      }}
-                      onMouseLeave={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.saveButton.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.saveButton.color;
-                        // @ts-ignore
-                        e.target.style.transform = 'none';
-                      }}
-                    >
-                      <Check size={14} />
-                    </button>
-                    <button
-                      style={stylesobj.iconButton}
-                      onClick={cancelEditing}
-                      onMouseEnter={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.cancelButtonHover.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.cancelButtonHover.color;
-                        // @ts-ignore
-                        e.target.style.transform = stylesobj.cancelButtonHover.transform;
-                      }}
-                      onMouseLeave={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.cancelButton.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.cancelButton.color;
-                        // @ts-ignore
-                        e.target.style.transform = 'none';
-                      }}
-                    >
-                      <X size={14} />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      style={stylesobj.iconButton}
-                      onClick={() => startEditing(index)}
-                      onMouseEnter={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.editButtonHover.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.editButtonHover.color;
-                        // @ts-ignore
-                        e.target.style.transform = stylesobj.editButtonHover.transform;
-                      }}
-                      onMouseLeave={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.editButton.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.editButton.color;
-                        // @ts-ignore
-                        e.target.style.transform = 'none';
-                      }}
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                    <button
-                      style={stylesobj.iconButton}
-                      onClick={() => deleteOption(index)}
-                      onMouseEnter={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.deleteButtonHover.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.deleteButtonHover.color;
-                        // @ts-ignore
-                        e.target.style.transform = stylesobj.deleteButtonHover.transform;
-                      }}
-                      onMouseLeave={(e) => {
-                        // @ts-ignore
-                        e.target.style.backgroundColor = stylesobj.deleteButton.backgroundColor;
-                        // @ts-ignore
-                        e.target.style.color = stylesobj.deleteButton.color;
-                        // @ts-ignore
-                        e.target.style.transform = 'none';
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </>
-                )}
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {editingId === index ? (
+                    <>
+                      <button
+                        className="flex items-center justify-center w-6 h-6 rounded text-gray-500 hover:bg-green-100 hover:text-green-600 transition-colors"
+                        onClick={saveEditing}
+                        title="Save"
+                      >
+                        <Check size={12} />
+                      </button>
+                      <button
+                        className="flex items-center justify-center w-6 h-6 rounded text-gray-500 hover:bg-red-100 hover:text-red-600 transition-colors"
+                        onClick={cancelEditing}
+                        title="Cancel"
+                      >
+                        <X size={12} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="flex items-center justify-center w-6 h-6 rounded text-gray-500 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                        onClick={() => startEditing(index)}
+                        title="Edit"
+                      >
+                        <Edit2 size={12} />
+                      </button>
+                      <button
+                        className="flex items-center justify-center w-6 h-6 rounded text-gray-500 hover:bg-red-100 hover:text-red-600 transition-colors"
+                        onClick={() => deleteOption(index)}
+                        title="Delete"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           ))}
