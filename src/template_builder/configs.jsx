@@ -182,7 +182,7 @@ export const TemplateElementConfigFormSchema = {
   ],
 };
 
-export const generaElementsSchema = {
+export const GeneralElementSchema = {
   ...TemplateElementConfigFormSchema
 };
 
