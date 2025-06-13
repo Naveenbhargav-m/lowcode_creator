@@ -111,44 +111,6 @@ export const TemplateElementConfigFormSchema = {
       "type": "actions_config",
       "path": "configs.events",
       "label": "Actions"
-    },
-    {
-      "id": "configs.data_source.data_query",
-      "type": "dropdown",
-      "path": "configs.data_source.data_query",
-      "options": [
-        {"label": "option1", "value": "option1"},
-        {"label": "option2","value": "option2"}
-      ],
-      "dynamicConfig": [
-        {
-          "condition": {"field": "test", "operator": "non_empty"},
-          "callback": "get_query_names",
-          "assignTo": "options"
-        }
-      ],
-      "label": "Pick a Query"
-    },
-    {
-      "id": "configs.data_source.field_mapping",
-      "type": "data_mapper",
-      "path": "configs.data_source.field_mapping",
-      "label": "Data Mapping",
-      enableStaticValues: true,
-      enableSourceFields: true,
-      enableUserFields: false,
-      "target_fields": [],
-      "source_fields": [],
-      "dynamicConfig": [
-        {
-          "condition": {"field": "configs.data_source.data_query", "operator": "not_empty"},
-          "callback": "get_query_field_map",
-          "assignTo": [
-            {"key": "source_fields", "transform": (data) => data.inputs},
-            {"key": "target_fields", "transform": (data) => data.query_fields},
-          ],
-        }
-      ],
     }
 ],
   
@@ -186,10 +148,7 @@ export const TemplateElementConfigFormSchema = {
     {
       "id": "datasource",
       "title": "data_source",
-      "fieldIds": [
-        "configs.data_source.data_query",
-        "configs.data_source.field_mapping"
-      ],
+      "fieldIds": [],
     }
   ],
   
@@ -273,3 +232,10 @@ let extrafields = [
   }
 ];
 
+RootElementSchema.fields = [...RootElementSchema.fields, ...extrafields];
+RootElementSchema.sections[4]["fieldIds"] = [...RootElementSchema.sections[4]["fieldIds"],
+ "configs.data_source.data_query", "configs.data_source.field_mapping"];
+
+
+
+ export {RootElementSchema};
