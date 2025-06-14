@@ -208,11 +208,13 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
 
   function TemplateMobileView() {
     let curScreen = activeTamplate.value;
-    let style = {};
+    let style = {
+      backgroundColor: "black"
+    };
     let outerDivStyle = {
       position: "relative",
       height: "100%",
-      width: "800px",
+      width: "400px",
       backgroundColor: "#f9f9f9",
       border: "1px solid #e0e0e0",
       overflow: "auto",
@@ -275,7 +277,13 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
   
     return (
       <MobileMockup>
-        <div style={{ ...outerDivStyle }} className="scrollbar-hide">
+        <div style={{ ...outerDivStyle }} className="scrollbar-hide"
+        onClick={(e) => 
+          {
+          e.stopPropagation();
+          activeTemplateElement.value = "screen"}
+          }
+        >
           <Drop
             onDrop={(data) => {
               HandleTemplateDrop(data);
@@ -283,7 +291,12 @@ export function CreateFormPopup({ isOpen, onClose, onSubmit, FormLabel, placeHol
             dropElementData={{ element: "screen" }}
             wrapParent={true}
           >
-            <div style={{ ...style }} onClick={() => (activeTemplateElement.value = "screen")}>
+            <div style={{ ...style }} onClick={(e) => 
+              {
+              e.stopPropagation();
+              activeTemplateElement.value = "screen"}
+              }
+              >
               <ReactSortable
                 list={sortableItems.value}
                 setList={(newList) => {

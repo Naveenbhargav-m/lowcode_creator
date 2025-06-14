@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Code, Eye } from 'lucide-react';
 import Demo, { Accordion, ActionsConfig, ArrayField, CheckboxField, ColorField, DateField, DynamicKeyValueField, GlobalSelectField, NumberField, OptionsListField, SelectField, StaticKeyValueField, styles, TextField, TimeField } from './components';
 import DataMappingComponent from "../dynamic_data_picker/data_picker";
 import { DataMapperField, GlobalJavaScriptField } from "./componentss2";
+import { ExtendableDataMapperField } from "./mapper_componets";
 
 
 // Helper functions for handling nested objects
@@ -437,6 +438,11 @@ export function ConfigFormV3({
           handleFieldChange(dynamicField.id, value);
         }}/>
         break;
+      case "extended_data_mapper":
+          fieldComponent = <ExtendableDataMapperField 
+          field={dynamicField} value={fieldValue} 
+          onChange={(id, value) => {handleFieldChange(dynamicField.id, value)}} />
+          break;
       case "data_mapper":
           // @ts-ignore
           fieldComponent = <DataMapperField field={dynamicField} value={fieldValue} onChange={(is,value) => {console.log("dynamic field value:",value);handleFieldChange(dynamicField.id, value)}}/>;
