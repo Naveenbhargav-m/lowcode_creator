@@ -184,6 +184,10 @@ function GetQueryInputsAndOutputs(formValues, fieldConfig, context) {
         "target_fields": outarr,
     };
 }
+
+function GetParentData(formValues, fieldConfig, context) {
+    
+}
 export {
     GetCurrentWorkflowInputs, GetQueries, GetQueryInputs, GetTableFields, GetQuerySelectFields,
     GetQueryOutputsOnly,GetQueryInputsOnly, GetQueryInputsAndOutputs
