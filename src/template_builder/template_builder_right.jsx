@@ -1,12 +1,11 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
-import { GetQueries, GetQueryInputs } from "../config_helpers/config_callbacks";
+import { GetQueries, GetQueryInputs, GetQueryOutputsOnly } from "../config_helpers/config_callbacks";
 import { GeneralElementSchema, RootElementSchema, TemplateElementConfigFormSchema } from "./configs";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, MarkTemplateAsChanged, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
 
 function GetConfigs(activeelementID) {  
   if(activeelementID === "screen" || activeelementID === "template") {
-    debugger;
     return RootElementSchema;
   } else {
     return GeneralElementSchema
@@ -26,6 +25,9 @@ export function TemplateBuilderRightView() {
     }
 
     const handleChange = (data) => {
+      if(activeElementID === "screen") {
+        console.log("Data: ",data);
+      }
       if(activeElement !== undefined) {
         activeElement = {...activeElement,...data};
         activeTemplateElements[activeElementID].value = {...activeElement};
@@ -63,7 +65,7 @@ export function TemplateBuilderRightView() {
       context={{
         "callbacks": {
           "get_query_names": GetQueries,
-          "get_query_field_map": GetQueryInputs
+          "get_query_field_map": GetQueryOutputsOnly
         },
       }}
       schema={schema} 
