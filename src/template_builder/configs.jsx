@@ -193,6 +193,12 @@ let  RootElementSchema = {
 
 let extrafields = [
   {
+    "id": "configs.data_source.date_key",
+    "type": "text",
+    "path": "configs.data_source.date_key",
+    "label": "Data key"
+  },
+  {
     "id": "configs.data_source.data_query",
     "type": "dropdown",
     "path": "configs.data_source.data_query",
@@ -202,7 +208,7 @@ let extrafields = [
     ],
     "dynamicConfig": [
       {
-        "condition": {"field": "test", "operator": "non_empty"},
+        "condition": {"field": "configs.data_source.date_key", "operator": "non_empty"},
         "callback": "get_query_names",
         "assignTo": "options"
       }
@@ -211,7 +217,7 @@ let extrafields = [
   },
   {
     "id": "configs.data_source.field_mapping",
-    "type": "data_mapper",
+    "type": "extended_data_mapper",
     "path": "configs.data_source.field_mapping",
     "label": "Data Mapping",
     enableStaticValues: true,

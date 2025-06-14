@@ -1,4 +1,5 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
+import { GetQueries, GetQueryInputs } from "../config_helpers/config_callbacks";
 import { GeneralElementSchema, RootElementSchema, TemplateElementConfigFormSchema } from "./configs";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, MarkTemplateAsChanged, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
@@ -33,7 +34,11 @@ export function TemplateBuilderRightView() {
     };
   
     const handleSubmit = (data) => {
-      if(activeElement !== undefined) {
+      if(activeElementID === "screen") {
+        console.log("new data:",data);
+        return;
+      }
+      if(activeElement !== undefined && activeElementID !== "screen") {
         activeElement= {...activeElement,...data};
         activeTemplateElements[activeElementID].value = {...activeElement};
         let mytemp = templates[activeTamplate.peek()];
@@ -54,7 +59,15 @@ export function TemplateBuilderRightView() {
     let schema = GetConfigs(activeElementID);
     return (
     <div style={{width:"100%", "color": "black"}}>
-      <ConfigFormV3 schema={schema} initialValues={{...activeElement}} 
+      <ConfigFormV3 
+      context={{
+        "callbacks": {
+          "get_query_names": GetQueries,
+          "get_query_field_map": GetQueryInputs
+        },
+      }}
+      schema={schema} 
+      initialValues={{...activeElement}} 
       onChange={(data) => {handleChange(data|| {});}} onSubmit={(data) => {handleSubmit(data || {})}}/>
     </div>);
 }
