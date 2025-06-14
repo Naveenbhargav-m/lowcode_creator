@@ -95,7 +95,8 @@ async function CreateTemplate(formData) {
         name: formData.name,
         order: Object.keys(templates).length + 1,
         mobile_children: {},
-        desktop_children: {}
+        desktop_children: {},
+        data_source: {},
       }
     };
 

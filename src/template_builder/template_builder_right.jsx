@@ -1,6 +1,6 @@
 import { ConfigFormV3 } from "../components/generic/config_form_v3/config_form";
-import { GetQueries, GetQueryInputs, GetQueryOutputsOnly } from "../config_helpers/config_callbacks";
-import { GeneralElementSchema, RootElementSchema, TemplateElementConfigFormSchema } from "./configs";
+import { GetQueries, GetQueryOutputsOnly } from "../config_helpers/config_callbacks";
+import { GeneralElementSchema, RootElementSchema } from "./configs";
 import { activeTamplate, activeTemplateElement, activeTemplateElements, MarkTemplateAsChanged, templateDesignView, templateRightPanelActiveTab, templates } from "./templates_state";
 
 
@@ -19,6 +19,17 @@ export function TemplateBuilderRightView() {
 
     if(activeElementID.length === 0) {
         return <div></div>;
+    } else if(activeElementID === "screen") {
+      let template_id = activeTamplate.value;
+      let curtemplate = templates[template_id] || {};
+      let configs = curtemplate["configs"];
+      if(configs["configs"] !== undefined) {
+        configs = configs["configs"];
+      }
+      activeElement =  {"configs": {
+        "data_source": configs["data_source"] || {},
+        "style": configs["style"] || {},
+      }};
     } else {
       let activeSignal = activeTemplateElements[activeElementID] || {};
       activeElement = activeSignal.value;
@@ -26,7 +37,12 @@ export function TemplateBuilderRightView() {
 
     const handleChange = (data) => {
       if(activeElementID === "screen") {
-        console.log("Data: ",data);
+        let template_id = activeTamplate.value;
+        let curtemplate = templates[template_id] || {};
+        curtemplate["configs"] = {...curtemplate["configs"], ...data["configs"]};
+        templates[template_id] = curtemplate;
+        MarkTemplateAsChanged(activeTamplate.value);
+        return;
       }
       if(activeElement !== undefined) {
         activeElement = {...activeElement,...data};
@@ -36,9 +52,13 @@ export function TemplateBuilderRightView() {
     };
   
     const handleSubmit = (data) => {
-      if(activeElementID === "screen") {
-        console.log("new data:",data);
-        return;
+        if(activeElementID === "screen") {
+          let template_id = activeTamplate.value;
+          let curtemplate = templates[template_id] || {};
+          curtemplate["configs"] = {...curtemplate["configs"], ...data["configs"]};
+          templates[template_id] = curtemplate;
+          MarkTemplateAsChanged(activeTamplate.value);
+          return;
       }
       if(activeElement !== undefined && activeElementID !== "screen") {
         activeElement= {...activeElement,...data};
