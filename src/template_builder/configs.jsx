@@ -223,16 +223,13 @@ let extrafields = [
     enableStaticValues: true,
     enableSourceFields: true,
     enableUserFields: false,
+    enableTargetFieldExtension: true,
     "target_fields": [],
     "source_fields": [],
     "dynamicConfig": [
       {
         "condition": {"field": "configs.data_source.data_query", "operator": "not_empty"},
-        "callback": "get_query_field_map",
-        "assignTo": [
-          {"key": "source_fields", "transform": (data) => data.inputs},
-          {"key": "target_fields", "transform": (data) => data.query_fields},
-        ],
+        "callback": "get_query_field_map"
       }
     ],
   }
@@ -240,7 +237,7 @@ let extrafields = [
 
 RootElementSchema.fields = [...RootElementSchema.fields, ...extrafields];
 RootElementSchema.sections[4]["fieldIds"] = [...RootElementSchema.sections[4]["fieldIds"],
- "configs.data_source.data_query", "configs.data_source.field_mapping"];
+ "configs.data_source.date_key", "configs.data_source.data_query", "configs.data_source.field_mapping"];
 
 
 
