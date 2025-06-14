@@ -1,6 +1,29 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Settings, X, Search, Database, Plus, ChevronDown, ChevronRight, Trash2, Edit3, Check, X as XIcon } from 'lucide-react';
 
+
+// Toggle Switch Component
+// @ts-ignore
+const ToggleSwitch = React.memo(({ enabled, onChange, label, disabled = false }) => (
+    <div className="flex items-center justify-between">
+      <span className={`text-sm ${disabled ? 'text-gray-400' : 'text-gray-700'}`}>{label}</span>
+      <button
+        onClick={() => !disabled && onChange(!enabled)}
+        disabled={disabled}
+        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+          enabled ? 'bg-blue-600' : 'bg-gray-300'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+      >
+        <span
+          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+            enabled ? 'translate-x-5' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    </div>
+  ));
+
+  
 // Field Editor Component
 // @ts-ignore
 const FieldEditor = React.memo(({ field, onSave, onCancel, fieldType }) => {
@@ -636,9 +659,8 @@ export const ExtendableDataMapperField = React.memo(({ field, value = [], onChan
 
             {/* Footer */}
             <div className="border-t border-gray-200 p-4 bg-gray-50 space-y-3">
-              <
-// @ts-ignore
-              ToggleSwitch
+              <ToggleSwitch
+                // @ts-ignore
                 enabled={autoMap}
                 onChange={setAutoMap}
                 label="Auto Map"
@@ -680,179 +702,3 @@ export const ExtendableDataMapperField = React.memo(({ field, value = [], onChan
     prevProps.onChange === nextProps.onChange
   );
 });
-
-// Demo Component
-const ExtendedPickerDemo = () => {
-  const [formData, setFormData] = useState({
-    mapping1: [],
-    mapping2: []
-  });
-
-  const handleChange = useCallback((fieldId, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldId]: value
-    }));
-  }, []);
-
-  // Demo field configurations
-  const field1 = {
-    id: 'mapping1',
-    label: 'User Profile Mapping',
-    placeholder: 'Configure user profile mappings',
-    helpText: 'Map source data to target user profile fields',
-    target_fields: [
-      { id: 'firstName', label: 'First Name', type: 'text' },
-      { id: 'lastName', label: 'Last Name', type: 'text' },
-      { id: 'email', label: 'Email Address', type: 'email' }
-    ],
-    source_fields: [
-      { id: 'user_first_name', label: 'User First Name', type: 'text' },
-      { id: 'user_last_name', label: 'User Last Name', type: 'text' }
-    ],
-    userFields: [
-      { id: 'currentUser.name', label: 'Current User Name' },
-      { id: 'currentUser.email', label: 'Current User Email' },
-      { id: 'session.userId', label: 'Session User ID' }
-    ],
-    enableStaticValues: true,
-    enableSourceFields: true,
-    enableUserFields: true,
-    enableSourceFieldExtension: true,
-    enableTargetFieldExtension: true
-  };
-
-  const field2 = {
-    id: 'mapping2',
-    label: 'Product Data Mapping',
-    placeholder: 'Configure product data mappings',
-    helpText: 'Map external product data to internal fields',
-    target_fields: [
-      { id: 'productName', label: 'Product Name', type: 'text' },
-      { id: 'price', label: 'Price', type: 'number' },
-      { id: 'category', label: 'Category', type: 'text' }
-    ],
-    source_fields: [], // Empty to demonstrate field extension
-    userFields: [
-      { id: 'user.department', label: 'User Department' },
-      { id: 'user.role', label: 'User Role' }
-    ],
-    enableStaticValues: true,
-    enableSourceFields: true,
-    enableUserFields: false,
-    enableSourceFieldExtension: true,
-    enableTargetFieldExtension: false
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto h-screen flex flex-col p-6">
-      {/* Fixed Header */}
-      <div className="text-center mb-8 flex-shrink-0">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Extendable Data Mapper Demo</h1>
-        <p className="text-gray-600">
-          Demonstrates dynamic field addition and configuration with proper optimization
-        </p>
-      </div>
-  
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto space-y-8 pr-2">
-        {/* Demo 1: Full featured mapping */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Demo 1: Full Featured Mapping
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            • Source and target field extension enabled<br/>
-            • All mapping types available<br/>
-            • Pre-populated with sample fields
-          </p>
-          <ExtendableDataMapperField
-            // @ts-ignore
-            field={field1}
-            value={formData.mapping1}
-            onChange={handleChange}
-          />
-        </div>
-  
-        {/* Demo 2: Limited with extensions */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Demo 2: Limited Configuration
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            • No source fields initially (can add via extension)<br/>
-            • User fields disabled<br/>
-            • Target field extension disabled<br/>
-            • Source field extension enabled
-          </p>
-          <ExtendableDataMapperField
-            // @ts-ignore
-            field={field2}
-            value={formData.mapping2}
-            onChange={handleChange}
-          />
-        </div>
-  
-        {/* Current State Display */}
-        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Current Form State</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Mapping 1 ({formData.mapping1.length} items)</h3>
-              <pre className="bg-white p-3 rounded border text-xs overflow-auto max-h-40">
-  {JSON.stringify(formData.mapping1, null, 2)}
-              </pre>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Mapping 2 ({formData.mapping2.length} items)</h3>
-              <pre className="bg-white p-3 rounded border text-xs overflow-auto max-h-40">
-  {JSON.stringify(formData.mapping2, null, 2)}
-              </pre>
-            </div>
-          </div>
-        </div>
-  
-        {/* Feature Overview */}
-        <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-          <h2 className="text-xl font-semibold text-blue-800 mb-4">Key Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="space-y-2">
-              <h3 className="font-medium text-blue-700">Dynamic Field Management</h3>
-              <ul className="space-y-1 text-blue-600">
-                <li>• Add new source/target fields on demand</li>
-                <li>• Edit existing custom fields</li>
-                <li>• Delete custom fields with cleanup</li>
-                <li>• Flag-based enable/disable per field type</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-medium text-blue-700">Performance Optimizations</h3>
-              <ul className="space-y-1 text-blue-600">
-                <li>• Memoized components with proper dependencies</li>
-                <li>• Stable references for config forms</li>
-                <li>• Efficient re-render prevention</li>
-                <li>• Custom comparison functions</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-  
-        {/* Usage Instructions */}
-        <div className="bg-green-50 p-6 rounded-lg border border-green-200">
-          <h2 className="text-xl font-semibold text-green-800 mb-4">How to Use</h2>
-          <div className="text-sm text-green-700 space-y-2">
-            <p><strong>1.</strong> Click "Configure field mappings" to open the mapper</p>
-            <p><strong>2.</strong> Add mappings using "Add Mapping" button</p>
-            <p><strong>3.</strong> For each mapping, select target field (add new if extension enabled)</p>
-            <p><strong>4.</strong> Choose mapping type: Static Value, Source Field, or User Field</p>
-            <p><strong>5.</strong> Add new source fields using "Add Source" when needed</p>
-            <p><strong>6.</strong> Edit/delete custom fields using the edit/trash icons</p>
-            <p><strong>7.</strong> Save changes to persist mappings</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ExtendedPickerDemo;

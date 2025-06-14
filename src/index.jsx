@@ -12,13 +12,12 @@ import { FormBuilderPage } from "./form_builder/form_edit_area";
 import { WorkFlowPage } from "./workflows/workflow_page";
 import { AppHomeScreen } from "./home/app_home";
 import { QueryBuilderPage } from "./query_builder/query_builder_page";
-import WorkflowBuilder from "./tests/reactflow1";
 import SecretsManager from "./secret_store/secret_store";
 import TemplateRegistrationPage from "./external_templates/external_templates";
 import { TemplatePage } from "./template_builder/templates_page";
 import { VariablesPage } from "./global_state_screen/global_state_page";
 import { ThemeEditor } from "./themes_screen/themes_screen";
-import PickerDemo from "./tests/data_picker_demo";
+import ExtendedPickerDemo from "./tests/data_picker_demo";
 
 export function App() {
   // Add global style to prevent body scrolling
@@ -69,7 +68,7 @@ export function App() {
             <Route path="/" component={AppCreatorPage} />
             <Route path="/queries" component={QueryBuilderPage} />
             <Route default component={() => <div>Not Found</div>} />
-            <Route path="/test" component={PickerDemo} />
+            <Route path="/test" component={ExtendedPickerDemo} />
           </Router>
         </main>
       </div>
