@@ -27,6 +27,43 @@ const googleConfigs = {
         "id": "google_auth_init",
         "title": "Google Auth"
     },
+    "get_google_user": {
+        "fields": [
+            {
+                    "id": "input_mapping.access_token",
+                    "type": "text",
+                    "label": "Access Token",
+            }
+        ]
+    },
+    "verify_google_token": {
+        "fields": [
+            {
+                    "id": "input_mapping.access_token",
+                    "type": "text",
+                    "label": "Access Token",
+            }
+        ]
+    },
+    "refresh_google_token": {
+        "fields":  [
+            {
+                "id": "input_mapping.client_id",
+                "type": "text",
+                "label": "client ID",
+            },
+            {
+                "id": "input_mapping.client_secret",
+                "type": "text",
+                "label": "client Secret",
+            },
+            {
+                "id": "input_mapping.refresh_token",
+                "type": "text",
+                "label": "Refresh Token",
+            }
+        ]
+    },
 };
 
 

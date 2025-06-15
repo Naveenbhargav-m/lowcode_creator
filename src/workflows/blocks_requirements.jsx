@@ -1,4 +1,5 @@
 import { googleConfigs } from "./block_configs/google_auth";
+import { natsConfigs } from "./block_configs/nats_configs";
 
 const insert_row_fields = {
   "fields": [
@@ -357,5 +358,13 @@ var blockFormRequirementsV2 = {
   "read_rows": {...read_rows},
   "delete_rows": {...delete_rows},
   "google_auth_init": {...googleConfigs["google_auth_init"]},
+  "get_google_user": {...googleConfigs.get_google_user},
+  "upsert_user": {...googleConfigs.verify_google_token},
+  "verify_google_token": {...googleConfigs.verify_google_token},
+  "refresh_google_token": {...googleConfigs.refresh_google_token},
+  "create_topic": {...natsConfigs.create_topic},
+  "publish": {...natsConfigs.publish},
+  "subscribe": {...natsConfigs.subscribe},
+  "delete_topic": {...natsConfigs.delete_topic},
 };
 export { blockFormRequirementsV2};
