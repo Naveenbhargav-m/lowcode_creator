@@ -5,7 +5,6 @@ import { TemplateOptionTabs } from "../template_builder/templates_page";
 import { CreateFormButton } from "../template_builder/template_builder_view";
 import { Draggable } from "../components/custom/Drag";
 
-
 // Sleek modern color palette - lighter and more premium
 const COLORS = {
   insert: "#60a5fa", // Softer blue
@@ -17,39 +16,79 @@ const COLORS = {
   text: "#475569", // Softer text color
   textLight: "#f8fafc", // Light text
   border: "#e2e8f0", // Light border
+  auth: "#f472b6", // Pink for auth operations
+  nats: "#06b6d4", // Cyan for NATS operations
+  http: "#10b981", // Emerald for HTTP operations
+  user: "#8b5cf6", // Violet for user operations
+};
 
-  }
 // Map node types to their colors
 const NODE_COLORS = {
   "code_block": COLORS.code,
-  "condition": COLORS.insert,
+  "condition": COLORS.condition,
   "loop": COLORS.condition,
   "insert_rows": COLORS.insert,
   "update_rows": COLORS.update,
   "read_rows": COLORS.active,
   "delete_rows": COLORS.condition,
-  "http_request": COLORS.code,
-  "create_topic": COLORS.insert,
-  "subscribe_topic": COLORS.insert,
-  "unsubscribe_topic": COLORS.condition,
-  "delete_topic": COLORS.border,
-
+  "http_call": COLORS.http,
+  "create_topic": COLORS.nats,
+  "publish": COLORS.nats,
+  "subscribe": COLORS.nats,
+  "delete_topic": COLORS.nats,
+  "google_auth_init": COLORS.auth,
+  "generate_auth_url": COLORS.auth,
+  "exchange_code_for_token": COLORS.auth,
+  "get_google_user": COLORS.user,
+  "upsert_user": COLORS.user,
+  "verify_google_token": COLORS.auth,
+  "refresh_google_token": COLORS.auth,
 };
 
-// Icons mapping
+// Icons mapping - matches the order of registerNodes
 const icons = [
-  "database",
-  "database",
-  "parentheses",
-  "workflow",
-  "book-open",
-  "trash",
-  "repeat",
-  "webhook",
-  "radio",
-  "mail-check",
-  "mail-question",
-  "trash"
+  "code", // code_block
+  "database-plus", // insert_rows
+  "database-edit", // update_rows
+  "git-branch", // condition
+  "database", // read_rows
+  "database-minus", // delete_rows
+  "repeat", // loop
+  "globe", // http_call
+  "plus-circle", // create_topic
+  "send", // publish
+  "mail", // subscribe
+  "trash", // delete_topic
+  "key", // google_auth_init
+  "link", // generate_auth_url
+  "refresh-ccw", // exchange_code_for_token
+  "user", // get_google_user
+  "user-plus", // upsert_user
+  "shield-check", // verify_google_token
+  "rotate-ccw", // refresh_google_token
+];
+
+
+let registerNodes = [
+  {"name": "Code", "type": "code_block", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
+  {"name": "Insert Rows", "type": "insert_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
+  {"name": "Update Rows", "type": "update_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
+  {"name": "Condition", "type": "condition", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Read Rows", "type": "read_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Delete Rows", "type": "delete_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Loop", "type": "loop", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "HTTP Call", "type": "http_call", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Create Topic", "type": "create_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Publish Message", "type": "publish", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Subscribe Message", "type": "subscribe", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Delete Topic", "type": "delete_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Google Auth Init", "type": "google_auth_init", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Generate Auth URL", "type": "generate_auth_url", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Exchange Code for Token", "type": "exchange_code_for_token", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Get Google User", "type": "get_google_user", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Upsert User", "type": "upsert_user", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Verify Google Token", "type": "verify_google_token", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
+  {"name": "Refresh Google Token", "type": "refresh_google_token", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
 ];
 
 import { useState } from "preact/hooks";
@@ -304,21 +343,6 @@ function WorkflowsList() {
 
 
 function DragComponent() {  
-  let registerNodes = [
-    {"name": "Code", "type": "code_block", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
-    {"name": "Insert Row", "type": "insert_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
-    {"name": "Update Row", "type": "update_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]}, 
-    {"name": "Condition", "type": "condition", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "Read Rows", "type": "read_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "Delete Rows", "type": "delete_rows", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "Loop", "type": "loop", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "http_call", "type": "http_call", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "create_topic", "type": "create_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "subscribe topic", "type": "subscribe_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "unsubscribe topic", "type": "unsubscribe_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-    {"name": "delete topic", "type": "delete_topic", "handles": [{"position": "bottom", "type": "source"}, {"position": "top", "type": "target"}]},
-
-  ];
   
   return (
     <div className="custom-drag-list scrollable-div" style={{ padding: "8px 0" , height:"70vh" }}> 

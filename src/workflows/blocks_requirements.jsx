@@ -138,53 +138,53 @@ const update_rows = {
 
 const read_rows = {
   "fields": [
-    {
-      "id": "input_mapping.table",
-      "type": "text",
-      "label": "table",
-      "description": "table to insert",
-      "path": "input_mapping.table"
-    },
-    {
-      "id": "input_mapping.schema",
-      "type": "text",
-      "label": "schema",
-      "description": "table schema",
-      "path": "input_mapping.schema"
-    },
-    {
-      "id": "input_mapping.query_block",
-      "type": "dropdown",
-      "label": "query_block",
-      "description": "query_block",
-      "path": "input_mapping.query_block",
-      "options": [],
-      "dynamicConfig": [
-        {
-          "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
-          "callback": "get_query_names",
-          "assignTo": "optons"
-        }
-      ],
-    },
-    {
-      "id": "input_mapping.fields",
-      "type": "data_mapper",
-      "label": "Fields Mapping",
-      "description": "columns mapping",
-      "path": "input_mapping.fields",
-      enableStaticValues: true,
-      enableSourceFields: true,
-      enableUserFields: false,
-      "target_fields": [],
-      "source_fields": [],
-      "dynamicConfig": [
-        {
-            "condition": {"dependsOn": "input_mapping.query_block", "operator": "not_empty"},
-            "callback": "get_query_fields",
-        },
-      ],
-    }
+      {
+        "id": "input_mapping.table",
+        "type": "text",
+        "label": "table",
+        "description": "table to insert",
+        "path": "input_mapping.table"
+      },
+      {
+        "id": "input_mapping.schema",
+        "type": "text",
+        "label": "schema",
+        "description": "table schema",
+        "path": "input_mapping.schema"
+      },
+      {
+        "id": "input_mapping.query_block",
+        "type": "dropdown",
+        "label": "query_block",
+        "description": "query_block",
+        "path": "input_mapping.query_block",
+        "options": [],
+        "dynamicConfig": [
+          {
+            "condition": {"dependsOn": "input_mapping.table", "operator": "not_empty"},
+            "callback": "get_query_names",
+            "assignTo": "options"
+          }
+        ],
+      },
+      {
+        "id": "input_mapping.fields",
+        "type": "data_mapper",
+        "label": "Fields Mapping",
+        "description": "columns mapping",
+        "path": "input_mapping.fields",
+        enableStaticValues: true,
+        enableSourceFields: true,
+        enableUserFields: false,
+        "target_fields": [],
+        "source_fields": [],
+        "dynamicConfig": [
+          {
+              "condition": {"dependsOn": "input_mapping.query_block", "operator": "not_empty"},
+              "callback": "get_query_fields",
+          },
+        ],
+      },
   ],
   "sections": [
     {
