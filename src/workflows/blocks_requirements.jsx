@@ -352,7 +352,10 @@ const code = {
 var blockFormRequirementsV2 = {
   "start": {...start},
   "end": {...end},
+  "condition": {...code},
+  "loop": {...code},
   "code_block": {...code},
+  "http_call": {...insert_row_fields},
   "insert_rows": {...insert_row_fields},
   "update_rows": {...update_rows},
   "read_rows": {...read_rows},
