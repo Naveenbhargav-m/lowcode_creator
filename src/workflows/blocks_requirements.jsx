@@ -1,3 +1,5 @@
+import { googleConfigs } from "./block_configs/google_auth";
+
 const insert_row_fields = {
   "fields": [
     {
@@ -270,83 +272,90 @@ const delete_rows = {
   ],
 };
 
+
+const start = {
+  "fields": [
+    {
+      "id": "input_mapping",
+      "label": "inputs",
+      "type": "array",
+      "path": "input_mapping"
+    },
+  ],
+  "sections": [
+    {
+      "id": "inputs",
+      "title": "inputs",
+      "fieldIds": ["input_mapping"],
+    }
+  ],
+  "tabs": [
+    {
+      "id": "configs",
+      "title": "Configs",
+      "sectionIds": ["inputs"],
+    }
+  ],
+};
+const end = {
+  "fields": [
+    {
+      "id": "output_mapping",
+      "label": "outputs",
+      "type": "array",
+      "path": "output_mapping"
+    },
+  ],
+  "sections": [
+    {
+      "id": "outputs",
+      "title": "outputs",
+      "fieldIds": ["output_mapping"],
+    }
+  ],
+  "tabs": [
+    {
+      "id": "configs",
+      "title": "Configs",
+      "sectionIds": ["outputs"],
+    }
+  ],
+};
+
+const code = {
+  "fields": [
+    {
+      "id": "input_mapping.js_code",
+      "label": "js_code",
+      "type": "code",
+      "description": "Can write js code here.",
+      "path": "input_mapping.js_code"
+    },
+  ],
+  "sections": [
+    {
+      "id": "inputs",
+      "title": "inputs",
+      "fieldIds": ["input_mapping.js_code"],
+    }
+  ],
+  "tabs": [
+    {
+      "id": "configs",
+      "title": "Configs",
+      "sectionIds": ["inputs"],
+    }
+  ],
+};
+
 var blockFormRequirementsV2 = {
-  "start": {
-    "fields": [
-      {
-        "id": "input_mapping",
-        "label": "inputs",
-        "type": "array",
-        "path": "input_mapping"
-      },
-    ],
-    "sections": [
-      {
-        "id": "inputs",
-        "title": "inputs",
-        "fieldIds": ["input_mapping"],
-      }
-    ],
-    "tabs": [
-      {
-        "id": "configs",
-        "title": "Configs",
-        "sectionIds": ["inputs"],
-      }
-    ],
-  },
-  "end": {
-    "fields": [
-      {
-        "id": "output_mapping",
-        "label": "outputs",
-        "type": "array",
-        "path": "output_mapping"
-      },
-    ],
-    "sections": [
-      {
-        "id": "outputs",
-        "title": "outputs",
-        "fieldIds": ["output_mapping"],
-      }
-    ],
-    "tabs": [
-      {
-        "id": "configs",
-        "title": "Configs",
-        "sectionIds": ["outputs"],
-      }
-    ],
-  },
-  "code_block": {
-    "fields": [
-      {
-        "id": "input_mapping.js_code",
-        "label": "js_code",
-        "type": "code",
-        "description": "Can write js code here.",
-        "path": "input_mapping.js_code"
-      },
-    ],
-    "sections": [
-      {
-        "id": "inputs",
-        "title": "inputs",
-        "fieldIds": ["input_mapping.js_code"],
-      }
-    ],
-    "tabs": [
-      {
-        "id": "configs",
-        "title": "Configs",
-        "sectionIds": ["inputs"],
-      }
-    ],
-  },
+  "start": {...start},
+  "end": {...end},
+  "code_block": {...code},
   "insert_rows": {...insert_row_fields},
   "update_rows": {...update_rows},
   "read_rows": {...read_rows},
   "delete_rows": {...delete_rows},
+  "google_auth_init": {...googleConfigs["google_auth_init"]},
 };
 export { blockFormRequirementsV2};
