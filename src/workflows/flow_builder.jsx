@@ -4,27 +4,34 @@ import '@xyflow/react/dist/style.css';
 
 import { activeFloweUpdated, activeWorkFlow, apiError, HandleWorkFlowBlockDrop, HasUnsavedChanges, isLoading, LoadWorkflows, SyncActiveWorkflow, SyncAllUnsavedWorkflows, unsavedWorkflows, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflownames } from "./workflow_state";
 import { useCallback, useEffect, useState, useRef } from "preact/hooks";
-import { CodeBlock, Condition, CreateTopic, DeleteRow, DeleteTopic, End, HttpCall, InsertRow, Loop, ReadRow, Start, SubscribeTopic, UnsubscribeTopic, UpdateRow } from "./block_ components";
+import { CodeBlock, Condition, CreateTopic, DeleteRow, DeleteTopic, End, ExchangeCodeForToken, GenerateAuthUrl, GetGoogleUser, GoogleAuthInit, HttpCall, InsertRow, Loop, PublishMessage, ReadRow, RefreshGoogleToken, Start, SubscribeMessage, SubscribeTopic, UnsubscribeTopic, UpdateRow, UpsertUser, VerifyGoogleToken } from "./block_ components";
 import { Drop } from "../components/custom/Drop";
 import { ModernSyncControls } from "../screen_builder/screen_components";
 import { signal } from "@preact/signals";
 import { useConditionalDelete } from "./hooks";
 
-let nodeTypes = {
+const nodeTypes = {
+  "code_block": CodeBlock,
   "insert_rows": InsertRow,
   "update_rows": UpdateRow,
-  "code_block": CodeBlock,
   "condition": Condition,
-  "start": Start,
-  "end": End,
   "read_rows": ReadRow,
   "delete_rows": DeleteRow,
   "loop": Loop,
   "http_call": HttpCall,
-  "subscribe_topic": SubscribeTopic,
-  "unsubscribe_topic": UnsubscribeTopic,
   "create_topic": CreateTopic,
+  "publish": PublishMessage,
+  "subscribe": SubscribeMessage,
   "delete_topic": DeleteTopic,
+  "google_auth_init": GoogleAuthInit,
+  "generate_auth_url": GenerateAuthUrl,
+  "exchange_code_for_token": ExchangeCodeForToken,
+  "get_google_user": GetGoogleUser,
+  "upsert_user": UpsertUser,
+  "verify_google_token": VerifyGoogleToken,
+  "refresh_google_token": RefreshGoogleToken,
+  "start": Start,
+  "end": End,
 };
 
 let formFocusKey = signal(false);

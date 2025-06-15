@@ -1,694 +1,386 @@
-import { NodeResizer } from "@xyflow/react";
-// @ts-ignore
 import { Handle, Position } from '@xyflow/react';
 import DynamicIcon from "../components/custom/dynamic_icon";
 import { activeworkFlowBlock } from "./workflow_state";
-import { useCallback } from "preact/hooks";
 
-// Sleek modern color palette
+// Enhanced color palette with consistent naming
 const COLORS = {
-  insert: "#38bdf8", // Bright blue
-  update: "#4ade80", // Bright green
-  condition: "#f97316", // Orange
-  start: "#06b6d4", // Cyan
-  end: "#a855f7", // Purple
+  primary: "#3B82F6",    // Blue
+  success: "#10B981",    // Green  
+  warning: "#F59E0B",    // Amber
+  danger: "#EF4444",     // Red
+  info: "#06B6D4",       // Cyan
+  purple: "#8B5CF6",     // Purple
+  indigo: "#6366F1",     // Indigo
+  pink: "#EC4899",       // Pink
 };
 
-const handleStyle = { left: 10 };
- 
+// Node configuration - single source of truth
+const NODE_CONFIG = {
+  // Database operations
+  insert_rows: { 
+    label: "Insert Row", 
+    icon: "plus-circle", 
+    color: COLORS.success,
+    description: "Add new record"
+  },
+  update_rows: { 
+    label: "Update Row", 
+    icon: "edit-3", 
+    color: COLORS.primary,
+    description: "Modify existing data"
+  },
+  read_rows: { 
+    label: "Read Row", 
+    icon: "database", 
+    color: COLORS.info,
+    description: "Query database"
+  },
+  delete_rows: { 
+    label: "Delete Row", 
+    icon: "trash-2", 
+    color: COLORS.danger,
+    description: "Remove record"
+  },
+  
+  // Control flow
+  condition: { 
+    label: "Condition", 
+    icon: "git-branch", 
+    color: COLORS.warning,
+    description: "if (condition) → then...",
+    handles: [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'true', type: 'source', position: Position.Bottom, style: { left: '25%' } },
+      { id: 'false', type: 'source', position: Position.Bottom, style: { left: '75%' } }
+    ]
+  },
+  loop: { 
+    label: "Loop", 
+    icon: "repeat", 
+    color: COLORS.warning,
+    description: "Iterate through items",
+    handles: [
+      { id: 'target', type: 'target', position: Position.Top },
+      { id: 'source', type: 'source', position: Position.Bottom },
+      { id: 'body', type: 'source', position: Position.Right }
+    ]
+  },
+  
+  // Workflow control
+  start: { 
+    label: "Start", 
+    icon: "play", 
+    color: COLORS.success,
+    description: "Begin workflow",
+    handles: [{ id: 'source', type: 'source', position: Position.Bottom }]
+  },
+  end: { 
+    label: "End", 
+    icon: "square", 
+    color: COLORS.danger,
+    description: "Complete workflow",
+    handles: [{ id: 'target', type: 'target', position: Position.Top }]
+  },
+  
+  // Code & HTTP
+  code_block: { 
+    label: "Code Block", 
+    icon: "code-2", 
+    color: COLORS.indigo,
+    description: "Execute code"
+  },
+  http_call: { 
+    label: "HTTP Call", 
+    icon: "globe", 
+    color: COLORS.purple,
+    description: "Make API request"
+  },
+  
+  // Messaging
+  create_topic: { 
+    label: "Create Topic", 
+    icon: "message-square-plus", 
+    color: COLORS.info,
+    description: "Create messaging topic"
+  },
+  publish: { 
+    label: "Publish", 
+    icon: "send", 
+    color: COLORS.info,
+    description: "Send message"
+  },
+  subscribe: { 
+    label: "Subscribe", 
+    icon: "mail", 
+    color: COLORS.info,
+    description: "Listen for messages"
+  },
+  delete_topic: { 
+    label: "Delete Topic", 
+    icon: "message-square-x", 
+    color: COLORS.danger,
+    description: "Remove topic"
+  },
+  
+  // Auth
+  google_auth_init: { 
+    label: "Google Auth", 
+    icon: "key", 
+    color: COLORS.pink,
+    description: "Initialize OAuth"
+  },
+  generate_auth_url: { 
+    label: "Auth URL", 
+    icon: "link", 
+    color: COLORS.pink,
+    description: "Generate OAuth URL"
+  },
+  exchange_code_for_token: { 
+    label: "Exchange Token", 
+    icon: "refresh-ccw", 
+    color: COLORS.pink,
+    description: "Get access token"
+  },
+  get_google_user: { 
+    label: "Get User", 
+    icon: "user", 
+    color: COLORS.purple,
+    description: "Fetch user info"
+  },
+  upsert_user: { 
+    label: "Upsert User", 
+    icon: "user-plus", 
+    color: COLORS.purple,
+    description: "Save user data"
+  },
+  verify_google_token: { 
+    label: "Verify Token", 
+    icon: "shield-check", 
+    color: COLORS.pink,
+    description: "Validate token"
+  },
+  refresh_google_token: { 
+    label: "Refresh Token", 
+    icon: "rotate-ccw", 
+    color: COLORS.pink,
+    description: "Renew access"
+  }
+};
 
-function TextUpdaterNode({ data, isConnectable }) {
-  const onChange = useCallback((evt) => {
-    console.log(evt.target.value);
-  }, []);
- 
-  // Function to stop event propagation so the node doesn't move when clicking handles
-  const onHandleMouseDown = (e) => {
-    // Stop the event from bubbling up to the node
-    e.stopPropagation();
-  };
- 
-  return (
-    <div className="text-updater-node" style={{
-      position: "relative",
-      background: "white",
-      border: "1px solid #ddd",
-      borderRadius: "6px",
-      padding: "10px",
-      width: "300px"
-    }}>
-      <Handle
-        type="target"
-        position={Position.Top}
-        isConnectable={isConnectable}
-        style={{
-          width: "12px",
-          height: "12px",
-          background: "#38bdf8",
-          border: "2px solid white",
-          top: "-6px",
-          zIndex: 10
-        }}
-        onMouseDown={onHandleMouseDown} // Add mouse down handler
-      />
-      <div>
-        <label htmlFor="text" style={{ marginBottom: "8px", display: "block" }}>Text:</label>
-        <div style={{
-          width: "100%", 
-          height: "200px", 
-          backgroundColor: "grey",
-          borderRadius: "4px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white"
-        }}>
-          Am the Box with static data
+// Default handles for most nodes
+const DEFAULT_HANDLES = [
+  { id: 'target', type: 'target', position: Position.Top },
+  { id: 'source', type: 'source', position: Position.Bottom }
+];
+
+// Enhanced detail renderers for specific node types
+const DetailRenderers = {
+  code_block: (data) => {
+    if (!data.code) return null;
+    const lines = data.code.split('\n').length;
+    const preview = data.code.length > 50 ? data.code.substring(0, 47) + '...' : data.code;
+    return (
+      <div className="mt-1 p-2 bg-gray-50 rounded text-xs font-mono border-l-2 border-indigo-400 overflow-hidden">
+        <div className="flex justify-between items-center mb-1 text-gray-500">
+          <span>{data.language || 'javascript'}</span>
+          <span>{lines} lines</span>
         </div>
+        <div className="text-gray-700 whitespace-pre-wrap break-all">{preview}</div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="a"
-        style={{
-          width: "12px",
-          height: "12px",
-          background: "#4ade80",
-          border: "2px solid white",
-          bottom: "-6px",
-          left: "30%",
-          zIndex: 10
-        }}
-        isConnectable={isConnectable}
-        onMouseDown={onHandleMouseDown} // Add mouse down handler
-      />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="b"
-        style={{
-          width: "12px",
-          height: "12px",
-          background: "#f97316",
-          border: "2px solid white",
-          bottom: "-6px",
-          left: "70%",
-          zIndex: 10
-        }}
-        isConnectable={isConnectable}
-        onMouseDown={onHandleMouseDown} // Add mouse down handler
-      />
-    </div>
-  );
-}
+    );
+  },
+  
+  http_call: (data) => {
+    if (!data.method && !data.url) return null;
+    return (
+      <div className="mt-1 space-y-1">
+        {data.method && data.url && (
+          <div className="flex items-center gap-2">
+            <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+              {data.method}
+            </span>
+            <span className="text-xs text-gray-600 truncate flex-1">{data.url}</span>
+          </div>
+        )}
+        {data.headers && (
+          <div className="text-xs text-gray-500">
+            {Object.keys(data.headers).length} headers
+          </div>
+        )}
+      </div>
+    );
+  },
+  
+  // Generic key-value renderer for most nodes
+  generic: (data, fields) => {
+    const entries = fields.filter(field => data[field]).slice(0, 3); // Limit to 3 fields
+    if (entries.length === 0) return null;
+    
+    return (
+      <div className="mt-1 space-y-1">
+        {entries.map(field => (
+          <div key={field} className="flex items-center gap-2 text-xs">
+            <span className="font-medium text-gray-600 capitalize">
+              {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
+            </span>
+            <span className="text-gray-700 truncate flex-1">
+              {typeof data[field] === 'string' 
+                ? (data[field].length > 20 ? data[field].substring(0, 17) + '...' : data[field])
+                : Array.isArray(data[field]) 
+                ? data[field].join(', ')
+                : String(data[field])
+              }
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+};
 
-// Base Node Component with improved sleek styling
-function FlowNode({ data, name, icon, color, children }) {
-  const handleNodeClick = () => {
-    activeworkFlowBlock.value = { ...data };
+// Universal Flow Node Component
+function FlowNode({ data, type }) {
+  const config = NODE_CONFIG[type];
+  if (!config) {
+    console.warn(`Unknown node type: ${type}`);
+    return null;
+  }
+
+  const handleClick = () => {
+    activeworkFlowBlock.value = { ...data, type };
   };
 
-  const baseStyle = {
-    width: "180px", // Fixed width for consistency
-    backgroundColor: "white",
-    color: "#333",
-    fontSize: "0.85em",
-    borderRadius: "6px",
-    border: `1px solid #e2e8f0`,
-    boxShadow: `0 2px 4px rgba(0, 0, 0, 0.05), 0 0 0 2px ${color}20`,
-    position: "relative", // Needed for absolute positioned elements
-    display: "flex",
-    padding: "10px",
-    cursor: "pointer"
-  };
-
-  const iconContainerStyle = {
-    marginRight: "10px",
-    background: `${color}15`,
-    padding: "6px",
-    borderRadius: "6px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  };
-
-  const contentStyle = {
-    display: "flex",
-    flexDirection: "column"
-  };
-
-  const labelStyle = {
-    fontWeight: "600",
-    textAlign: "left",
-    width: "100%",
-    color: "#1e293b",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    overflow: "hidden"
-  };
-
-  const childrenStyle = {
-    fontSize: "0.8em",
-    marginTop: "2px",
-    color: "#64748b",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis"
-  };
-
-  // Color accent on left side
-  const accentStyle = {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: "3px",
-    backgroundColor: color,
-    borderTopLeftRadius: "6px",
-    borderBottomLeftRadius: "6px"
-  };
-
-  // Base handle style
-  const handleBaseStyle = {
-    background: color,
-    width: "8px",
-    height: "8px",
-    border: "2px solid white",
+  // Determine handles
+  const handles = data.handles || config.handles || DEFAULT_HANDLES;
+  
+  // Render node details based on type
+  const renderDetails = () => {
+    // Custom renderers for specific types
+    if (DetailRenderers[type]) {
+      return DetailRenderers[type](data);
+    }
+    
+    // Generic renderer for common patterns
+    const commonFields = ['table', 'conditions', 'topic', 'topicName', 'message', 'email', 'url', 'collection', 'variable'];
+    const relevantFields = commonFields.filter(field => data[field]);
+    
+    if (relevantFields.length > 0) {
+      return DetailRenderers.generic(data, relevantFields);
+    }
+    
+    return null;
   };
 
   return (
-    <div onClick={handleNodeClick}>
-      {/* Render handles from data */}
-      {data.handles?.map((handle) => (
+    <div 
+      onClick={handleClick}
+      className="group cursor-pointer select-none"
+      style={{ width: '200px' }} // Fixed width for consistency
+    >
+      {/* Render handles */}
+      {handles.map((handle) => (
         <Handle
           key={handle.id}
           id={handle.id}
           type={handle.type}
-          position={handle.position || Position.Top}
+          position={handle.position}
           style={{
-            ...handleBaseStyle,
-            ...(handle.style || {})
+            background: config.color,
+            width: '8px',
+            height: '8px',
+            border: '2px solid white',
+            boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
+            ...handle.style
           }}
           isConnectable={true}
         />
       ))}
       
-      <div style={baseStyle}>
-        <div style={accentStyle}></div>
-        <div style={iconContainerStyle}>
-          <DynamicIcon name={icon} size={18} style={{ color: color }} />
+      {/* Node body */}
+      <div 
+        className="bg-white rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden relative"
+        style={{
+          borderLeft: `4px solid ${config.color}`,
+          borderColor: '#e2e8f0',
+          borderLeftColor: config.color
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center p-3 pb-2">
+          <div 
+            className="flex items-center justify-center w-8 h-8 rounded-md mr-3 flex-shrink-0"
+            style={{ 
+              backgroundColor: `${config.color}15`,
+              color: config.color 
+            }}
+          >
+            <DynamicIcon name={config.icon} size={16} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-sm text-gray-900 truncate">
+              {config.label}
+            </div>
+            <div className="text-xs text-gray-500 truncate">
+              {config.description}
+            </div>
+          </div>
         </div>
-        <div style={contentStyle}>
-          <div style={labelStyle}>{name}</div>
-          <div style={childrenStyle}>{children}</div>
+        
+        {/* Details */}
+        <div className="px-3 pb-3">
+          {renderDetails()}
         </div>
+        
+        {/* Hover effect indicator */}
+        <div 
+          className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+          style={{
+            background: `linear-gradient(45deg, transparent 0%, ${config.color}08 100%)`
+          }}
+        />
       </div>
     </div>
   );
 }
 
-// Individual Node Components
-export function InsertRow({ data }) {
-  // Default handles if none provided
-  const nodeData = {
+// Factory function to create node components
+const createNodeComponent = (type) => ({ data }) => (
+  <FlowNode data={data} type={type} />
+);
+
+// Export all node components
+export const InsertRow = createNodeComponent('insert_rows');
+export const UpdateRow = createNodeComponent('update_rows');
+export const ReadRow = createNodeComponent('read_rows');
+export const DeleteRow = createNodeComponent('delete_rows');
+export const Condition = createNodeComponent('condition');
+export const Loop = createNodeComponent('loop');
+export const Start = createNodeComponent('start');
+export const End = createNodeComponent('end');
+export const CodeBlock = createNodeComponent('code_block');
+export const HttpCall = createNodeComponent('http_call');
+export const CreateTopic = createNodeComponent('create_topic');
+export const PublishMessage = createNodeComponent('publish');
+export const SubscribeMessage = createNodeComponent('subscribe');
+export const SubscribeTopic = createNodeComponent('subscribe'); // Alias
+export const UnsubscribeTopic = createNodeComponent('subscribe'); // Reuse with different config
+export const DeleteTopic = createNodeComponent('delete_topic');
+export const GoogleAuthInit = createNodeComponent('google_auth_init');
+export const GenerateAuthUrl = createNodeComponent('generate_auth_url');
+export const ExchangeCodeForToken = createNodeComponent('exchange_code_for_token');
+export const GetGoogleUser = createNodeComponent('get_google_user');
+export const UpsertUser = createNodeComponent('upsert_user');
+export const VerifyGoogleToken = createNodeComponent('verify_google_token');
+export const RefreshGoogleToken = createNodeComponent('refresh_google_token');
+
+// Utility to get all available node types
+export const getAvailableNodeTypes = () => Object.keys(NODE_CONFIG);
+
+// Utility to create a new node with default configuration
+export const createNode = (type, data = {}) => ({
+  type,
+  data: {
     ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Insert Row"
-      icon="diamond-plus"
-      color={COLORS.insert}
-    >
-      Add new record
-    </FlowNode>
-  );
-}
-
-export function UpdateRow({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Update Row"
-      icon="pencil"
-      color={COLORS.update}
-    >
-      Modify existing data
-    </FlowNode>
-  );
-}
-
-export function Condition({ data }) {
-  // Default handles for condition nodes
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source-true', type: 'source', position: Position.Bottom, style: { left: 30 } },
-      { id: 'source-false', type: 'source', position: Position.Bottom, style: { left: 'auto', right: 30 } }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Condition"
-      icon="git-branch"
-      color={COLORS.condition}
-    >
-      if (condition) → then...
-    </FlowNode>
-  );
-}
-
-export function Start({ data }) {
-  // Start only has output
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Start"
-      icon="play"
-      color={COLORS.start}
-    >
-      Begin workflow
-    </FlowNode>
-  );
-}
-
-export function End({ data }) {
-  // End only has input
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="End"
-      icon="circle-check"
-      color={COLORS.end}
-    >
-      Complete workflow
-    </FlowNode>
-  );
-}
-
-
-
-export function CodeBlock({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  // Determine language for syntax highlighting
-  const language = data.language || 'javascript';
-
-  // Function to format code for preview
-  const formatCodePreview = (code) => {
-    if (!code) return null;
-    
-    // Split code into lines
-    const lines = code.split('\n');
-    
-    // If code is small enough, show it all
-    if (lines.length <= 5 && code.length < 200) {
-      return code;
-    }
-    
-    // Otherwise, show first few lines with ellipsis
-    return lines.slice(0, 3).join('\n') + (lines.length > 3 ? '\n...' : '');
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Code Block"
-      icon="code-2"
-      color={COLORS.code || "#6366F1"} // Indigo color if COLORS.code not defined
-    >
-      {data.code ? (
-        <div className="w-full max-w-full">
-          <div className="flex items-center justify-between mb-1 px-1">
-            <span className="text-xs font-medium text-gray-500">{language}</span>
-            <span className="text-xs text-gray-400">{data.code.split('\n').length} lines</span>
-          </div>
-          <div className="code-preview text-xs font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-hidden whitespace-pre border-l-4 border-indigo-500">
-            {formatCodePreview(data.code)}
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center space-x-2 text-gray-500">
-          <span>Execute code snippet</span>
-        </div>  
-      )}
-    </FlowNode>
-  );
-}
-
-
-
-export function ReadRow({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Read Row"
-      icon="database"
-      color={COLORS.database || "#10B981"} // Green color if COLORS.database not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.table && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Table:</span>
-            <span className="text-xs">{data.table}</span>
-          </div>
-        )}
-        {data.conditions && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Conditions:</span>
-            <span className="text-xs">{data.conditions}</span>
-          </div>
-        )}
-        {!data.table && !data.conditions && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Read data from database</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
-
-export function DeleteRow({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Delete Row"
-      icon="trash-2"
-      color={COLORS.delete || "#EF4444"} // Red color if COLORS.delete not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.table && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Table:</span>
-            <span className="text-xs">{data.table}</span>
-          </div>
-        )}
-        {data.conditions && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Conditions:</span>
-            <span className="text-xs">{data.conditions}</span>
-          </div>
-        )}
-        {!data.table && !data.conditions && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Delete data from database</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
-
-export function HttpCall({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="HTTP Call"
-      icon="globe"
-      color={COLORS.http || "#8B5CF6"} // Purple color if COLORS.http not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.method && data.url && (
-          <>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-medium px-1 py-0.5 bg-purple-100 dark:bg-purple-900 rounded">
-                {data.method}
-              </span>
-              <span className="text-xs truncate max-w-xs">{data.url}</span>
-            </div>
-            {data.headers && (
-              <div className="text-xs text-gray-500">
-                {Object.keys(data.headers).length} header{Object.keys(data.headers).length !== 1 ? 's' : ''}
-              </div>
-            )}
-          </>
-        )}
-        {(!data.method || !data.url) && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Make API request</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
-
-export function Loop({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom },
-      { id: 'loop-body', type: 'source', position: Position.Right }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Loop"
-      icon="repeat"
-      color={COLORS.loop || "#F59E0B"} // Amber color if COLORS.loop not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.collection && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Collection:</span>
-            <span className="text-xs">{data.collection}</span>
-          </div>
-        )}
-        {data.variable && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Variable:</span>
-            <span className="text-xs">{data.variable}</span>
-          </div>
-        )}
-        {!data.collection && !data.variable && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Iterate through items</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
-
-export function CreateTopic({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Create Topic"
-      icon="message-square-plus"
-      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.topicName && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Topic:</span>
-            <span className="text-xs">{data.topicName}</span>
-          </div>
-        )}
-        {data.options && Object.keys(data.options).length > 0 && (
-          <div className="text-xs text-gray-500">
-            With {Object.keys(data.options).length} option{Object.keys(data.options).length !== 1 ? 's' : ''}
-          </div>
-        )}
-        {!data.topicName && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Create topic</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
-
-export function SubscribeTopic({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Subscribe Topic"
-      icon="bell"
-      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.topicName && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Topic:</span>
-            <span className="text-xs">{data.topicName}</span>
-          </div>
-        )}
-        {data.subscriber && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Subscriber:</span>
-            <span className="text-xs">{data.subscriber}</span>
-          </div>
-        )}
-        {!data.topicName && !data.subscriber && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Subscribe to messaging topic</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
-
-export function UnsubscribeTopic({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Unsubscribe Topic"
-      icon="bell-off"
-      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.topicName && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Topic:</span>
-            <span className="text-xs">{data.topicName}</span>
-          </div>
-        )}
-        {data.subscriber && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Subscriber:</span>
-            <span className="text-xs">{data.subscriber}</span>
-          </div>
-        )}
-        {!data.topicName && !data.subscriber && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Unsubscribe topic</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
-
-export function DeleteTopic({ data }) {
-  // Default handles if none provided
-  const nodeData = {
-    ...data,
-    handles: data.handles || [
-      { id: 'target', type: 'target', position: Position.Top },
-      { id: 'source', type: 'source', position: Position.Bottom }
-    ]
-  };
-
-  return (
-    <FlowNode
-      data={nodeData}
-      name="Delete Topic"
-      icon="message-square-x"
-      color={COLORS.topic || "#0EA5E9"} // Sky blue color if COLORS.topic not defined
-    >
-      <div className="flex flex-col space-y-1">
-        {data.topicName && (
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-medium">Topic:</span>
-            <span className="text-xs">{data.topicName}</span>
-          </div>
-        )}
-        {!data.topicName && (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <span>Delete topic</span>
-          </div>
-        )}
-      </div>
-    </FlowNode>
-  );
-}
+    handles: data.handles || NODE_CONFIG[type]?.handles || DEFAULT_HANDLES
+  }
+});
