@@ -76,21 +76,32 @@ const Sidebar = () => {
         ref={sidebarRef}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
-        className={`bg-white h-screen flex flex-col items-center py-4 px-2 shadow-lg overflow-hidden
+        className={`bg-white h-screen flex flex-col items-center shadow-lg overflow-hidden
           transition-[width] duration-300 ease-in-out ${
             expanded ? 'w-52' : 'w-16'
           }`}
-        
       >
-        {/* Logo */}
-        <div className="mt-6 mb-8 flex justify-center">
+        {/* Logo - Fixed at top */}
+        <div className="mt-6 mb-8 flex justify-center flex-shrink-0 px-2">
           <div className="h-8 w-8 bg-emerald-500 rounded-full flex justify-center items-center">
             <AppLogo />
           </div>
         </div>
         
-        {/* Menu Items */}
-        <div className="w-full flex flex-col pt-2 gap-2">
+        {/* Menu Items - Scrollable */}
+        <div 
+          className="w-full flex flex-col pt-2 gap-2 px-2 flex-1 overflow-y-auto scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none', /* Firefox */
+            msOverflowStyle: 'none', /* Internet Explorer 10+ */
+          }}
+        >
+          <style jsx>{`
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+          `}</style>
+          
           {menuItems.map((item) => {
             const isSelected = selected === item.value;
             
