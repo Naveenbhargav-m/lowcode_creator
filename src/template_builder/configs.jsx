@@ -7,16 +7,17 @@ export const TemplateElementConfigFormSchema = {
     // Basic element settings
     {
       id: 'value',
-      type: 'text',
-      label: 'Default Value',
-      placeholder: 'Enter default selected value',
-      path: '', // Root level
-    },
-    {
-      id: 'picker',
-      type: 'data_picker',
-      label: 'Default Value',
-      placeholder: 'Enter default selected value',
+      type: 'single_picker',
+      label: 'value',
+      "options": [],
+      dynamicConfig: [
+        {
+          "condition": {"field": "configs.data_source.date_key", "operator": "non_empty"},
+          "callback": "get_parent_inputs",
+          "assignTo": "options"
+        }
+      ],
+      placeholder: 'select a value',
       path: '', // Root level
     },
     
@@ -199,6 +200,12 @@ let extrafields = [
     "label": "Data key"
   },
   {
+    "id": "configs.data_source.inputs",
+    "type": "array",
+    "path": "configs.data_source.date_key",
+    "label": "Data key",
+  },
+  {
     "id": "configs.data_source.data_query",
     "type": "dropdown",
     "path": "configs.data_source.data_query",
@@ -217,7 +224,7 @@ let extrafields = [
   },
   {
     "id": "configs.data_source.field_mapping",
-    "type": "extended_data_mapper",
+    "type": "data_mapper",
     "path": "configs.data_source.field_mapping",
     "label": "Data Mapping",
     enableStaticValues: true,
@@ -237,7 +244,7 @@ let extrafields = [
 
 RootElementSchema.fields = [...RootElementSchema.fields, ...extrafields];
 RootElementSchema.sections[4]["fieldIds"] = [...RootElementSchema.sections[4]["fieldIds"],
- "configs.data_source.date_key", "configs.data_source.data_query", "configs.data_source.field_mapping"];
+ "configs.data_source.date_key", "configs.data_source.inputs","configs.data_source.data_query", "configs.data_source.field_mapping"];
 
 
 

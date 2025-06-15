@@ -276,7 +276,7 @@ const MultiValuePicker = ({ data = [], value = [], onChange, placeholder = "Sele
 };
 
 // Demo Component
-const Demo = () => {
+const InlinePickerDemo = () => {
   // Sample data
   const stringData = ['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape'];
   const objectData = [
@@ -413,4 +413,4 @@ const Demo = () => {
   );
 };
 
-export default Demo;
+export default InlinePickerDemo;

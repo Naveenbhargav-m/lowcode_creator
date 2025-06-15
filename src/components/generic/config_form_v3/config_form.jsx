@@ -5,6 +5,7 @@ import Demo, { Accordion, ActionsConfig, ArrayField, CheckboxField, ColorField, 
 import DataMappingComponent from "../dynamic_data_picker/data_picker";
 import { DataMapperField, GlobalJavaScriptField } from "./componentss2";
 import { ExtendableDataMapperField } from "./mapper_componets";
+import { MultiValuePicker, SingleValuePicker } from "./data_pickers";
 
 
 // Helper functions for handling nested objects
@@ -438,8 +439,23 @@ export function ConfigFormV3({
           handleFieldChange(dynamicField.id, value);
         }}/>
         break;
+      case "single_picker":
+        fieldComponent = <SingleValuePicker 
+          field={dynamicField}
+          value={fieldValue}
+          onChange={(id, value) => handleFieldChange(dynamicField.id, value)}
+        />
+        break;
+      case "mulit_picker":
+        fieldComponent = <MultiValuePicker 
+          field={dynamicField}
+          value={fieldValue}
+          onChange={(id, value) => handleFieldChange(dynamicField.id, value)}
+        />
+        break;
       case "extended_data_mapper":
           fieldComponent = <ExtendableDataMapperField 
+          // @ts-ignore
           field={dynamicField} value={fieldValue} 
           onChange={(id, value) => {handleFieldChange(dynamicField.id, value)}} />
           break;
