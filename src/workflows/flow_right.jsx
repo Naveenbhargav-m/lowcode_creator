@@ -12,7 +12,6 @@ function GetTablesList(formvalues, fieldConfig, context) {
 }
 
 
-
 function GetForms() {
     let forms = getBlockNames("forms");
     return forms;

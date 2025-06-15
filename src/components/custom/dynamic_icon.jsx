@@ -94,6 +94,19 @@ import {
   MailCheck,
   MailQuestion,
   Webhook,
+  Code,
+  DatabaseZap,
+  PenTool,
+  GitBranch,
+  Key,
+  Link,
+  RefreshCcw,
+  UserPlus,
+  ShieldCheck,
+  RotateCcw,
+  Globe,
+  PlusCircle,
+  Send,
 } from "lucide-react";
 
 export default function DynamicIcon({ name, size, style = {}}) {
@@ -193,7 +206,22 @@ export default function DynamicIcon({ name, size, style = {}}) {
     "radio": <Radio size={size} style={{...style}}/>,
     "mail-check": <MailCheck size={size} style={{...style}}/>,
     "mail-question": <MailQuestion size={size} style={{...style}}/>,
-    "webhook": <Webhook size={size} style={{...style}}/>
+    "webhook": <Webhook size={size} style={{...style}}/>,
+    "code": <Code size={size} style={{...style}}/>, // code_block
+    "database-plus": <DatabaseZap size={size} style={{...style}}/>, // insert_rows
+    "database-edit": <PenTool size={size} style={{...style}}/>, // update_rows
+    "git-branch": <GitBranch size={size} style={{...style}}/>, // condition
+    "database-minus": <Database size={size} style={{...style}}/>, // delete_rows
+    "globe": <Globe size={size} style={{...style}}/>, // http_call
+    "plus-circle": <PlusCircle size={size} style={{...style}}/>, // create_topic
+    "send": <Send size={size} style={{...style}}/>, // publish
+
+    "key": <Key size={size} style={{...style}}/>, // google_auth_init
+    "link": <Link size={size} style={{...style}}/>, // generate_auth_url
+    "refresh-ccw": <RefreshCcw size={size} style={{...style}}/>, // exchange_code_for_token
+    "user-plus": <UserPlus size={size} style={{...style}}/>, // upsert_user
+    "shield-check": <ShieldCheck size={size} style={{...style}}/>, // verify_google_token
+    "rotate-ccw": <RotateCcw size={size} style={{...style}}/>, //
   };
 
   return icon_map[name] || null;

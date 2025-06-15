@@ -1,4 +1,7 @@
 import { addEdge, ConnectionLineType, ConnectionMode, ReactFlow, useEdgesState, useNodesState, Controls, Background, Panel } from "@xyflow/react";
+// Make sure to import the CSS file
+import '@xyflow/react/dist/style.css';
+
 import { activeFloweUpdated, activeWorkFlow, apiError, HandleWorkFlowBlockDrop, HasUnsavedChanges, isLoading, LoadWorkflows, SyncActiveWorkflow, SyncAllUnsavedWorkflows, unsavedWorkflows, UpdateActiveWorkflowEdges, UpdateActiveWorkflowNodes, workflownames } from "./workflow_state";
 import { useCallback, useEffect, useState, useRef } from "preact/hooks";
 import { CodeBlock, Condition, CreateTopic, DeleteRow, DeleteTopic, End, HttpCall, InsertRow, Loop, ReadRow, Start, SubscribeTopic, UnsubscribeTopic, UpdateRow } from "./block_ components";
@@ -25,6 +28,7 @@ let nodeTypes = {
 };
 
 let formFocusKey = signal(false);
+
 function FlowBuilder() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -33,11 +37,12 @@ function FlowBuilder() {
 
   useEffect(() => {
     const activeFlow = activeWorkFlow.value || { nodes: [], edges: [] };
-    if(activeFlow["nodes"] === null || activeFlow["edges"] === null) {
+    // Fix the logic here - checking edges twice instead of nodes and edges
+    if(activeFlow["nodes"] === null || activeFlow["nodes"] === undefined) {
       activeFlow["nodes"] = [];
     }
 
-    if(activeFlow["edges"] === null || activeFlow["edges"] === null) {
+    if(activeFlow["edges"] === null || activeFlow["edges"] === undefined) {
       activeFlow["edges"] = [];
     }
     console.log("active flow:", activeFlow);
@@ -117,80 +122,88 @@ function FlowBuilder() {
     []
   );
 
-  // Default React Flow props for better connection behavior
+  // Enhanced edge options for better visibility
   const defaultEdgeOptions = {
     animated: true,
     style: {
       stroke: '#555',
       strokeWidth: 2,
+      strokeOpacity: 1, // Ensure full opacity
     },
+    type: 'smoothstep', // Use smoothstep for better visibility
   };
 
-  const [syncMode, setSyncMode] = useState("active"); // "active" or "all"
-    const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMode, setSyncMode] = useState("active");
+  const [isSyncing, setIsSyncing] = useState(false);
 
-    useEffect(() => {
-        LoadWorkflows();
-    }, []);
+  useEffect(() => {
+    LoadWorkflows();
+  }, []);
 
-    const handleSync = async () => {
-        setIsSyncing(true);
-        try {
-            if (syncMode === "active") {
-                await SyncActiveWorkflow();
-            } else {
-                await SyncAllUnsavedWorkflows();
-            }
-        } catch (error) {
-            console.error("Sync failed:", error);
-        } finally {
-            setIsSyncing(false);
-        }
-    };
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      if (syncMode === "active") {
+        await SyncActiveWorkflow();
+      } else {
+        await SyncAllUnsavedWorkflows();
+      }
+    } catch (error) {
+      console.error("Sync failed:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
-    const handleDismissError = () => {
-        // You might want to implement a way to clear the error in your state
-        console.log("Error dismissed");
-    };
+  const handleDismissError = () => {
+    console.log("Error dismissed");
+  };
 
-    const unsavedCount = unsavedWorkflows.value.size;
-    const activeQueryHasChanges = activeWorkFlow.value && HasUnsavedChanges(activeWorkFlow.value["id"]);
-    const canSyncActive = activeWorkFlow.value && activeQueryHasChanges;
-    const canSyncAll = unsavedCount > 0;
+  const unsavedCount = unsavedWorkflows.value.size;
+  const activeQueryHasChanges = activeWorkFlow.value && HasUnsavedChanges(activeWorkFlow.value["id"]);
+  const canSyncActive = activeWorkFlow.value && activeQueryHasChanges;
+  const canSyncAll = unsavedCount > 0;
 
   let conditionsKey = useConditionalDelete();
 
   console.log("rendering the flow builder", nodes);
+  
   return (
     <>
-      <div style={{display:"flex", "flexDirection": "row-reverse", "justifyContent": "space-between", alignItems:"center"}}>
-                      <ModernSyncControls
-                        onDismissError={handleDismissError}
-                        syncMode={syncMode}
-                        setSyncMode={setSyncMode}
-                        isSyncing={isSyncing}
-                        isLoading={isLoading?.value}
-                        // @ts-ignore
-                        activeScreen={activeWorkFlow.value.id}
-                        screenNamesList={workflownames.value}
-                        unsavedCount={unsavedCount}
-                        activeScreenHasChanges={activeQueryHasChanges}
-                        canSyncActive={canSyncActive}
-                        canSyncAll={canSyncAll}
-                        handleSync={handleSync}
-                        apiError={apiError?.value}
-                        showLegacySync={true}
-                        showProgressBar={true}
-                        compact={false}
-                      />
+      <div style={{
+        display: "flex", 
+        flexDirection: "row-reverse", 
+        justifyContent: "space-between", 
+        alignItems: "center"
+      }}>
+        <ModernSyncControls
+          onDismissError={handleDismissError}
+          syncMode={syncMode}
+          setSyncMode={setSyncMode}
+          isSyncing={isSyncing}
+          isLoading={isLoading?.value}
+          // @ts-ignore
+          activeScreen={activeWorkFlow.value.id}
+          screenNamesList={workflownames.value}
+          unsavedCount={unsavedCount}
+          activeScreenHasChanges={activeQueryHasChanges}
+          canSyncActive={canSyncActive}
+          canSyncAll={canSyncAll}
+          handleSync={handleSync}
+          apiError={apiError?.value}
+          showLegacySync={true}
+          showProgressBar={true}
+          compact={false}
+        />
       </div>
-      <Drop onDrop={(data) => {HandleWorkFlowBlockDrop(data)}} dropElementData={{"element":"screen"}} wrapParent={true}>
-        <div style={{height:"90vh", width:"70vw"}}>
+      
+      <Drop 
+        onDrop={(data) => {HandleWorkFlowBlockDrop(data)}} 
+        dropElementData={{"element":"screen"}} 
+        wrapParent={true}
+      >
+        <div style={{height: "90vh", width: "70vw", position: "relative"}}>
           <ReactFlow 
-            style={{
-              "--pico-primary-background": "black", 
-              "--pico-primary-hover-background": "black"
-            }}
             nodes={nodes} 
             edges={edges} 
             onNodesChange={onNodesChange} 
@@ -200,7 +213,11 @@ function FlowBuilder() {
             defaultEdgeOptions={defaultEdgeOptions}
             connectionMode={ConnectionMode.Loose}
             fitView 
-            connectionLineStyle={{ stroke: '#aaa', strokeWidth: 2 }}
+            connectionLineStyle={{ 
+              stroke: '#aaa', 
+              strokeWidth: 2,
+              strokeOpacity: 1 
+            }}
             connectionLineType={ConnectionLineType.SmoothStep}
             selectNodesOnDrag={false}
             onInit={onInit}
@@ -209,9 +226,26 @@ function FlowBuilder() {
             selectionOnDrag
             selectionKeyCode="partial"
             multiSelectionKeyCode="Control"
+            // Add these props to improve rendering
+            nodesDraggable={true}
+            nodesConnectable={true}
+            elementsSelectable={true}
+            // Ensure proper z-index management
+            style={{ position: 'relative', zIndex: 1 }}
           >
-            <Controls />
-              <Background color="#aaa" gap={16} />
+            <Controls style={{ zIndex: 10 }} />
+            <Background 
+              color="#aaa" 
+              gap={16} 
+              style={{ 
+                zIndex: 0,
+                opacity: 0.5  // Make background more subtle
+              }} 
+            />
+            {/* Add attribution panel to avoid default ReactFlow text */}
+            <Panel position="bottom-left" style={{ fontSize: '10px', color: '#999' }}>
+              Workflow Builder
+            </Panel>
           </ReactFlow>
         </div>
       </Drop>
@@ -219,4 +253,4 @@ function FlowBuilder() {
   );
 }
 
-export {FlowBuilder, formFocusKey};
+export { FlowBuilder, formFocusKey };
