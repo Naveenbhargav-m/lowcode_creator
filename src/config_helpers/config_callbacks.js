@@ -148,10 +148,15 @@ function GetQueryOutputsOnly(formValues, fieldConfig, context) {
             "value": cur
         };
         outarr.push(obj);
+    };
+    let targetFields = [];
+    if(context !== undefined) {
+        let existingData = context["data"] || {};
+        targetFields = existingData["target_fields"] || [];
     }
     return {
         "source_fields": outarr,
-        "target_fields": [],
+        "target_fields": targetFields,
     };
 }
 

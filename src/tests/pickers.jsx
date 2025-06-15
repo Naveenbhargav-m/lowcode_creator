@@ -410,7 +410,7 @@ const MultiValuePicker = (props) => (
 );
 
 // Demo Component
-const Demo = () => {
+const SideDrawerPickersDemo = () => {
   const [singleValue, setSingleValue] = useState('');
   const [multiValues, setMultiValues] = useState([]);
   const [objSingleValue, setObjSingleValue] = useState('');
@@ -550,4 +550,4 @@ const Demo = () => {
   );
 };
 
-export default Demo;
+export default SideDrawerPickersDemo;

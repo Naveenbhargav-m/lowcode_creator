@@ -12,6 +12,37 @@ function GetConfigs(activeelementID) {
   }
 }
 
+function GetTemplateInputs(template_id) {
+  let curtemp = templates[template_id];
+  let configs = curtemp["configs"];
+  if(configs["configs"] !== undefined) {
+    configs = configs["configs"];
+  }
+  let datasource = configs["data_source"] || {};
+  let inputs = datasource["inputs"] || {};
+  let inparr = [];
+  for(var i=0;i<inputs.length;i++) {
+    let cur = inputs[i];
+    let obj = {
+      "id": cur,
+      "value": cur,
+      "name": cur,
+      "label": cur
+    };
+    inparr.push(obj);
+  }
+  return inparr;
+}
+
+function get_parent_inputs(formValues, fieldConfig, context) {
+  if(context === undefined) {
+    return [];
+  }
+  let data = context["data"] || {};
+  let inputs = data["template_inputs"] || [];
+  return inputs;
+}
+
 
 export function TemplateBuilderRightView() {
     let activeElementID = activeTemplateElement.value;
@@ -79,13 +110,19 @@ export function TemplateBuilderRightView() {
     };
     console.log("Active Element:",activeElement);
     let schema = GetConfigs(activeElementID);
+    let inputsdata = GetTemplateInputs(activeTamplate.value);
     return (
     <div style={{width:"100%", "color": "black"}}>
       <ConfigFormV3 
       context={{
+        "data": {
+          "target_fields": inputsdata,
+          "template_inputs": inputsdata,
+        },
         "callbacks": {
           "get_query_names": GetQueries,
-          "get_query_field_map": GetQueryOutputsOnly
+          "get_query_field_map": GetQueryOutputsOnly,
+          "get_parent_inputs": get_parent_inputs,
         },
       }}
       schema={schema} 
